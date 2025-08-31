@@ -141,7 +141,7 @@ const CleanExporterLayout = memo(({ children, user }: CleanExporterLayoutProps) 
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-50 to-slate-100">
       {/* TOP HEADER WITH TIME, CLOCK, AND WEATHER */}
-      <header className="bg-white shadow-sm border-b border-gray-200 sticky top-0 z-50 w-full">
+      <header className="bg-white/95 backdrop-blur-sm shadow-xl border-b border-slate-200 sticky top-0 z-50 w-full">
         <div className="px-4 py-3">
           <div className="flex justify-between items-center">
             {/* LEFT: LOGOS AND TITLE */}
@@ -162,19 +162,19 @@ const CleanExporterLayout = memo(({ children, user }: CleanExporterLayoutProps) 
                   />
                 </div>
                 <div>
-                  <h1 className="text-lg font-bold text-gray-900">Exporter Portal</h1>
-                  <p className="text-xs text-gray-600">AgriTrace360™</p>
+                  <h1 className="text-lg font-bold text-slate-900">Exporter Portal</h1>
+                  <p className="text-xs text-slate-600">AgriTrace360™</p>
                 </div>
               </div>
             </div>
             
             {/* CENTER: TIME, DATE, AND WEATHER */}
-            <div className="flex items-center space-x-6 bg-gradient-to-r from-blue-50 to-green-50 px-6 py-3 rounded-lg border border-blue-100">
+            <div className="flex items-center space-x-6 bg-gradient-to-r from-slate-100 to-slate-50 px-6 py-3 rounded-lg border border-slate-200 shadow-lg">
               {/* Date and Time */}
               <div className="flex items-center space-x-3">
                 <Calendar className="h-5 w-5 text-blue-600" />
                 <div className="text-sm">
-                  <div className="font-semibold text-gray-900">
+                  <div className="font-semibold text-slate-900">
                     {currentTime.toLocaleDateString('en-US', { 
                       weekday: 'short',
                       month: 'short', 
@@ -188,7 +188,7 @@ const CleanExporterLayout = memo(({ children, user }: CleanExporterLayoutProps) 
               <div className="flex items-center space-x-3">
                 <Clock className="h-5 w-5 text-green-600" />
                 <div className="text-sm">
-                  <div className="font-semibold text-gray-900">
+                  <div className="font-semibold text-slate-900">
                     {currentTime.toLocaleTimeString('en-US', { 
                       hour: '2-digit',
                       minute: '2-digit',
@@ -203,8 +203,8 @@ const CleanExporterLayout = memo(({ children, user }: CleanExporterLayoutProps) 
               <div className="flex items-center space-x-3 border-l border-blue-200 pl-4">
                 <WeatherIcon className="h-5 w-5 text-orange-600" />
                 <div className="text-sm">
-                  <div className="font-semibold text-gray-900">{weather.temperature}</div>
-                  <div className="text-xs text-gray-600">{weather.location}</div>
+                  <div className="font-semibold text-slate-900">{weather.temperature}</div>
+                  <div className="text-xs text-slate-600">{weather.location}</div>
                 </div>
               </div>
             </div>
@@ -218,8 +218,8 @@ const CleanExporterLayout = memo(({ children, user }: CleanExporterLayoutProps) 
               
               <div className="flex items-center space-x-3">
                 <div className="text-right">
-                  <p className="text-sm font-medium text-gray-900">{user?.companyName || 'Loading...'}</p>
-                  <p className="text-xs text-gray-500">Licensed Exporter Portal</p>
+                  <p className="text-sm font-medium text-slate-900">{user?.companyName || 'Loading...'}</p>
+                  <p className="text-xs text-slate-500">Licensed Exporter Portal</p>
                 </div>
                 <div className="relative">
                   <Button
@@ -241,7 +241,7 @@ const CleanExporterLayout = memo(({ children, user }: CleanExporterLayoutProps) 
       
       <div className="flex">
         {/* SINGLE SIDEBAR NAVIGATION - NO DUPLICATES */}
-        <div className="w-64 bg-white border-r border-gray-200 min-h-screen flex flex-col fixed left-0 top-16 z-40">
+        <div className="w-64 bg-white/95 backdrop-blur-sm border-r border-slate-200 shadow-xl min-h-screen flex flex-col fixed left-0 top-16 z-40">
 
           {/* Navigation Items */}
           <nav className="flex-1 p-4 space-y-1 overflow-y-auto pt-8">
@@ -254,13 +254,13 @@ const CleanExporterLayout = memo(({ children, user }: CleanExporterLayoutProps) 
                   <div className={`
                     group flex items-center px-3 py-2 text-sm font-medium rounded-md transition-colors cursor-pointer
                     ${isActive 
-                      ? 'bg-blue-50 text-blue-700 border-r-2 border-blue-700' 
-                      : 'text-gray-600 hover:text-gray-900 hover:bg-gray-50'
+                      ? 'bg-gradient-to-r from-blue-500 to-blue-600 text-white shadow-lg' 
+                      : 'text-slate-600 hover:text-slate-900 hover:bg-slate-50'
                     }
                   `}>
                     <Icon className={`
                       mr-3 h-5 w-5 flex-shrink-0
-                      ${isActive ? 'text-blue-500' : 'text-gray-400 group-hover:text-gray-500'}
+                      ${isActive ? 'text-white' : 'text-slate-400 group-hover:text-slate-500'}
                     `} />
                     <div className="flex-1">
                       <div className="flex items-center justify-between">
@@ -271,7 +271,9 @@ const CleanExporterLayout = memo(({ children, user }: CleanExporterLayoutProps) 
                           </Badge>
                         )}
                       </div>
-                      <p className="text-xs text-gray-500 mt-0.5 truncate">
+                      <p className={`text-xs mt-0.5 truncate ${
+                        isActive ? 'text-blue-100' : 'text-slate-500'
+                      }`}>
                         {item.description}
                       </p>
                     </div>
@@ -282,7 +284,7 @@ const CleanExporterLayout = memo(({ children, user }: CleanExporterLayoutProps) 
           </nav>
 
           {/* Footer */}
-          <div className="p-4 border-t border-gray-200">
+          <div className="p-4 border-t border-slate-200 bg-gradient-to-r from-slate-50 to-slate-100">
             <ProfileDropdown
               userName={user?.companyName || user?.username || "Exporter User"}
               userEmail={user?.email || "exporter@company.co"}

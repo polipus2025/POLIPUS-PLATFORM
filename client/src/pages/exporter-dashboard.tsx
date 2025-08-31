@@ -6,6 +6,7 @@ import { useToast } from "@/hooks/use-toast";
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { 
   Ship, 
   FileText, 
@@ -26,7 +27,9 @@ import {
   Award,
   ShoppingCart,
   Warehouse,
-  ArrowRight
+  ArrowRight,
+  ClipboardCheck,
+  CreditCard
 } from 'lucide-react';
 import { Link } from "wouter";
 import CleanExporterLayout from '@/components/layout/clean-exporter-layout';
@@ -204,6 +207,22 @@ const ExporterDashboard = memo(() => {
 
         <div className="min-h-screen bg-gradient-to-br from-slate-50 to-slate-100">
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+          
+          {/* TAB NAVIGATION */}
+          <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
+            <TabsList className="grid w-full grid-cols-2 mb-8">
+              <TabsTrigger value="overview" className="text-sm font-medium">
+                <BarChart3 className="w-4 h-4 mr-2" />
+                Overview
+              </TabsTrigger>
+              <TabsTrigger value="inspections" className="text-sm font-medium">
+                <ClipboardCheck className="w-4 h-4 mr-2" />
+                Inspections & Payments
+              </TabsTrigger>
+            </TabsList>
+
+            {/* OVERVIEW TAB CONTENT */}
+            <TabsContent value="overview" className="space-y-6">
           {/* ⚡ PERFORMANCE METRICS GRID */}
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
             {metricsData.map((metric, index) => (
@@ -458,6 +477,14 @@ const ExporterDashboard = memo(() => {
               </div>
             </div>
           </div>
+            </TabsContent>
+
+            {/* INSPECTIONS & PAYMENTS TAB CONTENT */}
+            <TabsContent value="inspections" className="space-y-6">
+              <InspectionsAndPayments exporterId={(user as any)?.exporterId || (user as any)?.id} />
+            </TabsContent>
+
+          </Tabs>
         </div>
         </div>
       </CleanExporterLayout>
@@ -466,4 +493,188 @@ const ExporterDashboard = memo(() => {
 });
 
 ExporterDashboard.displayName = 'ExporterDashboard';
+
+// ⚡ INSPECTIONS & PAYMENTS COMPONENT
+const InspectionsAndPayments = memo(({ exporterId }: { exporterId: string }) => {
+  const { toast } = useToast();
+  
+  // Fetch scheduled pickups for this exporter
+  const { data: scheduledPickupsData, isLoading: pickupsLoading } = useQuery({
+    queryKey: [`/api/exporter/scheduled-pickups/${exporterId}`],
+    enabled: !!exporterId,
+    staleTime: 60000, // 1 minute cache
+  });
+
+  const scheduledPickups = scheduledPickupsData?.data || [];
+
+  // Handle action buttons
+  const handleBookInspection = useCallback((pickup: any) => {
+    toast({
+      title: "Product Inspection Booking",
+      description: `Booking inspection for ${pickup.commodityType} (${pickup.requestId})`,
+    });
+    // TODO: Implement inspection booking logic
+  }, [toast]);
+
+  const handleInternationalCertifications = useCallback((pickup: any) => {
+    toast({
+      title: "International Certifications",
+      description: `Processing certifications for ${pickup.commodityType} (${pickup.requestId})`,
+    });
+    // TODO: Implement certifications logic
+  }, [toast]);
+
+  const handlePaymentConfirmation = useCallback((pickup: any) => {
+    toast({
+      title: "Payment Confirmation",
+      description: `Processing payment confirmation for ${pickup.commodityType} (${pickup.requestId})`,
+    });
+    // TODO: Implement payment confirmation logic
+  }, [toast]);
+
+  if (pickupsLoading) {
+    return (
+      <div className="space-y-4">
+        {[1, 2, 3].map((i) => (
+          <Card key={i} className="animate-pulse">
+            <CardContent className="p-6">
+              <div className="h-6 bg-gray-200 rounded w-1/4 mb-4"></div>
+              <div className="space-y-2">
+                <div className="h-4 bg-gray-200 rounded w-1/2"></div>
+                <div className="h-4 bg-gray-200 rounded w-2/3"></div>
+                <div className="h-4 bg-gray-200 rounded w-1/3"></div>
+              </div>
+            </CardContent>
+          </Card>
+        ))}
+      </div>
+    );
+  }
+
+  if (!scheduledPickups || scheduledPickups.length === 0) {
+    return (
+      <div className="text-center py-12">
+        <ClipboardCheck className="h-16 w-16 text-slate-300 mx-auto mb-4" />
+        <h3 className="text-xl font-medium text-slate-900 mb-2">No Scheduled Pickups</h3>
+        <p className="text-slate-600">Products will appear here when warehouse pickup is scheduled</p>
+      </div>
+    );
+  }
+
+  return (
+    <div className="space-y-6">
+      <div className="text-center mb-8">
+        <h2 className="text-2xl font-bold text-slate-900 mb-2">Inspections & Payments</h2>
+        <p className="text-slate-600">Manage inspections, certifications, and payments for scheduled pickups</p>
+      </div>
+
+      {scheduledPickups.map((pickup: any) => (
+        <Card key={pickup.requestId} className="bg-white shadow-xl border-slate-200 hover:shadow-2xl transition-all">
+          <CardHeader>
+            <CardTitle className="flex items-center space-x-2">
+              <Package className="h-5 w-5 text-blue-600" />
+              <span>Pickup Scheduled - {pickup.requestId}</span>
+              <Badge className="bg-green-100 text-green-800">Ready for Action</Badge>
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-6">
+              
+              {/* Product Details */}
+              <div className="space-y-3">
+                <h4 className="font-medium text-slate-900 flex items-center">
+                  <Package className="h-4 w-4 mr-2 text-blue-600" />
+                  Product Details
+                </h4>
+                <div className="space-y-2 text-sm">
+                  <p><span className="font-medium">Commodity:</span> {pickup.commodityType}</p>
+                  <p><span className="font-medium">Quantity:</span> {pickup.quantity} {pickup.unit}</p>
+                  <p><span className="font-medium">Total Value:</span> <span className="font-bold text-green-600">${pickup.totalValue?.toLocaleString() || '0'}</span></p>
+                  <p><span className="font-medium">Custody ID:</span> <span className="font-mono text-xs bg-gray-100 px-2 py-1 rounded">{pickup.transactionId}</span></p>
+                </div>
+              </div>
+
+              {/* Pickup & Warehouse Details */}
+              <div className="space-y-3">
+                <h4 className="font-medium text-slate-900 flex items-center">
+                  <Warehouse className="h-4 w-4 mr-2 text-purple-600" />
+                  Pickup Details
+                </h4>
+                <div className="space-y-2 text-sm">
+                  <p><span className="font-medium">📅 Pickup Date:</span> {pickup.dispatchDate ? new Date(pickup.dispatchDate).toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric', year: 'numeric' }) : 'Not set'}</p>
+                  <p><span className="font-medium">🏭 Warehouse:</span> {pickup.confirmedBy}</p>
+                  <p><span className="font-medium">📍 Location:</span> {pickup.farmLocation}</p>
+                  <p><span className="font-medium">🏠 County:</span> {pickup.county}</p>
+                </div>
+              </div>
+
+              {/* Buyer Information */}
+              <div className="space-y-3">
+                <h4 className="font-medium text-slate-900 flex items-center">
+                  <Users className="h-4 w-4 mr-2 text-green-600" />
+                  Buyer Information
+                </h4>
+                <div className="space-y-2 text-sm">
+                  <p><span className="font-medium">Company:</span> {pickup.buyerCompany}</p>
+                  <p><span className="font-medium">Contact:</span> {pickup.buyerName}</p>
+                  <p><span className="font-medium">🔐 Code:</span> <span className="font-mono text-xs bg-blue-100 px-2 py-1 rounded">{pickup.verificationCode}</span></p>
+                  <p><span className="font-medium">✅ Confirmed:</span> {pickup.confirmedAt ? new Date(pickup.confirmedAt).toLocaleDateString() : 'N/A'}</p>
+                </div>
+              </div>
+            </div>
+
+            {/* ACTION BUTTONS */}
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-4 pt-4 border-t border-slate-200">
+              
+              {/* 1. Book Product Inspection */}
+              <Button 
+                className="w-full bg-blue-600 hover:bg-blue-700 text-white"
+                onClick={() => handleBookInspection(pickup)}
+                data-testid={`book-inspection-${pickup.requestId}`}
+              >
+                <ClipboardCheck className="h-4 w-4 mr-2" />
+                Book Product Inspection
+              </Button>
+
+              {/* 2. International Certifications */}
+              <Button 
+                className="w-full bg-purple-600 hover:bg-purple-700 text-white"
+                onClick={() => handleInternationalCertifications(pickup)}
+                data-testid={`international-certs-${pickup.requestId}`}
+              >
+                <FileText className="h-4 w-4 mr-2" />
+                International Certifications
+              </Button>
+
+              {/* 3. Payment Confirmation - CONDITIONAL */}
+              {/* TODO: Add logic to check if buyer requested payment for this product */}
+              <Button 
+                className="w-full bg-green-600 hover:bg-green-700 text-white"
+                onClick={() => handlePaymentConfirmation(pickup)}
+                disabled={true} // Will be enabled when buyer requests payment
+                data-testid={`payment-confirmation-${pickup.requestId}`}
+              >
+                <CreditCard className="h-4 w-4 mr-2" />
+                Payment Confirmation
+                {true && <span className="text-xs block mt-1">(Awaiting Buyer Request)</span>}
+              </Button>
+            </div>
+
+            {/* Status Indicator */}
+            <div className="mt-4 p-3 bg-green-50 rounded-lg">
+              <div className="flex items-center space-x-2">
+                <CheckCircle className="h-4 w-4 text-green-600" />
+                <p className="text-sm text-green-800">
+                  <span className="font-medium">Status:</span> Ready for inspection booking and certification processing
+                </p>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+      ))}
+    </div>
+  );
+});
+InspectionsAndPayments.displayName = 'InspectionsAndPayments';
+
 export default ExporterDashboard;

@@ -18307,6 +18307,57 @@ GENERATED: ${new Date().toLocaleDateString()}`;
     }
   });
 
+  // Get scheduled pickups for exporter (for Inspections & Payments)
+  app.get("/api/exporter/scheduled-pickups/:exporterId", async (req, res) => {
+    try {
+      const { exporterId } = req.params;
+      console.log(`📦 Fetching scheduled pickups for exporter: ${exporterId}`);
+      
+      // Get warehouse dispatch requests linked to this exporter through accepted offers
+      const exporterPickupsQuery = await db
+        .select({
+          requestId: warehouseDispatchRequests.requestId,
+          transactionId: warehouseDispatchRequests.transactionId,
+          commodityType: warehouseDispatchRequests.commodityType,
+          quantity: warehouseDispatchRequests.quantity,
+          unit: warehouseDispatchRequests.unit,
+          totalValue: warehouseDispatchRequests.totalValue,
+          dispatchDate: warehouseDispatchRequests.dispatchDate,
+          confirmedBy: warehouseDispatchRequests.confirmedBy,
+          status: warehouseDispatchRequests.status,
+          buyerName: warehouseDispatchRequests.buyerName,
+          buyerCompany: warehouseDispatchRequests.buyerCompany,
+          verificationCode: warehouseDispatchRequests.verificationCode,
+          county: warehouseDispatchRequests.county,
+          farmLocation: warehouseDispatchRequests.farmLocation,
+          confirmedAt: warehouseDispatchRequests.confirmedAt
+        })
+        .from(warehouseDispatchRequests)
+        .innerJoin(
+          buyerExporterOffers,
+          and(
+            eq(warehouseDispatchRequests.transactionId, buyerExporterOffers.custodyId),
+            eq(buyerExporterOffers.acceptedBy, exporterId)
+          )
+        )
+        .where(eq(warehouseDispatchRequests.status, 'confirmed'))
+        .orderBy(desc(warehouseDispatchRequests.confirmedAt));
+
+      console.log(`📦 Found ${exporterPickupsQuery.length} scheduled pickups for exporter ${exporterId}`);
+      
+      res.json({
+        success: true,
+        data: exporterPickupsQuery
+      });
+    } catch (error: any) {
+      console.error('Error fetching scheduled pickups:', error);
+      res.status(500).json({
+        error: "Failed to fetch scheduled pickups",
+        details: error.message
+      });
+    }
+  });
+
   // Get buyer's custody lots (for "My Products" menu)
   app.get("/api/buyer/custody-lots/:buyerId", async (req, res) => {
     try {

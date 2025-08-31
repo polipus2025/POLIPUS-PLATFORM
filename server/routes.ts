@@ -14050,11 +14050,21 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  // Get pending inspector assignments for DDGOTS
+  // Get pending inspector assignments for DDGOTS - ONLY REAL EXPORTER BOOKINGS
   app.get("/api/ddgots/pending-inspector-assignments", async (req, res) => {
     try {
       const assignments = await storage.getPendingInspectorAssignments();
-      res.json({ success: true, data: assignments });
+      
+      // Filter to only show bookings that were actually made by exporters with proper request IDs
+      const realExporterBookings = assignments.filter(booking => 
+        booking.booked_by === 'exporter-system' && 
+        booking.request_id && 
+        booking.request_id.startsWith('CUSTODY-') &&
+        booking.booking_id && 
+        booking.booking_id.startsWith('PINSP-')
+      );
+      
+      res.json({ success: true, data: realExporterBookings });
     } catch (error: any) {
       console.error("Error fetching pending assignments:", error);
       res.status(500).json({ error: "Failed to fetch pending assignments" });

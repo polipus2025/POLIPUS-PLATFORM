@@ -17882,18 +17882,16 @@ GENERATED: ${new Date().toLocaleDateString()}`;
       const { QrBatchService } = await import('./qr-batch-service');
       const qrCodeUrl = await QrBatchService.generateQrCodeImage(readableQrData);
 
-      // Create QR batch entry in same table as Farmer-Buyer QR codes
+      // Create QR batch entry with correct columns
       await db.execute(sql`
         INSERT INTO qr_batches (
           batch_code, warehouse_id, buyer_id, buyer_name,
           commodity_type, total_bags, bag_weight, total_weight,
-          quality_grade, harvest_date, qr_code_data, qr_code_url,
-          status, created_at, type
+          quality_grade, harvest_date, qr_code_data, qr_code_url, status
         ) VALUES (
           ${batchCode}, ${warehouseId}, ${dispatchRequest.buyer_id}, ${dispatchRequest.buyer_name},
           ${dispatchRequest.commodity_type}, ${1}, ${dispatchRequest.quantity}, ${dispatchRequest.quantity},
-          ${'Grade A'}, NOW(), ${readableQrData}, ${qrCodeUrl},
-          ${'generated'}, NOW(), ${'buyer_exporter_dispatch'}
+          ${'Grade A'}, NOW(), ${readableQrData}, ${qrCodeUrl}, ${'generated'}
         )
       `);
 

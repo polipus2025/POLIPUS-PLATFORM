@@ -41,7 +41,9 @@ import {
   Headphones,
   Monitor,
   Radio,
-  Wifi
+  Wifi,
+  FileDown,
+  X
 } from "lucide-react";
 import { apiRequest } from "@/lib/queryClient";
 import { useLocation } from "wouter";
@@ -125,26 +127,30 @@ export default function DGDashboard() {
   ];
 
   return (
-    <div className="min-h-screen bg-white">
+    <div className="min-h-screen bg-gradient-to-br from-slate-50 to-slate-100">
       {/* Header */}
-      <div className="bg-white border-b border-slate-200 shadow-sm">
+      <div className="bg-white/90 backdrop-blur-sm border-b border-slate-200 shadow-lg">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex justify-between items-center py-6">
             <div className="flex items-center space-x-4">
-              <div className="w-12 h-12 bg-gradient-to-br from-blue-500 to-blue-600 rounded-full flex items-center justify-center">
-                <Crown className="w-6 h-6 text-white" />
+              <div className="w-16 h-16 bg-gradient-to-br from-blue-500 to-blue-600 rounded-full flex items-center justify-center shadow-lg">
+                <Crown className="w-8 h-8 text-white" />
               </div>
               <div>
-                <h1 className="text-2xl font-bold text-slate-900">Director General Dashboard</h1>
-                <p className="text-slate-600">Executive Leadership Portal</p>
+                <h1 className="text-3xl font-bold text-slate-900">Director General Dashboard</h1>
+                <p className="text-slate-700 text-lg">Executive Leadership Portal</p>
+                <p className="text-slate-600 text-sm">Liberia Agriculture Commodity Regulatory Authority</p>
               </div>
             </div>
             <div className="flex items-center space-x-4">
-              <Badge variant="outline" className="border-blue-500 text-blue-600 bg-blue-50">
+              <Badge variant="outline" className="border-blue-500 text-blue-600 bg-blue-50 shadow-sm">
                 <Shield className="w-4 h-4 mr-1" />
                 Executive Access
               </Badge>
-              <Button onClick={handleLogout} variant="outline" className="text-slate-600 hover:text-slate-900">
+              <Button 
+                onClick={handleLogout} 
+                className="bg-gradient-to-r from-slate-600 to-slate-700 hover:from-slate-700 hover:to-slate-800 text-white shadow-lg hover:shadow-xl transition-all"
+              >
                 <LogOut className="w-4 h-4 mr-2" />
                 Logout
               </Button>
@@ -156,53 +162,67 @@ export default function DGDashboard() {
       {/* Main Content */}
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         {/* Dashboard Action Buttons */}
-        <div className="flex items-center justify-between mb-6">
-          <div className="flex items-center gap-4">
-            <h2 className="text-xl font-semibold text-slate-900">Dashboard Controls</h2>
-            <Button 
-              onClick={() => setShowMonitoring(true)} 
-              className="bg-green-600 hover:bg-green-700 text-white"
-            >
-              <Activity className="w-4 h-4 mr-2" />
-              Comprehensive Monitoring
-            </Button>
-          </div>
-        </div>
+        <Card className="bg-white shadow-xl border-slate-200 hover:shadow-2xl transition-all mb-8">
+          <CardContent className="p-6">
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-4">
+                <div className="w-12 h-12 bg-gradient-to-br from-green-500 to-green-600 rounded-full flex items-center justify-center shadow-lg">
+                  <Activity className="w-6 h-6 text-white" />
+                </div>
+                <div>
+                  <h2 className="text-xl font-bold text-slate-900">Dashboard Controls</h2>
+                  <p className="text-slate-600">Comprehensive system monitoring and oversight</p>
+                </div>
+              </div>
+              <Button 
+                onClick={() => setShowMonitoring(true)} 
+                className="bg-gradient-to-r from-green-600 to-green-700 hover:from-green-700 hover:to-green-800 text-white shadow-lg hover:shadow-xl transition-all"
+              >
+                <Activity className="w-4 h-4 mr-2" />
+                Launch Monitoring System
+              </Button>
+            </div>
+          </CardContent>
+        </Card>
 
-        <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">
-          <TabsList className="grid w-full grid-cols-5">
-            <TabsTrigger value="overview" className="flex items-center gap-2">
-              <BarChart3 className="w-4 h-4" />
-              Executive Overview
-            </TabsTrigger>
-            <TabsTrigger value="departments" className="flex items-center gap-2">
-              <Building2 className="w-4 h-4" />
-              Departmental Reports
-            </TabsTrigger>
-            <TabsTrigger value="portal-oversight" className="flex items-center gap-2">
-              <Eye className="w-4 h-4" />
-              Portal Oversight
-            </TabsTrigger>
-            <TabsTrigger value="strategic" className="flex items-center gap-2">
-              <Target className="w-4 h-4" />
-              Strategic Initiatives
-            </TabsTrigger>
-            <TabsTrigger value="governance" className="flex items-center gap-2">
-              <Award className="w-4 h-4" />
-              Governance
-            </TabsTrigger>
-          </TabsList>
+        <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-8">
+          <Card className="bg-white shadow-xl border-slate-200">
+            <CardContent className="p-2">
+              <TabsList className="grid w-full grid-cols-5 bg-slate-50">
+                <TabsTrigger value="overview" className="flex items-center gap-2 data-[state=active]:bg-gradient-to-r data-[state=active]:from-blue-500 data-[state=active]:to-blue-600 data-[state=active]:text-white data-[state=active]:shadow-md">
+                  <BarChart3 className="w-4 h-4" />
+                  Executive Overview
+                </TabsTrigger>
+                <TabsTrigger value="departments" className="flex items-center gap-2 data-[state=active]:bg-gradient-to-r data-[state=active]:from-emerald-500 data-[state=active]:to-emerald-600 data-[state=active]:text-white data-[state=active]:shadow-md">
+                  <Building2 className="w-4 h-4" />
+                  Departmental Reports
+                </TabsTrigger>
+                <TabsTrigger value="portal-oversight" className="flex items-center gap-2 data-[state=active]:bg-gradient-to-r data-[state=active]:from-purple-500 data-[state=active]:to-purple-600 data-[state=active]:text-white data-[state=active]:shadow-md">
+                  <Eye className="w-4 h-4" />
+                  Portal Oversight
+                </TabsTrigger>
+                <TabsTrigger value="strategic" className="flex items-center gap-2 data-[state=active]:bg-gradient-to-r data-[state=active]:from-orange-500 data-[state=active]:to-orange-600 data-[state=active]:text-white data-[state=active]:shadow-md">
+                  <Target className="w-4 h-4" />
+                  Strategic Initiatives
+                </TabsTrigger>
+                <TabsTrigger value="governance" className="flex items-center gap-2 data-[state=active]:bg-gradient-to-r data-[state=active]:from-cyan-500 data-[state=active]:to-cyan-600 data-[state=active]:text-white data-[state=active]:shadow-md">
+                  <Award className="w-4 h-4" />
+                  Governance
+                </TabsTrigger>
+              </TabsList>
+            </CardContent>
+          </Card>
 
           {/* Executive Overview */}
           <TabsContent value="overview" className="space-y-6">
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
               {/* Revenue Metrics */}
-              <Card className="bg-white shadow-lg border-0">
+              <Card className="bg-white shadow-xl border-slate-200 hover:shadow-2xl transition-all group">
                 <CardHeader className="pb-3">
                   <div className="flex items-center justify-between">
-                    <CardTitle className="text-lg text-slate-900">Total Revenue</CardTitle>
-                    <div className="p-2 bg-green-100 rounded-lg">
-                      <TrendingUp className="w-5 h-5 text-green-600" />
+                    <CardTitle className="text-lg font-bold text-slate-900">Total Revenue</CardTitle>
+                    <div className="p-3 bg-gradient-to-br from-green-500 to-green-600 rounded-full shadow-lg group-hover:scale-110 transition-transform">
+                      <TrendingUp className="w-5 h-5 text-white" />
                     </div>
                   </div>
                 </CardHeader>
@@ -215,12 +235,12 @@ export default function DGDashboard() {
               </Card>
 
               {/* Compliance Rate */}
-              <Card className="bg-white shadow-lg border-0">
+              <Card className="bg-white shadow-xl border-slate-200 hover:shadow-2xl transition-all group">
                 <CardHeader className="pb-3">
                   <div className="flex items-center justify-between">
-                    <CardTitle className="text-lg text-slate-900">Compliance Rate</CardTitle>
-                    <div className="p-2 bg-blue-100 rounded-lg">
-                      <Shield className="w-5 h-5 text-blue-600" />
+                    <CardTitle className="text-lg font-bold text-slate-900">Compliance Rate</CardTitle>
+                    <div className="p-3 bg-gradient-to-br from-blue-500 to-blue-600 rounded-full shadow-lg group-hover:scale-110 transition-transform">
+                      <Shield className="w-5 h-5 text-white" />
                     </div>
                   </div>
                 </CardHeader>
@@ -233,12 +253,12 @@ export default function DGDashboard() {
               </Card>
 
               {/* Active Projects */}
-              <Card className="bg-white shadow-lg border-0">
+              <Card className="bg-white shadow-xl border-slate-200 hover:shadow-2xl transition-all group">
                 <CardHeader className="pb-3">
                   <div className="flex items-center justify-between">
-                    <CardTitle className="text-lg text-slate-900">Active Projects</CardTitle>
-                    <div className="p-2 bg-purple-100 rounded-lg">
-                      <FileText className="w-5 h-5 text-purple-600" />
+                    <CardTitle className="text-lg font-bold text-slate-900">Active Projects</CardTitle>
+                    <div className="p-3 bg-gradient-to-br from-purple-500 to-purple-600 rounded-full shadow-lg group-hover:scale-110 transition-transform">
+                      <FileText className="w-5 h-5 text-white" />
                     </div>
                   </div>
                 </CardHeader>
@@ -252,10 +272,12 @@ export default function DGDashboard() {
             </div>
 
             {/* DG Final Approvals Section */}
-            <Card className="bg-white shadow-lg border-0">
+            <Card className="bg-white shadow-xl border-slate-200 hover:shadow-2xl transition-all">
               <CardHeader>
-                <CardTitle className="flex items-center gap-2">
-                  <CheckCircle className="w-5 h-5 text-green-600" />
+                <CardTitle className="flex items-center gap-2 text-slate-900 font-bold">
+                  <div className="p-2 bg-gradient-to-br from-green-500 to-green-600 rounded-full">
+                    <CheckCircle className="w-5 h-5 text-white" />
+                  </div>
                   Final Approvals Required
                 </CardTitle>
                 <CardDescription>
@@ -277,11 +299,11 @@ export default function DGDashboard() {
                       <div className="text-sm text-slate-600">Technical review completed by DDGOTS</div>
                     </div>
                     <div className="flex gap-2">
-                      <Button size="sm" className="bg-green-600 hover:bg-green-700 text-white">
+                      <Button size="sm" className="bg-gradient-to-r from-green-600 to-green-700 hover:from-green-700 hover:to-green-800 text-white shadow-lg hover:shadow-xl transition-all">
                         <CheckCircle className="w-4 h-4 mr-1" />
                         Approve
                       </Button>
-                      <Button size="sm" variant="destructive">
+                      <Button size="sm" className="bg-gradient-to-r from-red-600 to-red-700 hover:from-red-700 hover:to-red-800 text-white shadow-lg hover:shadow-xl transition-all">
                         <XCircle className="w-4 h-4 mr-1" />
                         Reject
                       </Button>
@@ -294,11 +316,11 @@ export default function DGDashboard() {
                       <div className="text-sm text-slate-600">Payment validated by DDGAF</div>
                     </div>
                     <div className="flex gap-2">
-                      <Button size="sm" className="bg-green-600 hover:bg-green-700 text-white">
+                      <Button size="sm" className="bg-gradient-to-r from-green-600 to-green-700 hover:from-green-700 hover:to-green-800 text-white shadow-lg hover:shadow-xl transition-all">
                         <CheckCircle className="w-4 h-4 mr-1" />
                         Approve
                       </Button>
-                      <Button size="sm" variant="destructive">
+                      <Button size="sm" className="bg-gradient-to-r from-red-600 to-red-700 hover:from-red-700 hover:to-red-800 text-white shadow-lg hover:shadow-xl transition-all">
                         <XCircle className="w-4 h-4 mr-1" />
                         Reject
                       </Button>
@@ -314,11 +336,11 @@ export default function DGDashboard() {
                       <Button size="sm" variant="outline">
                         Review Details
                       </Button>
-                      <Button size="sm" className="bg-green-600 hover:bg-green-700 text-white">
+                      <Button size="sm" className="bg-gradient-to-r from-green-600 to-green-700 hover:from-green-700 hover:to-green-800 text-white shadow-lg hover:shadow-xl transition-all">
                         <CheckCircle className="w-4 h-4 mr-1" />
                         Approve
                       </Button>
-                      <Button size="sm" variant="destructive">
+                      <Button size="sm" className="bg-gradient-to-r from-red-600 to-red-700 hover:from-red-700 hover:to-red-800 text-white shadow-lg hover:shadow-xl transition-all">
                         <XCircle className="w-4 h-4 mr-1" />
                         Reject
                       </Button>
@@ -779,90 +801,105 @@ export default function DGDashboard() {
 
       {/* Comprehensive Monitoring Modal */}
       <Dialog open={showMonitoring} onOpenChange={setShowMonitoring}>
-        <DialogContent className="max-w-6xl h-[90vh] overflow-y-auto">
-          <DialogHeader>
-            <DialogTitle className="flex items-center gap-2 text-2xl">
-              <Activity className="w-6 h-6 text-green-600" />
+        <DialogContent className="max-w-6xl h-[90vh] overflow-y-auto bg-gradient-to-br from-slate-50 to-slate-100 border-slate-200 shadow-2xl">
+          <DialogHeader className="text-center pb-6">
+            <div className="mx-auto w-20 h-20 bg-gradient-to-br from-green-500 to-green-600 rounded-full flex items-center justify-center mb-4 shadow-lg">
+              <Activity className="w-10 h-10 text-white" />
+            </div>
+            <DialogTitle className="text-3xl font-bold text-slate-900 mb-2">
               AgriTrace360™ Comprehensive Monitoring System
             </DialogTitle>
-            <DialogDescription>
+            <DialogDescription className="text-slate-700 text-lg">
               Real-time monitoring across all 15 Liberian counties with mobile inspector tracking and comprehensive analytics
             </DialogDescription>
+            <p className="text-slate-600 text-sm mt-2">Director General Executive Monitoring Dashboard</p>
           </DialogHeader>
 
           <div className="space-y-6">
             {/* Quick Stats Overview */}
-            <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-              <Card className="bg-green-50 border-green-200">
-                <CardContent className="p-4">
+            <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
+              <Card className="bg-white shadow-xl border-slate-200 hover:shadow-2xl transition-all group">
+                <CardContent className="p-6">
                   <div className="flex items-center justify-between">
                     <div>
-                      <p className="text-sm text-green-600">Active Inspectors</p>
-                      <p className="text-2xl font-bold text-green-800">47</p>
+                      <p className="text-sm text-slate-600 font-medium">Active Inspectors</p>
+                      <p className="text-3xl font-bold text-slate-900">47</p>
                     </div>
-                    <Smartphone className="w-8 h-8 text-green-600" />
+                    <div className="p-3 bg-gradient-to-br from-green-500 to-green-600 rounded-full shadow-lg group-hover:scale-110 transition-transform">
+                      <Smartphone className="w-6 h-6 text-white" />
+                    </div>
                   </div>
                 </CardContent>
               </Card>
               
-              <Card className="bg-blue-50 border-blue-200">
-                <CardContent className="p-4">
+              <Card className="bg-white shadow-xl border-slate-200 hover:shadow-2xl transition-all group">
+                <CardContent className="p-6">
                   <div className="flex items-center justify-between">
                     <div>
-                      <p className="text-sm text-blue-600">Counties Online</p>
-                      <p className="text-2xl font-bold text-blue-800">15/15</p>
+                      <p className="text-sm text-slate-600 font-medium">Counties Online</p>
+                      <p className="text-3xl font-bold text-slate-900">15/15</p>
                     </div>
-                    <MapPin className="w-8 h-8 text-blue-600" />
+                    <div className="p-3 bg-gradient-to-br from-blue-500 to-blue-600 rounded-full shadow-lg group-hover:scale-110 transition-transform">
+                      <MapPin className="w-6 h-6 text-white" />
+                    </div>
                   </div>
                 </CardContent>
               </Card>
 
-              <Card className="bg-orange-50 border-orange-200">
-                <CardContent className="p-4">
+              <Card className="bg-white shadow-xl border-slate-200 hover:shadow-2xl transition-all group">
+                <CardContent className="p-6">
                   <div className="flex items-center justify-between">
                     <div>
-                      <p className="text-sm text-orange-600">Pending Inspections</p>
-                      <p className="text-2xl font-bold text-orange-800">12</p>
+                      <p className="text-sm text-slate-600 font-medium">Pending Inspections</p>
+                      <p className="text-3xl font-bold text-slate-900">12</p>
                     </div>
-                    <Clock className="w-8 h-8 text-orange-600" />
+                    <div className="p-3 bg-gradient-to-br from-orange-500 to-orange-600 rounded-full shadow-lg group-hover:scale-110 transition-transform">
+                      <Clock className="w-6 h-6 text-white" />
+                    </div>
                   </div>
                 </CardContent>
               </Card>
 
-              <Card className="bg-red-50 border-red-200">
-                <CardContent className="p-4">
+              <Card className="bg-white shadow-xl border-slate-200 hover:shadow-2xl transition-all group">
+                <CardContent className="p-6">
                   <div className="flex items-center justify-between">
                     <div>
-                      <p className="text-sm text-red-600">Critical Alerts</p>
-                      <p className="text-2xl font-bold text-red-800">3</p>
+                      <p className="text-sm text-slate-600 font-medium">Critical Alerts</p>
+                      <p className="text-3xl font-bold text-slate-900">3</p>
                     </div>
-                    <AlertCircle className="w-8 h-8 text-red-600" />
+                    <div className="p-3 bg-gradient-to-br from-red-500 to-red-600 rounded-full shadow-lg group-hover:scale-110 transition-transform">
+                      <AlertCircle className="w-6 h-6 text-white" />
+                    </div>
                   </div>
                 </CardContent>
               </Card>
             </div>
 
             {/* Monitoring Tabs */}
-            <Tabs defaultValue="mobile-inspectors" className="w-full">
-              <TabsList className="grid w-full grid-cols-7">
-                <TabsTrigger value="mobile-inspectors" className="text-xs">Mobile Inspectors</TabsTrigger>
-                <TabsTrigger value="county-reports" className="text-xs">County Reports</TabsTrigger>
-                <TabsTrigger value="supply-chain" className="text-xs">Supply Chain</TabsTrigger>
-                <TabsTrigger value="portal-activity" className="text-xs">Portal Activity</TabsTrigger>
-                <TabsTrigger value="compliance" className="text-xs">Compliance</TabsTrigger>
-                <TabsTrigger value="emergency" className="text-xs">Emergency</TabsTrigger>
-                <TabsTrigger value="analytics" className="text-xs">Analytics</TabsTrigger>
-              </TabsList>
+            <Card className="bg-white shadow-xl border-slate-200">
+              <CardContent className="p-2">
+                <Tabs defaultValue="mobile-inspectors" className="w-full">
+                  <TabsList className="grid w-full grid-cols-7 bg-slate-50">
+                    <TabsTrigger value="mobile-inspectors" className="text-xs data-[state=active]:bg-gradient-to-r data-[state=active]:from-green-500 data-[state=active]:to-green-600 data-[state=active]:text-white data-[state=active]:shadow-md">Mobile Inspectors</TabsTrigger>
+                    <TabsTrigger value="county-reports" className="text-xs data-[state=active]:bg-gradient-to-r data-[state=active]:from-blue-500 data-[state=active]:to-blue-600 data-[state=active]:text-white data-[state=active]:shadow-md">County Reports</TabsTrigger>
+                    <TabsTrigger value="supply-chain" className="text-xs data-[state=active]:bg-gradient-to-r data-[state=active]:from-purple-500 data-[state=active]:to-purple-600 data-[state=active]:text-white data-[state=active]:shadow-md">Supply Chain</TabsTrigger>
+                    <TabsTrigger value="portal-activity" className="text-xs data-[state=active]:bg-gradient-to-r data-[state=active]:from-orange-500 data-[state=active]:to-orange-600 data-[state=active]:text-white data-[state=active]:shadow-md">Portal Activity</TabsTrigger>
+                    <TabsTrigger value="compliance" className="text-xs data-[state=active]:bg-gradient-to-r data-[state=active]:from-cyan-500 data-[state=active]:to-cyan-600 data-[state=active]:text-white data-[state=active]:shadow-md">Compliance</TabsTrigger>
+                    <TabsTrigger value="emergency" className="text-xs data-[state=active]:bg-gradient-to-r data-[state=active]:from-red-500 data-[state=active]:to-red-600 data-[state=active]:text-white data-[state=active]:shadow-md">Emergency</TabsTrigger>
+                    <TabsTrigger value="analytics" className="text-xs data-[state=active]:bg-gradient-to-r data-[state=active]:from-indigo-500 data-[state=active]:to-indigo-600 data-[state=active]:text-white data-[state=active]:shadow-md">Analytics</TabsTrigger>
+                  </TabsList>
 
-              {/* Mobile Inspector Monitoring */}
-              <TabsContent value="mobile-inspectors" className="space-y-4">
-                <Card>
-                  <CardHeader>
-                    <CardTitle className="flex items-center gap-2">
-                      <Smartphone className="w-5 h-5" />
-                      Mobile Inspector Real-Time Tracking
-                    </CardTitle>
-                  </CardHeader>
+                  {/* Mobile Inspector Monitoring */}
+                  <TabsContent value="mobile-inspectors" className="space-y-6">
+                    <Card className="bg-white shadow-xl border-slate-200 hover:shadow-2xl transition-all">
+                      <CardHeader>
+                        <CardTitle className="flex items-center gap-3 text-slate-900 font-bold">
+                          <div className="p-2 bg-gradient-to-br from-green-500 to-green-600 rounded-full">
+                            <Smartphone className="w-5 h-5 text-white" />
+                          </div>
+                          Mobile Inspector Real-Time Tracking
+                        </CardTitle>
+                      </CardHeader>
                   <CardContent className="space-y-4">
                     {/* Inspector Status Grid */}
                     <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
@@ -1355,7 +1392,9 @@ export default function DGDashboard() {
                   </CardContent>
                 </Card>
               </TabsContent>
-            </Tabs>
+                </Tabs>
+              </CardContent>
+            </Card>
           </div>
 
           {/* Action Buttons */}
@@ -1370,16 +1409,17 @@ export default function DGDashboard() {
                 Auto-refresh: 30s
               </Badge>
             </div>
-            <div className="flex gap-2">
-              <Button variant="outline" size="sm">
-                <Button className="w-4 h-4 mr-1" />
+            <div className="flex gap-3">
+              <Button className="bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 text-white shadow-lg hover:shadow-xl transition-all" size="sm">
+                <FileDown className="w-4 h-4 mr-2" />
                 Export Report
               </Button>
-              <Button variant="outline" size="sm">
-                <Settings className="w-4 h-4 mr-1" />
+              <Button className="bg-gradient-to-r from-purple-600 to-purple-700 hover:from-purple-700 hover:to-purple-800 text-white shadow-lg hover:shadow-xl transition-all" size="sm">
+                <Settings className="w-4 h-4 mr-2" />
                 Configure Alerts
               </Button>
-              <Button onClick={() => setShowMonitoring(false)} variant="outline" size="sm">
+              <Button onClick={() => setShowMonitoring(false)} className="bg-gradient-to-r from-slate-600 to-slate-700 hover:from-slate-700 hover:to-slate-800 text-white shadow-lg hover:shadow-xl transition-all" size="sm">
+                <X className="w-4 h-4 mr-2" />
                 Close
               </Button>
             </div>

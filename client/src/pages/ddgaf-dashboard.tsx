@@ -134,26 +134,30 @@ export default function DDGAFDashboard() {
   ];
 
   return (
-    <div className="min-h-screen bg-white">
+    <div className="min-h-screen bg-gradient-to-br from-slate-50 to-slate-100">
       {/* Header */}
-      <div className="bg-white border-b border-amber-200 shadow-sm">
+      <div className="bg-white/90 backdrop-blur-sm border-b border-slate-200 shadow-lg">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex justify-between items-center py-6">
             <div className="flex items-center space-x-4">
-              <div className="w-12 h-12 bg-gradient-to-br from-amber-500 to-amber-600 rounded-full flex items-center justify-center">
-                <Calculator className="w-6 h-6 text-white" />
+              <div className="w-16 h-16 bg-gradient-to-br from-amber-500 to-amber-600 rounded-full flex items-center justify-center shadow-lg">
+                <Calculator className="w-8 h-8 text-white" />
               </div>
               <div>
-                <h1 className="text-2xl font-bold text-slate-900">DDGAF Dashboard</h1>
-                <p className="text-slate-600">Administration & Finance</p>
+                <h1 className="text-3xl font-bold text-slate-900">DDGAF Dashboard</h1>
+                <p className="text-slate-700 text-lg">Administration & Finance</p>
+                <p className="text-slate-600 text-sm">Liberia Agriculture Commodity Regulatory Authority</p>
               </div>
             </div>
             <div className="flex items-center space-x-4">
-              <Badge variant="outline" className="border-amber-500 text-amber-600 bg-amber-50">
+              <Badge variant="outline" className="border-amber-500 text-amber-600 bg-amber-50 shadow-sm">
                 <DollarSign className="w-4 h-4 mr-1" />
                 Finance Access
               </Badge>
-              <Button onClick={handleLogout} variant="outline" className="text-slate-600 hover:text-slate-900">
+              <Button 
+                onClick={handleLogout} 
+                className="bg-gradient-to-r from-slate-600 to-slate-700 hover:from-slate-700 hover:to-slate-800 text-white shadow-lg hover:shadow-xl transition-all"
+              >
                 <LogOut className="w-4 h-4 mr-2" />
                 Logout
               </Button>
@@ -164,35 +168,39 @@ export default function DDGAFDashboard() {
 
       {/* Main Content */}
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">
-          <TabsList className="grid w-full grid-cols-4">
-            <TabsTrigger value="payments" className="flex items-center gap-2">
-              <CreditCard className="w-4 h-4" />
-              Payment Validation
-            </TabsTrigger>
-            <TabsTrigger value="financial" className="flex items-center gap-2">
-              <FileText className="w-4 h-4" />
-              Financial Records
-            </TabsTrigger>
-            <TabsTrigger value="accounts" className="flex items-center gap-2">
-              <AlertTriangle className="w-4 h-4" />
-              Unpaid Accounts
-            </TabsTrigger>
-            <TabsTrigger value="reports" className="flex items-center gap-2">
-              <TrendingUp className="w-4 h-4" />
-              Financial Reports
-            </TabsTrigger>
-          </TabsList>
+        <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-8">
+          <Card className="bg-white shadow-xl border-slate-200">
+            <CardContent className="p-2">
+              <TabsList className="grid w-full grid-cols-4 bg-slate-50">
+                <TabsTrigger value="payments" className="flex items-center gap-2 data-[state=active]:bg-gradient-to-r data-[state=active]:from-amber-500 data-[state=active]:to-amber-600 data-[state=active]:text-white data-[state=active]:shadow-md">
+                  <CreditCard className="w-4 h-4" />
+                  Payment Validation
+                </TabsTrigger>
+                <TabsTrigger value="financial" className="flex items-center gap-2 data-[state=active]:bg-gradient-to-r data-[state=active]:from-green-500 data-[state=active]:to-green-600 data-[state=active]:text-white data-[state=active]:shadow-md">
+                  <FileText className="w-4 h-4" />
+                  Financial Records
+                </TabsTrigger>
+                <TabsTrigger value="accounts" className="flex items-center gap-2 data-[state=active]:bg-gradient-to-r data-[state=active]:from-red-500 data-[state=active]:to-red-600 data-[state=active]:text-white data-[state=active]:shadow-md">
+                  <AlertTriangle className="w-4 h-4" />
+                  Unpaid Accounts
+                </TabsTrigger>
+                <TabsTrigger value="reports" className="flex items-center gap-2 data-[state=active]:bg-gradient-to-r data-[state=active]:from-blue-500 data-[state=active]:to-blue-600 data-[state=active]:text-white data-[state=active]:shadow-md">
+                  <TrendingUp className="w-4 h-4" />
+                  Financial Reports
+                </TabsTrigger>
+              </TabsList>
+            </CardContent>
+          </Card>
 
           {/* Payment Validation */}
           <TabsContent value="payments" className="space-y-6">
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-              <Card className="bg-white shadow-lg border-0">
+              <Card className="bg-white shadow-xl border-slate-200 hover:shadow-2xl transition-all group">
                 <CardHeader className="pb-3">
                   <div className="flex items-center justify-between">
-                    <CardTitle className="text-lg text-slate-900">Total Revenue</CardTitle>
-                    <div className="p-2 bg-green-100 rounded-lg">
-                      <DollarSign className="w-5 h-5 text-green-600" />
+                    <CardTitle className="text-lg font-bold text-slate-900">Total Revenue</CardTitle>
+                    <div className="p-3 bg-gradient-to-br from-green-500 to-green-600 rounded-full shadow-lg group-hover:scale-110 transition-transform">
+                      <DollarSign className="w-5 h-5 text-white" />
                     </div>
                   </div>
                 </CardHeader>
@@ -204,12 +212,12 @@ export default function DDGAFDashboard() {
                 </CardContent>
               </Card>
 
-              <Card className="bg-white shadow-lg border-0">
+              <Card className="bg-white shadow-xl border-slate-200 hover:shadow-2xl transition-all group">
                 <CardHeader className="pb-3">
                   <div className="flex items-center justify-between">
-                    <CardTitle className="text-lg text-slate-900">Pending Payments</CardTitle>
-                    <div className="p-2 bg-amber-100 rounded-lg">
-                      <CreditCard className="w-5 h-5 text-amber-600" />
+                    <CardTitle className="text-lg font-bold text-slate-900">Pending Payments</CardTitle>
+                    <div className="p-3 bg-gradient-to-br from-amber-500 to-amber-600 rounded-full shadow-lg group-hover:scale-110 transition-transform">
+                      <CreditCard className="w-5 h-5 text-white" />
                     </div>
                   </div>
                 </CardHeader>
@@ -221,12 +229,12 @@ export default function DDGAFDashboard() {
                 </CardContent>
               </Card>
 
-              <Card className="bg-white shadow-lg border-0">
+              <Card className="bg-white shadow-xl border-slate-200 hover:shadow-2xl transition-all group">
                 <CardHeader className="pb-3">
                   <div className="flex items-center justify-between">
-                    <CardTitle className="text-lg text-slate-900">Unpaid Accounts</CardTitle>
-                    <div className="p-2 bg-red-100 rounded-lg">
-                      <AlertTriangle className="w-5 h-5 text-red-600" />
+                    <CardTitle className="text-lg font-bold text-slate-900">Unpaid Accounts</CardTitle>
+                    <div className="p-3 bg-gradient-to-br from-red-500 to-red-600 rounded-full shadow-lg group-hover:scale-110 transition-transform">
+                      <AlertTriangle className="w-5 h-5 text-white" />
                     </div>
                   </div>
                 </CardHeader>
@@ -238,12 +246,12 @@ export default function DDGAFDashboard() {
                 </CardContent>
               </Card>
 
-              <Card className="bg-white shadow-lg border-0">
+              <Card className="bg-white shadow-xl border-slate-200 hover:shadow-2xl transition-all group">
                 <CardHeader className="pb-3">
                   <div className="flex items-center justify-between">
-                    <CardTitle className="text-lg text-slate-900">Overdue Amount</CardTitle>
-                    <div className="p-2 bg-orange-100 rounded-lg">
-                      <TrendingUp className="w-5 h-5 text-orange-600" />
+                    <CardTitle className="text-lg font-bold text-slate-900">Overdue Amount</CardTitle>
+                    <div className="p-3 bg-gradient-to-br from-orange-500 to-orange-600 rounded-full shadow-lg group-hover:scale-110 transition-transform">
+                      <TrendingUp className="w-5 h-5 text-white" />
                     </div>
                   </div>
                 </CardHeader>

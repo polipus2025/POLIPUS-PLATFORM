@@ -194,26 +194,30 @@ export default function DDGOTSDashboard() {
   ];
 
   return (
-    <div className="min-h-screen bg-white">
+    <div className="min-h-screen bg-gradient-to-br from-slate-50 to-slate-100">
       {/* Header */}
-      <div className="bg-white border-b border-emerald-200 shadow-sm">
+      <div className="bg-white/90 backdrop-blur-sm border-b border-slate-200 shadow-lg">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex justify-between items-center py-6">
             <div className="flex items-center space-x-4">
-              <div className="w-12 h-12 bg-gradient-to-br from-emerald-500 to-emerald-600 rounded-full flex items-center justify-center">
-                <Cog className="w-6 h-6 text-white" />
+              <div className="w-16 h-16 bg-gradient-to-br from-emerald-500 to-emerald-600 rounded-full flex items-center justify-center shadow-lg">
+                <Cog className="w-8 h-8 text-white" />
               </div>
               <div>
-                <h1 className="text-2xl font-bold text-slate-900">DDGOTS Dashboard</h1>
-                <p className="text-slate-600">Operations & Technical Services</p>
+                <h1 className="text-3xl font-bold text-slate-900">DDGOTS Dashboard</h1>
+                <p className="text-slate-700 text-lg">Operations & Technical Services</p>
+                <p className="text-slate-600 text-sm">Liberia Agriculture Commodity Regulatory Authority</p>
               </div>
             </div>
             <div className="flex items-center space-x-4">
-              <Badge variant="outline" className="border-emerald-500 text-emerald-600 bg-emerald-50">
+              <Badge variant="outline" className="border-emerald-500 text-emerald-600 bg-emerald-50 shadow-sm">
                 <Settings className="w-4 h-4 mr-1" />
                 Operations Access
               </Badge>
-              <Button onClick={handleLogout} variant="outline" className="text-slate-600 hover:text-slate-900">
+              <Button 
+                onClick={handleLogout} 
+                className="bg-gradient-to-r from-slate-600 to-slate-700 hover:from-slate-700 hover:to-slate-800 text-white shadow-lg hover:shadow-xl transition-all"
+              >
                 <LogOut className="w-4 h-4 mr-2" />
                 Logout
               </Button>
@@ -224,39 +228,43 @@ export default function DDGOTSDashboard() {
 
       {/* Main Content */}
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">
-          <TabsList className="grid w-full grid-cols-5">
-            <TabsTrigger value="operations" className="flex items-center gap-2">
-              <Settings className="w-4 h-4" />
-              Operations Overview
-            </TabsTrigger>
-            <TabsTrigger value="inspectors" className="flex items-center gap-2">
-              <Users className="w-4 h-4" />
-              Inspector Management
-            </TabsTrigger>
-            <TabsTrigger value="reports" className="flex items-center gap-2">
-              <FileCheck className="w-4 h-4" />
-              Inspection Reports
-            </TabsTrigger>
-            <TabsTrigger value="compliance" className="flex items-center gap-2">
-              <CheckCircle className="w-4 h-4" />
-              Technical Compliance
-            </TabsTrigger>
-            <TabsTrigger value="farmers" className="flex items-center gap-2">
-              <Users className="w-4 h-4" />
-              Farmer Oversight
-            </TabsTrigger>
-          </TabsList>
+        <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-8">
+          <Card className="bg-white shadow-xl border-slate-200">
+            <CardContent className="p-2">
+              <TabsList className="grid w-full grid-cols-5 bg-slate-50">
+                <TabsTrigger value="operations" className="flex items-center gap-2 data-[state=active]:bg-gradient-to-r data-[state=active]:from-emerald-500 data-[state=active]:to-emerald-600 data-[state=active]:text-white data-[state=active]:shadow-md">
+                  <Settings className="w-4 h-4" />
+                  Operations Overview
+                </TabsTrigger>
+                <TabsTrigger value="inspectors" className="flex items-center gap-2 data-[state=active]:bg-gradient-to-r data-[state=active]:from-blue-500 data-[state=active]:to-blue-600 data-[state=active]:text-white data-[state=active]:shadow-md">
+                  <Users className="w-4 h-4" />
+                  Inspector Management
+                </TabsTrigger>
+                <TabsTrigger value="reports" className="flex items-center gap-2 data-[state=active]:bg-gradient-to-r data-[state=active]:from-purple-500 data-[state=active]:to-purple-600 data-[state=active]:text-white data-[state=active]:shadow-md">
+                  <FileCheck className="w-4 h-4" />
+                  Inspection Reports
+                </TabsTrigger>
+                <TabsTrigger value="compliance" className="flex items-center gap-2 data-[state=active]:bg-gradient-to-r data-[state=active]:from-orange-500 data-[state=active]:to-orange-600 data-[state=active]:text-white data-[state=active]:shadow-md">
+                  <CheckCircle className="w-4 h-4" />
+                  Technical Compliance
+                </TabsTrigger>
+                <TabsTrigger value="farmers" className="flex items-center gap-2 data-[state=active]:bg-gradient-to-r data-[state=active]:from-cyan-500 data-[state=active]:to-cyan-600 data-[state=active]:text-white data-[state=active]:shadow-md">
+                  <Users className="w-4 h-4" />
+                  Farmer Oversight
+                </TabsTrigger>
+              </TabsList>
+            </CardContent>
+          </Card>
 
           {/* Operations Overview */}
           <TabsContent value="operations" className="space-y-6">
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-              <Card className="bg-white shadow-lg border-0">
+              <Card className="bg-white shadow-xl border-slate-200 hover:shadow-2xl transition-all group">
                 <CardHeader className="pb-3">
                   <div className="flex items-center justify-between">
-                    <CardTitle className="text-lg text-slate-900">Active Inspectors</CardTitle>
-                    <div className="p-2 bg-emerald-100 rounded-lg">
-                      <Users className="w-5 h-5 text-emerald-600" />
+                    <CardTitle className="text-lg font-bold text-slate-900">Active Inspectors</CardTitle>
+                    <div className="p-3 bg-gradient-to-br from-emerald-500 to-emerald-600 rounded-full shadow-lg group-hover:scale-110 transition-transform">
+                      <Users className="w-5 h-5 text-white" />
                     </div>
                   </div>
                 </CardHeader>
@@ -268,12 +276,12 @@ export default function DDGOTSDashboard() {
                 </CardContent>
               </Card>
 
-              <Card className="bg-white shadow-lg border-0">
+              <Card className="bg-white shadow-xl border-slate-200 hover:shadow-2xl transition-all group">
                 <CardHeader className="pb-3">
                   <div className="flex items-center justify-between">
-                    <CardTitle className="text-lg text-slate-900">Pending Reports</CardTitle>
-                    <div className="p-2 bg-amber-100 rounded-lg">
-                      <FileCheck className="w-5 h-5 text-amber-600" />
+                    <CardTitle className="text-lg font-bold text-slate-900">Pending Reports</CardTitle>
+                    <div className="p-3 bg-gradient-to-br from-amber-500 to-amber-600 rounded-full shadow-lg group-hover:scale-110 transition-transform">
+                      <FileCheck className="w-5 h-5 text-white" />
                     </div>
                   </div>
                 </CardHeader>
@@ -285,12 +293,12 @@ export default function DDGOTSDashboard() {
                 </CardContent>
               </Card>
 
-              <Card className="bg-white shadow-lg border-0">
+              <Card className="bg-white shadow-xl border-slate-200 hover:shadow-2xl transition-all group">
                 <CardHeader className="pb-3">
                   <div className="flex items-center justify-between">
-                    <CardTitle className="text-lg text-slate-900">Compliance Rate</CardTitle>
-                    <div className="p-2 bg-blue-100 rounded-lg">
-                      <CheckCircle className="w-5 h-5 text-blue-600" />
+                    <CardTitle className="text-lg font-bold text-slate-900">Compliance Rate</CardTitle>
+                    <div className="p-3 bg-gradient-to-br from-blue-500 to-blue-600 rounded-full shadow-lg group-hover:scale-110 transition-transform">
+                      <CheckCircle className="w-5 h-5 text-white" />
                     </div>
                   </div>
                 </CardHeader>

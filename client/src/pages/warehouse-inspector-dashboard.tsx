@@ -3214,7 +3214,7 @@ export default function WarehouseInspectorDashboard() {
                             </p>
                           </div>
 
-                          {/* Status */}
+                          {/* Status & Actions */}
                           <div className="space-y-2">
                             <div className="flex items-center space-x-2">
                               <CheckCircle className="h-5 w-5 text-green-600" />
@@ -3226,6 +3226,28 @@ export default function WarehouseInspectorDashboard() {
                             <div className="bg-blue-50 p-2 rounded text-xs text-blue-800">
                               Custody: {request.transactionId}
                             </div>
+                            <Button 
+                              size="sm" 
+                              variant="outline"
+                              className="w-full border-green-600 text-green-600 hover:bg-green-50"
+                              onClick={() => {
+                                const qrBatch = qrBatches?.find((batch: any) => batch.batchCode === request.qrBatchCode);
+                                if (qrBatch) {
+                                  setSelectedQrBatch(qrBatch);
+                                  setShowQrModal(true);
+                                } else {
+                                  toast({
+                                    title: "QR Code Not Found",
+                                    description: "QR code data not available",
+                                    variant: "destructive"
+                                  });
+                                }
+                              }}
+                              data-testid={`view-qr-${request.requestId}`}
+                            >
+                              <QrCode className="h-4 w-4 mr-1" />
+                              View & Print QR Code
+                            </Button>
                           </div>
                         </div>
                       </div>

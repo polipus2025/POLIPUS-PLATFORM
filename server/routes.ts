@@ -17935,15 +17935,27 @@ DISPATCH DATE: ${new Date(dispatchRequest.dispatch_date).toLocaleDateString()}
 VERIFICATION: ${dispatchRequest.verification_code}
 GENERATED: ${new Date().toLocaleDateString()}`;
 
+      // Generate QR code image using same service as warehouse bags
+      let qrCodeUrl = '';
+      try {
+        const { QrBatchService } = await import('./qr-batch-service');
+        qrCodeUrl = await QrBatchService.generateQrCodeImage(readableQrData);
+        console.log(`📱 QR Code image generated: ${qrCodeUrl}`);
+      } catch (qrError) {
+        console.log(`⚠️  QR image generation failed:`, qrError);
+        qrCodeUrl = `data:image/svg+xml;base64,${Buffer.from(`<svg xmlns="http://www.w3.org/2000/svg" width="200" height="200"><rect width="200" height="200" fill="white"/><text x="100" y="100" text-anchor="middle" font-family="Arial" font-size="12">${batchCode}</text></svg>`).toString('base64')}`;
+      }
+
       // Create QR batch entry for the generated code
       try {
         await db.execute(sql`
           INSERT INTO qr_batches (
             batch_code, warehouse_id, buyer_id, commodity_type, 
-            total_bags, total_weight, status
+            total_bags, total_weight, qr_code_data, qr_code_url, status
           ) VALUES (
             ${batchCode}, ${'WH-NIMBA-001'}, ${dispatchRequest.buyer_id}, 
-            ${dispatchRequest.commodity_type}, ${1}, ${parseFloat(dispatchRequest.quantity) || 1}, ${'generated'}
+            ${dispatchRequest.commodity_type}, ${1}, ${parseFloat(dispatchRequest.quantity) || 1}, 
+            ${readableQrData}, ${qrCodeUrl}, ${'generated'}
           )
         `);
         console.log(`📱 QR batch ${batchCode} created successfully`);
@@ -17967,8 +17979,9 @@ GENERATED: ${new Date().toLocaleDateString()}`;
 
       res.json({
         success: true,
-        message: "Dispatch confirmed successfully",
+        message: "Dispatch confirmed and QR code generated successfully",
         batchCode: batchCode,
+        qrCodeUrl: qrCodeUrl,
         dispatchRequestId: dispatchRequestId
       });
 

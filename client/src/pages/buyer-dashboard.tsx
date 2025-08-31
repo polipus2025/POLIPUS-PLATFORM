@@ -103,7 +103,7 @@ export default function BuyerDashboard() {
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-50 to-slate-100">
       {/* Header */}
-      <div className="bg-white shadow-sm border-b border-slate-200">
+      <div className="bg-white/95 backdrop-blur-sm shadow-xl border-b border-slate-200">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex justify-between items-center py-4">
             <div className="flex items-center space-x-4">
@@ -144,7 +144,7 @@ export default function BuyerDashboard() {
           <TabsContent value="overview" className="space-y-6">
             {/* Overview Metrics */}
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-              <Card className="bg-gradient-to-r from-blue-50 to-blue-100 border-blue-200">
+              <Card className="bg-white/95 backdrop-blur-sm shadow-xl hover:shadow-2xl transition-all duration-300 border border-slate-200 bg-gradient-to-r from-blue-50 to-blue-100 border-blue-200">
                 <CardContent className="p-6">
                   <div className="flex items-center justify-between">
                     <div>
@@ -157,7 +157,7 @@ export default function BuyerDashboard() {
                 </CardContent>
               </Card>
 
-              <Card className="bg-gradient-to-r from-green-50 to-green-100 border-green-200">
+              <Card className="bg-white/95 backdrop-blur-sm shadow-xl hover:shadow-2xl transition-all duration-300 border border-slate-200 bg-gradient-to-r from-green-50 to-green-100 border-green-200">
                 <CardContent className="p-6">
                   <div className="flex items-center justify-between">
                     <div>
@@ -170,7 +170,7 @@ export default function BuyerDashboard() {
                 </CardContent>
               </Card>
 
-              <Card className="bg-gradient-to-r from-purple-50 to-purple-100 border-purple-200">
+              <Card className="bg-white/95 backdrop-blur-sm shadow-xl hover:shadow-2xl transition-all duration-300 border border-slate-200 bg-gradient-to-r from-purple-50 to-purple-100 border-purple-200">
                 <CardContent className="p-6">
                   <div className="flex items-center justify-between">
                     <div>
@@ -185,7 +185,7 @@ export default function BuyerDashboard() {
             </div>
 
             {/* Recent Orders */}
-            <Card>
+            <Card className="bg-white/95 backdrop-blur-sm shadow-xl hover:shadow-2xl transition-all duration-300 border border-slate-200">
               <CardHeader>
                 <CardTitle className="flex items-center gap-2">
                   <Package className="w-5 h-5" />
@@ -225,7 +225,7 @@ export default function BuyerDashboard() {
           </TabsContent>
 
           <TabsContent value="orders">
-            <Card>
+            <Card className="bg-white/95 backdrop-blur-sm shadow-xl hover:shadow-2xl transition-all duration-300 border border-slate-200">
               <CardHeader>
                 <CardTitle>Purchase Orders Management</CardTitle>
                 <CardDescription>Manage your commodity purchase orders and track deliveries</CardDescription>
@@ -272,7 +272,7 @@ export default function BuyerDashboard() {
           </TabsContent>
 
           <TabsContent value="contracts">
-            <Card>
+            <Card className="bg-white/95 backdrop-blur-sm shadow-xl hover:shadow-2xl transition-all duration-300 border border-slate-200">
               <CardHeader>
                 <CardTitle>Farmer Contracts</CardTitle>
                 <CardDescription>Manage contracts with registered farmers</CardDescription>
@@ -290,7 +290,7 @@ export default function BuyerDashboard() {
           </TabsContent>
 
           <TabsContent value="payments">
-            <Card>
+            <Card className="bg-white/95 backdrop-blur-sm shadow-xl hover:shadow-2xl transition-all duration-300 border border-slate-200">
               <CardHeader>
                 <CardTitle>Payment Management</CardTitle>
                 <CardDescription>Track payment history and manage outstanding balances</CardDescription>

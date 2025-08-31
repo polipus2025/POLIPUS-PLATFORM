@@ -217,15 +217,16 @@ export default function FarmerDashboard() {
   };
 
   return (
-    <div className="space-y-3 sm:space-y-4 p-2 sm:p-4 max-w-7xl mx-auto">
+    <div className="min-h-screen bg-gradient-to-br from-slate-50 to-slate-100">
+      <div className="space-y-3 sm:space-y-4 p-2 sm:p-4 max-w-7xl mx-auto">
 
       {/* Mobile-Responsive Header */}
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
         <div>
-          <h1 className="text-lg sm:text-xl font-bold text-gray-900">
+          <h1 className="text-2xl sm:text-3xl font-bold text-slate-900">
             Welcome back, {farmerName}!
           </h1>
-          <p className="text-xs sm:text-sm text-gray-600 mt-1">
+          <p className="text-sm sm:text-base text-slate-700 mt-1">
             Farmer ID: {farmerId} | Your farm management dashboard
           </p>
         </div>
@@ -243,7 +244,7 @@ export default function FarmerDashboard() {
 
       {/* Simplified Tabbed Navigation Interface */}
       <Tabs defaultValue="overview" className="w-full">
-        <TabsList className="grid w-full grid-cols-3 lg:grid-cols-6 bg-slate-100 h-12">
+        <TabsList className="grid w-full grid-cols-3 lg:grid-cols-6 bg-white/95 backdrop-blur-sm shadow-lg h-12">
           <TabsTrigger value="overview" className="flex items-center justify-center gap-1 text-xs lg:text-sm p-2 lg:p-3">
             <Home className="h-3 w-3 lg:h-4 lg:w-4" />
             <span className="hidden sm:inline">Overview</span>
@@ -274,7 +275,7 @@ export default function FarmerDashboard() {
         <TabsContent value="overview" className="space-y-3 mt-3">
           {/* Compact Statistics Cards */}
           <div className="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-4 gap-3">
-            <Card className="bg-gradient-to-r from-green-50 to-emerald-50 border-green-200">
+            <Card className="bg-white/95 backdrop-blur-sm shadow-xl hover:shadow-2xl transition-all duration-300 border border-slate-200 bg-gradient-to-r from-green-50 to-emerald-50 border-green-200">
               <CardContent className="p-3 sm:p-4">
                 <div className="flex items-center justify-between">
                   <div className="flex-1">
@@ -287,7 +288,7 @@ export default function FarmerDashboard() {
               </CardContent>
             </Card>
 
-            <Card className="bg-gradient-to-r from-blue-50 to-cyan-50 border-blue-200">
+            <Card className="bg-white/95 backdrop-blur-sm shadow-xl hover:shadow-2xl transition-all duration-300 border border-slate-200 bg-gradient-to-r from-blue-50 to-cyan-50 border-blue-200">
               <CardContent className="p-3 sm:p-4">
                 <div className="flex items-center justify-between">
                   <div className="flex-1">
@@ -300,7 +301,7 @@ export default function FarmerDashboard() {
               </CardContent>
             </Card>
 
-            <Card className="bg-gradient-to-r from-orange-50 to-yellow-50 border-orange-200">
+            <Card className="bg-white/95 backdrop-blur-sm shadow-xl hover:shadow-2xl transition-all duration-300 border border-slate-200 bg-gradient-to-r from-orange-50 to-yellow-50 border-orange-200">
               <CardContent className="p-3 sm:p-4">
                 <div className="flex items-center justify-between">
                   <div className="flex-1">
@@ -313,7 +314,7 @@ export default function FarmerDashboard() {
               </CardContent>
             </Card>
 
-            <Card className="bg-gradient-to-r from-purple-50 to-pink-50 border-purple-200">
+            <Card className="bg-white/95 backdrop-blur-sm shadow-xl hover:shadow-2xl transition-all duration-300 border border-slate-200 bg-gradient-to-r from-purple-50 to-pink-50 border-purple-200">
               <CardContent className="p-3 sm:p-4">
                 <div className="flex items-center justify-between">
                   <div className="flex-1">
@@ -330,7 +331,7 @@ export default function FarmerDashboard() {
           {/* Compact Recent Activities and Quick Actions */}
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
             {/* Recent Farm Activities */}
-            <Card>
+            <Card className="bg-white/95 backdrop-blur-sm shadow-xl hover:shadow-2xl transition-all duration-300 border border-slate-200">
               <CardHeader>
                 <CardTitle className="flex items-center gap-2">
                   <TrendingUp className="h-5 w-5 text-green-600" />
@@ -343,8 +344,8 @@ export default function FarmerDashboard() {
                     <CheckCircle className="h-5 w-5 text-green-600 mt-0.5" />
                     <div className="flex-1">
                       <p className="text-sm font-medium">Coffee Harvest Completed</p>
-                      <p className="text-xs text-gray-600">Plot PLT-001 - 2.5 tons harvested</p>
-                      <p className="text-xs text-gray-500">2 days ago</p>
+                      <p className="text-xs text-slate-600">Plot PLT-001 - 2.5 tons harvested</p>
+                      <p className="text-xs text-slate-500">2 days ago</p>
                     </div>
                   </div>
 
@@ -352,8 +353,8 @@ export default function FarmerDashboard() {
                     <Package className="h-5 w-5 text-blue-600 mt-0.5" />
                     <div className="flex-1">
                       <p className="text-sm font-medium">Batch Code Generated</p>
-                      <p className="text-xs text-gray-600">COF-2024-001 for coffee export</p>
-                      <p className="text-xs text-gray-500">3 days ago</p>
+                      <p className="text-xs text-slate-600">COF-2024-001 for coffee export</p>
+                      <p className="text-xs text-slate-500">3 days ago</p>
                     </div>
                   </div>
 
@@ -361,8 +362,8 @@ export default function FarmerDashboard() {
                     <Calendar className="h-5 w-5 text-yellow-600 mt-0.5" />
                     <div className="flex-1">
                       <p className="text-sm font-medium">Crop Planning Updated</p>
-                      <p className="text-xs text-gray-600">Next season cocoa planning</p>
-                      <p className="text-xs text-gray-500">1 week ago</p>
+                      <p className="text-xs text-slate-600">Next season cocoa planning</p>
+                      <p className="text-xs text-slate-500">1 week ago</p>
                     </div>
                   </div>
                 </div>
@@ -370,7 +371,7 @@ export default function FarmerDashboard() {
             </Card>
 
             {/* Quick Actions */}
-            <Card>
+            <Card className="bg-white/95 backdrop-blur-sm shadow-xl hover:shadow-2xl transition-all duration-300 border border-slate-200">
               <CardHeader>
                 <CardTitle className="flex items-center gap-2">
                   <Leaf className="h-5 w-5 text-green-600" />
@@ -380,18 +381,18 @@ export default function FarmerDashboard() {
               <CardContent>
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                   <Button variant="outline" className="w-full h-auto p-4 flex flex-col items-center gap-2" disabled>
-                    <MapPin className="h-6 w-6 text-gray-400" />
-                    <span className="text-sm text-gray-500">Farm Plots - Restricted</span>
+                    <MapPin className="h-6 w-6 text-slate-400" />
+                    <span className="text-sm text-slate-500">Farm Plots - Restricted</span>
                   </Button>
 
                   <Button variant="outline" className="w-full h-auto p-4 flex flex-col items-center gap-2" disabled>
-                    <MapPin className="h-6 w-6 text-gray-400" />
-                    <span className="text-sm text-gray-500">GPS Mapping - Restricted</span>
+                    <MapPin className="h-6 w-6 text-slate-400" />
+                    <span className="text-sm text-slate-500">GPS Mapping - Restricted</span>
                   </Button>
 
                   <Button variant="outline" className="w-full h-auto p-4 flex flex-col items-center gap-2" disabled>
-                    <Calendar className="h-6 w-6 text-gray-400" />
-                    <span className="text-sm text-gray-500">Use Marketplace Tab</span>
+                    <Calendar className="h-6 w-6 text-slate-400" />
+                    <span className="text-sm text-slate-500">Use Marketplace Tab</span>
                   </Button>
 
                   <Button variant="outline" className="w-full h-auto p-4 flex flex-col items-center gap-2">
@@ -449,7 +450,7 @@ export default function FarmerDashboard() {
                         <div className="flex items-center justify-between">
                           <div>
                             <h3 className="font-semibold text-lg text-green-800">Plot #{plot.plot_number}: {plot.plot_name}</h3>
-                            <p className="text-sm text-gray-600 mt-1">
+                            <p className="text-sm text-slate-600 mt-1">
                               <strong>Unique Plot ID:</strong> <span className="font-mono bg-green-50 px-2 py-1 rounded text-green-700 font-bold">{plot.plot_id}</span>
                             </p>
                           </div>
@@ -462,7 +463,7 @@ export default function FarmerDashboard() {
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                           {/* Plot Details */}
                           <div className="space-y-3">
-                            <h4 className="font-medium text-gray-800">Plot Information</h4>
+                            <h4 className="font-medium text-slate-800">Plot Information</h4>
                             <div className="text-sm space-y-1">
                               <div><strong>Size:</strong> {plot.plot_size} {plot.plot_size_unit}</div>
                               <div><strong>Primary Crop:</strong> {plot.primary_crop || plot.crop_type}</div>
@@ -496,7 +497,7 @@ export default function FarmerDashboard() {
 
                           {/* GPS Information */}
                           <div className="space-y-3">
-                            <h4 className="font-medium text-gray-800">GPS & Boundaries</h4>
+                            <h4 className="font-medium text-slate-800">GPS & Boundaries</h4>
                             <div className="text-sm">
                               <div><strong>Primary GPS:</strong> {plot.gps_coordinates}</div>
                             </div>
@@ -521,7 +522,7 @@ export default function FarmerDashboard() {
                   
                   {/* Legacy Farm Data (if exists) */}
                   {farmerLandData.farmer?.landMapData && (
-                    <Card className="border-2 border-blue-100">
+                    <Card className="bg-white/95 backdrop-blur-sm shadow-xl hover:shadow-2xl transition-all duration-300 border border-slate-200 border-2 border-blue-100">
                       <CardHeader>
                         <CardTitle className="text-blue-800">Legacy Farm Registration Data</CardTitle>
                         <CardDescription>Original farm mapping data from farmer registration</CardDescription>
@@ -550,8 +551,8 @@ export default function FarmerDashboard() {
                   )}
                 </div>
               ) : (
-                <div className="text-center py-12 text-gray-500">
-                  <MapPin className="h-12 w-12 mx-auto mb-4 text-gray-300" />
+                <div className="text-center py-12 text-slate-500">
+                  <MapPin className="h-12 w-12 mx-auto mb-4 text-slate-300" />
                   <p className="text-lg font-medium mb-2">No Farm Plots Registered</p>
                   <p className="text-sm">Land mapping and plot registration is handled by official Land Inspectors.</p>
                   <p className="text-sm">Focus on crop scheduling and harvest management instead.</p>
@@ -564,7 +565,7 @@ export default function FarmerDashboard() {
 
         {/* MARKETPLACE TAB */}
         <TabsContent value="marketplace" className="space-y-6 mt-6">
-          <Card className="mb-6">
+          <Card className="bg-white/95 backdrop-blur-sm shadow-xl hover:shadow-2xl transition-all duration-300 border border-slate-200 mb-6">
             <CardHeader>
               <CardTitle className="flex items-center">
                 <Package className="w-5 h-5 mr-2 text-blue-600" />
@@ -578,7 +579,7 @@ export default function FarmerDashboard() {
               <form className="space-y-4" onSubmit={handleSubmitOffer}>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-2">
+                    <label className="block text-sm font-medium text-slate-700 mb-2">
                       Commodity Type <span className="text-red-500">*</span>
                     </label>
                     <select 
@@ -600,7 +601,7 @@ export default function FarmerDashboard() {
                   </div>
 
                   <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-2">
+                    <label className="block text-sm font-medium text-slate-700 mb-2">
                       Quality Grade <span className="text-red-500">*</span>
                     </label>
                     <select 
@@ -616,7 +617,7 @@ export default function FarmerDashboard() {
                   </div>
 
                   <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-2">
+                    <label className="block text-sm font-medium text-slate-700 mb-2">
                       Quantity Available <span className="text-red-500">*</span>
                     </label>
                     <input
@@ -632,7 +633,7 @@ export default function FarmerDashboard() {
                   </div>
 
                   <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-2">
+                    <label className="block text-sm font-medium text-slate-700 mb-2">
                       Unit <span className="text-red-500">*</span>
                     </label>
                     <select 
@@ -648,7 +649,7 @@ export default function FarmerDashboard() {
                   </div>
 
                   <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-2">
+                    <label className="block text-sm font-medium text-slate-700 mb-2">
                       Price per Unit (USD) <span className="text-red-500">*</span>
                     </label>
                     <input
@@ -664,7 +665,7 @@ export default function FarmerDashboard() {
                   </div>
 
                   <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-2">
+                    <label className="block text-sm font-medium text-slate-700 mb-2">
                       Harvest Date <span className="text-red-500">*</span>
                     </label>
                     <input
@@ -678,7 +679,7 @@ export default function FarmerDashboard() {
 
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-2">
+                    <label className="block text-sm font-medium text-slate-700 mb-2">
                       Payment Terms <span className="text-red-500">*</span>
                     </label>
                     <select 
@@ -695,7 +696,7 @@ export default function FarmerDashboard() {
                   </div>
 
                   <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-2">
+                    <label className="block text-sm font-medium text-slate-700 mb-2">
                       Delivery Terms <span className="text-red-500">*</span>
                     </label>
                     <select 
@@ -713,7 +714,7 @@ export default function FarmerDashboard() {
                 </div>
 
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                  <label className="block text-sm font-medium text-slate-700 mb-2">
                     Description
                   </label>
                   <textarea
@@ -750,7 +751,7 @@ export default function FarmerDashboard() {
             </CardHeader>
             <CardContent>
               {farmerOffersLoading ? (
-                <div className="text-center py-8 text-gray-500">Loading offers...</div>
+                <div className="text-center py-8 text-slate-500">Loading offers...</div>
               ) : farmerOffers && farmerOffers.length > 0 ? (
                 <div className="space-y-4">
                   {farmerOffers.map((offer: any) => (
@@ -761,9 +762,9 @@ export default function FarmerDashboard() {
                     }`}>
                       <div className="flex justify-between items-start mb-3">
                         <div>
-                          <p className="font-semibold text-gray-900">{offer.commodityType}</p>
-                          <p className="text-sm text-gray-600">Offer ID: {offer.offerId}</p>
-                          <p className="text-sm text-gray-600">{offer.quantityAvailable} {offer.unit} • ${offer.totalValue}</p>
+                          <p className="font-semibold text-slate-900">{offer.commodityType}</p>
+                          <p className="text-sm text-slate-600">Offer ID: {offer.offerId}</p>
+                          <p className="text-sm text-slate-600">{offer.quantityAvailable} {offer.unit} • ${offer.totalValue}</p>
                         </div>
                         <div className="flex flex-col gap-1">
                           <Badge className={`${
@@ -784,7 +785,7 @@ export default function FarmerDashboard() {
                       </div>
                       
                       {/* Dates Section */}
-                      <div className="text-sm text-gray-600 mb-2">
+                      <div className="text-sm text-slate-600 mb-2">
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
                           <p>
                             <strong>📅 Offer Created:</strong> {new Date(offer.offerCreatedAt).toLocaleString()}
@@ -805,7 +806,7 @@ export default function FarmerDashboard() {
                       {offer.status === 'confirmed' && offer.buyerName && (
                         <div className="border-t pt-3 mt-3">
                           <p className="text-sm font-medium text-green-700 mb-1">✅ Buyer Details:</p>
-                          <div className="text-sm text-gray-600">
+                          <div className="text-sm text-slate-600">
                             <p><strong>Buyer:</strong> {offer.buyerName}</p>
                             <p><strong>Company:</strong> {offer.buyerCompany}</p>
                             <p><strong>Buyer ID:</strong> {offer.buyerId}</p>
@@ -825,8 +826,8 @@ export default function FarmerDashboard() {
                   ))}
                 </div>
               ) : (
-                <div className="text-center py-8 text-gray-500">
-                  <Package className="w-12 h-12 mx-auto mb-4 text-gray-300" />
+                <div className="text-center py-8 text-slate-500">
+                  <Package className="w-12 h-12 mx-auto mb-4 text-slate-300" />
                   <p>No offers submitted yet</p>
                   <p className="text-sm">Submit your first product offer above</p>
                 </div>
@@ -850,7 +851,7 @@ export default function FarmerDashboard() {
             </CardHeader>
             <CardContent>
               {farmerOffersLoading ? (
-                <div className="text-center py-8 text-gray-500">Loading pending offers...</div>
+                <div className="text-center py-8 text-slate-500">Loading pending offers...</div>
               ) : farmerOffers && farmerOffers.filter((offer: any) => offer.status === 'pending').length > 0 ? (
                 <div className="space-y-4">
                   {farmerOffers.filter((offer: any) => offer.status === 'pending').map((offer: any) => (
@@ -858,8 +859,8 @@ export default function FarmerDashboard() {
                       <div className="flex justify-between items-start mb-3">
                         <div>
                           <p className="font-semibold text-orange-900">{offer.commodityType} Offer</p>
-                          <p className="text-sm text-gray-600">Offer ID: {offer.offerId}</p>
-                          <p className="text-sm text-gray-600">{offer.quantityAvailable} {offer.unit} • ${offer.totalValue.toLocaleString()}</p>
+                          <p className="text-sm text-slate-600">Offer ID: {offer.offerId}</p>
+                          <p className="text-sm text-slate-600">{offer.quantityAvailable} {offer.unit} • ${offer.totalValue.toLocaleString()}</p>
                         </div>
                         <Badge className="bg-orange-600 text-white">PENDING</Badge>
                       </div>
@@ -898,8 +899,8 @@ export default function FarmerDashboard() {
                   ))}
                 </div>
               ) : (
-                <div className="text-center py-12 text-gray-500">
-                  <Clock className="w-12 h-12 mx-auto mb-4 text-gray-300" />
+                <div className="text-center py-12 text-slate-500">
+                  <Clock className="w-12 h-12 mx-auto mb-4 text-slate-300" />
                   <p className="text-lg font-medium mb-2">No Pending Offers</p>
                   <p className="text-sm">All your offers have been accepted by buyers!</p>
                   <p className="text-sm">Submit new offers in the Marketplace tab.</p>
@@ -923,7 +924,7 @@ export default function FarmerDashboard() {
             </CardHeader>
             <CardContent>
               {acceptedOffersLoading ? (
-                <div className="text-center py-8 text-gray-500">Loading accepted offers...</div>
+                <div className="text-center py-8 text-slate-500">Loading accepted offers...</div>
               ) : acceptedOffers && acceptedOffers.length > 0 ? (
                 <div className="space-y-4">
                   {acceptedOffers.map((offer: any) => (
@@ -957,15 +958,15 @@ export default function FarmerDashboard() {
                       {/* Offer Details */}
                       <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4 text-sm">
                         <div>
-                          <p className="text-gray-600">Quantity</p>
+                          <p className="text-slate-600">Quantity</p>
                           <p className="font-medium">{offer.quantityAvailable} {offer.unit}</p>
                         </div>
                         <div>
-                          <p className="text-gray-600">Price per {offer.unit}</p>
+                          <p className="text-slate-600">Price per {offer.unit}</p>
                           <p className="font-medium">${offer.pricePerUnit?.toLocaleString()}</p>
                         </div>
                         <div>
-                          <p className="text-gray-600">Total Value</p>
+                          <p className="text-slate-600">Total Value</p>
                           <p className="font-medium text-green-600">${offer.totalValue?.toLocaleString()}</p>
                         </div>
                       </div>
@@ -975,14 +976,14 @@ export default function FarmerDashboard() {
                         <div className="flex items-center justify-between">
                           <div className="flex items-center space-x-3">
                             <div>
-                              <p className="text-xs text-gray-600">First Verification Code</p>
+                              <p className="text-xs text-slate-600">First Verification Code</p>
                               <code className="text-sm bg-blue-100 text-blue-700 px-2 py-1 rounded font-mono">
                                 {offer.verificationCode}
                               </code>
                             </div>
                             {offer.secondVerificationCode && (
                               <div>
-                                <p className="text-xs text-gray-600">Second Code (After Payment)</p>
+                                <p className="text-xs text-slate-600">Second Code (After Payment)</p>
                                 <code className="text-sm bg-purple-100 text-purple-700 px-2 py-1 rounded font-mono">
                                   {offer.secondVerificationCode}
                                 </code>
@@ -997,7 +998,7 @@ export default function FarmerDashboard() {
                                 <p className="text-xs text-green-600 font-medium mb-1">
                                   ✅ Payment Confirmed
                                 </p>
-                                <p className="text-xs text-gray-500">
+                                <p className="text-xs text-slate-500">
                                   {new Date(offer.paymentConfirmedAt).toLocaleDateString()}
                                 </p>
                               </div>
@@ -1029,8 +1030,8 @@ export default function FarmerDashboard() {
                 ))}
                 </div>
               ) : (
-                <div className="text-center py-8 text-gray-500">
-                  <Handshake className="w-12 h-12 mx-auto mb-4 text-gray-300" />
+                <div className="text-center py-8 text-slate-500">
+                  <Handshake className="w-12 h-12 mx-auto mb-4 text-slate-300" />
                   <p>No Accepted Offers Yet</p>
                   <p className="text-sm">Offers accepted by buyers will appear here with buyer details</p>
                 </div>
@@ -1053,7 +1054,7 @@ export default function FarmerDashboard() {
             </CardHeader>
             <CardContent>
               {farmerTransactionsLoading ? (
-                <div className="text-center py-8 text-gray-500">Loading...</div>
+                <div className="text-center py-8 text-slate-500">Loading...</div>
               ) : farmerTransactions && farmerTransactions.length > 0 ? (
                 <div className="space-y-3">
                   {farmerTransactions.map((transaction: any) => (
@@ -1062,7 +1063,7 @@ export default function FarmerDashboard() {
                         <div>
                           <p className="font-semibold text-green-900">{transaction.commodityType}</p>
                           <p className="text-sm text-blue-600 font-medium">Farmer Offer ID: {transaction.farmerOfferId}</p>
-                          <p className="text-sm text-gray-600">Buyer: {transaction.buyerName} ({transaction.buyerCompany})</p>
+                          <p className="text-sm text-slate-600">Buyer: {transaction.buyerName} ({transaction.buyerCompany})</p>
                         </div>
                         <div className="flex flex-col gap-1">
                           <Badge className="bg-green-600 text-white">Confirmed</Badge>
@@ -1074,7 +1075,7 @@ export default function FarmerDashboard() {
                         </div>
                       </div>
                       
-                      <div className="text-sm text-gray-600 mb-3">
+                      <div className="text-sm text-slate-600 mb-3">
                         <p>Quantity: <span className="font-medium">{transaction.quantityAvailable} {transaction.unit}</span></p>
                         <p>Total Value: <span className="font-medium">${transaction.totalValue}</span></p>
                         <p>First Code: <span className="font-mono font-bold text-blue-600">{transaction.verificationCode}</span></p>
@@ -1092,7 +1093,7 @@ export default function FarmerDashboard() {
                       {/* Payment Confirmation Button */}
                       {!transaction.paymentConfirmed && (
                         <div className="border-t pt-3">
-                          <p className="text-sm text-gray-700 mb-2">
+                          <p className="text-sm text-slate-700 mb-2">
                             <strong>Payment Status:</strong> Waiting for buyer payment
                           </p>
                           <Button
@@ -1113,7 +1114,7 @@ export default function FarmerDashboard() {
                               </>
                             )}
                           </Button>
-                          <p className="text-xs text-gray-500 mt-1 text-center">
+                          <p className="text-xs text-slate-500 mt-1 text-center">
                             Click only after you receive payment from the buyer
                           </p>
                         </div>
@@ -1130,8 +1131,8 @@ export default function FarmerDashboard() {
                   ))}
                 </div>
               ) : (
-                <div className="text-center py-8 text-gray-500">
-                  <FileText className="w-8 h-8 mx-auto mb-2 text-gray-300" />
+                <div className="text-center py-8 text-slate-500">
+                  <FileText className="w-8 h-8 mx-auto mb-2 text-slate-300" />
                   <p className="text-sm">No confirmed transactions yet</p>
                   <p className="text-xs">Completed transactions will appear here</p>
                 </div>
@@ -1154,8 +1155,8 @@ export default function FarmerDashboard() {
               </CardDescription>
             </CardHeader>
             <CardContent>
-              <div className="text-center py-8 text-gray-500">
-                <MessageSquare className="h-12 w-12 mx-auto mb-4 text-gray-300" />
+              <div className="text-center py-8 text-slate-500">
+                <MessageSquare className="h-12 w-12 mx-auto mb-4 text-slate-300" />
                 <p className="text-lg font-medium mb-2">No Inquiries</p>
                 <p className="text-sm">Buyer inquiries will appear here</p>
               </div>
@@ -1167,7 +1168,7 @@ export default function FarmerDashboard() {
         <TabsContent value="alerts" className="space-y-6 mt-6">
           {/* System Alerts */}
           {Array.isArray(alerts) && alerts.length > 0 && (
-            <Card className="border-yellow-200 bg-yellow-50">
+            <Card className="bg-white/95 backdrop-blur-sm shadow-xl hover:shadow-2xl transition-all duration-300 border border-slate-200 border-yellow-200 bg-yellow-50">
               <CardHeader>
                 <CardTitle className="flex items-center gap-2 text-yellow-800">
                   <AlertTriangle className="h-5 w-5" />
@@ -1180,8 +1181,8 @@ export default function FarmerDashboard() {
                     <div key={index} className="flex items-start gap-3 p-3 bg-white rounded-lg border">
                       <AlertTriangle className="h-4 w-4 text-yellow-600 mt-0.5" />
                       <div className="flex-1">
-                        <p className="text-sm font-medium text-gray-900">{alert.message}</p>
-                        <p className="text-xs text-gray-500 mt-1">{alert.date}</p>
+                        <p className="text-sm font-medium text-slate-900">{alert.message}</p>
+                        <p className="text-xs text-slate-500 mt-1">{alert.date}</p>
                       </div>
                     </div>
                   ))}
@@ -1191,6 +1192,7 @@ export default function FarmerDashboard() {
           )}
         </TabsContent>
       </Tabs>
+      </div>
     </div>
   );
 }

@@ -848,9 +848,9 @@ export default function SellersHub() {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-50 to-slate-100">
-      <div className="container mx-auto px-4 pt-1 pb-4 space-y-3">
+      <div className="container mx-auto px-4 pt-0 pb-4 space-y-2">
       {/* Back Button */}
-      <div className="flex items-center mt-6 mb-2">
+      <div className="flex items-center mt-8 mb-2">
         <Link href="/exporter-dashboard">
           <Button 
             variant="ghost" 

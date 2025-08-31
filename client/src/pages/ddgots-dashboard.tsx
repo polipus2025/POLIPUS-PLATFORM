@@ -630,51 +630,84 @@ export default function DDGOTSDashboard() {
                         <div className="space-y-4">
                           <h4 className="font-semibold text-slate-900 flex items-center gap-2">
                             <UserCheck className="w-4 h-4 text-emerald-600" />
-                            🚢 Assign Port Inspector
+                            🚢 {booking.assignmentStatus === 'assigned' ? 'Assigned Inspector' : 'Assign Port Inspector'}
                           </h4>
-                          <Select value={selectedInspector} onValueChange={setSelectedInspector}>
-                            <SelectTrigger className="w-full">
-                              <SelectValue placeholder={`Select Port Inspector at ${booking.portFacility}`} />
-                            </SelectTrigger>
-                            <SelectContent>
-                              {(portInspectors?.data || []).map((inspector: any) => (
-                                <SelectItem key={inspector.inspectorId} value={inspector.inspectorId}>
-                                  🚢 {inspector.fullName} - {inspector.certificationLevel} • {inspector.specializations}
-                                </SelectItem>
-                              ))}
-                            </SelectContent>
-                          </Select>
+                          
+                          {booking.assignmentStatus === 'assigned' ? (
+                            <div className="p-4 bg-green-50 border border-green-200 rounded-lg">
+                              <div className="flex items-center gap-2 text-green-800">
+                                <CheckCircle className="w-5 h-5 text-green-600" />
+                                <span className="font-semibold">Assigned to: {booking.assignedInspectorName}</span>
+                              </div>
+                              <p className="text-sm text-green-600 mt-1">
+                                📅 Assigned on: {new Date(booking.assignedAt).toLocaleDateString('en-US', {
+                                  weekday: 'short',
+                                  month: 'short',
+                                  day: 'numeric',
+                                  year: 'numeric'
+                                })}
+                              </p>
+                              {booking.ddgotsNotes && (
+                                <p className="text-sm text-green-600 mt-1">
+                                  📝 Notes: {booking.ddgotsNotes}
+                                </p>
+                              )}
+                            </div>
+                          ) : (
+                            <Select value={selectedInspector} onValueChange={setSelectedInspector}>
+                              <SelectTrigger className="w-full">
+                                <SelectValue placeholder={`Select Port Inspector at ${booking.portFacility}`} />
+                              </SelectTrigger>
+                              <SelectContent>
+                                {(portInspectors?.data || []).map((inspector: any) => (
+                                  <SelectItem key={inspector.inspectorId} value={inspector.inspectorId}>
+                                    🚢 {inspector.fullName} - {inspector.certificationLevel} • {inspector.specializations}
+                                  </SelectItem>
+                                ))}
+                              </SelectContent>
+                            </Select>
+                          )}
                         </div>
 
                         <div className="space-y-4">
-                          <h4 className="font-semibold text-slate-900">Assignment Notes</h4>
-                          <Textarea
-                            placeholder="Add any special instructions for the inspector..."
-                            value={assignmentNotes}
-                            onChange={(e) => setAssignmentNotes(e.target.value)}
-                            className="h-20"
-                          />
+                          <h4 className="font-semibold text-slate-900">📝 Assignment Notes</h4>
+                          {booking.assignmentStatus === 'assigned' ? (
+                            <div className="p-3 bg-slate-50 border border-slate-200 rounded-lg">
+                              <p className="text-sm text-slate-600">
+                                {booking.ddgotsNotes || 'No additional notes provided'}
+                              </p>
+                            </div>
+                          ) : (
+                            <Textarea
+                              placeholder="Add any special instructions for the inspector..."
+                              value={assignmentNotes}
+                              onChange={(e) => setAssignmentNotes(e.target.value)}
+                              className="h-20"
+                            />
+                          )}
                         </div>
                       </div>
 
                       {/* Assignment Action */}
-                      <div className="flex justify-end pt-4">
-                        <Button
-                          onClick={() => assignInspectorMutation.mutate({
-                            bookingId: booking.bookingId,
-                            inspectorId: selectedInspector,
-                            notes: assignmentNotes
-                          })}
-                          disabled={!selectedInspector || assignInspectorMutation.isPending}
-                          className="bg-green-600 hover:bg-green-700 text-white shadow-lg"
-                        >
-                          {assignInspectorMutation.isPending ? (
-                            <>⏳ Assigning...</>
-                          ) : (
-                            <>🎯 Assign Inspector & Send to {booking.portFacility}</>
-                          )}
-                        </Button>
-                      </div>
+                      {booking.assignmentStatus !== 'assigned' && (
+                        <div className="flex justify-end pt-4">
+                          <Button
+                            onClick={() => assignInspectorMutation.mutate({
+                              bookingId: booking.bookingId,
+                              inspectorId: selectedInspector,
+                              notes: assignmentNotes
+                            })}
+                            disabled={!selectedInspector || assignInspectorMutation.isPending}
+                            className="bg-green-600 hover:bg-green-700 text-white shadow-lg"
+                          >
+                            {assignInspectorMutation.isPending ? (
+                              <>⏳ Assigning...</>
+                            ) : (
+                              <>🎯 Assign Inspector & Send to {booking.portFacility}</>
+                            )}
+                          </Button>
+                        </div>
+                      )}
                     </CardContent>
                   </Card>
                 ))}

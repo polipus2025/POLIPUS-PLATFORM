@@ -14050,13 +14050,22 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  // Get pending inspector assignments for DDGOTS - ONLY REAL EXPORTER BOOKINGS
+  // Get ALL inspector assignments for DDGOTS - PENDING AND ASSIGNED
   app.get("/api/ddgots/pending-inspector-assignments", async (req, res) => {
     try {
-      const assignments = await storage.getPendingInspectorAssignments();
+      // Get both pending and assigned bookings to show assignment status
+      const allAssignments = await db.select()
+        .from(portInspectionBookings)
+        .where(
+          or(
+            eq(portInspectionBookings.assignmentStatus, 'pending_assignment'),
+            eq(portInspectionBookings.assignmentStatus, 'assigned')
+          )
+        )
+        .orderBy(portInspectionBookings.bookedAt);
       
       // Filter to only show bookings that were actually made by exporters with proper request IDs
-      const realExporterBookings = assignments.filter(booking => 
+      const realExporterBookings = allAssignments.filter(booking => 
         booking.bookedBy === 'exporter-system' && 
         booking.requestId && 
         booking.requestId.startsWith('CUSTODY-') &&
@@ -14066,8 +14075,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
       
       res.json({ success: true, data: realExporterBookings });
     } catch (error: any) {
-      console.error("Error fetching pending assignments:", error);
-      res.status(500).json({ error: "Failed to fetch pending assignments" });
+      console.error("Error fetching assignments:", error);
+      res.status(500).json({ error: "Failed to fetch assignments" });
     }
   });
 

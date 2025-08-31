@@ -32,7 +32,7 @@ export default function AgriTraceAdminLogin() {
         body: JSON.stringify({
           username,
           password,
-          adminCode
+          accessCode: adminCode
         })
       });
 

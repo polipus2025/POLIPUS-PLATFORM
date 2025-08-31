@@ -74,6 +74,7 @@ import DGLogin from "@/pages/auth/dg-login";
 import RegulatoryClassicLogin from "@/pages/auth/regulatory-classic-login";
 import SystemAdminLogin from "@/pages/auth/system-admin-login";
 import MonitoringLogin from "@/pages/auth/monitoring-login";
+import AgriTraceAdminLogin from "@/pages/auth/agritrace-admin-login";
 
 // MANAGEMENT PAGES
 const BuyerManagement = lazy(() => import("@/pages/buyer-management"));
@@ -154,6 +155,7 @@ function App() {
             <Route path="/dg-login" component={DGLogin} />
             <Route path="/regulatory-classic-login" component={RegulatoryClassicLogin} />
             <Route path="/system-admin-login" component={SystemAdminLogin} />
+            <Route path="/agritrace-admin-login" component={AgriTraceAdminLogin} />
             <Route path="/monitoring-login" component={MonitoringLogin} />
             
             {/* SYSTEM MONITORING */}

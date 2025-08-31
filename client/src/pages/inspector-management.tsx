@@ -240,10 +240,41 @@ export default function InspectorManagement() {
       certificationLevel: ''
     });
 
-    const nextStep = () => setCurrentStep(prev => Math.min(prev + 1, 3));
     const prevStep = () => setCurrentStep(prev => Math.max(prev - 1, 1));
 
+    const validateStep = (step: number) => {
+      switch (step) {
+        case 1:
+          if (!formData.firstName.trim() || !formData.lastName.trim() || !formData.nationalId.trim() || !formData.phoneNumber.trim()) {
+            toast({ title: "Validation Error", description: "Please fill in all required fields" });
+            return false;
+          }
+          break;
+        case 2:
+          if (!formData.inspectorType || !formData.inspectionAreaCounty) {
+            toast({ title: "Validation Error", description: "Please select inspector type and inspection area" });
+            return false;
+          }
+          break;
+        case 3:
+          if (!formData.certificationLevel) {
+            toast({ title: "Validation Error", description: "Please select certification level" });
+            return false;
+          }
+          break;
+      }
+      return true;
+    };
+
+    const nextStep = () => {
+      if (validateStep(currentStep)) {
+        setCurrentStep(prev => Math.min(prev + 1, 3));
+      }
+    };
+
     const handleSubmit = async () => {
+      if (!validateStep(3)) return;
+      
       try {
         const response = await apiRequest('/api/inspectors', { 
           method: 'POST', 

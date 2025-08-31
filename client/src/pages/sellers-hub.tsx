@@ -866,17 +866,9 @@ export default function SellersHub() {
 
       {/* Header */}
       <div className="bg-white/95 backdrop-blur-sm rounded-2xl shadow-xl border border-slate-200 mb-8">
-        <div className="p-6">
-          <div className="flex justify-between items-center">
-            {/* LEFT: TITLE */}
-            <div className="flex items-center space-x-4">
-              <div>
-                <h1 className="text-4xl font-bold text-slate-900">Sellers Hub</h1>
-                <p className="text-slate-700 text-lg">Browse buyer offers and grow your export business</p>
-              </div>
-            </div>
-            
-            {/* CENTER: TIME, DATE, AND WEATHER */}
+        <div className="p-6 space-y-4">
+          {/* TOP: TIME, DATE, AND WEATHER */}
+          <div className="flex justify-center">
             <div className="flex items-center space-x-6 bg-gradient-to-r from-slate-100 to-slate-50 px-6 py-3 rounded-lg border border-slate-200 shadow-lg">
               {/* Date and Time */}
               <div className="flex items-center space-x-3">
@@ -916,8 +908,15 @@ export default function SellersHub() {
                 </div>
               </div>
             </div>
+          </div>
+          
+          {/* BOTTOM: TITLE AND USER INFO */}
+          <div className="flex justify-between items-center">
+            <div className="text-center flex-1">
+              <h1 className="text-4xl font-bold text-slate-900 mb-2">Sellers Hub</h1>
+              <p className="text-slate-700 text-lg">Browse buyer offers and grow your export business</p>
+            </div>
             
-            {/* RIGHT: PLACEHOLDER */}
             <div className="flex items-center space-x-4">
               <div className="text-right">
                 <p className="text-sm font-medium text-slate-900">{user?.companyName || 'Loading...'}</p>

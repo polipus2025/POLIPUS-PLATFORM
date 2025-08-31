@@ -347,18 +347,52 @@ const ExporterDashboard = memo(() => {
                           <div className="space-y-2">
                             <Button 
                               size="sm" 
+                              className="w-full bg-blue-600 hover:bg-blue-700 text-white" 
+                              onClick={async () => {
+                                const dispatchDate = prompt('Schedule pickup date (YYYY-MM-DD):');
+                                if (!dispatchDate) return;
+                                
+                                try {
+                                  const response = await fetch('/api/exporter/schedule-dispatch', {
+                                    method: 'POST',
+                                    headers: { 'Content-Type': 'application/json' },
+                                    body: JSON.stringify({
+                                      offerId: deal.offer_id,
+                                      verificationCode: deal.verification_code,
+                                      dispatchDate,
+                                      custodyId: deal.custody_id
+                                    })
+                                  });
+                                  
+                                  const result = await response.json();
+                                  if (result.success) {
+                                    alert(`✅ Dispatch Scheduled!\n\nRequest ID: ${result.requestId}\nPickup Date: ${dispatchDate}\nWarehouse will be notified to prepare your order.`);
+                                    window.location.reload();
+                                  } else {
+                                    alert(`❌ Error: ${result.message}`);
+                                  }
+                                } catch (error) {
+                                  alert('❌ Failed to schedule dispatch. Please try again.');
+                                }
+                              }}
+                              data-testid={`schedule-dispatch-${deal.offer_id}`}
+                            >
+                              <Calendar className="h-4 w-4 mr-1" />
+                              Schedule Warehouse Pickup
+                            </Button>
+                            
+                            <Button 
+                              size="sm" 
                               className="w-full" 
                               variant="outline"
                               onClick={() => {
-                                alert(`🚛 Transport Arrangement\n\nContact Details:\nBuyer: ${deal.buyer_company}\nPhone: ${deal.buyer_phone}\nVerification Code: ${deal.verification_code}\n\nNext: Call buyer to arrange pickup from their warehouse to your export facility.`);
+                                alert(`📞 Buyer Contact Information\n\nCompany: ${deal.buyer_business_name || deal.buyer_company}\nContact: ${deal.contact_person_first_name ? `${deal.contact_person_first_name} ${deal.contact_person_last_name}` : deal.buyer_contact}\nPhone: ${deal.buyer_phone_verified || deal.buyer_phone}\nLocation: ${deal.buyer_county || deal.county}, ${deal.buyer_country || 'Liberia'}\n\nVerification Code: ${deal.verification_code}`);
                               }}
-                              data-testid={`arrange-transport-${deal.offer_id}`}
+                              data-testid={`contact-buyer-${deal.offer_id}`}
                             >
-                              <Truck className="h-4 w-4 mr-1" />
-                              Arrange Transport
+                              <Phone className="h-4 w-4 mr-1" />
+                              Contact Buyer
                             </Button>
-                            
-                            {/* Payment confirmation button removed as requested */}
                           </div>
                         </div>
                       </div>

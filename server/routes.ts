@@ -17948,7 +17948,7 @@ GENERATED: ${new Date().toLocaleDateString()}`;
         FROM buyer_exporter_offers beo
         JOIN exporter_offer_responses eor ON beo.offer_id = eor.offer_id
         LEFT JOIN buyers b ON beo.buyer_id = b.buyer_id
-        LEFT JOIN warehouse_custody wc ON b.buyer_id = wc.buyer_id
+        LEFT JOIN warehouse_custody wc ON beo.custody_id = wc.custody_id
         WHERE beo.status = 'accepted' 
         AND eor.exporter_id = ${exporterId}
         AND eor.response_type = 'accept'
@@ -17968,6 +17968,70 @@ GENERATED: ${new Date().toLocaleDateString()}`;
       res.status(500).json({
         success: false,
         message: "Failed to fetch accepted deals"
+      });
+    }
+  });
+
+  // Exporter schedule dispatch for accepted deal
+  app.post("/api/exporter/schedule-dispatch", async (req, res) => {
+    try {
+      const {
+        offerId,
+        verificationCode,
+        dispatchDate,
+        custodyId
+      } = req.body;
+
+      console.log(`📅 Exporter scheduling dispatch for offer ${offerId}`);
+
+      // Get offer details
+      const offerResult = await db.execute(sql`
+        SELECT 
+          beo.buyer_id, beo.buyer_company, beo.commodity, 
+          beo.quantity_available, beo.total_value, beo.county,
+          eor.exporter_company
+        FROM buyer_exporter_offers beo
+        JOIN exporter_offer_responses eor ON beo.offer_id = eor.offer_id
+        WHERE beo.offer_id = ${offerId} AND beo.status = 'accepted'
+      `);
+      
+      const offer = offerResult.rows?.[0] || offerResult[0];
+
+      if (!offer) {
+        return res.status(404).json({
+          success: false,
+          message: "Accepted deal not found"
+        });
+      }
+
+      // Generate dispatch request ID
+      const requestId = `WDR-${new Date().toISOString().split('T')[0].replace(/-/g, '')}-${Math.floor(Math.random() * 999).toString().padStart(3, '0')}`;
+
+      // Create dispatch request
+      await db.execute(sql`
+        INSERT INTO warehouse_dispatch_requests (
+          request_id, transaction_id, verification_code, buyer_id, buyer_name, buyer_company,
+          commodity_type, quantity, unit, total_value, county, dispatch_date
+        ) VALUES (
+          ${requestId}, ${offerId}, ${verificationCode}, ${offer.buyer_id || 'BUYER-001'}, 
+          ${offer.buyer_company || 'Unknown Company'}, ${offer.buyer_company || 'Unknown Company'}, ${offer.commodity || 'Cocoa'}, 
+          ${offer.quantity_available || 1}, 'MT', ${offer.total_value || 0}, ${offer.county || 'Montserrado'}, ${dispatchDate}
+        )
+      `);
+
+      console.log(`✅ Dispatch request ${requestId} created successfully`);
+
+      res.json({
+        success: true,
+        message: "Dispatch scheduled successfully",
+        requestId: requestId
+      });
+
+    } catch (error: any) {
+      console.error("Error scheduling dispatch:", error);
+      res.status(500).json({
+        success: false,
+        message: "Failed to schedule dispatch"
       });
     }
   });

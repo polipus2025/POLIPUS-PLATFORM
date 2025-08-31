@@ -140,6 +140,41 @@ export default function WarehouseInspectorDashboard() {
     select: (data: any) => data?.data || []
   });
 
+  // Fetch pending dispatch requests for exporter coordination
+  const { data: pendingDispatchData, isLoading: pendingDispatchLoading } = useQuery({
+    queryKey: ['/api/warehouse-inspector/pending-dispatch-requests'],
+    select: (data: any) => data || { data: [] }
+  });
+
+  // 🚛 Dispatch confirmation mutation
+  const dispatchConfirmationMutation = useMutation({
+    mutationFn: async ({ requestId, confirmationNotes }: any) => {
+      return await apiRequest('/api/warehouse-inspector/confirm-dispatch', {
+        method: 'POST',
+        body: JSON.stringify({
+          dispatchRequestId: requestId,
+          warehouseId: inspectorData.warehouseId || 'WH-001',
+          inspectorId: inspectorData.inspectorId || inspectorData.username,
+          confirmationNotes
+        })
+      });
+    },
+    onSuccess: (response: any) => {
+      toast({
+        title: "Dispatch Confirmed ✅",
+        description: `QR batch ${response.batchCode} generated successfully`,
+      });
+      queryClient.invalidateQueries({ queryKey: ['/api/warehouse-inspector/pending-dispatch-requests'] });
+    },
+    onError: () => {
+      toast({
+        title: "Error",
+        description: "Failed to confirm dispatch request",
+        variant: "destructive"
+      });
+    }
+  });
+
   // Product registration mutation
   const registerProductMutation = useMutation({
     mutationFn: async (registrationData: any) => {
@@ -3021,125 +3056,122 @@ export default function WarehouseInspectorDashboard() {
 
           {/* Dispatch Tab - Warehouse Dispatch Confirmation System */}
           <TabsContent value="dispatch" className="space-y-6">
-            <div className="space-y-6">
-              <Card className="bg-white/95 backdrop-blur-sm shadow-xl hover:shadow-2xl transition-all duration-300 border border-slate-200">
-                <CardHeader>
-                  <CardTitle className="text-xl flex items-center">
-                    <Truck className="w-6 h-6 mr-3 text-blue-600" />
-                    🚛 Pending Dispatch Requests
-                  </CardTitle>
-                  <CardDescription>
-                    Buyer-scheduled warehouse dispatch requests awaiting confirmation. Confirming will automatically generate QR codes.
-                  </CardDescription>
-                </CardHeader>
-                <CardContent>
-                  {dispatchRequestsLoading ? (
-                    <div className="flex justify-center items-center py-8">
-                      <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
-                      <span className="ml-3 text-slate-600">Loading dispatch requests...</span>
-                    </div>
-                  ) : pendingDispatchRequests && pendingDispatchRequests.length > 0 ? (
-                    <div className="space-y-4">
-                      {pendingDispatchRequests.map((request: any) => (
-                        <Card key={request.request_id} className="border border-gray-200 hover:shadow-md transition-shadow">
-                          <CardContent className="p-6">
-                            <div className="flex justify-between items-start mb-4">
-                              <div className="space-y-2">
-                                <div className="flex items-center gap-2">
-                                  <h3 className="text-lg font-semibold text-blue-600">
-                                    Request ID: {request.request_id}
-                                  </h3>
-                                  <Badge className="bg-orange-100 text-orange-800">
-                                    Pending Confirmation
-                                  </Badge>
-                                </div>
-                                <div className="grid grid-cols-2 gap-4 text-sm">
-                                  <div>
-                                    <span className="font-medium text-gray-700">Buyer:</span> {request.buyer_name}
-                                  </div>
-                                  <div>
-                                    <span className="font-medium text-gray-700">Company:</span> {request.buyer_company}
-                                  </div>
-                                  <div>
-                                    <span className="font-medium text-gray-700">Commodity:</span> {request.commodity_type}
-                                  </div>
-                                  <div>
-                                    <span className="font-medium text-gray-700">Quantity:</span> {request.quantity} {request.unit}
-                                  </div>
-                                  <div>
-                                    <span className="font-medium text-gray-700">County:</span> {request.county}
-                                  </div>
-                                  <div>
-                                    <span className="font-medium text-gray-700">Farm Location:</span> {request.farm_location}
-                                  </div>
-                                  <div>
-                                    <span className="font-medium text-gray-700">Total Value:</span> ${request.total_value}
-                                  </div>
-                                  <div>
-                                    <span className="font-medium text-gray-700">Scheduled Date:</span> 
-                                    <span className="text-blue-600 font-medium ml-1">
-                                      {new Date(request.dispatch_date).toLocaleDateString()}
-                                    </span>
-                                  </div>
-                                </div>
-                                <div className="mt-3 p-3 bg-blue-50 rounded-lg">
-                                  <div className="flex items-center gap-2">
-                                    <CheckCircle className="w-4 h-4 text-blue-600" />
-                                    <span className="text-sm font-medium text-blue-800">
-                                      Verification Code: {request.verification_code}
-                                    </span>
-                                  </div>
-                                </div>
-                              </div>
+            {/* 🚛 PENDING DISPATCH REQUESTS FROM EXPORTERS */}
+            <Card className="bg-white/95 backdrop-blur-sm shadow-xl hover:shadow-2xl transition-all duration-300 border border-slate-200">
+              <CardHeader>
+                <CardTitle className="text-xl flex items-center">
+                  <Truck className="w-6 h-6 mr-3 text-blue-600" />
+                  Pending Dispatch Requests
+                  <Badge className="ml-2 bg-blue-100 text-blue-800">
+                    {pendingDispatchData?.data?.length || 0}
+                  </Badge>
+                </CardTitle>
+                <CardDescription>
+                  Exporters requesting pickup coordination for accepted deals
+                </CardDescription>
+              </CardHeader>
+              <CardContent>
+                {pendingDispatchData?.data && pendingDispatchData.data.length > 0 ? (
+                  <div className="space-y-4">
+                    {pendingDispatchData.data.map((request: any) => (
+                      <div key={request.requestId} className="border border-slate-200 rounded-lg p-4 hover:border-blue-300 transition-colors">
+                        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                          {/* Request Details */}
+                          <div className="space-y-2">
+                            <div className="flex items-center space-x-2">
+                              <Package className="h-4 w-4 text-green-600" />
+                              <span className="font-medium">{request.commodityType}</span>
                             </div>
-                            
-                            <div className="flex justify-between items-center pt-4 border-t">
-                              <div className="text-xs text-slate-500">
-                                Requested: {new Date(request.requested_at).toLocaleString()}
-                              </div>
-                              <div className="flex gap-3">
-                                <Button
-                                  variant="outline"
-                                  size="sm"
-                                  className="border-red-300 text-red-700 hover:bg-red-50"
-                                  data-testid={`button-reject-dispatch-${request.request_id}`}
-                                >
-                                  <XCircle className="w-4 h-4 mr-2" />
-                                  Reject
-                                </Button>
-                                <Button
-                                  size="sm"
-                                  className="bg-green-600 hover:bg-green-700 text-white"
-                                  onClick={() => dispatchConfirmationMutation.mutate({ 
-                                    requestId: request.request_id,
-                                    confirmationNotes: "Warehouse dispatch confirmed and QR code generated"
-                                  })}
-                                  disabled={dispatchConfirmationMutation.isPending}
-                                  data-testid={`button-confirm-dispatch-${request.request_id}`}
-                                >
-                                  {dispatchConfirmationMutation.isPending ? (
-                                    <Loader2 className="w-4 h-4 mr-2 animate-spin" />
-                                  ) : (
-                                    <CheckCircle className="w-4 h-4 mr-2" />
-                                  )}
-                                  Confirm & Generate QR
-                                </Button>
-                              </div>
+                            <p className="text-sm text-slate-600">
+                              Request ID: <span className="font-mono text-xs">{request.requestId}</span>
+                            </p>
+                            <p className="text-sm text-slate-600">
+                              Quantity: <span className="font-medium">{request.quantity} {request.unit}</span>
+                            </p>
+                            <p className="text-sm text-slate-600">
+                              Value: <span className="font-medium text-green-600">${request.totalValue}</span>
+                            </p>
+                            <p className="text-sm text-slate-600">
+                              Location: <span className="font-medium">{request.county}</span>
+                            </p>
+                          </div>
+
+                          {/* Buyer Information */}
+                          <div className="space-y-2">
+                            <h4 className="font-medium text-slate-900">Buyer Details</h4>
+                            <p className="text-sm">
+                              <span className="font-medium">{request.buyerCompany}</span>
+                            </p>
+                            <p className="text-sm text-slate-600">
+                              Buyer ID: {request.buyerId}
+                            </p>
+                            <p className="text-sm text-slate-600">
+                              Farm: {request.farmLocation}
+                            </p>
+                            <p className="text-xs font-mono bg-gray-100 px-2 py-1 rounded">
+                              Verification: {request.verificationCode}
+                            </p>
+                          </div>
+
+                          {/* Dispatch Action */}
+                          <div className="space-y-2">
+                            <h4 className="font-medium text-slate-900">Pickup Schedule</h4>
+                            <div className="bg-blue-50 p-3 rounded-lg">
+                              <p className="text-sm font-medium text-blue-800">Requested Date</p>
+                              <p className="text-sm text-blue-900">{new Date(request.dispatchDate).toLocaleDateString()}</p>
                             </div>
-                          </CardContent>
-                        </Card>
-                      ))}
-                    </div>
-                  ) : (
-                    <div className="text-center py-12">
-                      <Truck className="w-16 h-16 mx-auto text-gray-400 mb-4" />
-                      <h3 className="text-lg font-medium text-slate-900 mb-2">No Pending Dispatch Requests</h3>
-                      <p className="text-slate-500">All dispatch requests have been processed or no new requests are available.</p>
-                    </div>
-                  )}
-                </CardContent>
-              </Card>
-            </div>
+                            <p className="text-xs text-gray-500">
+                              Requested: {new Date(request.requestedAt).toLocaleDateString()}
+                            </p>
+                            <Button 
+                              size="sm" 
+                              className="w-full bg-green-600 hover:bg-green-700 text-white"
+                              onClick={async () => {
+                                try {
+                                  const response = await apiRequest('/api/warehouse-inspector/confirm-dispatch', {
+                                    method: 'POST',
+                                    body: JSON.stringify({
+                                      dispatchRequestId: request.requestId,
+                                      warehouseId: inspectorData.warehouseId,
+                                      inspectorId: inspectorData.inspectorId,
+                                      confirmationNotes: 'Dispatch approved by warehouse inspector'
+                                    })
+                                  });
+                                  
+                                  if (response.success) {
+                                    toast({
+                                      title: "Dispatch Confirmed",
+                                      description: `QR batch ${response.batchCode} generated for pickup`,
+                                    });
+                                    queryClient.invalidateQueries({ queryKey: ['/api/warehouse-inspector/pending-dispatch-requests'] });
+                                  }
+                                } catch (error) {
+                                  toast({
+                                    title: "Error",
+                                    description: "Failed to confirm dispatch",
+                                    variant: "destructive"
+                                  });
+                                }
+                              }}
+                              data-testid={`confirm-dispatch-${request.requestId}`}
+                            >
+                              <CheckCircle className="h-4 w-4 mr-1" />
+                              Confirm Pickup & Generate QR
+                            </Button>
+                          </div>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                ) : (
+                  <div className="text-center py-8">
+                    <Truck className="h-12 w-12 text-slate-300 mx-auto mb-4" />
+                    <h3 className="text-lg font-medium text-slate-900 mb-2">No Pending Dispatch Requests</h3>
+                    <p className="text-slate-600">Exporter pickup requests will appear here</p>
+                  </div>
+                )}
+              </CardContent>
+            </Card>
           </TabsContent>
 
         </Tabs>

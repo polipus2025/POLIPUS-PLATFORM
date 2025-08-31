@@ -1659,6 +1659,7 @@ export default function AgriculturalBuyerDashboard() {
                                         
                                         // PRIORITY 1: If dispatch already exists, show its status (regardless of offers)
                                         if (dispatchStatus && dispatchStatus.status === 'confirmed') {
+                                          const pickupDate = dispatchStatus.dispatchDate ? new Date(dispatchStatus.dispatchDate).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }) : '';
                                           return (
                                             <Button 
                                               size="sm"
@@ -1668,6 +1669,7 @@ export default function AgriculturalBuyerDashboard() {
                                             >
                                               <CheckCircle className="h-4 w-4 mr-2" />
                                               ✅ Pickup Scheduled - {dispatchStatus.requestId}
+                                              {pickupDate && <span className="block text-xs mt-1">📅 {pickupDate}</span>}
                                             </Button>
                                           );
                                         } else if (dispatchStatus && dispatchStatus.status === 'pending') {

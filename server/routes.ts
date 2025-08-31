@@ -17821,6 +17821,63 @@ GENERATED: ${new Date().toLocaleDateString()}`;
     }
   });
 
+  // Get confirmed dispatch requests 
+  app.get("/api/warehouse-inspector/confirmed-dispatches", async (req, res) => {
+    try {
+      const confirmedRequests = await db.execute(sql`
+        SELECT DISTINCT
+          wdr.request_id as "requestId", 
+          wdr.transaction_id as "transactionId", 
+          wdr.verification_code as "verificationCode", 
+          wdr.buyer_id as "buyerId", 
+          wdr.buyer_name as "buyerName", 
+          wdr.buyer_company as "buyerCompany",
+          wdr.commodity_type as "commodityType", 
+          wdr.quantity, 
+          wdr.unit, 
+          wdr.total_value as "totalValue",
+          wdr.county, 
+          wdr.farm_location as "farmLocation",
+          wdr.dispatch_date as "dispatchDate", 
+          wdr.confirmed_at as "confirmedAt",
+          wdr.confirmed_by as "confirmedBy",
+          wdr.qr_batch_code as "qrBatchCode"
+        FROM warehouse_dispatch_requests wdr
+        WHERE wdr.status = 'confirmed'
+        ORDER BY wdr.confirmed_at DESC
+      `);
+
+      res.json({
+        success: true,
+        data: confirmedRequests.rows.map((row: any) => ({
+          requestId: row.requestId,
+          transactionId: row.transactionId,
+          verificationCode: row.verificationCode,
+          buyerId: row.buyerId,
+          buyerName: row.buyerName,
+          buyerCompany: row.buyerCompany,
+          commodityType: row.commodityType,
+          quantity: row.quantity,
+          unit: row.unit,
+          totalValue: row.totalValue,
+          county: row.county,
+          farmLocation: row.farmLocation,
+          dispatchDate: row.dispatchDate,
+          confirmedAt: row.confirmedAt,
+          confirmedBy: row.confirmedBy,
+          qrBatchCode: row.qrBatchCode
+        }))
+      });
+
+    } catch (error: any) {
+      console.error("Error fetching confirmed dispatches:", error);
+      res.status(500).json({
+        success: false,
+        message: "Failed to fetch confirmed dispatches"
+      });
+    }
+  });
+
   // Warehouse confirms dispatch date and auto-generates QR code  
   app.post("/api/warehouse-inspector/confirm-dispatch", async (req, res) => {
     try {
@@ -17878,8 +17935,21 @@ DISPATCH DATE: ${new Date(dispatchRequest.dispatch_date).toLocaleDateString()}
 VERIFICATION: ${dispatchRequest.verification_code}
 GENERATED: ${new Date().toLocaleDateString()}`;
 
-      // Skip QR generation for now to test basic functionality
-      console.log(`📱 Skipping QR generation, just updating dispatch status`);
+      // Create QR batch entry for the generated code
+      try {
+        await db.execute(sql`
+          INSERT INTO qr_batches (
+            batch_code, warehouse_id, buyer_id, commodity_type, 
+            total_bags, total_weight, status
+          ) VALUES (
+            ${batchCode}, ${'WH-NIMBA-001'}, ${dispatchRequest.buyer_id}, 
+            ${dispatchRequest.commodity_type}, ${1}, ${parseFloat(dispatchRequest.quantity) || 1}, ${'generated'}
+          )
+        `);
+        console.log(`📱 QR batch ${batchCode} created successfully`);
+      } catch (qrError) {
+        console.log(`⚠️  QR batch creation failed, but dispatch still confirmed:`, qrError);
+      }
 
       // Update dispatch request status to confirmed and add QR batch code
       await db.execute(sql`

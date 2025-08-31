@@ -146,6 +146,12 @@ export default function WarehouseInspectorDashboard() {
     select: (data: any) => data || { data: [] }
   });
 
+  // ✅ Fetch confirmed dispatch requests
+  const { data: confirmedDispatchData, isLoading: confirmedDispatchLoading } = useQuery({
+    queryKey: ['/api/warehouse-inspector/confirmed-dispatches'],
+    select: (data: any) => data || { data: [] }
+  });
+
 
   // Product registration mutation
   const registerProductMutation = useMutation({
@@ -3152,6 +3158,84 @@ export default function WarehouseInspectorDashboard() {
                     <Truck className="h-12 w-12 text-slate-300 mx-auto mb-4" />
                     <h3 className="text-lg font-medium text-slate-900 mb-2">No Pending Dispatch Requests</h3>
                     <p className="text-slate-600">Exporter pickup requests will appear here</p>
+                  </div>
+                )}
+              </CardContent>
+            </Card>
+
+            {/* ✅ CONFIRMED DISPATCH REQUESTS */}
+            <Card className="bg-white/95 backdrop-blur-sm shadow-xl hover:shadow-2xl transition-all duration-300 border border-slate-200">
+              <CardHeader>
+                <CardTitle className="text-xl flex items-center">
+                  <CheckCircle className="w-6 h-6 mr-3 text-green-600" />
+                  Confirmed Dispatches
+                  <Badge className="ml-2 bg-green-100 text-green-800">
+                    {confirmedDispatchData?.data?.length || 0}
+                  </Badge>
+                </CardTitle>
+                <CardDescription>
+                  Successfully confirmed dispatch requests with QR batch codes
+                </CardDescription>
+              </CardHeader>
+              <CardContent>
+                {confirmedDispatchData?.data && confirmedDispatchData.data.length > 0 ? (
+                  <div className="space-y-4">
+                    {confirmedDispatchData.data.map((request: any) => (
+                      <div key={request.requestId} className="border border-green-200 rounded-lg p-4 bg-green-50">
+                        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                          {/* Request Details */}
+                          <div className="space-y-2">
+                            <div className="flex items-center space-x-2">
+                              <Package className="h-4 w-4 text-green-600" />
+                              <span className="font-medium">{request.commodityType}</span>
+                            </div>
+                            <p className="text-sm text-slate-600">
+                              Request ID: <span className="font-mono text-xs">{request.requestId}</span>
+                            </p>
+                            <p className="text-sm text-slate-600">
+                              Quantity: <span className="font-medium">{request.quantity} {request.unit}</span>
+                            </p>
+                            <p className="text-sm text-slate-600">
+                              Value: <span className="font-medium text-green-600">${request.totalValue?.toLocaleString() || '0.00'}</span>
+                            </p>
+                          </div>
+
+                          {/* QR Code Details */}
+                          <div className="space-y-2">
+                            <h4 className="font-medium text-green-900">QR Batch Code</h4>
+                            <div className="bg-white p-3 rounded-lg border border-green-200">
+                              <p className="text-sm font-mono text-green-800">{request.qrBatchCode}</p>
+                            </div>
+                            <p className="text-xs text-green-700">
+                              Confirmed: {new Date(request.confirmedAt).toLocaleDateString()}
+                            </p>
+                            <p className="text-xs text-green-700">
+                              By: {request.confirmedBy}
+                            </p>
+                          </div>
+
+                          {/* Status */}
+                          <div className="space-y-2">
+                            <div className="flex items-center space-x-2">
+                              <CheckCircle className="h-5 w-5 text-green-600" />
+                              <span className="font-medium text-green-800">CONFIRMED</span>
+                            </div>
+                            <p className="text-sm text-slate-600">
+                              Ready for exporter pickup coordination
+                            </p>
+                            <div className="bg-blue-50 p-2 rounded text-xs text-blue-800">
+                              Custody: {request.transactionId}
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                ) : (
+                  <div className="text-center py-8">
+                    <CheckCircle className="h-12 w-12 text-slate-300 mx-auto mb-4" />
+                    <h3 className="text-lg font-medium text-slate-900 mb-2">No Confirmed Dispatches</h3>
+                    <p className="text-slate-600">Confirmed dispatch requests will appear here</p>
                   </div>
                 )}
               </CardContent>

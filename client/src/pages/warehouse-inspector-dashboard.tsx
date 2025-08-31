@@ -3078,7 +3078,7 @@ export default function WarehouseInspectorDashboard() {
                               Buyer ID: {request.buyerId}
                             </p>
                             <p className="text-sm text-slate-600">
-                              Current Location: <span className="font-medium">{request.farmLocation}</span>
+                              Delivery Address: <span className="font-medium">{request.farmLocation}</span>
                             </p>
                             <p className="text-xs font-mono bg-gray-100 px-2 py-1 rounded">
                               Verification: {request.verificationCode}

@@ -2371,7 +2371,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.post('/api/agritrace-admin/configurations', authenticateAgriTraceAdmin, async (req, res) => {
     try {
       const { configKey, configValue } = req.body;
-      await agriTraceAdmin.updateAgriTraceConfiguration(configKey, configValue, req.user?.firstName || 'unknown');
+      await agriTraceAdmin.updateAgriTraceConfiguration(configKey, configValue, (req.user as any)?.firstName || 'unknown');
       res.json({ success: true, message: 'AgriTrace configuration updated' });
     } catch (error: any) {
       console.error('Error updating AgriTrace configuration:', error);
@@ -2393,7 +2393,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.post('/api/agritrace-admin/features/toggle', authenticateAgriTraceAdmin, async (req, res) => {
     try {
       const { flagName, isEnabled } = req.body;
-      await agriTraceAdmin.toggleAgriTraceFeature(flagName, isEnabled, req.user?.firstName || 'unknown');
+      await agriTraceAdmin.toggleAgriTraceFeature(flagName, isEnabled, (req.user as any)?.firstName || 'unknown');
       res.json({ success: true, message: 'AgriTrace feature toggled' });
     } catch (error: any) {
       console.error('Error toggling AgriTrace feature:', error);

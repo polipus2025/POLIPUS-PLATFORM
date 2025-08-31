@@ -270,7 +270,7 @@ export default function FrontPage() {
                             )}
                           </Badge>
                         </div>
-                        <Button className="w-full text-xs sm:text-sm bg-gradient-to-r from-slate-600 to-slate-700 hover:from-slate-700 hover:to-slate-800 text-white mt-4">
+                        <Button className="w-full text-xs sm:text-sm bg-gradient-to-r from-slate-500 to-slate-600 hover:from-slate-600 hover:to-slate-700 text-white mt-4">
                           <ArrowRight className="h-3 w-3 sm:h-4 sm:w-4 mr-1 sm:mr-2" />
                           Enter Platform
                         </Button>
@@ -339,7 +339,7 @@ export default function FrontPage() {
             </p>
             <div className="flex flex-col sm:flex-row items-center justify-center gap-3 sm:gap-4">
               <Link href="/mobile-app-download">
-                <Button className="bg-gradient-to-r from-slate-600 to-slate-700 hover:from-slate-700 hover:to-slate-800 text-white flex items-center gap-2" data-testid="button-download-app">
+                <Button className="bg-gradient-to-r from-slate-500 to-slate-600 hover:from-slate-600 hover:to-slate-700 text-white flex items-center gap-2" data-testid="button-download-app">
                   <Download className="h-4 w-4" />
                   Download App
                 </Button>

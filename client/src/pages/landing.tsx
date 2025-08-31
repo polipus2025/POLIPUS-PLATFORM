@@ -55,14 +55,14 @@ export default function Landing() {
   const WeatherIcon = getWeatherIcon();
 
   return (
-    <div className="min-h-screen isms-gradient">
+    <div className="min-h-screen bg-gradient-to-br from-slate-50 to-slate-100">
       <Helmet>
         <title>AgriTrace360™ - Agricultural Traceability & Compliance Platform | LACRA</title>
         <meta name="description" content="Comprehensive agricultural commodity compliance management system for the Liberia Agriculture Commodity Regulatory Authority" />
       </Helmet>
 
-      {/* Mobile-Responsive Header - ISMS Style */}
-      <header className="isms-card sticky top-0 z-10 mb-0">
+      {/* Mobile-Responsive Header */}
+      <header className="bg-white shadow-xl border-slate-200 sticky top-0 z-10 mb-0">
         <div className="max-w-7xl mx-auto px-3 sm:px-4 py-3 sm:py-4">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-3 sm:gap-8">
@@ -174,9 +174,9 @@ export default function Landing() {
 
       {/* Main Content */}
       <main className="max-w-7xl mx-auto p-8">
-        {/* Hero Section - ISMS Style */}
-        <div className="isms-card text-center mb-12">
-          <div className="w-20 h-20 rounded-2xl isms-icon-bg-blue flex items-center justify-center mx-auto mb-6">
+        {/* Hero Section */}
+        <div className="bg-white shadow-xl border-slate-200 rounded-lg p-8 text-center mb-12">
+          <div className="w-20 h-20 rounded-2xl bg-gradient-to-br from-blue-500 to-blue-600 flex items-center justify-center mx-auto mb-6 shadow-lg">
             <Globe className="h-10 w-10 text-white" />
           </div>
           <h2 className="text-4xl md:text-6xl font-bold text-slate-900 mb-6">
@@ -190,10 +190,10 @@ export default function Landing() {
             platform supporting all 15 Liberian counties and major cash crops with EUDR compliance integration.
           </p>
           
-          {/* Key Features - ISMS Style */}
+          {/* Key Features */}
           <div className="grid grid-cols-2 md:grid-cols-4 gap-6 max-w-4xl mx-auto">
-            <div className="isms-card text-center">
-              <div className="w-12 h-12 rounded-xl isms-icon-bg-green flex items-center justify-center mx-auto mb-3">
+            <div className="bg-white shadow-lg border-slate-200 rounded-lg p-4 text-center">
+              <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-green-500 to-green-600 flex items-center justify-center mx-auto mb-3">
                 <BarChart3 className="h-6 w-6 text-white" />
               </div>
               <p className="text-slate-600 text-sm mb-1">Real-time</p>
@@ -201,8 +201,8 @@ export default function Landing() {
               <p className="text-slate-600 text-sm">Platform</p>
             </div>
             
-            <div className="isms-card text-center">
-              <div className="w-12 h-12 rounded-xl isms-icon-bg-blue flex items-center justify-center mx-auto mb-3">
+            <div className="bg-white shadow-lg border-slate-200 rounded-lg p-4 text-center">
+              <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-blue-500 to-blue-600 flex items-center justify-center mx-auto mb-3">
                 <MapPin className="h-6 w-6 text-white" />
               </div>
               <p className="text-slate-600 text-sm mb-1">GPS Farm</p>
@@ -210,8 +210,8 @@ export default function Landing() {
               <p className="text-slate-600 text-sm">System</p>
             </div>
             
-            <div className="isms-card text-center">
-              <div className="w-12 h-12 rounded-xl isms-icon-bg-emerald flex items-center justify-center mx-auto mb-3">
+            <div className="bg-white shadow-lg border-slate-200 rounded-lg p-4 text-center">
+              <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-emerald-500 to-emerald-600 flex items-center justify-center mx-auto mb-3">
                 <span className="text-white font-black text-xl">EU</span>
               </div>
               <p className="text-slate-600 text-sm mb-1">EUDR</p>
@@ -219,8 +219,8 @@ export default function Landing() {
               <p className="text-slate-600 text-sm">Compliance</p>
             </div>
             
-            <div className="isms-card text-center">
-              <div className="w-12 h-12 rounded-xl isms-icon-bg-purple flex items-center justify-center mx-auto mb-3">
+            <div className="bg-white shadow-lg border-slate-200 rounded-lg p-4 text-center">
+              <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-purple-500 to-purple-600 flex items-center justify-center mx-auto mb-3">
                 <Globe className="h-6 w-6 text-white" />
               </div>
               <p className="text-slate-600 text-sm mb-1">Government</p>
@@ -232,11 +232,11 @@ export default function Landing() {
 
 
 
-        {/* Access Portals - ISMS Style */}
-        <div className="isms-card mb-12">
+        {/* Access Portals */}
+        <div className="bg-white shadow-xl border-slate-200 rounded-lg p-8 mb-12">
           <div className="flex items-center justify-between gap-3 mb-8">
             <div className="flex items-center gap-3">
-              <div className="w-12 h-12 rounded-xl isms-icon-bg-slate flex items-center justify-center">
+              <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-slate-500 to-slate-600 flex items-center justify-center">
                 <Shield className="h-6 w-6 text-white" />
               </div>
               <div>
@@ -247,7 +247,7 @@ export default function Landing() {
             <div>
               <Button 
                 asChild 
-                className="bg-blue-600 hover:bg-blue-700 text-white px-6 py-2 rounded-md text-sm font-medium transition-colors"
+                className="bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 text-white px-6 py-2 rounded-md text-sm font-medium transition-colors"
               >
                 <a href="/">
                   ← Back to Polipus Platform
@@ -258,187 +258,187 @@ export default function Landing() {
           
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
             {/* Regulatory Portal */}
-            <div className="isms-card group hover:shadow-xl transition-all duration-300 h-80 flex flex-col p-4">
-              <div className="text-center pb-3">
-                <div className="w-12 h-12 rounded-xl isms-icon-bg-blue flex items-center justify-center mx-auto mb-3 group-hover:scale-110 transition-transform">
-                  <Shield className="h-6 w-6 text-white" />
+            <div className="bg-white shadow-xl border-slate-200 hover:shadow-2xl transition-all duration-300 cursor-pointer group rounded-lg p-6">
+              <div className="text-center pb-4">
+                <div className="w-16 h-16 rounded-full bg-gradient-to-br from-blue-500 to-blue-600 flex items-center justify-center mx-auto mb-4 group-hover:scale-110 transition-transform">
+                  <Shield className="h-8 w-8 text-white" />
                 </div>
-                <h3 className="text-lg font-bold text-slate-900 mb-1">
+                <h3 className="text-xl font-bold text-slate-900 mb-2">
                   Regulatory
                 </h3>
-                <p className="text-slate-600 text-xs leading-tight">
+                <p className="text-slate-600 text-sm">
                   LACRA administrators
                 </p>
               </div>
               
-              <div className="space-y-2 mb-4 flex-1">
-                <div className="flex items-start gap-2 text-xs text-slate-600">
-                  <div className="w-2 h-2 rounded-full bg-green-500 mt-1 flex-shrink-0"></div>
-                  <span className="leading-tight">Compliance monitoring</span>
+              <div className="space-y-3 mb-6">
+                <div className="flex items-start gap-2 text-sm text-slate-600">
+                  <div className="w-2 h-2 rounded-full bg-green-500 mt-2 flex-shrink-0"></div>
+                  <span>Compliance monitoring</span>
                 </div>
-                <div className="flex items-start gap-2 text-xs text-slate-600">
-                  <div className="w-2 h-2 rounded-full bg-blue-500 mt-1 flex-shrink-0"></div>
-                  <span className="leading-tight">System analytics</span>
+                <div className="flex items-start gap-2 text-sm text-slate-600">
+                  <div className="w-2 h-2 rounded-full bg-blue-500 mt-2 flex-shrink-0"></div>
+                  <span>System analytics</span>
                 </div>
-                <div className="flex items-start gap-2 text-xs text-slate-600">
-                  <div className="w-2 h-2 rounded-full bg-purple-500 mt-1 flex-shrink-0"></div>
-                  <span className="leading-tight">Government integration</span>
+                <div className="flex items-start gap-2 text-sm text-slate-600">
+                  <div className="w-2 h-2 rounded-full bg-purple-500 mt-2 flex-shrink-0"></div>
+                  <span>Government integration</span>
                 </div>
-                <div className="flex items-start gap-2 text-xs text-slate-600">
-                  <div className="w-2 h-2 rounded-full bg-slate-500 mt-1 flex-shrink-0"></div>
-                  <span className="leading-tight">User management</span>
+                <div className="flex items-start gap-2 text-sm text-slate-600">
+                  <div className="w-2 h-2 rounded-full bg-slate-500 mt-2 flex-shrink-0"></div>
+                  <span>User management</span>
                 </div>
               </div>
               
               <Button 
                 asChild 
-                className="isms-button w-full text-sm py-2 group-hover:scale-105 transition-transform"
+                className="w-full bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 text-white group"
               >
                 <a href="/regulatory-login">
                   Access Portal
-                  <ArrowRight className="ml-1 h-3 w-3" />
+                  <ArrowRight className="w-4 h-4 ml-2 group-hover:translate-x-1 transition-transform" />
                 </a>
               </Button>
             </div>
 
             {/* Farmer Portal */}
-            <div className="isms-card group hover:shadow-xl transition-all duration-300 h-80 flex flex-col p-4">
-              <div className="text-center pb-3">
-                <div className="w-12 h-12 rounded-xl isms-icon-bg-green flex items-center justify-center mx-auto mb-3 group-hover:scale-110 transition-transform">
-                  <Leaf className="h-6 w-6 text-white" />
+            <div className="bg-white shadow-xl border-slate-200 hover:shadow-2xl transition-all duration-300 cursor-pointer group rounded-lg p-6">
+              <div className="text-center pb-4">
+                <div className="w-16 h-16 rounded-full bg-gradient-to-br from-green-500 to-green-600 flex items-center justify-center mx-auto mb-4 group-hover:scale-110 transition-transform">
+                  <Leaf className="h-8 w-8 text-white" />
                 </div>
-                <h3 className="text-lg font-bold text-slate-900 mb-1">
+                <h3 className="text-xl font-bold text-slate-900 mb-2">
                   Farmer & Buyer
                 </h3>
-                <p className="text-slate-600 text-xs leading-tight">
+                <p className="text-slate-600 text-sm">
                   Agricultural producers & buyers
                 </p>
               </div>
               
-              <div className="space-y-2 mb-4 flex-1">
-                <div className="flex items-start gap-2 text-xs text-slate-600">
-                  <div className="w-2 h-2 rounded-full bg-green-500 mt-1 flex-shrink-0"></div>
-                  <span className="leading-tight">Farm plot mapping</span>
+              <div className="space-y-3 mb-6">
+                <div className="flex items-start gap-2 text-sm text-slate-600">
+                  <div className="w-2 h-2 rounded-full bg-green-500 mt-2 flex-shrink-0"></div>
+                  <span>Farm plot mapping</span>
                 </div>
-                <div className="flex items-start gap-2 text-xs text-slate-600">
-                  <div className="w-2 h-2 rounded-full bg-emerald-500 mt-1 flex-shrink-0"></div>
-                  <span className="leading-tight">Batch code tracking</span>
+                <div className="flex items-start gap-2 text-sm text-slate-600">
+                  <div className="w-2 h-2 rounded-full bg-emerald-500 mt-2 flex-shrink-0"></div>
+                  <span>Batch code tracking</span>
                 </div>
-                <div className="flex items-start gap-2 text-xs text-slate-600">
-                  <div className="w-2 h-2 rounded-full bg-blue-500 mt-1 flex-shrink-0"></div>
-                  <span className="leading-tight">Crop planning</span>
+                <div className="flex items-start gap-2 text-sm text-slate-600">
+                  <div className="w-2 h-2 rounded-full bg-blue-500 mt-2 flex-shrink-0"></div>
+                  <span>Crop planning</span>
                 </div>
-                <div className="flex items-start gap-2 text-xs text-slate-600">
-                  <div className="w-2 h-2 rounded-full bg-green-600 mt-1 flex-shrink-0"></div>
-                  <span className="leading-tight">Compliance docs</span>
+                <div className="flex items-start gap-2 text-sm text-slate-600">
+                  <div className="w-2 h-2 rounded-full bg-green-600 mt-2 flex-shrink-0"></div>
+                  <span>Compliance docs</span>
                 </div>
               </div>
               
               <Button 
                 asChild 
-                className="isms-button w-full text-sm py-2 group-hover:scale-105 transition-transform"
+                className="w-full bg-gradient-to-r from-green-600 to-green-700 hover:from-green-700 hover:to-green-800 text-white group"
               >
                 <a href="/farmer-login">
                   Access Portal
-                  <ArrowRight className="ml-1 h-3 w-3" />
+                  <ArrowRight className="w-4 h-4 ml-2 group-hover:translate-x-1 transition-transform" />
                 </a>
               </Button>
             </div>
 
             {/* Inspector Portal */}
-            <div className="isms-card group hover:shadow-xl transition-all duration-300 h-80 flex flex-col p-4">
-              <div className="text-center pb-3">
-                <div className="w-12 h-12 rounded-xl isms-icon-bg-orange flex items-center justify-center mx-auto mb-3 group-hover:scale-110 transition-transform">
-                  <Users className="h-6 w-6 text-white" />
+            <div className="bg-white shadow-xl border-slate-200 hover:shadow-2xl transition-all duration-300 cursor-pointer group rounded-lg p-6">
+              <div className="text-center pb-4">
+                <div className="w-16 h-16 rounded-full bg-gradient-to-br from-orange-500 to-orange-600 flex items-center justify-center mx-auto mb-4 group-hover:scale-110 transition-transform">
+                  <Users className="h-8 w-8 text-white" />
                 </div>
-                <h3 className="text-lg font-bold text-slate-900 mb-1">
+                <h3 className="text-xl font-bold text-slate-900 mb-2">
                   Inspector
                 </h3>
-                <p className="text-slate-600 text-xs leading-tight">
+                <p className="text-slate-600 text-sm">
                   Extension officers
                 </p>
               </div>
               
-              <div className="space-y-2 mb-4 flex-1">
-                <div className="flex items-start gap-2 text-xs text-slate-600">
-                  <div className="w-2 h-2 rounded-full bg-orange-500 mt-1 flex-shrink-0"></div>
-                  <span className="leading-tight">Farmer onboarding</span>
+              <div className="space-y-3 mb-6">
+                <div className="flex items-start gap-2 text-sm text-slate-600">
+                  <div className="w-2 h-2 rounded-full bg-orange-500 mt-2 flex-shrink-0"></div>
+                  <span>Farmer onboarding</span>
                 </div>
-                <div className="flex items-start gap-2 text-xs text-slate-600">
-                  <div className="w-2 h-2 rounded-full bg-yellow-500 mt-1 flex-shrink-0"></div>
-                  <span className="leading-tight">GPS field mapping</span>
+                <div className="flex items-start gap-2 text-sm text-slate-600">
+                  <div className="w-2 h-2 rounded-full bg-yellow-500 mt-2 flex-shrink-0"></div>
+                  <span>GPS field mapping</span>
                 </div>
-                <div className="flex items-start gap-2 text-xs text-slate-600">
-                  <div className="w-2 h-2 rounded-full bg-green-500 mt-1 flex-shrink-0"></div>
-                  <span className="leading-tight">Mobile data collection</span>
+                <div className="flex items-start gap-2 text-sm text-slate-600">
+                  <div className="w-2 h-2 rounded-full bg-green-500 mt-2 flex-shrink-0"></div>
+                  <span>Mobile data collection</span>
                 </div>
-                <div className="flex items-start gap-2 text-xs text-slate-600">
-                  <div className="w-2 h-2 rounded-full bg-blue-500 mt-1 flex-shrink-0"></div>
-                  <span className="leading-tight">Field reports</span>
+                <div className="flex items-start gap-2 text-sm text-slate-600">
+                  <div className="w-2 h-2 rounded-full bg-blue-500 mt-2 flex-shrink-0"></div>
+                  <span>Field reports</span>
                 </div>
               </div>
               
               <Button 
                 asChild 
-                className="isms-button w-full text-sm py-2 group-hover:scale-105 transition-transform"
+                className="w-full bg-gradient-to-r from-orange-600 to-orange-700 hover:from-orange-700 hover:to-orange-800 text-white group"
               >
                 <a href="/inspector-login">
                   Access Portal
-                  <ArrowRight className="ml-1 h-3 w-3" />
+                  <ArrowRight className="w-4 h-4 ml-2 group-hover:translate-x-1 transition-transform" />
                 </a>
               </Button>
             </div>
 
             {/* Exporter Portal */}
-            <div className="isms-card group hover:shadow-xl transition-all duration-300 h-80 flex flex-col p-4">
-              <div className="text-center pb-3">
-                <div className="w-12 h-12 rounded-xl isms-icon-bg-purple flex items-center justify-center mx-auto mb-3 group-hover:scale-110 transition-transform">
-                  <Package className="h-6 w-6 text-white" />
+            <div className="bg-white shadow-xl border-slate-200 hover:shadow-2xl transition-all duration-300 cursor-pointer group rounded-lg p-6">
+              <div className="text-center pb-4">
+                <div className="w-16 h-16 rounded-full bg-gradient-to-br from-purple-500 to-purple-600 flex items-center justify-center mx-auto mb-4 group-hover:scale-110 transition-transform">
+                  <Package className="h-8 w-8 text-white" />
                 </div>
-                <h3 className="text-lg font-bold text-slate-900 mb-1">
+                <h3 className="text-xl font-bold text-slate-900 mb-2">
                   Exporter
                 </h3>
-                <p className="text-slate-600 text-xs leading-tight">
+                <p className="text-slate-600 text-sm">
                   Commodity exporters
                 </p>
               </div>
               
-              <div className="space-y-2 mb-4 flex-1">
-                <div className="flex items-start gap-2 text-xs text-slate-600">
-                  <div className="w-2 h-2 rounded-full bg-blue-500 mt-1 flex-shrink-0"></div>
-                  <span className="leading-tight">Export order management</span>
+              <div className="space-y-3 mb-6">
+                <div className="flex items-start gap-2 text-sm text-slate-600">
+                  <div className="w-2 h-2 rounded-full bg-blue-500 mt-2 flex-shrink-0"></div>
+                  <span>Export order management</span>
                 </div>
-                <div className="flex items-start gap-2 text-xs text-slate-600">
-                  <div className="w-2 h-2 rounded-full bg-purple-500 mt-1 flex-shrink-0"></div>
-                  <span className="leading-tight">LACRA compliance</span>
+                <div className="flex items-start gap-2 text-sm text-slate-600">
+                  <div className="w-2 h-2 rounded-full bg-purple-500 mt-2 flex-shrink-0"></div>
+                  <span>LACRA compliance</span>
                 </div>
-                <div className="flex items-start gap-2 text-xs text-slate-600">
-                  <div className="w-2 h-2 rounded-full bg-green-500 mt-1 flex-shrink-0"></div>
-                  <span className="leading-tight">Network partnerships</span>
+                <div className="flex items-start gap-2 text-sm text-slate-600">
+                  <div className="w-2 h-2 rounded-full bg-green-500 mt-2 flex-shrink-0"></div>
+                  <span>Network partnerships</span>
                 </div>
-                <div className="flex items-start gap-2 text-xs text-slate-600">
-                  <div className="w-2 h-2 rounded-full bg-orange-500 mt-1 flex-shrink-0"></div>
-                  <span className="leading-tight">Export analytics</span>
+                <div className="flex items-start gap-2 text-sm text-slate-600">
+                  <div className="w-2 h-2 rounded-full bg-orange-500 mt-2 flex-shrink-0"></div>
+                  <span>Export analytics</span>
                 </div>
               </div>
               
               <Button 
                 asChild 
-                className="isms-button w-full text-sm py-2 group-hover:scale-105 transition-transform"
+                className="w-full bg-gradient-to-r from-purple-600 to-purple-700 hover:from-purple-700 hover:to-purple-800 text-white group"
               >
                 <a href="/exporter-login">
                   Access Portal
-                  <ArrowRight className="ml-1 h-3 w-3" />
+                  <ArrowRight className="w-4 h-4 ml-2 group-hover:translate-x-1 transition-transform" />
                 </a>
               </Button>
             </div>
           </div>
         </div>
 
-        {/* System Overview - ISMS Style */}
-        <div className="isms-card mb-12">
+        {/* System Overview */}
+        <div className="bg-white shadow-xl border-slate-200 rounded-lg p-8 mb-12">
           <div className="flex items-center gap-3 mb-8">
-            <div className="w-12 h-12 rounded-xl isms-icon-bg-green flex items-center justify-center">
+            <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-green-500 to-green-600 flex items-center justify-center">
               <BarChart3 className="h-6 w-6 text-white" />
             </div>
             <div>
@@ -448,8 +448,8 @@ export default function Landing() {
           </div>
           
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-            <div className="isms-card text-center">
-              <div className="w-12 h-12 rounded-xl isms-icon-bg-green flex items-center justify-center mx-auto mb-3">
+            <div className="bg-white shadow-lg border-slate-200 rounded-lg p-6 text-center">
+              <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-green-500 to-green-600 flex items-center justify-center mx-auto mb-3">
                 <MapPin className="h-6 w-6 text-white" />
               </div>
               <p className="text-slate-600 text-sm mb-1">Liberian</p>
@@ -457,8 +457,8 @@ export default function Landing() {
               <p className="text-slate-600 text-sm">Counties</p>
             </div>
             
-            <div className="isms-card text-center">
-              <div className="w-12 h-12 rounded-xl isms-icon-bg-blue flex items-center justify-center mx-auto mb-3">
+            <div className="bg-white shadow-lg border-slate-200 rounded-lg p-6 text-center">
+              <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-blue-500 to-blue-600 flex items-center justify-center mx-auto mb-3">
                 <Leaf className="h-6 w-6 text-white" />
               </div>
               <p className="text-slate-600 text-sm mb-1">Cash Crop</p>
@@ -466,8 +466,8 @@ export default function Landing() {
               <p className="text-slate-600 text-sm">Types</p>
             </div>
             
-            <div className="isms-card text-center">
-              <div className="w-12 h-12 rounded-xl isms-icon-bg-emerald flex items-center justify-center mx-auto mb-3">
+            <div className="bg-white shadow-lg border-slate-200 rounded-lg p-6 text-center">
+              <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-emerald-500 to-emerald-600 flex items-center justify-center mx-auto mb-3">
                 <FileCheck className="h-6 w-6 text-white" />
               </div>
               <p className="text-slate-600 text-sm mb-1">EUDR</p>
@@ -475,8 +475,8 @@ export default function Landing() {
               <p className="text-slate-600 text-sm">Compliant</p>
             </div>
             
-            <div className="isms-card text-center">
-              <div className="w-12 h-12 rounded-xl isms-icon-bg-purple flex items-center justify-center mx-auto mb-3">
+            <div className="bg-white shadow-lg border-slate-200 rounded-lg p-6 text-center">
+              <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-purple-500 to-purple-600 flex items-center justify-center mx-auto mb-3">
                 <Globe className="h-6 w-6 text-white" />
               </div>
               <p className="text-slate-600 text-sm mb-1">Government</p>
@@ -486,9 +486,9 @@ export default function Landing() {
           </div>
         </div>
 
-        {/* Contact Information - ISMS Style */}
-        <div className="isms-card text-center">
-          <div className="w-16 h-16 rounded-2xl isms-icon-bg-slate flex items-center justify-center mx-auto mb-6">
+        {/* Contact Information */}
+        <div className="bg-white shadow-xl border-slate-200 rounded-lg p-8 text-center">
+          <div className="w-16 h-16 rounded-2xl bg-gradient-to-br from-slate-500 to-slate-600 flex items-center justify-center mx-auto mb-6">
             <Shield className="h-8 w-8 text-white" />
           </div>
           <h4 className="text-xl font-semibold text-slate-900 mb-4">

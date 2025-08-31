@@ -1,10 +1,13 @@
 import { useState } from "react";
-import { useQuery } from "@tanstack/react-query";
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Alert, AlertDescription } from "@/components/ui/alert";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Textarea } from "@/components/ui/textarea";
+import { useToast } from "@/hooks/use-toast";
 import { 
   Settings, 
   Users, 
@@ -27,7 +30,11 @@ import {
   Eye,
   Calendar,
   Shield,
-  TrendingUp
+  TrendingUp,
+  Package,
+  Building2,
+  DollarSign,
+  User
 } from "lucide-react";
 import { apiRequest } from "@/lib/queryClient";
 import { useLocation } from "wouter";
@@ -35,6 +42,10 @@ import { useLocation } from "wouter";
 export default function DDGOTSDashboard() {
   const [, navigate] = useLocation();
   const [activeTab, setActiveTab] = useState('operations');
+  const [selectedInspector, setSelectedInspector] = useState('');
+  const [assignmentNotes, setAssignmentNotes] = useState('');
+  const { toast } = useToast();
+  const queryClient = useQueryClient();
   
   // Check authentication
   const ddgotsToken = localStorage.getItem('ddgotsToken');
@@ -93,6 +104,17 @@ export default function DDGOTSDashboard() {
     queryFn: () => apiRequest('/api/eudr/pending-approval'),
   });
 
+  // Port inspection booking data
+  const { data: pendingAssignments, isLoading: assignmentsLoading } = useQuery({
+    queryKey: ['/api/ddgots/pending-inspector-assignments'],
+    queryFn: () => apiRequest('/api/ddgots/pending-inspector-assignments'),
+  });
+
+  const { data: portInspectors, isLoading: inspectorsLoading } = useQuery({
+    queryKey: ['/api/ddgots/port-inspectors'],
+    queryFn: () => apiRequest('/api/ddgots/port-inspectors'),
+  });
+
   const handleLogout = () => {
     localStorage.removeItem('ddgotsToken');
     localStorage.removeItem('ddgotsUser');
@@ -110,6 +132,36 @@ export default function DDGOTSDashboard() {
   const handleExporterManagement = () => {
     navigate('/exporter-management');
   };
+
+  // Inspector assignment mutation
+  const assignInspectorMutation = useMutation({
+    mutationFn: async ({ bookingId, inspectorId, notes }: { bookingId: string; inspectorId: string; notes: string }) => {
+      const response = await fetch('/api/ddgots/assign-inspector', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${ddgotsToken}`
+        },
+        body: JSON.stringify({
+          bookingId,
+          inspectorId,
+          assignedBy: JSON.parse(ddgotsUser || '{}').username,
+          ddgotsNotes: notes
+        })
+      });
+      if (!response.ok) throw new Error('Failed to assign inspector');
+      return response.json();
+    },
+    onSuccess: () => {
+      toast({ title: "Success!", description: "Inspector assigned successfully. They will receive the inspection request." });
+      queryClient.invalidateQueries({ queryKey: ['/api/ddgots/pending-inspector-assignments'] });
+      setSelectedInspector('');
+      setAssignmentNotes('');
+    },
+    onError: () => {
+      toast({ title: "Error", description: "Failed to assign inspector. Please try again.", variant: "destructive" });
+    }
+  });
 
   // Mock data for DDGOTS operations
   const mockOperationsData = {
@@ -231,7 +283,7 @@ export default function DDGOTSDashboard() {
         <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-8">
           <Card className="bg-white shadow-xl border-slate-200">
             <CardContent className="p-2">
-              <TabsList className="grid w-full grid-cols-5 bg-slate-50">
+              <TabsList className="grid w-full grid-cols-6 bg-slate-50">
                 <TabsTrigger value="operations" className="flex items-center gap-2 data-[state=active]:bg-gradient-to-r data-[state=active]:from-emerald-500 data-[state=active]:to-emerald-600 data-[state=active]:text-white data-[state=active]:shadow-md">
                   <Settings className="w-4 h-4" />
                   Operations Overview
@@ -247,6 +299,10 @@ export default function DDGOTSDashboard() {
                 <TabsTrigger value="compliance" className="flex items-center gap-2 data-[state=active]:bg-gradient-to-r data-[state=active]:from-orange-500 data-[state=active]:to-orange-600 data-[state=active]:text-white data-[state=active]:shadow-md">
                   <CheckCircle className="w-4 h-4" />
                   Technical Compliance
+                </TabsTrigger>
+                <TabsTrigger value="assign-inspector" className="flex items-center gap-2 data-[state=active]:bg-gradient-to-r data-[state=active]:from-red-500 data-[state=active]:to-red-600 data-[state=active]:text-white data-[state=active]:shadow-md">
+                  <ClipboardCheck className="w-4 h-4" />
+                  Assign Inspector
                 </TabsTrigger>
                 <TabsTrigger value="farmers" className="flex items-center gap-2 data-[state=active]:bg-gradient-to-r data-[state=active]:from-cyan-500 data-[state=active]:to-cyan-600 data-[state=active]:text-white data-[state=active]:shadow-md">
                   <Users className="w-4 h-4" />
@@ -474,6 +530,152 @@ export default function DDGOTSDashboard() {
                 </Card>
               ))}
             </div>
+          </TabsContent>
+
+          {/* Assign Inspector */}
+          <TabsContent value="assign-inspector" className="space-y-6">
+            <div className="flex justify-between items-center">
+              <div>
+                <h2 className="text-2xl font-bold text-slate-900">🔄 Assign Port Inspector</h2>
+                <p className="text-slate-600">Review inspection booking requests and assign port inspectors</p>
+              </div>
+              <Badge variant="outline" className="border-red-500 text-red-600 bg-red-50 px-3 py-1">
+                {pendingAssignments?.length || 0} Pending Assignments
+              </Badge>
+            </div>
+
+            {assignmentsLoading ? (
+              <div className="flex items-center justify-center h-32">
+                <div className="animate-spin w-8 h-8 border-4 border-primary border-t-transparent rounded-full" />
+              </div>
+            ) : (
+              <div className="grid gap-6">
+                {(pendingAssignments || []).map((booking: any, index: number) => (
+                  <Card key={booking.bookingId || index} className="bg-white shadow-lg border-0">
+                    <CardHeader className="pb-4">
+                      <div className="flex justify-between items-start">
+                        <div>
+                          <CardTitle className="text-lg text-slate-900 flex items-center gap-2">
+                            <Package className="w-5 h-5 text-blue-600" />
+                            Inspection Request #{booking.bookingId}
+                          </CardTitle>
+                          <CardDescription className="text-slate-600 mt-1">
+                            🏢 {booking.exporterCompany} • 📅 Booked: {new Date(booking.bookedAt).toLocaleDateString()}
+                          </CardDescription>
+                        </div>
+                        <Badge variant="outline" className="border-amber-500 text-amber-600 bg-amber-50">
+                          {booking.urgencyLevel === 'urgent' ? '🚨 URGENT' : booking.urgencyLevel === 'high' ? '⚠️ HIGH PRIORITY' : '📋 NORMAL'}
+                        </Badge>
+                      </div>
+                    </CardHeader>
+                    <CardContent className="space-y-6">
+                      {/* Complete Order Details */}
+                      <div className="grid grid-cols-1 md:grid-cols-3 gap-6 p-4 bg-slate-50 rounded-lg">
+                        <div className="space-y-3">
+                          <h4 className="font-semibold text-slate-900 flex items-center gap-2">
+                            <Package className="w-4 h-4 text-green-600" />
+                            Product Details
+                          </h4>
+                          <div className="space-y-1 text-sm">
+                            <p><span className="font-medium">Commodity:</span> {booking.commodityType}</p>
+                            <p><span className="font-medium">Quantity:</span> {booking.quantity} {booking.unit}</p>
+                            <p><span className="font-medium">Total Value:</span> ${booking.totalValue}</p>
+                            <p><span className="font-medium">Verification:</span> {booking.verificationCode}</p>
+                          </div>
+                        </div>
+
+                        <div className="space-y-3">
+                          <h4 className="font-semibold text-slate-900 flex items-center gap-2">
+                            <User className="w-4 h-4 text-blue-600" />
+                            Buyer & Location
+                          </h4>
+                          <div className="space-y-1 text-sm">
+                            <p><span className="font-medium">Buyer:</span> {booking.buyerName}</p>
+                            <p><span className="font-medium">Company:</span> {booking.buyerCompany}</p>
+                            <p><span className="font-medium">County:</span> {booking.county}</p>
+                            <p><span className="font-medium">Farm Location:</span> {booking.farmLocation}</p>
+                          </div>
+                        </div>
+
+                        <div className="space-y-3">
+                          <h4 className="font-semibold text-slate-900 flex items-center gap-2">
+                            <Building2 className="w-4 h-4 text-purple-600" />
+                            Export Details
+                          </h4>
+                          <div className="space-y-1 text-sm">
+                            <p><span className="font-medium">Exporter:</span> {booking.exporterName}</p>
+                            <p><span className="font-medium">Company:</span> {booking.exporterCompany}</p>
+                            <p><span className="font-medium">Port:</span> {booking.portFacility}</p>
+                            <p><span className="font-medium">Dispatch:</span> {new Date(booking.dispatchDate).toLocaleDateString()}</p>
+                          </div>
+                        </div>
+                      </div>
+
+                      {/* Inspector Assignment Interface */}
+                      <div className="grid grid-cols-1 md:grid-cols-2 gap-6 p-4 bg-blue-50 rounded-lg border">
+                        <div className="space-y-4">
+                          <h4 className="font-semibold text-slate-900 flex items-center gap-2">
+                            <UserCheck className="w-4 h-4 text-emerald-600" />
+                            🚢 Assign Port Inspector
+                          </h4>
+                          <Select value={selectedInspector} onValueChange={setSelectedInspector}>
+                            <SelectTrigger className="w-full">
+                              <SelectValue placeholder={`Select Port Inspector at ${booking.portFacility}`} />
+                            </SelectTrigger>
+                            <SelectContent>
+                              {(portInspectors || []).map((inspector: any) => (
+                                <SelectItem key={inspector.inspectorId} value={inspector.inspectorId}>
+                                  🚢 {inspector.fullName} - {inspector.certificationLevel} • {inspector.specializations}
+                                </SelectItem>
+                              ))}
+                            </SelectContent>
+                          </Select>
+                        </div>
+
+                        <div className="space-y-4">
+                          <h4 className="font-semibold text-slate-900">Assignment Notes</h4>
+                          <Textarea
+                            placeholder="Add any special instructions for the inspector..."
+                            value={assignmentNotes}
+                            onChange={(e) => setAssignmentNotes(e.target.value)}
+                            className="h-20"
+                          />
+                        </div>
+                      </div>
+
+                      {/* Assignment Action */}
+                      <div className="flex justify-end pt-4">
+                        <Button
+                          onClick={() => assignInspectorMutation.mutate({
+                            bookingId: booking.bookingId,
+                            inspectorId: selectedInspector,
+                            notes: assignmentNotes
+                          })}
+                          disabled={!selectedInspector || assignInspectorMutation.isPending}
+                          className="bg-green-600 hover:bg-green-700 text-white shadow-lg"
+                        >
+                          {assignInspectorMutation.isPending ? (
+                            <>⏳ Assigning...</>
+                          ) : (
+                            <>🎯 Assign Inspector & Send to {booking.portFacility}</>
+                          )}
+                        </Button>
+                      </div>
+                    </CardContent>
+                  </Card>
+                ))}
+                
+                {(!pendingAssignments || pendingAssignments.length === 0) && (
+                  <Card className="bg-slate-50 border-2 border-dashed border-slate-300">
+                    <CardContent className="flex flex-col items-center justify-center h-40 text-center">
+                      <ClipboardCheck className="w-12 h-12 text-slate-400 mb-4" />
+                      <h3 className="text-lg font-medium text-slate-600">No Pending Assignments</h3>
+                      <p className="text-slate-500">All inspection bookings have been assigned to port inspectors</p>
+                    </CardContent>
+                  </Card>
+                )}
+              </div>
+            )}
           </TabsContent>
 
           {/* Farmer Oversight */}

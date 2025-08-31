@@ -56,6 +56,7 @@ import {
   inspectorAreaAssignments,
   inspectorCredentials,
   inspectorActivities,
+  portInspectionBookings,
   buyers,
   buyerCredentials,
   buyerDocuments,
@@ -188,6 +189,8 @@ import {
   type InsertInspectorAreaAssignment,
   type InsertInspectorCredentials,
   type InsertInspectorActivity,
+  type PortInspectionBooking,
+  type InsertPortInspectionBooking,
   type Buyer,
   type BuyerCredentials,
   type BuyerDocument,
@@ -4241,6 +4244,90 @@ export class DatabaseStorage implements IStorage {
 
   async updateRegulatoryUserSettings(userId: string, settings: any): Promise<any> {
     return settings;
+  }
+
+  // ========================================
+  // PORT INSPECTION BOOKING METHODS
+  // ========================================
+
+  async getPendingInspectorAssignments(): Promise<PortInspectionBooking[]> {
+    try {
+      const assignments = await db.select()
+        .from(portInspectionBookings)
+        .where(eq(portInspectionBookings.assignmentStatus, 'pending_assignment'))
+        .orderBy(portInspectionBookings.bookedAt);
+      return assignments;
+    } catch (error) {
+      console.error('Error fetching pending inspector assignments:', error);
+      return [];
+    }
+  }
+
+  async getPortInspectors(portFacility: string = 'Port of Monrovia'): Promise<Inspector[]> {
+    try {
+      const inspectorsList = await db.select()
+        .from(inspectors)
+        .where(
+          and(
+            eq(inspectors.inspectorType, 'port'),
+            eq(inspectors.portFacility, portFacility),
+            eq(inspectors.isActive, true)
+          )
+        )
+        .orderBy(inspectors.fullName);
+      return inspectorsList;
+    } catch (error) {
+      console.error('Error fetching port inspectors:', error);
+      return [];
+    }
+  }
+
+  async assignInspectorToBooking(bookingId: string, inspectorId: string, assignedBy: string, notes?: string): Promise<PortInspectionBooking> {
+    try {
+      // Get inspector details
+      const [inspector] = await db.select()
+        .from(inspectors)
+        .where(eq(inspectors.inspectorId, inspectorId));
+      
+      if (!inspector) {
+        throw new Error('Inspector not found');
+      }
+
+      // Update booking with assignment
+      const [updatedBooking] = await db.update(portInspectionBookings)
+        .set({
+          assignmentStatus: 'assigned',
+          assignedInspectorId: inspectorId,
+          assignedInspectorName: inspector.fullName,
+          assignedBy,
+          assignedAt: new Date(),
+          ddgotsNotes: notes,
+          updatedAt: new Date()
+        })
+        .where(eq(portInspectionBookings.bookingId, bookingId))
+        .returning();
+      
+      return updatedBooking;
+    } catch (error) {
+      console.error('Error assigning inspector to booking:', error);
+      throw error;
+    }
+  }
+
+  async createPortInspectionBooking(data: InsertPortInspectionBooking): Promise<PortInspectionBooking> {
+    try {
+      const [newBooking] = await db.insert(portInspectionBookings)
+        .values({
+          ...data,
+          createdAt: new Date(),
+          updatedAt: new Date()
+        })
+        .returning();
+      return newBooking;
+    } catch (error) {
+      console.error('Error creating port inspection booking:', error);
+      throw error;
+    }
   }
 
 }

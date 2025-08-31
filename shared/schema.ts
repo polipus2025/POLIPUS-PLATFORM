@@ -4522,6 +4522,72 @@ export type InsertCertificateApproval = typeof certificateApprovals.$inferInsert
 export type CertificateType = typeof certificateTypes.$inferSelect;
 export type InsertCertificateType = typeof certificateTypes.$inferInsert;
 
+// ========================================
+// PORT INSPECTION BOOKING SYSTEM
+// ========================================
+
+export const portInspectionBookings = pgTable("port_inspection_bookings", {
+  id: serial("id").primaryKey(),
+  bookingId: text("booking_id").notNull().unique(), // PINSP-YYYYMMDD-XXXX
+  
+  // Complete Order Details
+  requestId: text("request_id").notNull(), // Original exporter request
+  transactionId: text("transaction_id").notNull(),
+  commodityType: text("commodity_type").notNull(),
+  quantity: text("quantity").notNull(),
+  unit: text("unit").notNull(),
+  totalValue: text("total_value").notNull(),
+  dispatchDate: timestamp("dispatch_date").notNull(),
+  
+  // Buyer & Location Details
+  buyerName: text("buyer_name").notNull(),
+  buyerCompany: text("buyer_company").notNull(),
+  verificationCode: text("verification_code").notNull(),
+  county: text("county").notNull(),
+  farmLocation: text("farm_location").notNull(),
+  confirmedBy: text("confirmed_by").notNull(),
+  confirmedAt: timestamp("confirmed_at").notNull(),
+  
+  // Exporter Details
+  exporterId: text("exporter_id").notNull(),
+  exporterName: text("exporter_name").notNull(),
+  exporterCompany: text("exporter_company").notNull(),
+  
+  // Port & Inspection Details
+  portFacility: text("port_facility").notNull().default("Port of Monrovia"),
+  inspectionType: text("inspection_type").notNull().default("quality_compliance"), // quality_compliance, document_verification, container_inspection
+  scheduledDate: timestamp("scheduled_date"),
+  urgencyLevel: text("urgency_level").notNull().default("normal"), // normal, high, urgent
+  
+  // Assignment & Status Tracking
+  assignmentStatus: text("assignment_status").notNull().default("pending_assignment"), // pending_assignment, assigned, in_progress, completed, cancelled
+  assignedInspectorId: text("assigned_inspector_id").references(() => inspectors.inspectorId),
+  assignedInspectorName: text("assigned_inspector_name"),
+  assignedBy: text("assigned_by"), // DDGOTS officer who assigned
+  assignedAt: timestamp("assigned_at"),
+  
+  // Special Instructions & Notes
+  specialInstructions: text("special_instructions"),
+  ddgotsNotes: text("ddgots_notes"),
+  inspectorNotes: text("inspector_notes"),
+  
+  // Booking Details
+  bookedAt: timestamp("booked_at").defaultNow(),
+  bookedBy: text("booked_by").notNull(), // Exporter who booked
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+});
+
+// Port inspection booking schemas
+export const insertPortInspectionBookingSchema = createInsertSchema(portInspectionBookings).omit({
+  id: true,
+  createdAt: true,
+  updatedAt: true,
+});
+
+export type PortInspectionBooking = typeof portInspectionBookings.$inferSelect;
+export type InsertPortInspectionBooking = z.infer<typeof insertPortInspectionBookingSchema>;
+
 // Farmer Credentials Types
 export type FarmerCredentials = typeof farmerCredentials.$inferSelect;
 export type InsertFarmerCredentials = z.infer<typeof insertFarmerCredentialSchema>;

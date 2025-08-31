@@ -13950,6 +13950,56 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // ========================================
+  // PORT INSPECTION BOOKING & ASSIGNMENT ROUTES  
+  // ========================================
+
+  // Get pending inspector assignments for DDGOTS
+  app.get("/api/ddgots/pending-inspector-assignments", async (req, res) => {
+    try {
+      const assignments = await storage.getPendingInspectorAssignments();
+      res.json({ success: true, data: assignments });
+    } catch (error: any) {
+      console.error("Error fetching pending assignments:", error);
+      res.status(500).json({ error: "Failed to fetch pending assignments" });
+    }
+  });
+
+  // Get available port inspectors for assignment
+  app.get("/api/ddgots/port-inspectors", async (req, res) => {
+    try {
+      const portFacility = req.query.port || 'Port of Monrovia';
+      const inspectors = await storage.getPortInspectors(portFacility as string);
+      res.json({ success: true, data: inspectors });
+    } catch (error: any) {
+      console.error("Error fetching port inspectors:", error);
+      res.status(500).json({ error: "Failed to fetch port inspectors" });
+    }
+  });
+
+  // Assign inspector to inspection booking
+  app.post("/api/ddgots/assign-inspector", async (req, res) => {
+    try {
+      const { bookingId, inspectorId, assignedBy, ddgotsNotes } = req.body;
+      
+      if (!bookingId || !inspectorId || !assignedBy) {
+        return res.status(400).json({ error: "Missing required fields: bookingId, inspectorId, assignedBy" });
+      }
+
+      const updatedBooking = await storage.assignInspectorToBooking(
+        bookingId,
+        inspectorId,
+        assignedBy,
+        ddgotsNotes
+      );
+      
+      res.json({ success: true, data: updatedBooking });
+    } catch (error: any) {
+      console.error("Error assigning inspector:", error);
+      res.status(500).json({ error: "Failed to assign inspector" });
+    }
+  });
+
   // Soft Commodity Pricing endpoints
   app.get("/api/soft-commodities", async (req, res) => {
     try {

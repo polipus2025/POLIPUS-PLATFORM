@@ -4270,7 +4270,6 @@ export class DatabaseStorage implements IStorage {
         .where(
           and(
             eq(inspectors.inspectorType, 'port'),
-            eq(inspectors.portFacility, portFacility),
             eq(inspectors.isActive, true)
           )
         )

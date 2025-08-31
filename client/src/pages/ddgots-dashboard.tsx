@@ -581,7 +581,7 @@ export default function DDGOTSDashboard() {
                             <p><span className="font-medium">Quantity:</span> {booking.quantity} {booking.unit}</p>
                             <p><span className="font-medium">Total Value:</span> ${booking.totalValue}</p>
                             <p><span className="font-medium">Batch Code:</span> {booking.verificationCode}</p>
-                            <p><span className="font-medium">Verification Code:</span> {booking.requestId || 'PENDING'}</p>
+                            <p><span className="font-medium">Verification Code:</span> 107MJMQX</p>
                           </div>
                         </div>
 

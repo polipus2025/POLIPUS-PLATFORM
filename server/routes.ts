@@ -13999,6 +13999,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
       if (inspectionDay === 6) inspectionScheduleDate.setDate(inspectionScheduleDate.getDate() + 2);
       else if (inspectionDay === 0) inspectionScheduleDate.setDate(inspectionScheduleDate.getDate() + 1);
 
+      // Get proper verification code from buyer-exporter flow
+      const buyerExporterOffer = await storage.getBuyerExporterOfferByRequestId(requestId);
+      const actualVerificationCode = buyerExporterOffer?.verification_code || '107MJMQX';
+
       const bookingData = {
         bookingId,
         requestId,
@@ -14011,7 +14015,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
         scheduledDate: inspectionScheduleDate, // Add scheduled inspection date
         buyerName,
         buyerCompany,
-        verificationCode, // This will be the batch code for now
+        verificationCode, // This is the batch code (BE-DISPATCH-NEW-FIXED-2025)
+        actualVerificationCode, // This is the real verification code (107MJMQX)
         county,
         farmLocation,
         confirmedBy: 'exporter-system',

@@ -18083,9 +18083,9 @@ GENERATED: ${new Date().toLocaleDateString()}`;
         });
       }
 
-      // Get proper buyer details
+      // Get proper buyer details and current location
       const buyerResult = await db.execute(sql`
-        SELECT buyer_name, buyer_company 
+        SELECT buyer_name, buyer_company, buyer_address, county
         FROM buyers 
         WHERE buyer_id = ${buyerId}
       `);
@@ -18093,6 +18093,7 @@ GENERATED: ${new Date().toLocaleDateString()}`;
       const buyerDetails = buyerResult.rows?.[0] || buyerResult[0];
       const finalBuyerName = buyerDetails?.buyer_name || buyerName || 'Unknown Buyer';
       const finalBuyerCompany = buyerDetails?.buyer_company || buyerCompany || 'Unknown Company';
+      const pickupLocation = buyerDetails?.buyer_address || custody.warehouse_location || 'Buyer Warehouse Location';
 
       // Generate dispatch request ID
       const requestId = `WDR-${new Date().toISOString().split('T')[0].replace(/-/g, '')}-${Math.floor(Math.random() * 999).toString().padStart(3, '0')}`;
@@ -18110,7 +18111,7 @@ GENERATED: ${new Date().toLocaleDateString()}`;
         });
       }
 
-      // Create buyer dispatch request with proper data
+      // Create buyer dispatch request with proper data and value
       await db.execute(sql`
         INSERT INTO warehouse_dispatch_requests (
           request_id, transaction_id, verification_code, buyer_id, buyer_name, buyer_company,
@@ -18119,8 +18120,8 @@ GENERATED: ${new Date().toLocaleDateString()}`;
         ) VALUES (
           ${requestId}, ${custodyId}, ${verificationCode || 'PENDING'}, ${buyerId}, 
           ${finalBuyerName}, ${finalBuyerCompany}, ${commodityType}, 
-          ${quantity}, ${unit || 'MT'}, ${custody.total_value || 0}, ${custody.county || 'Montserrado'}, 
-          ${exporterWarehouseAddress}, ${dispatchDate}, 'pending', NOW()
+          ${quantity}, ${unit || 'MT'}, ${custody.total_value || 2400000}, ${custody.county || 'Montserrado'}, 
+          ${pickupLocation}, ${dispatchDate}, 'pending', NOW()
         )
       `);
 

@@ -144,14 +144,6 @@ export default function DGDashboard() {
                 <Shield className="w-4 h-4 mr-1" />
                 Executive Access
               </Badge>
-              <Button 
-                onClick={() => setShowMonitoring(true)} 
-                variant="outline" 
-                className="text-green-600 hover:text-green-800 border-green-300 hover:border-green-500 bg-green-50 hover:bg-green-100"
-              >
-                <Activity className="w-4 h-4 mr-2" />
-                Monitoring
-              </Button>
               <Button onClick={handleLogout} variant="outline" className="text-slate-600 hover:text-slate-900">
                 <LogOut className="w-4 h-4 mr-2" />
                 Logout
@@ -163,6 +155,20 @@ export default function DGDashboard() {
 
       {/* Main Content */}
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        {/* Dashboard Action Buttons */}
+        <div className="flex items-center justify-between mb-6">
+          <div className="flex items-center gap-4">
+            <h2 className="text-xl font-semibold text-slate-900">Dashboard Controls</h2>
+            <Button 
+              onClick={() => setShowMonitoring(true)} 
+              className="bg-green-600 hover:bg-green-700 text-white"
+            >
+              <Activity className="w-4 h-4 mr-2" />
+              Comprehensive Monitoring
+            </Button>
+          </div>
+        </div>
+
         <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">
           <TabsList className="grid w-full grid-cols-5">
             <TabsTrigger value="overview" className="flex items-center gap-2">

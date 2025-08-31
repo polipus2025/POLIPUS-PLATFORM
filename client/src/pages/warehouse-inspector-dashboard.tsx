@@ -3100,15 +3100,20 @@ export default function WarehouseInspectorDashboard() {
                               className="w-full bg-green-600 hover:bg-green-700 text-white"
                               onClick={async () => {
                                 try {
+                                  console.log('Inspector Data:', inspectorData);
+                                  console.log('Request Data:', request);
+                                  
                                   const response = await apiRequest('/api/warehouse-inspector/confirm-dispatch', {
                                     method: 'POST',
                                     body: JSON.stringify({
                                       dispatchRequestId: request.requestId,
-                                      warehouseId: inspectorData.warehouseId,
-                                      inspectorId: inspectorData.inspectorId,
+                                      warehouseId: inspectorData.warehouseId || inspectorData.username || 'WH-NIMBA-001',
+                                      inspectorId: inspectorData.inspectorId || inspectorData.username || 'WH-INS-001',
                                       confirmationNotes: 'Dispatch approved by warehouse inspector'
                                     })
                                   });
+                                  
+                                  console.log('API Response:', response);
                                   
                                   if (response.success) {
                                     toast({
@@ -3116,11 +3121,18 @@ export default function WarehouseInspectorDashboard() {
                                       description: `QR batch ${response.batchCode} generated for pickup`,
                                     });
                                     queryClient.invalidateQueries({ queryKey: ['/api/warehouse-inspector/pending-dispatch-requests'] });
+                                  } else {
+                                    toast({
+                                      title: "Error",
+                                      description: response.message || "Failed to confirm dispatch",
+                                      variant: "destructive"
+                                    });
                                   }
-                                } catch (error) {
+                                } catch (error: any) {
+                                  console.error('Dispatch confirmation error:', error);
                                   toast({
                                     title: "Error",
-                                    description: "Failed to confirm dispatch",
+                                    description: error.message || "Failed to confirm dispatch",
                                     variant: "destructive"
                                   });
                                 }

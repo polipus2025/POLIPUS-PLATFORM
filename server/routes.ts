@@ -13994,10 +13994,14 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const inspectionScheduleDate = new Date(nextWorkingDay);
       inspectionScheduleDate.setDate(inspectionScheduleDate.getDate() + 2);
       
-      // Ensure inspection is on working day
+      // ENSURE inspection is on WORKING DAY (Mon-Fri)
       const inspectionDay = inspectionScheduleDate.getDay();
-      if (inspectionDay === 6) inspectionScheduleDate.setDate(inspectionScheduleDate.getDate() + 2);
-      else if (inspectionDay === 0) inspectionScheduleDate.setDate(inspectionScheduleDate.getDate() + 1);
+      if (inspectionDay === 6) { // Saturday -> Monday
+        inspectionScheduleDate.setDate(inspectionScheduleDate.getDate() + 2);
+      } else if (inspectionDay === 0) { // Sunday -> Monday  
+        inspectionScheduleDate.setDate(inspectionScheduleDate.getDate() + 1);
+      }
+      // Now guaranteed to be Monday-Friday working day
 
       // Get proper verification code from buyer-exporter flow
       const buyerExporterOffer = await storage.getBuyerExporterOfferByRequestId(requestId);

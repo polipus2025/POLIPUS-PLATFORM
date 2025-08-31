@@ -256,9 +256,9 @@ export default function Landing() {
             </div>
           </div>
           
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 items-stretch">
             {/* Regulatory Portal */}
-            <div className="bg-white shadow-xl border-slate-200 hover:shadow-2xl transition-all duration-300 cursor-pointer group rounded-lg p-6">
+            <div className="bg-white shadow-xl border-slate-200 hover:shadow-2xl transition-all duration-300 cursor-pointer group rounded-lg p-6 flex flex-col h-full">
               <div className="text-center pb-4">
                 <div className="w-16 h-16 rounded-full bg-gradient-to-br from-blue-500 to-blue-600 flex items-center justify-center mx-auto mb-4 group-hover:scale-110 transition-transform">
                   <Shield className="h-8 w-8 text-white" />
@@ -302,7 +302,7 @@ export default function Landing() {
             </div>
 
             {/* Farmer Portal */}
-            <div className="bg-white shadow-xl border-slate-200 hover:shadow-2xl transition-all duration-300 cursor-pointer group rounded-lg p-6">
+            <div className="bg-white shadow-xl border-slate-200 hover:shadow-2xl transition-all duration-300 cursor-pointer group rounded-lg p-6 flex flex-col h-full">
               <div className="text-center pb-4">
                 <div className="w-16 h-16 rounded-full bg-gradient-to-br from-green-500 to-green-600 flex items-center justify-center mx-auto mb-4 group-hover:scale-110 transition-transform">
                   <Leaf className="h-8 w-8 text-white" />
@@ -315,7 +315,7 @@ export default function Landing() {
                 </p>
               </div>
               
-              <div className="space-y-3 mb-6">
+              <div className="space-y-3 mb-6 flex-1">
                 <div className="flex items-start gap-2 text-sm text-slate-600">
                   <div className="w-2 h-2 rounded-full bg-green-500 mt-2 flex-shrink-0"></div>
                   <span>Farm plot mapping</span>
@@ -346,7 +346,7 @@ export default function Landing() {
             </div>
 
             {/* Inspector Portal */}
-            <div className="bg-white shadow-xl border-slate-200 hover:shadow-2xl transition-all duration-300 cursor-pointer group rounded-lg p-6">
+            <div className="bg-white shadow-xl border-slate-200 hover:shadow-2xl transition-all duration-300 cursor-pointer group rounded-lg p-6 flex flex-col h-full">
               <div className="text-center pb-4">
                 <div className="w-16 h-16 rounded-full bg-gradient-to-br from-orange-500 to-orange-600 flex items-center justify-center mx-auto mb-4 group-hover:scale-110 transition-transform">
                   <Users className="h-8 w-8 text-white" />
@@ -359,7 +359,7 @@ export default function Landing() {
                 </p>
               </div>
               
-              <div className="space-y-3 mb-6">
+              <div className="space-y-3 mb-6 flex-1">
                 <div className="flex items-start gap-2 text-sm text-slate-600">
                   <div className="w-2 h-2 rounded-full bg-orange-500 mt-2 flex-shrink-0"></div>
                   <span>Farmer onboarding</span>
@@ -390,7 +390,7 @@ export default function Landing() {
             </div>
 
             {/* Exporter Portal */}
-            <div className="bg-white shadow-xl border-slate-200 hover:shadow-2xl transition-all duration-300 cursor-pointer group rounded-lg p-6">
+            <div className="bg-white shadow-xl border-slate-200 hover:shadow-2xl transition-all duration-300 cursor-pointer group rounded-lg p-6 flex flex-col h-full">
               <div className="text-center pb-4">
                 <div className="w-16 h-16 rounded-full bg-gradient-to-br from-purple-500 to-purple-600 flex items-center justify-center mx-auto mb-4 group-hover:scale-110 transition-transform">
                   <Package className="h-8 w-8 text-white" />
@@ -403,7 +403,7 @@ export default function Landing() {
                 </p>
               </div>
               
-              <div className="space-y-3 mb-6">
+              <div className="space-y-3 mb-6 flex-1">
                 <div className="flex items-start gap-2 text-sm text-slate-600">
                   <div className="w-2 h-2 rounded-full bg-blue-500 mt-2 flex-shrink-0"></div>
                   <span>Export order management</span>

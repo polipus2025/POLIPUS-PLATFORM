@@ -17878,20 +17878,8 @@ DISPATCH DATE: ${new Date(dispatchRequest.dispatch_date).toLocaleDateString()}
 VERIFICATION: ${dispatchRequest.verification_code}
 GENERATED: ${new Date().toLocaleDateString()}`;
 
-      // Generate QR code image using same service as Farmer-Buyer
-      const { QrBatchService } = await import('./qr-batch-service');
-      const qrCodeUrl = await QrBatchService.generateQrCodeImage(readableQrData);
-
-      // Create QR batch entry with minimal columns to avoid SQL issues
-      await db.execute(sql`
-        INSERT INTO qr_batches (
-          batch_code, warehouse_id, buyer_id, commodity_type, 
-          total_bags, total_weight, status
-        ) VALUES (
-          ${batchCode}, ${warehouseId || 'WH-NIMBA-001'}, ${dispatchRequest.buyer_id}, 
-          ${dispatchRequest.commodity_type}, ${1}, ${parseFloat(dispatchRequest.quantity) || 1}, ${'generated'}
-        )
-      `);
+      // Skip QR generation for now to test basic functionality
+      console.log(`📱 Skipping QR generation, just updating dispatch status`);
 
       // Update dispatch request status to confirmed and add QR batch code
       await db.execute(sql`
@@ -17909,9 +17897,8 @@ GENERATED: ${new Date().toLocaleDateString()}`;
 
       res.json({
         success: true,
-        message: "Dispatch confirmed and QR code generated successfully",
+        message: "Dispatch confirmed successfully",
         batchCode: batchCode,
-        qrCodeUrl: qrCodeUrl,
         dispatchRequestId: dispatchRequestId
       });
 

@@ -141,10 +141,13 @@ import {
   exporterOfferResponses,
   insertBuyerExporterOfferSchema,
   insertExporterOfferResponseSchema,
+  warehouseDispatchRequests,
+  insertWarehouseDispatchRequestSchema,
   type WarehouseCustody,
   type NewWarehouseCustody,
   type StorageFees,
-  type AuthorizationRequest
+  type AuthorizationRequest,
+  type WarehouseDispatchRequest
 } from "@shared/schema";
 import { z } from "zod";
 import path from "path";

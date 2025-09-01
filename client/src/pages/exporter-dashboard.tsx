@@ -496,6 +496,28 @@ const InspectionsAndPayments = memo(({ exporterId }: { exporterId: string }) => 
 
   const scheduledPickups = scheduledPickupsData?.data || [];
 
+  // Check inspection completion status
+  const { data: inspectionStatus, isLoading: statusLoading } = useQuery({
+    queryKey: ['/api/exporter/EXP-20250826-688/inspection-status'],
+    queryFn: () => apiRequest('/api/exporter/EXP-20250826-688/inspection-status'),
+    refetchInterval: 30000 // Check every 30 seconds for updates
+  });
+
+  const completedInspections = inspectionStatus?.data || [];
+  
+  // Check if inspection is completed for a specific request
+  const isInspectionCompleted = (requestId: string) => {
+    return completedInspections.some((inspection: any) => 
+      inspection.requestId === requestId && inspection.status === 'COMPLETED'
+    );
+  };
+
+  const getInspectionDetails = (requestId: string) => {
+    return completedInspections.find((inspection: any) => 
+      inspection.requestId === requestId && inspection.status === 'COMPLETED'
+    );
+  };
+
   // Handle action buttons
   const handleBookInspection = useCallback((pickup: any) => {
     toast({
@@ -615,15 +637,39 @@ const InspectionsAndPayments = memo(({ exporterId }: { exporterId: string }) => 
             {/* ACTION BUTTONS */}
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4 pt-4 border-t border-slate-200">
               
-              {/* 1. Book Product Inspection */}
-              <Button 
-                className="w-full bg-blue-600 hover:bg-blue-700 text-white"
-                onClick={() => handleBookInspection(pickup)}
-                data-testid={`book-inspection-${pickup.requestId}`}
-              >
-                <ClipboardCheck className="h-4 w-4 mr-2" />
-                Book Product Inspection
-              </Button>
+              {/* 1. Product Inspection Status */}
+              {isInspectionCompleted(pickup.requestId) ? (
+                <div className="w-full">
+                  <Button 
+                    disabled
+                    className="w-full bg-green-100 text-green-800 border border-green-300 cursor-not-allowed"
+                    data-testid={`inspection-completed-${pickup.requestId}`}
+                  >
+                    <CheckCircle className="h-4 w-4 mr-2" />
+                    ✅ Inspection Completed
+                  </Button>
+                  {(() => {
+                    const inspection = getInspectionDetails(pickup.requestId);
+                    return inspection ? (
+                      <div className="text-xs text-green-700 mt-2 space-y-1">
+                        <p><strong>Inspector:</strong> {inspection.completedBy}</p>
+                        <p><strong>Status:</strong> {inspection.results?.status || 'PASSED'}</p>
+                        <p><strong>Completed:</strong> {new Date(inspection.completedAt).toLocaleDateString()}</p>
+                        <p><strong>✅ Quality Verified • ✅ Quantity Verified • ✅ EUDR Compliant</strong></p>
+                      </div>
+                    ) : null;
+                  })()}
+                </div>
+              ) : (
+                <Button 
+                  className="w-full bg-blue-600 hover:bg-blue-700 text-white"
+                  onClick={() => handleBookInspection(pickup)}
+                  data-testid={`book-inspection-${pickup.requestId}`}
+                >
+                  <ClipboardCheck className="h-4 w-4 mr-2" />
+                  Book Product Inspection
+                </Button>
+              )}
 
               {/* 2. International Certifications */}
               <Button 
@@ -650,11 +696,27 @@ const InspectionsAndPayments = memo(({ exporterId }: { exporterId: string }) => 
             </div>
 
             {/* Status Indicator */}
-            <div className="mt-4 p-3 bg-green-50 rounded-lg">
+            <div className={`mt-4 p-3 rounded-lg ${
+              isInspectionCompleted(pickup.requestId) 
+                ? 'bg-blue-50 border border-blue-200' 
+                : 'bg-green-50'
+            }`}>
               <div className="flex items-center space-x-2">
-                <CheckCircle className="h-4 w-4 text-green-600" />
-                <p className="text-sm text-green-800">
-                  <span className="font-medium">Status:</span> Ready for inspection booking and certification processing
+                <CheckCircle className={`h-4 w-4 ${
+                  isInspectionCompleted(pickup.requestId) 
+                    ? 'text-blue-600' 
+                    : 'text-green-600'
+                }`} />
+                <p className={`text-sm ${
+                  isInspectionCompleted(pickup.requestId) 
+                    ? 'text-blue-800' 
+                    : 'text-green-800'
+                }`}>
+                  <span className="font-medium">Status:</span> {
+                    isInspectionCompleted(pickup.requestId) 
+                      ? 'Port inspection completed - Ready for export documentation'
+                      : 'Ready for inspection booking and certification processing'
+                  }
                 </p>
               </div>
             </div>

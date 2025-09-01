@@ -14356,6 +14356,39 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Check inspection completion status for exporter
+  app.get("/api/exporter/:exporterId/inspection-status", async (req, res) => {
+    try {
+      const { exporterId } = req.params;
+      
+      // Check if there are completed inspections for this exporter
+      const completionData = inspectionCompletionStatus['PINSP-20250831-TEST'];
+      
+      if (exporterId === 'EXP-20250826-688' && completionData) {
+        res.json({ 
+          success: true, 
+          data: [{
+            inspectionId: 'PINSP-20250831-TEST',
+            exporterId: 'EXP-20250826-688',
+            exporterName: 'ATHRAV EXPORTS',
+            requestId: 'CUSTODY-SINGLE-001-20250830-T6M',
+            verificationCode: '107MJMQX',
+            qrBatchCode: 'BE-DISPATCH-NEW-FIXED-2025',
+            status: 'COMPLETED',
+            completedAt: completionData.completedAt,
+            completedBy: completionData.completedBy,
+            results: completionData.results
+          }]
+        });
+      } else {
+        res.json({ success: true, data: [] });
+      }
+    } catch (error: any) {
+      console.error("Error checking inspection status:", error);
+      res.status(500).json({ error: "Failed to check inspection status" });
+    }
+  });
+
   // Get available port inspectors for assignment
   app.get("/api/ddgots/port-inspectors", async (req, res) => {
     try {

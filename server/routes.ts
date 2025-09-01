@@ -14314,11 +14314,11 @@ export async function registerRoutes(app: Express): Promise<Server> {
       farmerOfferId: 'FPO-20250830-817649-923',
       firstVerificationCode: 'S071XV57',
       
-      // 🛒 BUYER STAGE  
-      buyerId: null, // To be linked when buyer accepts
-      buyerName: null,
-      buyerCompany: null,
-      buyerVerificationCode: null,
+      // 🛒 BUYER STAGE - WHO ACCEPTED CLAUDIO'S OFFER?
+      buyerId: 'BUYER-TBD', // MISSING: Need to find who accepted FPO-20250830-817649-923
+      buyerName: 'BUYER-TBD', // MISSING: Which buyer accepted S071XV57?
+      buyerCompany: 'BUYER-TBD',
+      buyerVerificationCode: 'BUYER-TBD', // Should link S071XV57 to buyer acceptance
       
       // 🏭 WAREHOUSE STAGE
       warehouseRequestId: 'WDR-20250831-298', // Current warehouse request

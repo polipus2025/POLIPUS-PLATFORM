@@ -14126,6 +14126,37 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Get existing inspection bookings for exporter
+  app.get("/api/exporter/:exporterId/inspection-bookings", async (req, res) => {
+    try {
+      const { exporterId } = req.params;
+      console.log(`🔍 Fetching inspection bookings for exporter: ${exporterId}`);
+
+      const bookings = await storage.getPortInspectionBookingsByExporter(exporterId);
+
+      const formattedBookings = bookings.map(booking => ({
+        booking_id: booking.bookingId,
+        request_id: booking.requestId,
+        assignment_status: booking.assignmentStatus,
+        scheduled_date: booking.scheduledDate,
+        assigned_inspector_name: booking.assignedInspectorName
+      }));
+
+      console.log(`✅ Found ${formattedBookings.length} inspection bookings for exporter ${exporterId}`);
+      
+      res.json({ 
+        success: true, 
+        data: formattedBookings 
+      });
+    } catch (error: any) {
+      console.error("❌ Error fetching inspection bookings:", error);
+      res.status(500).json({ 
+        success: false, 
+        error: 'Failed to fetch inspection bookings' 
+      });
+    }
+  });
+
   // Get ALL inspector assignments for DDGOTS - PENDING AND ASSIGNED
   app.get("/api/ddgots/pending-inspector-assignments", async (req, res) => {
     try {

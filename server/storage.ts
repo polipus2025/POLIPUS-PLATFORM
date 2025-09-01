@@ -4341,6 +4341,18 @@ export class DatabaseStorage implements IStorage {
     }
   }
 
+  async getPortInspectionBookingsByExporter(exporterId: string): Promise<PortInspectionBooking[]> {
+    try {
+      return await db.select()
+        .from(portInspectionBookings)
+        .where(eq(portInspectionBookings.exporterId, exporterId))
+        .orderBy(desc(portInspectionBookings.createdAt));
+    } catch (error) {
+      console.error('Error fetching port inspection bookings by exporter:', error);
+      throw error;
+    }
+  }
+
 }
 
 export const storage = new DatabaseStorage();

@@ -86,6 +86,34 @@ const ExporterInspections = memo(() => {
 
   const scheduledPickups = scheduledPickupsData?.data || [];
 
+  // Fetch existing inspection bookings for this exporter
+  const { data: existingBookingsData } = useQuery<{
+    success: boolean;
+    data: Array<{
+      booking_id: string;
+      request_id: string;
+      assignment_status: string;
+      scheduled_date: string;
+      assigned_inspector_name?: string;
+    }>;
+  }>({
+    queryKey: [`/api/exporter/${exporterId}/inspection-bookings`],
+    enabled: !!exporterId,
+    staleTime: 60000, // 1 minute cache
+  });
+
+  const existingBookings = existingBookingsData?.data || [];
+
+  // Helper function to check if pickup already has booking
+  const hasExistingBooking = (requestId: string) => {
+    return existingBookings.some(booking => booking.request_id === requestId);
+  };
+
+  // Get booking details for a pickup
+  const getBookingDetails = (requestId: string) => {
+    return existingBookings.find(booking => booking.request_id === requestId);
+  };
+
   // Handle action buttons
   const handleBookInspection = useCallback((pickup: any) => {
     setSelectedPickup(pickup);
@@ -132,8 +160,9 @@ const ExporterInspections = memo(() => {
       });
       setShowBookingModal(false);
       setSelectedPickup(null);
-      // Refresh scheduled pickups
+      // Refresh scheduled pickups and inspection bookings
       queryClient.invalidateQueries({ queryKey: [`/api/exporter/scheduled-pickups/${exporterId}`] });
+      queryClient.invalidateQueries({ queryKey: [`/api/exporter/${exporterId}/inspection-bookings`] });
     },
     onError: (error) => {
       toast({
@@ -319,14 +348,46 @@ const ExporterInspections = memo(() => {
 
                         {/* 🚀 ACTION BUTTONS */}
                         <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                          <Button 
-                            onClick={() => handleBookInspection(pickup)}
-                            className="bg-blue-600 hover:bg-blue-700 text-white border-0 shadow-lg"
-                            data-testid={`book-inspection-${pickup.requestId}`}
-                          >
-                            <ClipboardCheck className="h-5 w-5 mr-2" />
-                            Book Product Inspection
-                          </Button>
+                          {hasExistingBooking(pickup.requestId) ? (
+                            <div className="space-y-2">
+                              <Button 
+                                disabled
+                                className="bg-gray-400 text-white border-0 shadow-lg cursor-not-allowed w-full"
+                                data-testid={`book-inspection-disabled-${pickup.requestId}`}
+                              >
+                                <CheckCircle className="h-5 w-5 mr-2" />
+                                Inspection Booked
+                              </Button>
+                              {(() => {
+                                const booking = getBookingDetails(pickup.requestId);
+                                return (
+                                  <div className="text-xs text-slate-600 space-y-1">
+                                    <p><strong>Booking ID:</strong> {booking?.booking_id}</p>
+                                    {booking?.assigned_inspector_name && (
+                                      <p><strong>Inspector:</strong> {booking.assigned_inspector_name}</p>
+                                    )}
+                                    {booking?.scheduled_date && (
+                                      <p><strong>Date:</strong> {new Date(booking.scheduled_date).toLocaleDateString()}</p>
+                                    )}
+                                    <p><strong>Status:</strong> 
+                                      <Badge className="ml-2 text-xs">
+                                        {booking?.assignment_status?.replace('_', ' ') || 'pending'}
+                                      </Badge>
+                                    </p>
+                                  </div>
+                                );
+                              })()}
+                            </div>
+                          ) : (
+                            <Button 
+                              onClick={() => handleBookInspection(pickup)}
+                              className="bg-blue-600 hover:bg-blue-700 text-white border-0 shadow-lg"
+                              data-testid={`book-inspection-${pickup.requestId}`}
+                            >
+                              <ClipboardCheck className="h-5 w-5 mr-2" />
+                              Book Product Inspection
+                            </Button>
+                          )}
                           <Button 
                             onClick={() => handleCertifications(pickup)}
                             className="bg-purple-600 hover:bg-purple-700 text-white border-0 shadow-lg"

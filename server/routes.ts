@@ -20210,5 +20210,20 @@ GENERATED: ${new Date().toLocaleDateString()}`;
     }
   });
 
+  // 📄 PDF Download endpoint for complete flow documentation
+  app.get("/download/complete-agricultural-supply-chain-flow.pdf", (req, res) => {
+    const filePath = "/home/runner/workspace/Complete-Agricultural-Supply-Chain-Flow.pdf";
+    
+    res.setHeader('Content-Type', 'application/pdf');
+    res.setHeader('Content-Disposition', 'attachment; filename="Complete-Agricultural-Supply-Chain-Flow.pdf"');
+    
+    res.sendFile(filePath, (err) => {
+      if (err) {
+        console.error("Error serving PDF:", err);
+        res.status(404).json({ error: "PDF file not found" });
+      }
+    });
+  });
+
   return httpServer;
 }

@@ -230,7 +230,7 @@ import {
   type InsertBuyerExporterVerification
 } from "../shared/schema.js";
 import { db } from "./db";
-import { eq, desc, and, or, sql } from "drizzle-orm";
+import { eq, desc, and, or, sql, isNotNull } from "drizzle-orm";
 import bcrypt from "bcryptjs";
 
 export interface IStorage {
@@ -3021,53 +3021,42 @@ export class DatabaseStorage implements IStorage {
 
   // Port Inspector Methods - Real Data Integration
   async getPortInspectorPendingInspections(): Promise<any[]> {
-    // Get pending export orders that need port inspection
-    const pendingInspections = await db
-      .select({
-        id: exportOrders.id,
-        orderNumber: exportOrders.orderNumber,
-        exporterId: exportOrders.exporterId,
-        commodityId: exportOrders.commodityId,
-        quantity: exportOrders.quantity,
-        unit: exportOrders.unit,
-        destinationCountry: exportOrders.destinationCountry,
-        destinationPort: exportOrders.destinationPort,
-        expectedShipmentDate: exportOrders.expectedShipmentDate,
-        orderStatus: exportOrders.orderStatus,
-        lacraApprovalStatus: exportOrders.lacraApprovalStatus,
-        exporterName: exporters.companyName,
-        exporterContact: exporters.contactPersonFirstName,
-        exporterEmail: exporters.primaryEmail,
-        exporterPhone: exporters.primaryPhone,
-        commodityName: commodities.name,
-        commodityType: commodities.type
-      })
-      .from(exportOrders)
-      .leftJoin(exporters, eq(exportOrders.exporterId, exporters.exporterId))
-      .leftJoin(commodities, eq(exportOrders.commodityId, commodities.id))
-      .where(
+    try {
+      // Get inspection bookings assigned to port inspectors
+      const pendingInspections = await db.select().from(portInspectionBookings).where(
         and(
-          eq(exportOrders.orderStatus, 'pending_inspection'),
-          eq(exportOrders.lacraApprovalStatus, 'approved')
+          isNotNull(portInspectionBookings.assignedInspectorId),
+          eq(portInspectionBookings.assignmentStatus, 'assigned')
         )
-      )
-      .orderBy(desc(exportOrders.expectedShipmentDate));
+      ).orderBy(desc(portInspectionBookings.scheduledDate));
 
-    return pendingInspections.map(inspection => ({
-      id: `EXP-INS-${inspection.id}`,
-      exporterId: inspection.exporterId,
-      exporterName: inspection.exporterName || 'Unknown Exporter',
-      shipmentId: inspection.orderNumber,
-      commodity: inspection.commodityName || inspection.commodityType,
-      quantity: `${inspection.quantity} ${inspection.unit}`,
-      containers: [`CONT-${inspection.id}-01`],
-      scheduledDate: inspection.expectedShipmentDate?.toISOString().split('T')[0] + ' 14:00',
-      priority: 'high',
-      status: 'pending',
-      documents: ['Certificate of Origin', 'EUDR Compliance', 'Quality Certificate'],
-      vesselName: 'MV Atlantic Trader',
-      destination: `${inspection.destinationPort}, ${inspection.destinationCountry}`
-    }));
+      return pendingInspections.map(inspection => ({
+        id: inspection.bookingId,
+        exporterId: inspection.exporterId,
+        exporterName: inspection.exporterName || 'Unknown Exporter',
+        shipmentId: inspection.requestId,
+        commodity: inspection.commodityType,
+        quantity: `${inspection.quantity} ${inspection.unit}`,
+        containers: [`CONT-${inspection.requestId}-01`],
+        scheduledDate: inspection.scheduledDate?.toISOString().split('T')[0] + ' 14:00',
+        priority: inspection.urgencyLevel === 'urgent' ? 'high' : 'medium',
+        status: inspection.assignmentStatus,
+        documents: ['Certificate of Origin', 'EUDR Compliance', 'Quality Certificate'],
+        vesselName: 'MV Atlantic Trader',
+        destination: `${inspection.portFacility}`,
+        assignedInspector: inspection.assignedInspectorName,
+        verificationCode: inspection.verificationCode,
+        buyerName: inspection.buyerName,
+        buyerCompany: inspection.buyerCompany,
+        totalValue: inspection.totalValue,
+        dispatchDate: inspection.dispatchDate,
+        county: inspection.county,
+        farmLocation: inspection.farmLocation
+      }));
+    } catch (error) {
+      console.error('Error in getPortInspectorPendingInspections:', error);
+      return [];
+    }
   }
 
   async getActiveShipments(): Promise<any[]> {

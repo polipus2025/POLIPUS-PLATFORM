@@ -47,10 +47,11 @@ export default function PortInspectorDashboard() {
   // Get inspector data from localStorage
   const inspectorData = JSON.parse(localStorage.getItem("inspectorData") || "{}");
   const portFacility = inspectorData.portFacility || "Port of Monrovia";
+  const inspectorId = inspectorData.inspectorId || "INS-PORT-001"; // Default to James Kofi for testing
 
-  // Real data queries
+  // Real data queries - Get inspections assigned to this specific inspector
   const { data: pendingInspections, isLoading: loadingInspections } = useQuery({
-    queryKey: ['/api/port-inspector/pending-inspections'],
+    queryKey: [`/api/port-inspector/${inspectorId}/assigned-inspections`],
     select: (data: any) => data?.data || []
   });
 
@@ -81,7 +82,7 @@ export default function PortInspectorDashboard() {
     },
     onSuccess: () => {
       toast({ title: "Success", description: "Inspection started successfully" });
-      queryClient.invalidateQueries({ queryKey: ['/api/port-inspector/pending-inspections'] });
+      queryClient.invalidateQueries({ queryKey: [`/api/port-inspector/${inspectorId}/assigned-inspections`] });
     },
     onError: () => {
       toast({ title: "Error", description: "Failed to start inspection", variant: "destructive" });
@@ -100,7 +101,7 @@ export default function PortInspectorDashboard() {
     },
     onSuccess: () => {
       toast({ title: "Success", description: "Inspection completed successfully" });
-      queryClient.invalidateQueries({ queryKey: ['/api/port-inspector/pending-inspections'] });
+      queryClient.invalidateQueries({ queryKey: [`/api/port-inspector/${inspectorId}/assigned-inspections`] });
       queryClient.invalidateQueries({ queryKey: ['/api/port-inspector/active-shipments'] });
     },
     onError: () => {

@@ -14436,6 +14436,42 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Port Inspector specific assigned inspections
+  app.get("/api/port-inspector/:inspectorId/assigned-inspections", async (req, res) => {
+    try {
+      const { inspectorId } = req.params;
+      const assignedInspections = await db.select()
+        .from(portInspectionBookings)
+        .where(eq(portInspectionBookings.assignedInspectorId, inspectorId))
+        .orderBy(desc(portInspectionBookings.scheduledDate));
+
+      const formattedInspections = assignedInspections.map(inspection => ({
+        id: inspection.bookingId,
+        exporterId: inspection.exporterId,
+        exporterName: inspection.exporterName || 'Unknown Exporter',
+        shipmentId: inspection.requestId,
+        commodity: inspection.commodityType,
+        quantity: `${inspection.quantity} ${inspection.unit}`,
+        scheduledDate: inspection.scheduledDate?.toISOString().split('T')[0] + ' 14:00',
+        priority: inspection.urgencyLevel === 'urgent' ? 'high' : 'medium',
+        status: inspection.assignmentStatus,
+        assignedInspector: inspection.assignedInspectorName,
+        verificationCode: inspection.verificationCode,
+        buyerName: inspection.buyerName,
+        buyerCompany: inspection.buyerCompany,
+        totalValue: inspection.totalValue,
+        dispatchDate: inspection.dispatchDate,
+        county: inspection.county,
+        farmLocation: inspection.farmLocation
+      }));
+
+      res.json({ success: true, data: formattedInspections });
+    } catch (error: any) {
+      console.error("Error fetching assigned inspections:", error);
+      res.status(500).json({ success: false, message: "Failed to fetch assigned inspections" });
+    }
+  });
+
   app.get("/api/port-inspector/active-shipments", async (req, res) => {
     try {
       const shipments = await storage.getActiveShipments();

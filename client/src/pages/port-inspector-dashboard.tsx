@@ -44,8 +44,21 @@ export default function PortInspectorDashboard() {
   const { toast } = useToast();
   const queryClient = useQueryClient();
 
-  // Get inspector data from localStorage
-  const inspectorData = JSON.parse(localStorage.getItem("inspectorData") || "{}");
+  // Get inspector data from localStorage with safe parsing
+  const getInspectorData = () => {
+    try {
+      const stored = localStorage.getItem("inspectorData");
+      if (stored && stored !== "undefined" && stored !== "null") {
+        return JSON.parse(stored);
+      }
+      return {};
+    } catch (error) {
+      console.warn("Failed to parse inspector data from localStorage:", error);
+      return {};
+    }
+  };
+  
+  const inspectorData = getInspectorData();
   const portFacility = inspectorData.portFacility || "Port of Monrovia";
   const inspectorId = inspectorData.inspectorId || "INS-PORT-001"; // Default to James Kofi for testing
 

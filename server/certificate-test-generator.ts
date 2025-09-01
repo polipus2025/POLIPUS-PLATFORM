@@ -326,7 +326,345 @@ export function addCertificateTestRoutes(app: Express) {
     }
   });
 
-  // The other certificate types will be added here...
-  // (keeping this minimal for now to focus on the simple EUDR)
+  // Generate Simple Deforestation Analysis Certificate
+  app.get('/api/test/deforestation-certificate/:farmerId', async (req, res) => {
+    try {
+      const { farmerId } = req.params;
+      const farmer = {
+        id: farmerId,
+        fullName: "John Kollie",
+        county: "Bong",
+        city: "Gbarnga",
+        farmSize: 25.5,
+        gpsCoordinates: "7.0042° N, 9.4334° W",
+        cropType: "Cocoa"
+      };
+      
+      const certNumber = `DFA-${farmer.county.substring(0,3).toUpperCase()}-${Date.now().toString().slice(-6)}`;
+      const doc = new PDFDocument({ size: 'A4', margin: 40 });
+
+      res.setHeader('Content-Type', 'application/pdf');
+      res.setHeader('Content-Disposition', `inline; filename="Deforestation_Analysis_${farmer.fullName.replace(' ', '_')}.pdf"`);
+      doc.pipe(res);
+
+      // Header
+      doc.rect(0, 0, 595, 80).fillColor('#059669').fill();
+      doc.rect(40, 15, 80, 50).strokeColor('#ffffff').stroke();
+      doc.fillColor('#ffffff').fontSize(10).font('Helvetica-Bold').text('LACRA', 50, 25);
+      doc.fontSize(18).font('Helvetica-Bold').text('DEFORESTATION ANALYSIS', 140, 25);
+      doc.fontSize(12).font('Helvetica').text('Environmental Impact Assessment', 140, 45);
+
+      doc.fillColor('#000000');
+      let yPos = 120;
+
+      // Certificate Details
+      doc.fontSize(14).font('Helvetica-Bold').text('ANALYSIS REPORT', 40, yPos);
+      yPos += 25;
+      
+      const issueDate = new Date().toLocaleDateString('en-US');
+      doc.fontSize(11).font('Helvetica');
+      doc.text(`Report Number: ${certNumber}`, 40, yPos);
+      doc.text(`Analysis Date: ${issueDate}`, 320, yPos);
+      yPos += 30;
+
+      // Farm Information
+      doc.fontSize(14).font('Helvetica-Bold').text('FARM INFORMATION', 40, yPos);
+      yPos += 25;
+      doc.fontSize(10).font('Helvetica');
+      doc.text(`Farmer: ${farmer.fullName}`, 40, yPos);
+      doc.text(`Location: ${farmer.city}, ${farmer.county}`, 40, yPos + 15);
+      doc.text(`Farm Size: ${farmer.farmSize} hectares`, 40, yPos + 30);
+      doc.text(`Crop Type: ${farmer.cropType}`, 40, yPos + 45);
+      yPos += 80;
+
+      // Analysis Results
+      doc.fontSize(14).font('Helvetica-Bold').text('ANALYSIS RESULTS', 40, yPos);
+      yPos += 25;
+      doc.fontSize(10).font('Helvetica');
+      doc.text('• Forest Cover Status: STABLE - No deforestation detected', 40, yPos);
+      doc.text('• Biodiversity Index: HIGH - Diverse ecosystem maintained', 40, yPos + 15);
+      doc.text('• Carbon Storage: 4.2 tonnes CO2/hectare/year', 40, yPos + 30);
+      doc.text('• Soil Quality: EXCELLENT - Rich organic matter', 40, yPos + 45);
+      yPos += 80;
+
+      // Conclusion
+      doc.fontSize(12).font('Helvetica-Bold').text('CONCLUSION', 40, yPos);
+      yPos += 20;
+      doc.fontSize(10).font('Helvetica').text(
+        `The environmental analysis confirms that ${farmer.fullName}'s farm demonstrates excellent ` +
+        'environmental stewardship with no deforestation detected and high biodiversity conservation.',
+        40, yPos, { width: 515, align: 'justify' }
+      );
+
+      doc.end();
+    } catch (error) {
+      console.error('Error generating deforestation certificate:', error);
+      res.status(500).json({ error: 'Failed to generate certificate' });
+    }
+  });
+
+  // Generate Simple Phytosanitary Certificate
+  app.get('/api/test/phytosanitary-certificate/:farmerId', async (req, res) => {
+    try {
+      const { farmerId } = req.params;
+      const farmer = {
+        id: farmerId,
+        fullName: "John Kollie",
+        county: "Bong",
+        city: "Gbarnga",
+        cropType: "Cocoa"
+      };
+      
+      const certNumber = `PHY-${farmer.county.substring(0,3).toUpperCase()}-${Date.now().toString().slice(-6)}`;
+      const doc = new PDFDocument({ size: 'A4', margin: 40 });
+
+      res.setHeader('Content-Type', 'application/pdf');
+      res.setHeader('Content-Disposition', `inline; filename="Phytosanitary_Certificate_${farmer.fullName.replace(' ', '_')}.pdf"`);
+      doc.pipe(res);
+
+      // Header
+      doc.rect(0, 0, 595, 80).fillColor('#8B5CF6').fill();
+      doc.fillColor('#ffffff').fontSize(18).font('Helvetica-Bold').text('PHYTOSANITARY CERTIFICATE', 140, 25);
+      doc.fontSize(12).font('Helvetica').text('Plant Health Certification', 140, 45);
+
+      doc.fillColor('#000000');
+      let yPos = 120;
+
+      // Certificate Details
+      doc.fontSize(14).font('Helvetica-Bold').text('CERTIFICATE DETAILS', 40, yPos);
+      yPos += 25;
+      
+      const issueDate = new Date().toLocaleDateString('en-US');
+      doc.fontSize(11).font('Helvetica');
+      doc.text(`Certificate Number: ${certNumber}`, 40, yPos);
+      doc.text(`Issue Date: ${issueDate}`, 320, yPos);
+      yPos += 30;
+
+      // Producer Information
+      doc.fontSize(14).font('Helvetica-Bold').text('PRODUCER INFORMATION', 40, yPos);
+      yPos += 25;
+      doc.fontSize(10).font('Helvetica');
+      doc.text(`Name: ${farmer.fullName}`, 40, yPos);
+      doc.text(`Location: ${farmer.city}, ${farmer.county}`, 40, yPos + 15);
+      doc.text(`Product: ${farmer.cropType}`, 40, yPos + 30);
+      yPos += 60;
+
+      // Health Status
+      doc.fontSize(14).font('Helvetica-Bold').text('PLANT HEALTH STATUS', 40, yPos);
+      yPos += 25;
+      doc.fontSize(10).font('Helvetica');
+      doc.text('• No plant pests detected', 40, yPos);
+      doc.text('• No plant diseases identified', 40, yPos + 15);
+      doc.text('• Products meet international phytosanitary standards', 40, yPos + 30);
+      doc.text('• Suitable for international export', 40, yPos + 45);
+      yPos += 80;
+
+      // Certification Statement
+      doc.fontSize(12).font('Helvetica-Bold').text('CERTIFICATION', 40, yPos);
+      yPos += 20;
+      doc.fontSize(10).font('Helvetica').text(
+        'This certificate confirms that the agricultural products have been inspected and found free from quarantine pests.',
+        40, yPos, { width: 515, align: 'justify' }
+      );
+
+      doc.end();
+    } catch (error) {
+      console.error('Error generating phytosanitary certificate:', error);
+      res.status(500).json({ error: 'Failed to generate certificate' });
+    }
+  });
+
+  // Generate Simple Certificate of Origin
+  app.get('/api/test/origin-certificate/:farmerId', async (req, res) => {
+    try {
+      const { farmerId } = req.params;
+      const farmer = {
+        id: farmerId,
+        fullName: "John Kollie",
+        county: "Bong",
+        city: "Gbarnga",
+        cropType: "Cocoa"
+      };
+      
+      const certNumber = `COO-${farmer.county.substring(0,3).toUpperCase()}-${Date.now().toString().slice(-6)}`;
+      const doc = new PDFDocument({ size: 'A4', margin: 40 });
+
+      res.setHeader('Content-Type', 'application/pdf');
+      res.setHeader('Content-Disposition', `inline; filename="Certificate_of_Origin_${farmer.fullName.replace(' ', '_')}.pdf"`);
+      doc.pipe(res);
+
+      // Header
+      doc.rect(0, 0, 595, 80).fillColor('#F59E0B').fill();
+      doc.fillColor('#ffffff').fontSize(18).font('Helvetica-Bold').text('CERTIFICATE OF ORIGIN', 140, 25);
+      doc.fontSize(12).font('Helvetica').text('Republic of Liberia', 140, 45);
+
+      doc.fillColor('#000000');
+      let yPos = 120;
+
+      // Certificate Details
+      doc.fontSize(14).font('Helvetica-Bold').text('ORIGIN CERTIFICATION', 40, yPos);
+      yPos += 25;
+      
+      const issueDate = new Date().toLocaleDateString('en-US');
+      doc.fontSize(11).font('Helvetica');
+      doc.text(`Certificate Number: ${certNumber}`, 40, yPos);
+      doc.text(`Issue Date: ${issueDate}`, 320, yPos);
+      yPos += 30;
+
+      // Product Origin
+      doc.fontSize(14).font('Helvetica-Bold').text('PRODUCT ORIGIN', 40, yPos);
+      yPos += 25;
+      doc.fontSize(10).font('Helvetica');
+      doc.text(`Country of Origin: Republic of Liberia`, 40, yPos);
+      doc.text(`Region: ${farmer.county} County`, 40, yPos + 15);
+      doc.text(`Producer: ${farmer.fullName}`, 40, yPos + 30);
+      doc.text(`Product: ${farmer.cropType}`, 40, yPos + 45);
+      yPos += 80;
+
+      // Certification Statement
+      doc.fontSize(12).font('Helvetica-Bold').text('OFFICIAL DECLARATION', 40, yPos);
+      yPos += 20;
+      doc.fontSize(10).font('Helvetica').text(
+        'This certificate officially declares that the products described herein originate from the Republic of Liberia ' +
+        'and meet all requirements for international trade.',
+        40, yPos, { width: 515, align: 'justify' }
+      );
+
+      doc.end();
+    } catch (error) {
+      console.error('Error generating origin certificate:', error);
+      res.status(500).json({ error: 'Failed to generate certificate' });
+    }
+  });
+
+  // Generate Simple Quality Control Certificate
+  app.get('/api/test/quality-certificate/:farmerId', async (req, res) => {
+    try {
+      const { farmerId } = req.params;
+      const farmer = {
+        id: farmerId,
+        fullName: "John Kollie",
+        county: "Bong",
+        city: "Gbarnga",
+        cropType: "Cocoa"
+      };
+      
+      const certNumber = `QC-${farmer.county.substring(0,3).toUpperCase()}-${Date.now().toString().slice(-6)}`;
+      const doc = new PDFDocument({ size: 'A4', margin: 40 });
+
+      res.setHeader('Content-Type', 'application/pdf');
+      res.setHeader('Content-Disposition', `inline; filename="Quality_Control_Certificate_${farmer.fullName.replace(' ', '_')}.pdf"`);
+      doc.pipe(res);
+
+      // Header
+      doc.rect(0, 0, 595, 80).fillColor('#EF4444').fill();
+      doc.fillColor('#ffffff').fontSize(18).font('Helvetica-Bold').text('QUALITY CONTROL CERTIFICATE', 140, 25);
+      doc.fontSize(12).font('Helvetica').text('Quality Assurance & Grading', 140, 45);
+
+      doc.fillColor('#000000');
+      let yPos = 120;
+
+      // Certificate Details
+      doc.fontSize(14).font('Helvetica-Bold').text('QUALITY ASSESSMENT', 40, yPos);
+      yPos += 25;
+      
+      const issueDate = new Date().toLocaleDateString('en-US');
+      doc.fontSize(11).font('Helvetica');
+      doc.text(`Certificate Number: ${certNumber}`, 40, yPos);
+      doc.text(`Assessment Date: ${issueDate}`, 320, yPos);
+      yPos += 30;
+
+      // Quality Grades
+      doc.fontSize(14).font('Helvetica-Bold').text('QUALITY GRADING', 40, yPos);
+      yPos += 25;
+      doc.fontSize(10).font('Helvetica');
+      doc.text('Overall Grade: PREMIUM GRADE A', 40, yPos);
+      doc.text('Moisture Content: ≤ 7.5% (Excellent)', 40, yPos + 15);
+      doc.text('Bean Size: 100+ beans per 100g (Superior)', 40, yPos + 30);
+      doc.text('Fermentation: 80%+ brown beans (Well Fermented)', 40, yPos + 45);
+      doc.text('Foreign Matter: < 1% (Excellent)', 40, yPos + 60);
+      yPos += 90;
+
+      // Quality Statement
+      doc.fontSize(12).font('Helvetica-Bold').text('QUALITY CERTIFICATION', 40, yPos);
+      yPos += 20;
+      doc.fontSize(10).font('Helvetica').text(
+        `The ${farmer.cropType} products from ${farmer.fullName} have been inspected and graded according to ` +
+        'international quality standards. Products meet premium export quality requirements.',
+        40, yPos, { width: 515, align: 'justify' }
+      );
+
+      doc.end();
+    } catch (error) {
+      console.error('Error generating quality certificate:', error);
+      res.status(500).json({ error: 'Failed to generate certificate' });
+    }
+  });
+
+  // Generate Simple Comprehensive Compliance Declaration
+  app.get('/api/test/compliance-declaration/:farmerId', async (req, res) => {
+    try {
+      const { farmerId } = req.params;
+      const farmer = {
+        id: farmerId,
+        fullName: "John Kollie",
+        county: "Bong",
+        city: "Gbarnga",
+        cropType: "Cocoa"
+      };
+      
+      const certNumber = `COMP-${farmer.county.substring(0,3).toUpperCase()}-${Date.now().toString().slice(-6)}`;
+      const doc = new PDFDocument({ size: 'A4', margin: 40 });
+
+      res.setHeader('Content-Type', 'application/pdf');
+      res.setHeader('Content-Disposition', `inline; filename="Compliance_Declaration_${farmer.fullName.replace(' ', '_')}.pdf"`);
+      doc.pipe(res);
+
+      // Header
+      doc.rect(0, 0, 595, 80).fillColor('#7C3AED').fill();
+      doc.fillColor('#ffffff').fontSize(18).font('Helvetica-Bold').text('COMPREHENSIVE COMPLIANCE', 140, 20);
+      doc.fontSize(12).font('Helvetica').text('LACRA & ECOENVIROS Declaration', 140, 50);
+
+      doc.fillColor('#000000');
+      let yPos = 120;
+
+      // Certificate Details
+      doc.fontSize(14).font('Helvetica-Bold').text('COMPLIANCE DECLARATION', 40, yPos);
+      yPos += 25;
+      
+      const issueDate = new Date().toLocaleDateString('en-US');
+      doc.fontSize(11).font('Helvetica');
+      doc.text(`Declaration Number: ${certNumber}`, 40, yPos);
+      doc.text(`Declaration Date: ${issueDate}`, 320, yPos);
+      yPos += 30;
+
+      // Compliance Areas
+      doc.fontSize(14).font('Helvetica-Bold').text('COMPLIANCE VERIFICATION', 40, yPos);
+      yPos += 25;
+      doc.fontSize(10).font('Helvetica');
+      doc.text('✓ EUDR Compliance - Deforestation-free production', 40, yPos);
+      doc.text('✓ Environmental Standards - Sustainable practices', 40, yPos + 15);
+      doc.text('✓ Quality Standards - Premium grade certification', 40, yPos + 30);
+      doc.text('✓ Phytosanitary Requirements - Plant health verified', 40, yPos + 45);
+      doc.text('✓ Origin Authentication - Liberian origin confirmed', 40, yPos + 60);
+      doc.text('✓ Labor Standards - Ethical farming practices', 40, yPos + 75);
+      yPos += 105;
+
+      // Final Declaration
+      doc.fontSize(12).font('Helvetica-Bold').text('OFFICIAL DECLARATION', 40, yPos);
+      yPos += 20;
+      doc.fontSize(10).font('Helvetica').text(
+        'This comprehensive declaration confirms that all agricultural activities by ' +
+        `${farmer.fullName} fully comply with LACRA regulations, ECOENVIROS standards, ` +
+        'and international requirements for sustainable agricultural production.',
+        40, yPos, { width: 515, align: 'justify' }
+      );
+
+      doc.end();
+    } catch (error) {
+      console.error('Error generating compliance declaration:', error);
+      res.status(500).json({ error: 'Failed to generate certificate' });
+    }
+  });
 
 }

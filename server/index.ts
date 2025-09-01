@@ -64,6 +64,10 @@ if (MAINTENANCE_MODE) {
       const { registerSimpleEudrRoutes } = await import('./eudr-simple-routes');
       registerSimpleEudrRoutes(app);
       
+      // Certificate testing routes
+      const { addCertificateTestRoutes } = await import('./certificate-test-generator');
+      addCertificateTestRoutes(app);
+      
       // Setup Vite for development or serve static files for production
       if (process.env.NODE_ENV === 'production') {
         console.log('🏭 Production mode - serving static files...');

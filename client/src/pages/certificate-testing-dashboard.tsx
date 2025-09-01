@@ -68,42 +68,27 @@ export default function CertificateTestingDashboard() {
 
   const generateTestCertificate = async (farmerId: string) => {
     try {
-      setGenerationStatus('Generating EUDR certificate pack...');
-      const response = await fetch(`/api/eudr/auto-generate/${farmerId}`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' }
-      });
-      
-      if (response.ok) {
-        const data = await response.json();
-        setGenerationStatus(`✅ Certificate pack generated! Pack ID: ${data.packId}`);
-        setSelectedFarmer(data.packId);
-      } else {
-        // Use a demo pack ID for testing
-        const demoPackId = `DEMO-${farmerId}-${Date.now()}`;
-        setGenerationStatus(`✅ Demo certificate ready! Pack ID: ${demoPackId}`);
-        setSelectedFarmer(demoPackId);
-      }
+      setGenerationStatus('✅ Test certificates ready with realistic simulation data!');
+      setSelectedFarmer(farmerId);
     } catch (error) {
-      console.error('Error generating certificate:', error);
-      const demoPackId = `DEMO-${farmerId}-${Date.now()}`;
-      setGenerationStatus(`✅ Demo certificate ready! Pack ID: ${demoPackId}`);
-      setSelectedFarmer(demoPackId);
+      console.error('Error setting up test certificates:', error);
+      setGenerationStatus('✅ Test certificates ready with realistic simulation data!');
+      setSelectedFarmer(farmerId);
     }
   };
 
-  const downloadCertificate = (packId: string, type: string) => {
-    const downloadUrl = type === 'enhanced' ? 
-      `/api/eudr/final-pdf/${packId}` : 
-      `/api/eudr-certificate/${packId}`;
+  const downloadCertificate = (farmerId: string, type: string) => {
+    const downloadUrl = type === 'eudr' ? 
+      `/api/test/eudr-certificate/${farmerId}` : 
+      `/api/test/deforestation-certificate/${farmerId}`;
     
     window.open(downloadUrl, '_blank');
   };
 
-  const previewInNewTab = (packId: string, type: string) => {
-    const previewUrl = type === 'enhanced' ? 
-      `/api/eudr/final-pdf/${packId}` : 
-      `/api/eudr-certificate/${packId}`;
+  const previewInNewTab = (farmerId: string, type: string) => {
+    const previewUrl = type === 'eudr' ? 
+      `/api/test/eudr-certificate/${farmerId}` : 
+      `/api/test/deforestation-certificate/${farmerId}`;
     
     window.open(previewUrl, '_blank');
   };
@@ -183,15 +168,15 @@ export default function CertificateTestingDashboard() {
                   {selectedFarmer && (
                     <>
                       <Button 
-                        onClick={() => downloadCertificate(selectedFarmer, 'enhanced')}
+                        onClick={() => downloadCertificate(selectedFarmer, 'eudr')}
                         className="flex-1 bg-blue-600 hover:bg-blue-700"
                         size="sm"
                       >
                         <Download className="h-4 w-4 mr-1" />
-                        Enhanced Pack
+                        EUDR Certificate
                       </Button>
                       <Button 
-                        onClick={() => previewInNewTab(selectedFarmer, 'enhanced')}
+                        onClick={() => previewInNewTab(selectedFarmer, 'eudr')}
                         variant="outline"
                         size="sm"
                       >
@@ -248,15 +233,15 @@ export default function CertificateTestingDashboard() {
                   {selectedFarmer && (
                     <>
                       <Button 
-                        onClick={() => downloadCertificate(selectedFarmer, 'standard')}
+                        onClick={() => downloadCertificate(selectedFarmer, 'deforestation')}
                         className="flex-1 bg-green-600 hover:bg-green-700"
                         size="sm"
                       >
                         <Download className="h-4 w-4 mr-1" />
-                        Standard Pack
+                        Deforestation Analysis
                       </Button>
                       <Button 
-                        onClick={() => previewInNewTab(selectedFarmer, 'standard')}
+                        onClick={() => previewInNewTab(selectedFarmer, 'deforestation')}
                         variant="outline"
                         size="sm"
                       >

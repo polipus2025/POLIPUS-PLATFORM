@@ -146,6 +146,9 @@ function App() {
             <Route path="/blue-carbon360" component={createLazyRoute(BlueCarbon360Portal)} />
             <Route path="/carbon-trace" component={createLazyRoute(CarbonTracePortal)} />
             
+            {/* CERTIFICATE TESTING DASHBOARD - HIGH PRIORITY */}
+            <Route path="/certificate-testing" component={CertificateTestingDashboard} />
+            
             {/* AGRICULTURAL AUTHENTICATION ROUTES */}
             <Route path="/farmer-login" component={FarmerLogin} />
             <Route path="/farmer-login-portal" component={FarmerLoginPortal} />
@@ -170,9 +173,6 @@ function App() {
             {/* AGRICULTURAL DASHBOARD ROUTES */}
             <Route path="/farmer-dashboard" component={createLazyRoute(FarmerDashboard)} />
             <Route path="/agricultural-buyer-dashboard" component={createLazyRoute(BuyerDashboard)} />
-            
-            {/* CERTIFICATE TESTING DASHBOARD */}
-            <Route path="/certificate-testing" component={CertificateTestingDashboard} />
             
             {/* AGRICULTURAL PAGES - Land Inspector Navigation */}
             <Route path="/onboard-farmer" component={createLazyRoute(OnboardFarmer)} />

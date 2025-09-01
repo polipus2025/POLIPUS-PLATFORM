@@ -531,4 +531,50 @@ router.post('/generate/compliance', async (req, res) => {
   }
 });
 
+// Auto-generate EUDR Certificate from farmer data
+router.get('/generate/eudr/:farmerId', async (req, res) => {
+  try {
+    const { farmerId } = req.params;
+    
+    // Get farmer data from database (using the same function as the test generator)
+    const response = await fetch(`http://localhost:5000/api/test/eudr-certificate/${farmerId}`);
+    if (!response.ok) {
+      throw new Error('Failed to fetch farmer data');
+    }
+    
+    // Stream the PDF directly to response
+    res.setHeader('Content-Type', 'application/pdf');
+    res.setHeader('Content-Disposition', `attachment; filename="EUDR_Certificate_${farmerId}.pdf"`);
+    
+    response.body?.pipe(res);
+    
+  } catch (error) {
+    console.error('Error generating EUDR certificate:', error);
+    res.status(500).json({ error: 'Failed to generate EUDR certificate' });
+  }
+});
+
+// Auto-generate Deforestation Certificate from farmer data  
+router.get('/generate/deforestation/:farmerId', async (req, res) => {
+  try {
+    const { farmerId } = req.params;
+    
+    // Get farmer data from database (using the same function as the test generator)
+    const response = await fetch(`http://localhost:5000/api/test/deforestation-certificate/${farmerId}`);
+    if (!response.ok) {
+      throw new Error('Failed to fetch farmer data');
+    }
+    
+    // Stream the PDF directly to response
+    res.setHeader('Content-Type', 'application/pdf');
+    res.setHeader('Content-Disposition', `attachment; filename="Deforestation_Certificate_${farmerId}.pdf"`);
+    
+    response.body?.pipe(res);
+    
+  } catch (error) {
+    console.error('Error generating deforestation certificate:', error);
+    res.status(500).json({ error: 'Failed to generate deforestation certificate' });
+  }
+});
+
 export default router;

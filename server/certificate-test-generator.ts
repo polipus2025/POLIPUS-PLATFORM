@@ -220,16 +220,11 @@ const generateBiodiversityAssessment = (farmer: EnhancedFarmerData) => {
 
 export function addCertificateTestRoutes(app: Express) {
   
-  // Generate EUDR Compliance Certificate with enhanced real data integration
+  // Generate Professional EUDR Compliance Certificate with Advanced Graphics and Legal Elements
   app.get('/api/test/eudr-certificate/:farmerId', async (req, res) => {
     try {
       const { farmerId } = req.params;
       const farmer = await getEnhancedFarmerData(farmerId);
-      
-      // Generate supporting documentation
-      const landDoc = generateLandAuthorityDocument(farmer);
-      const labourDoc = generateLabourDeclaration(farmer);
-      const biodiversityDoc = generateBiodiversityAssessment(farmer);
       
       // Certificate details for QR generation
       const certNumber = `EUDR-${farmer.county.substring(0,3).toUpperCase()}-${Date.now().toString().slice(-6)}`;
@@ -242,190 +237,345 @@ export function addCertificateTestRoutes(app: Express) {
         complianceStatus: farmer.complianceStatus || 'compliant'
       };
       
-      // Generate QR code
       const qrCodeDataUrl = await generateTraceabilityQR(qrData);
 
       const doc = new PDFDocument({ 
         size: 'A4', 
-        margin: 40,
+        margin: 30,
         info: {
-          Title: 'Enhanced EUDR Compliance Certificate with Real Data Integration',
-          Author: 'LACRA & ECOENVIROS',
-          Subject: 'EU Deforestation Regulation Compliance - Liberian Authority Verification',
-          Creator: 'Polipus AgriTrace Platform - Real Supply Chain Integration'
+          Title: 'Professional EUDR Compliance Certificate - Legal & Graphical',
+          Author: 'LACRA & ECOENVIROS Certification Authority',
+          Subject: 'EU Deforestation Regulation 2023/1115 - Complete Legal Compliance',
+          Creator: 'Polipus AgriTrace Professional Certification System'
         }
       });
 
-      // Set response headers for PDF
       res.setHeader('Content-Type', 'application/pdf');
-      res.setHeader('Content-Disposition', `inline; filename="Enhanced_EUDR_Certificate_${farmer.fullName.replace(' ', '_')}.pdf"`);
-      
+      res.setHeader('Content-Disposition', `inline; filename="EUDR_Certificate_${farmer.fullName.replace(' ', '_')}_${certNumber}.pdf"`);
       doc.pipe(res);
 
-      // === CERTIFICATE HEADER ===
-      doc.rect(0, 0, 595, 80).fillColor('#1a365d').fill();
-      
-      // LACRA Logo area
-      doc.rect(40, 15, 80, 50).strokeColor('#ffffff').stroke();
-      doc.fillColor('#ffffff').fontSize(10).font('Helvetica-Bold').text('LACRA', 50, 25);
-      doc.fontSize(8).text('Liberian Agricultural', 45, 40);
-      doc.text('Regulatory Authority', 45, 52);
-      
-      // Main Title
-      doc.fontSize(18).font('Helvetica-Bold').fillColor('#ffffff');
-      doc.text('EUDR COMPLIANCE CERTIFICATE', 140, 25);
-      doc.fontSize(12).font('Helvetica').text('EU Deforestation Regulation Compliance', 140, 45);
-      
-      // ECOENVIROS Logo area  
-      doc.rect(475, 15, 80, 50).strokeColor('#ffffff').stroke();
-      doc.fontSize(9).text('ECOENVIROS', 485, 25);
-      doc.fontSize(7).text('Audit & Certification', 485, 40);
-      doc.text('ISO 14001 Certified', 485, 52);
-
-      // Reset to black for content
-      doc.fillColor('#000000');
-      let yPos = 120;
-
-      // === CERTIFICATE INFORMATION ===
-      doc.fontSize(14).font('Helvetica-Bold').text('CERTIFICATE DETAILS', 40, yPos);
-      yPos += 25;
-      
-      // Certificate number and date (using pre-generated certNumber)
       const issueDate = new Date().toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' });
       const validUntil = new Date(Date.now() + 365 * 24 * 60 * 60 * 1000).toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' });
+      let yPos = 30;
+
+      // === PROFESSIONAL HEADER WITH EU REGULATIONS ===
+      doc.rect(0, 0, 595, 100).fillColor('#0f4c75').fill();
       
+      // EU Flag representation
+      doc.rect(30, 20, 60, 40).fillColor('#003399').fill();
+      doc.fillColor('#FFCC00').fontSize(12).font('Helvetica-Bold').text('EU', 50, 35);
+      doc.fontSize(8).text('REGULATION', 42, 48);
+      
+      // Main Title
+      doc.fontSize(20).font('Helvetica-Bold').fillColor('#ffffff');
+      doc.text('EUDR COMPLIANCE CERTIFICATE', 110, 25);
       doc.fontSize(11).font('Helvetica');
-      doc.text(`Certificate Number: ${certNumber}`, 40, yPos);
-      doc.text(`Issue Date: ${issueDate}`, 320, yPos);
-      yPos += 15;
-      doc.text(`Valid Until: ${validUntil}`, 40, yPos);
-      doc.text(`Batch Code: ${farmer.batchNumber || 'N/A'}`, 320, yPos);
-      yPos += 15;
-      doc.text(`QR Trace Code: ${farmer.qrTraceabilityCode || 'Generated'}`, 40, yPos);
-      doc.text(`Certification Level: APPROVED`, 320, yPos);
-      yPos += 30;
+      doc.text('EU Regulation 2023/1115 - Deforestation-Free Products', 110, 48);
+      doc.text('Legal Verification & Supply Chain Traceability', 110, 63);
+      
+      // Certification Authority
+      doc.rect(450, 20, 115, 60).strokeColor('#ffffff').lineWidth(2).stroke();
+      doc.fontSize(10).font('Helvetica-Bold').text('CERTIFIED BY:', 455, 30);
+      doc.fontSize(9).text('LACRA - LIBERIA', 455, 45);
+      doc.text('ECOENVIROS - EU', 455, 57);
+      doc.text('ISO 14001:2015', 455, 69);
 
-      // === FARMER INFORMATION ===
-      doc.fontSize(14).font('Helvetica-Bold').text('PRODUCER INFORMATION', 40, yPos);
-      yPos += 25;
-      
-      // Create info boxes
-      doc.rect(40, yPos, 250, 80).strokeColor('#cccccc').stroke();
-      doc.rect(310, yPos, 245, 80).strokeColor('#cccccc').stroke();
-      
-      // Left box - Basic info
-      doc.fontSize(11).font('Helvetica-Bold').text('Producer Details', 45, yPos + 10);
-      doc.fontSize(10).font('Helvetica');
-      doc.text(`Name: ${farmer.fullName}`, 45, yPos + 25);
-      doc.text(`Email: ${farmer.email}`, 45, yPos + 40);
-      doc.text(`Location: ${farmer.city}, ${farmer.county}`, 45, yPos + 55);
-      
-      // Right box - Farm info
-      doc.fontSize(11).font('Helvetica-Bold').text('Farm Details', 315, yPos + 10);
-      doc.fontSize(10).font('Helvetica');
-      doc.text(`GPS: ${farmer.gpsCoordinates}`, 315, yPos + 25);
-      doc.text(`Farm Size: ${farmer.farmSize} hectares`, 315, yPos + 40);
-      doc.text(`Primary Crop: ${farmer.cropType}`, 315, yPos + 55);
-      
-      yPos += 100;
-
-      // === COCOA TRADE INFORMATION ===
-      doc.fontSize(14).font('Helvetica-Bold').text('COCOA TRADE CERTIFICATION', 40, yPos);
-      yPos += 25;
-      
-      // Trade information boxes
-      doc.rect(40, yPos, 515, 100).strokeColor('#8B4513').lineWidth(2).stroke();
-      doc.rect(40, yPos, 515, 30).fillColor('#8B4513').fill();
-      
-      doc.fillColor('#ffffff').fontSize(12).font('Helvetica-Bold');
-      doc.text('CERTIFIED COCOA TRADE SPECIFICATIONS', 50, yPos + 8);
+      yPos = 120;
       doc.fillColor('#000000');
-      yPos += 40;
+
+      // === LEGAL BASIS & CERTIFICATE INFORMATION ===
+      doc.fontSize(16).font('Helvetica-Bold').text('LEGAL BASIS & CERTIFICATE DETAILS', 30, yPos);
+      yPos += 25;
       
-      // Trade details in columns
-      const cocoaTradeInfo = [
-        ['HS Code:', '1801.00.10 - Cocoa Beans, Raw/Unroasted'],
-        ['Commodity Classification:', 'Premium Grade Cocoa Beans'],
-        ['Certified Quantity:', `${farmer.cropQuantity || '2,450'} kg`],
-        ['Quality Grade:', 'Grade I - Premium Export Quality'],
-        ['Moisture Content:', '≤ 7.5% (Export Standard)'],
-        ['Bean Size:', '100+ beans per 100g (Superior Grade)'],
-        ['Fermentation Level:', 'Well Fermented (80%+ brown beans)'],
-        ['Export Destination:', 'European Union Markets']
+      // Legal framework box
+      doc.rect(30, yPos, 535, 70).strokeColor('#0f4c75').lineWidth(2).stroke();
+      doc.rect(30, yPos, 535, 25).fillColor('#e8f4fd').fill();
+      
+      doc.fontSize(11).font('Helvetica-Bold').fillColor('#0f4c75');
+      doc.text('LEGAL FRAMEWORK: EU REGULATION 2023/1115 - DEFORESTATION-FREE PRODUCTS', 35, yPos + 8);
+      
+      doc.fillColor('#000000').fontSize(9).font('Helvetica');
+      doc.text('This certificate is issued under EU Regulation 2023/1115 laying down rules on the making available on the Union', 35, yPos + 35);
+      doc.text('market and the export from the Union of certain commodities and products associated with deforestation and forest degradation.', 35, yPos + 47);
+      doc.text('Articles 3, 4, 5, 10 & 30 - Due Diligence Statement & Traceability Requirements Compliance Verified.', 35, yPos + 59);
+      
+      yPos += 85;
+
+      // Certificate details grid
+      doc.fontSize(12).font('Helvetica-Bold').text('CERTIFICATE IDENTIFICATION', 30, yPos);
+      yPos += 20;
+      
+      const certDetails = [
+        ['Certificate Number:', certNumber, 'Issue Date:', issueDate],
+        ['Valid Until:', validUntil, 'Regulation Article:', 'Articles 3, 4, 5, 10, 30'],
+        ['Commodity Code:', 'HS 1801.00.10 (Cocoa)', 'Risk Assessment:', 'LOW RISK - VERIFIED'],
+        ['GPS Coordinates:', farmer.gpsCoordinates, 'Batch Code:', farmer.batchNumber || 'AUTO-GENERATED']
       ];
       
-      // Left column
-      cocoaTradeInfo.slice(0, 4).forEach((info, index) => {
-        const infoY = yPos + (index * 15);
-        doc.fontSize(9).font('Helvetica-Bold').text(info[0], 50, infoY);
-        doc.font('Helvetica').text(info[1], 180, infoY);
+      certDetails.forEach((row, index) => {
+        const rowY = yPos + (index * 18);
+        doc.fontSize(9).font('Helvetica-Bold').text(row[0], 30, rowY);
+        doc.font('Helvetica').text(row[1], 130, rowY);
+        doc.font('Helvetica-Bold').text(row[2], 320, rowY);
+        doc.font('Helvetica').text(row[3], 420, rowY);
       });
       
-      // Right column  
-      cocoaTradeInfo.slice(4).forEach((info, index) => {
-        const infoY = yPos + (index * 15);
-        doc.fontSize(9).font('Helvetica-Bold').text(info[0], 320, infoY);
-        doc.font('Helvetica').text(info[1], 450, infoY);
+      yPos += 90;
+
+      // === PRODUCER & FARM VERIFICATION ===
+      doc.fontSize(14).font('Helvetica-Bold').text('VERIFIED PRODUCER & FARM INFORMATION', 30, yPos);
+      yPos += 25;
+      
+      // Producer box with verification status
+      doc.rect(30, yPos, 265, 90).strokeColor('#10b981').lineWidth(2).stroke();
+      doc.rect(30, yPos, 265, 25).fillColor('#d1fae5').fill();
+      doc.fontSize(11).font('Helvetica-Bold').fillColor('#065f46');
+      doc.text('✓ VERIFIED PRODUCER', 35, yPos + 8);
+      
+      doc.fillColor('#000000').fontSize(9).font('Helvetica');
+      doc.text(`Name: ${farmer.fullName}`, 35, yPos + 35);
+      doc.text(`Location: ${farmer.city}, ${farmer.county}`, 35, yPos + 47);
+      doc.text(`Email: ${farmer.email}`, 35, yPos + 59);
+      doc.text(`Registration: LACRA-${farmer.id}`, 35, yPos + 71);
+      
+      // Farm verification box
+      doc.rect(300, yPos, 265, 90).strokeColor('#3b82f6').lineWidth(2).stroke();
+      doc.rect(300, yPos, 265, 25).fillColor('#dbeafe').fill();
+      doc.fontSize(11).font('Helvetica-Bold').fillColor('#1e40af');
+      doc.text('✓ FARM VERIFICATION', 305, yPos + 8);
+      
+      doc.fillColor('#000000').fontSize(9).font('Helvetica');
+      doc.text(`GPS: ${farmer.gpsCoordinates}`, 305, yPos + 35);
+      doc.text(`Farm Size: ${farmer.farmSize} hectares`, 305, yPos + 47);
+      doc.text(`Primary Crop: ${farmer.cropType}`, 305, yPos + 59);
+      doc.text(`Satellite Verified: YES`, 305, yPos + 71);
+      
+      yPos += 110;
+
+      // === DEFORESTATION RISK ASSESSMENT WITH LEGEND ===
+      if (yPos > 650) {
+        doc.addPage();
+        yPos = 30;
+      }
+      
+      doc.fontSize(14).font('Helvetica-Bold').text('DEFORESTATION RISK ASSESSMENT & ANALYSIS', 30, yPos);
+      yPos += 25;
+      
+      // Risk assessment visual chart with legend
+      doc.rect(30, yPos, 535, 160).strokeColor('#e5e7eb').stroke();
+      doc.rect(30, yPos, 535, 25).fillColor('#f9fafb').fill();
+      doc.fontSize(11).font('Helvetica-Bold').text('COMPREHENSIVE RISK ANALYSIS WITH VISUAL INDICATORS', 35, yPos + 8);
+      
+      yPos += 35;
+      
+      // Risk categories with visual bars and legends
+      const riskCategories = [
+        { name: 'Forest Loss Risk', value: 5, max: 100, color: '#22c55e', status: 'EXCELLENT' },
+        { name: 'Legal Compliance', value: 98, max: 100, color: '#22c55e', status: 'COMPLIANT' },
+        { name: 'Supply Chain Integrity', value: 95, max: 100, color: '#22c55e', status: 'VERIFIED' },
+        { name: 'Documentation Quality', value: 100, max: 100, color: '#22c55e', status: 'COMPLETE' }
+      ];
+      
+      riskCategories.forEach((category, index) => {
+        const barY = yPos + (index * 25);
+        
+        // Category label
+        doc.fontSize(10).font('Helvetica-Bold').text(category.name, 40, barY);
+        
+        // Progress bar background
+        doc.rect(200, barY, 200, 15).fillColor('#f3f4f6').fill().strokeColor('#d1d5db').stroke();
+        
+        // Progress bar fill
+        const barWidth = (category.value / category.max) * 200;
+        doc.rect(200, barY, barWidth, 15).fillColor(category.color).fill();
+        
+        // Value and status
+        doc.fontSize(9).font('Helvetica').text(`${category.value}%`, 410, barY + 3);
+        doc.font('Helvetica-Bold').text(category.status, 450, barY + 3);
+      });
+      
+      // Legend for risk assessment
+      yPos += 110;
+      doc.fontSize(10).font('Helvetica-Bold').text('LEGEND:', 40, yPos);
+      doc.fontSize(8).font('Helvetica');
+      doc.rect(85, yPos - 2, 10, 10).fillColor('#22c55e').fill();
+      doc.text('Low Risk/Compliant (90-100%)', 100, yPos);
+      doc.rect(230, yPos - 2, 10, 10).fillColor('#fbbf24').fill();
+      doc.text('Medium Risk (70-89%)', 245, yPos);
+      doc.rect(360, yPos - 2, 10, 10).fillColor('#ef4444').fill();
+      doc.text('High Risk (<70%)', 375, yPos);
+      
+      yPos += 30;
+
+      // === SUPPLY CHAIN TRACEABILITY WITH QR CODE ===
+      doc.fontSize(14).font('Helvetica-Bold').text('SUPPLY CHAIN TRACEABILITY & VERIFICATION', 30, yPos);
+      yPos += 25;
+      
+      // Traceability workflow with legend
+      doc.rect(30, yPos, 535, 120).strokeColor('#1f2937').lineWidth(2).stroke();
+      doc.rect(30, yPos, 535, 25).fillColor('#374151').fill();
+      doc.fillColor('#ffffff').fontSize(11).font('Helvetica-Bold');
+      doc.text('COMPLETE TRACEABILITY WORKFLOW - FROM FARM TO EU MARKET', 35, yPos + 8);
+      
+      yPos += 35;
+      doc.fillColor('#000000');
+      
+      // Workflow steps with visual indicators
+      const workflowSteps = [
+        { step: '1', name: 'FARM', desc: 'GPS Verified', color: '#10b981', x: 60 },
+        { step: '2', name: 'HARVEST', desc: 'Batch Coded', color: '#3b82f6', x: 150 },
+        { step: '3', name: 'QUALITY', desc: 'LACRA Approved', color: '#8b5cf6', x: 240 },
+        { step: '4', name: 'EXPORT', desc: 'EU Compliant', color: '#f59e0b', x: 330 },
+        { step: '5', name: 'DELIVERY', desc: 'Traced & Verified', color: '#ef4444', x: 420 }
+      ];
+      
+      workflowSteps.forEach((step, index) => {
+        // Step circle with number
+        doc.circle(step.x, yPos + 15, 18).fillColor(step.color).fill();
+        doc.fillColor('#ffffff').fontSize(12).font('Helvetica-Bold');
+        doc.text(step.step, step.x - 4, yPos + 9);
+        
+        // Step details
+        doc.fillColor('#000000').fontSize(9).font('Helvetica-Bold');
+        doc.text(step.name, step.x - 20, yPos + 40);
+        doc.fontSize(8).font('Helvetica');
+        doc.text(step.desc, step.x - 25, yPos + 53);
+        
+        // Arrow to next step
+        if (index < workflowSteps.length - 1) {
+          doc.moveTo(step.x + 25, yPos + 15)
+             .lineTo(step.x + 55, yPos + 15)
+             .lineTo(step.x + 50, yPos + 10)
+             .moveTo(step.x + 55, yPos + 15)
+             .lineTo(step.x + 50, yPos + 20)
+             .strokeColor('#6b7280')
+             .lineWidth(2)
+             .stroke();
+        }
+      });
+      
+      // QR Code section
+      doc.rect(480, yPos, 70, 70).strokeColor('#000000').stroke();
+      doc.fontSize(8).font('Helvetica-Bold').text('QR CODE', 495, yPos + 10);
+      doc.fontSize(7).text('Scan for full', 488, yPos + 25);
+      doc.text('traceability', 490, yPos + 35);
+      doc.text('verification', 490, yPos + 45);
+      doc.text(`ID: ${certNumber}`, 485, yPos + 58);
+      
+      yPos += 90;
+
+      // === NEW PAGE FOR LEGAL COMPLIANCE ===
+      doc.addPage();
+      yPos = 30;
+      
+      // === LEGAL COMPLIANCE & REGULATORY REQUIREMENTS ===
+      doc.fontSize(16).font('Helvetica-Bold').text('LEGAL COMPLIANCE & REGULATORY VERIFICATION', 30, yPos);
+      yPos += 25;
+      
+      // EU Regulation compliance matrix
+      doc.rect(30, yPos, 535, 140).strokeColor('#0f4c75').lineWidth(2).stroke();
+      doc.rect(30, yPos, 535, 30).fillColor('#e8f4fd').fill();
+      doc.fontSize(12).font('Helvetica-Bold').fillColor('#0f4c75');
+      doc.text('EU REGULATION 2023/1115 - ARTICLE COMPLIANCE MATRIX', 35, yPos + 10);
+      
+      yPos += 40;
+      doc.fillColor('#000000');
+      
+      // Compliance requirements with checkmarks
+      const complianceItems = [
+        { article: 'Article 3', requirement: 'Due Diligence Statement', status: '✓ COMPLIANT', color: '#22c55e' },
+        { article: 'Article 4', requirement: 'Risk Assessment & Mitigation', status: '✓ VERIFIED', color: '#22c55e' },
+        { article: 'Article 5', requirement: 'Information Requirements', status: '✓ COMPLETE', color: '#22c55e' },
+        { article: 'Article 10', requirement: 'Geolocation Coordinates', status: '✓ PROVIDED', color: '#22c55e' },
+        { article: 'Article 30', requirement: 'Traceability Documentation', status: '✓ AVAILABLE', color: '#22c55e' }
+      ];
+      
+      complianceItems.forEach((item, index) => {
+        const itemY = yPos + (index * 18);
+        
+        doc.fontSize(9).font('Helvetica-Bold').text(item.article, 40, itemY);
+        doc.font('Helvetica').text(item.requirement, 120, itemY);
+        doc.fillColor(item.color).font('Helvetica-Bold').text(item.status, 350, itemY);
+        doc.fillColor('#000000');
+      });
+      
+      yPos += 120;
+
+      // === COMMODITY SPECIFICATION & TRADE INFORMATION ===
+      doc.fontSize(14).font('Helvetica-Bold').text('COMMODITY SPECIFICATION & TRADE DETAILS', 30, yPos);
+      yPos += 25;
+      
+      // Trade information with EU requirements
+      doc.rect(30, yPos, 535, 100).strokeColor('#8b4513').lineWidth(2).stroke();
+      doc.rect(30, yPos, 535, 25).fillColor('#fef3c7').fill();
+      doc.fontSize(11).font('Helvetica-Bold').fillColor('#92400e');
+      doc.text('CERTIFIED COCOA - EU IMPORT READY SPECIFICATIONS', 35, yPos + 8);
+      
+      yPos += 35;
+      doc.fillColor('#000000');
+      
+      const tradeSpecs = [
+        ['HS Code:', '1801.00.10 - Cocoa Beans, Raw', 'EU Import Category:', 'EUDR Relevant Commodity'],
+        ['Quantity:', `${farmer.cropQuantity || '2,450'} kg`, 'Quality Grade:', 'Premium Export Quality'],
+        ['Moisture Content:', '≤ 7.5% (EU Standard)', 'Fermentation:', '≥ 80% Well Fermented'],
+        ['Bean Count:', '100+ beans/100g', 'Certification Level:', 'EUDR Compliant - Approved']
+      ];
+      
+      tradeSpecs.forEach((spec, index) => {
+        const specY = yPos + (index * 15);
+        doc.fontSize(9).font('Helvetica-Bold').text(spec[0], 40, specY);
+        doc.font('Helvetica').text(spec[1], 140, specY);
+        doc.font('Helvetica-Bold').text(spec[2], 320, specY);
+        doc.font('Helvetica').text(spec[3], 430, specY);
       });
       
       yPos += 80;
 
-      // === PAGE 2 - CERTIFICATION STATEMENT ===
-      doc.addPage();
-      yPos = 50;
-
-      // === EUDR COMPLIANCE CONFIRMATION ===
-      doc.fontSize(16).font('Helvetica-Bold').text('EUDR COMPLIANCE CONFIRMATION', 40, yPos);
-      yPos += 30;
-      
-      // Compliance status box
-      doc.rect(40, yPos, 515, 100).strokeColor('#22c55e').lineWidth(3).stroke();
-      doc.rect(40, yPos, 515, 30).fillColor('#22c55e').fill();
-      
-      doc.fillColor('#ffffff').fontSize(14).font('Helvetica-Bold');
-      doc.text('✓ EUDR COMPLIANT - APPROVED FOR EU EXPORT', 60, yPos + 8);
-      
-      doc.fillColor('#000000').fontSize(11).font('Helvetica');
-      doc.text(`Farm: ${farmer.fullName} - ${farmer.city}, ${farmer.county}`, 60, yPos + 45);
-      doc.text(`GPS Coordinates: ${farmer.gpsCoordinates}`, 60, yPos + 60);
-      doc.text(`Deforestation Risk: LOW - Verified Sustainable`, 60, yPos + 75);
-      
-      yPos += 120;
-
-      // === CERTIFICATION STATEMENT ===
-      doc.fontSize(12).font('Helvetica-Bold').text('OFFICIAL CERTIFICATION STATEMENT', 40, yPos);
+      // === FINAL CERTIFICATION STATEMENT ===
+      doc.fontSize(14).font('Helvetica-Bold').text('OFFICIAL CERTIFICATION STATEMENT', 30, yPos);
       yPos += 20;
       
-      doc.fontSize(10).font('Helvetica').text(
-        `This certificate confirms that the agricultural production from ${farmer.fullName}'s farm ` +
-        `meets all requirements of the EU Deforestation Regulation (EUDR). The farm has been verified ` +
-        `as deforestation-free with complete supply chain traceability.`,
+      // Final compliance box
+      doc.rect(30, yPos, 535, 80).strokeColor('#22c55e').lineWidth(3).stroke();
+      doc.rect(30, yPos, 535, 25).fillColor('#22c55e').fill();
+      doc.fillColor('#ffffff').fontSize(12).font('Helvetica-Bold');
+      doc.text('✓ CERTIFIED EUDR COMPLIANT - APPROVED FOR EU MARKET ENTRY', 35, yPos + 8);
+      
+      yPos += 35;
+      doc.fillColor('#000000').fontSize(10).font('Helvetica');
+      doc.text(
+        `This certificate confirms that cocoa produced by ${farmer.fullName} at GPS coordinates ${farmer.gpsCoordinates} ` +
+        `in ${farmer.city}, ${farmer.county} meets all requirements of EU Regulation 2023/1115. The production is verified ` +
+        `as deforestation-free with complete due diligence documentation and supply chain traceability systems in place.`,
         40, yPos, { width: 515, align: 'justify' }
       );
+      
       yPos += 60;
 
-      // === SIGNATURES ===
-      doc.rect(40, yPos, 250, 60).strokeColor('#cccccc').stroke();
-      doc.rect(305, yPos, 250, 60).strokeColor('#cccccc').stroke();
+      // === AUTHORITY SIGNATURES ===
+      doc.rect(30, yPos, 260, 65).strokeColor('#cccccc').stroke();
+      doc.rect(305, yPos, 260, 65).strokeColor('#cccccc').stroke();
       
-      doc.fontSize(10).font('Helvetica-Bold').text('LACRA Certification Officer', 45, yPos + 10);
-      doc.fontSize(9).font('Helvetica').text('Digital Signature Applied', 45, yPos + 25);
-      doc.text(`Date: ${issueDate}`, 45, yPos + 40);
+      doc.fontSize(10).font('Helvetica-Bold').text('LACRA Certification Authority', 35, yPos + 10);
+      doc.fontSize(9).font('Helvetica').text('Digital Signature Applied', 35, yPos + 25);
+      doc.text('License: LR-CERT-2024-001', 35, yPos + 37);
+      doc.text(`Date: ${issueDate}`, 35, yPos + 49);
       
-      doc.fontSize(10).font('Helvetica-Bold').text('ECOENVIROS Auditor', 310, yPos + 10);
+      doc.fontSize(10).font('Helvetica-Bold').text('ECOENVIROS EU Auditor', 310, yPos + 10);
       doc.fontSize(9).font('Helvetica').text('Third-Party Verification', 310, yPos + 25);
-      doc.text(`Audit Date: ${issueDate}`, 310, yPos + 40);
+      doc.text('ISO 14001:2015 Certified', 310, yPos + 37);
+      doc.text(`Verification: ${issueDate}`, 310, yPos + 49);
 
       // === FOOTER ===
       yPos += 80;
       doc.fontSize(8).font('Helvetica').fillColor('#666666');
-      doc.text('This certificate is digitally generated and verified. For validation, visit: verify.lacra.gov.lr', 40, yPos);
-      doc.text(`Certificate ID: ${certNumber} | Generated: ${new Date().toISOString()}`, 40, yPos + 12);
+      doc.text('This certificate is digitally generated and verified. For online validation: verify.lacra.gov.lr/eudr', 30, yPos);
+      doc.text(`Certificate ID: ${certNumber} | Generated: ${new Date().toISOString()} | Regulation: EU 2023/1115`, 30, yPos + 12);
 
       doc.end();
       
     } catch (error) {
-      console.error('Error generating EUDR certificate:', error);
+      console.error('Error generating professional EUDR certificate:', error);
       res.status(500).json({ error: 'Failed to generate EUDR certificate' });
     }
   });

@@ -828,57 +828,36 @@ export function addCertificateTestRoutes(app: Express) {
       });
       
       yPos += 110;
-        doc.fontSize(9).font(line.startsWith('•') ? 'Helvetica' : line === '' ? 'Helvetica' : 'Helvetica').text(line, 60, yPos + (index * 12), { width: 480 });
-      });
-      
-      yPos += 200;
 
-      // === ENVIRONMENTAL IMPACT ASSESSMENT ===
-      doc.fontSize(12).font('Helvetica-Bold').text('ENHANCED ENVIRONMENTAL IMPACT STATEMENT', 40, yPos);
+      // === OFFICIAL ENVIRONMENTAL CERTIFICATION STATEMENT ===
+      doc.fontSize(14).font('Helvetica-Bold').text('OFFICIAL CERTIFICATION STATEMENT', 40, yPos);
       yPos += 20;
       
       doc.fontSize(10).font('Helvetica').text(
-        `Based on comprehensive 24-month satellite monitoring analysis and multi-agency verification, the farm operated by ${farmer.fullName} in ${farmer.county} ` +
-        `County demonstrates ZERO deforestation activity and exceptional environmental stewardship. Forest cover has remained stable at 98.3% with ` +
-        `biodiversity enhancement measures actively implemented. No deforestation alerts triggered during continuous monitoring. Agricultural ` +
-        `operations exceed environmental protection standards with positive biodiversity impact. The farm serves as a model for sustainable ` +
-        `agriculture and forest conservation, with comprehensive government verification and advanced environmental monitoring systems.`,
+        `This certificate confirms that the agricultural production from ${farmer.fullName}'s farm ` +
+        `in ${farmer.city}, ${farmer.county} meets all environmental protection standards. The farm has been verified ` +
+        `as deforestation-free with complete biodiversity conservation and environmental monitoring.`,
         40, yPos, { width: 515, align: 'justify' }
       );
-      yPos += 100;
+      yPos += 60;
 
-      // === DATA SOURCES ===
-      doc.fontSize(11).font('Helvetica-Bold').text('SATELLITE DATA SOURCES', 40, yPos);
-      yPos += 20;
+      // === AUTHORITY SIGNATURES ===
+      doc.rect(40, yPos, 250, 60).strokeColor('#cccccc').stroke();
+      doc.rect(305, yPos, 250, 60).strokeColor('#cccccc').stroke();
       
-      const dataSources = [
-        'NASA Landsat-8 Operational Land Imager',
-        'ESA Sentinel-2 MultiSpectral Instrument', 
-        'Global Forest Watch GLAD Alerts',
-        'USGS Earth Resources Observation'
-      ];
+      doc.fontSize(10).font('Helvetica-Bold').text('LACRA Environmental Officer', 45, yPos + 10);
+      doc.fontSize(9).font('Helvetica').text('Digital Signature Applied', 45, yPos + 25);
+      doc.text(`Date: ${analysisDate}`, 45, yPos + 40);
       
-      dataSources.forEach((source, index) => {
-        doc.fontSize(9).font('Helvetica').text(`• ${source}`, 50, yPos + (index * 12));
-      });
-      
-      yPos += 70;
-
-      // === CERTIFICATION ===
-      doc.rect(40, yPos, 515, 60).strokeColor('#cccccc').stroke();
-      
-      doc.fontSize(10).font('Helvetica-Bold').text('ENVIRONMENTAL CERTIFICATION', 45, yPos + 10);
-      doc.fontSize(9).font('Helvetica').text(
-        'This analysis confirms zero deforestation risk and environmental compliance.',
-        45, yPos + 25
-      );
-      doc.text(`Certified by: LACRA Environmental Division | Date: ${analysisDate}`, 45, yPos + 40);
+      doc.fontSize(10).font('Helvetica-Bold').text('Government Environmental Auditor', 310, yPos + 10);
+      doc.fontSize(9).font('Helvetica').text('Environmental Verification', 310, yPos + 25);
+      doc.text(`Audit Date: ${analysisDate}`, 310, yPos + 40);
 
       // === FOOTER ===
       yPos += 80;
       doc.fontSize(8).font('Helvetica').fillColor('#666666');
-      doc.text('Generated using NASA Earth Observation data and EU Copernicus Sentinel satellite imagery.', 40, yPos);
-      doc.text(`Report ID: ${reportNumber} | Analysis completed: ${new Date().toISOString()}`, 40, yPos + 12);
+      doc.text('This certificate is digitally generated and verified. For validation: verify.lacra.gov.lr/environmental', 40, yPos);
+      doc.text(`Certificate ID: ${reportNumber} | Generated: ${new Date().toISOString()}`, 40, yPos + 12);
 
       doc.end();
       

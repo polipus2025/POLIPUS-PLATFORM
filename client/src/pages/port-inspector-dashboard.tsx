@@ -608,7 +608,10 @@ export default function PortInspectorDashboard() {
                           <p className="text-sm text-slate-600">Quantity: {inspection.quantity}</p>
                           <p className="text-sm text-slate-600">Custody ID: {inspection.shipmentId}</p>
                           <p className="text-sm text-slate-600 font-semibold text-blue-600 bg-blue-50 px-2 py-1 rounded">
-                            QR Batch Code: {inspection.qrBatchCode || inspection.verificationCode}
+                            QR Batch Code: {inspection.qrBatchCode}
+                          </p>
+                          <p className="text-sm text-slate-600 font-semibold text-green-600 bg-green-50 px-2 py-1 rounded mt-1">
+                            Verification Code: {inspection.verificationCode}
                           </p>
                         </div>
                         

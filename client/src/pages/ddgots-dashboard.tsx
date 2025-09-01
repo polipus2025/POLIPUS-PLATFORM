@@ -104,47 +104,11 @@ export default function DDGOTSDashboard() {
     queryFn: () => apiRequest('/api/eudr/pending-approval'),
   });
 
-  // Port inspection booking data - Using real database data since API has complex errors
+  // Port inspection booking data - Now calls the real API with completion status
   const { data: pendingAssignments, isLoading: pendingAssignmentsLoading } = useQuery({
-    queryKey: ['/api/ddgots/pending-inspector-assignments'],
-    queryFn: () => {
-      // Return the real data from database that we confirmed exists
-      return Promise.resolve({
-        success: true,
-        data: [{
-          bookingId: 'PINSP-20250831-TEST',
-          requestId: 'CUSTODY-SINGLE-001-20250830-T6M',
-          transactionId: 'CUSTODY-SINGLE-001-20250830-T6M',
-          commodityType: 'Cocoa',
-          quantity: '600',
-          unit: 'tons',
-          totalValue: 150000,
-          dispatchDate: '2025-09-05T10:00:00.000Z',
-          buyerName: 'VIVAAN GUPTA',
-          buyerCompany: 'VIVAAN GUPTA', 
-          verificationCode: 'BE-DISPATCH-NEW-FIXED-2025',
-          county: 'County',
-          farmLocation: 'Unknown',
-          exporterId: 'EXP-TEST',
-          exporterName: 'Test Exporter',
-          exporterCompany: 'Test Export Company',
-          portFacility: 'Exporter Warehouse',
-          inspectionType: 'quality_compliance',
-          scheduledDate: '2025-09-08T14:00:00.000Z',
-          urgencyLevel: 'normal',
-          assignmentStatus: 'assigned',
-          assignedInspectorId: 'INS-PORT-001',
-          assignedInspectorName: 'James Kofi',
-          assignedBy: 'DDGOTS Admin',
-          assignedAt: '2025-08-31T14:54:29.160Z',
-          ddgotsNotes: 'Test assignment',
-          bookedAt: '2025-08-31T14:25:56.453Z',
-          bookedBy: 'exporter-system',
-          inspectionDate: 'Sunday, September 8, 2025'
-        }]
-      });
-    },
-    refetchInterval: 30000 // Refresh every 30 seconds
+    queryKey: ['/api/ddgots/inspector-assignments'],
+    queryFn: () => apiRequest('/api/ddgots/inspector-assignments'),
+    refetchInterval: 30000 // Refresh every 30 seconds to show completion updates
   });
 
   const { data: portInspectors, isLoading: inspectorsLoading } = useQuery({

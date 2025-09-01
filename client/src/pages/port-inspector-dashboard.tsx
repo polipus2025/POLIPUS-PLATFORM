@@ -274,24 +274,24 @@ export default function PortInspectorDashboard() {
     if (!qrCodeInput.trim()) {
       toast({
         title: "QR Code Required",
-        description: "Please enter the QR code number or scan with camera",
+        description: "Please enter the QR batch code or scan with camera",
         variant: "destructive"
       });
       return;
     }
 
-    // Process QR code verification - check if it matches expected container
-    const expectedContainer = "CONT-CUSTODY-SINGLE-001-20250830-T6M-01";
-    if (qrCodeInput.includes("CONT-CUSTODY-SINGLE-001-20250830-T6M") || qrCodeInput.includes("CUSTODY-SINGLE-001-20250830-T6M")) {
+    // Process QR code verification - check if it matches expected batch code
+    const expectedBatchCode = "BE-DISPATCH-NEW-FIXED-2025";
+    if (qrCodeInput.includes("BE-DISPATCH-NEW-FIXED-2025") || qrCodeInput === expectedBatchCode) {
       toast({
-        title: "✅ QR Code Verified Successfully",
-        description: `Container ${expectedContainer} verified. Product quality and quantity confirmed for inspection ${currentInspectionId}.`,
+        title: "✅ QR Batch Code Verified Successfully",
+        description: `Batch code ${expectedBatchCode} verified. Product quality and quantity confirmed for inspection ${currentInspectionId}.`,
         duration: 5000
       });
     } else {
       toast({
-        title: "⚠️ QR Code Verification",
-        description: `QR code processed for inspection ${currentInspectionId}. Please verify container details manually.`,
+        title: "⚠️ QR Batch Code Verification",
+        description: `QR batch code processed for inspection ${currentInspectionId}. Please verify batch code manually if different.`,
         duration: 4000
       });
     }
@@ -589,10 +589,9 @@ export default function PortInspectorDashboard() {
                           <p className="text-sm text-slate-600">Commodity: {inspection.commodity}</p>
                           <p className="text-sm text-slate-600">Quantity: {inspection.quantity}</p>
                           <p className="text-sm text-slate-600">Custody ID: {inspection.shipmentId}</p>
-                          <p className="text-sm text-slate-600 font-semibold text-blue-600">QR Container: {inspection.containers.join(", ")}</p>
-                          {inspection.verificationCode && (
-                            <p className="text-sm text-slate-600">Verification: {inspection.verificationCode}</p>
-                          )}
+                          <p className="text-sm text-slate-600 font-semibold text-blue-600 bg-blue-50 px-2 py-1 rounded">
+                            QR Batch Code: {inspection.qrBatchCode || inspection.verificationCode}
+                          </p>
                         </div>
                         
                         <div>
@@ -1043,17 +1042,17 @@ export default function PortInspectorDashboard() {
                   QR Code Scanner
                 </CardTitle>
                 <CardDescription>
-                  Scan or enter QR code for inspection {currentInspectionId}
+                  Scan or enter QR batch code for inspection {currentInspectionId}
                   <br />
-                  <span className="text-blue-600 font-medium">Expected Container: CONT-CUSTODY-SINGLE-001-20250830-T6M-01</span>
+                  <span className="text-blue-600 font-medium">Expected Batch Code: BE-DISPATCH-NEW-FIXED-2025</span>
                 </CardDescription>
               </CardHeader>
               <CardContent className="space-y-4">
                 <div>
-                  <Label htmlFor="qr-input">Enter QR Code Number</Label>
+                  <Label htmlFor="qr-input">Enter QR Batch Code</Label>
                   <Input
                     id="qr-input"
-                    placeholder="Enter QR code number..."
+                    placeholder="Enter QR batch code (e.g., BE-DISPATCH-NEW-FIXED-2025)..."
                     value={qrCodeInput}
                     onChange={(e) => setQrCodeInput(e.target.value)}
                     className="mt-1"
@@ -1067,7 +1066,7 @@ export default function PortInspectorDashboard() {
                     disabled={!qrCodeInput.trim()}
                   >
                     <CheckSquare className="w-4 h-4 mr-1" />
-                    Verify QR Code
+                    Verify Batch Code
                   </Button>
                   <Button 
                     variant="outline"

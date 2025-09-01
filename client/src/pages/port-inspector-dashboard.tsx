@@ -26,7 +26,12 @@ import {
   Scan,
   Camera,
   Shield,
-  FileCheck
+  FileCheck,
+  QrCode,
+  CheckSquare,
+  AlertCircle,
+  Play,
+  Square
 } from "lucide-react";
 import { Label } from "@/components/ui/label";
 import ProfileDropdown from "@/components/ProfileDropdown";
@@ -136,17 +141,7 @@ export default function PortInspectorDashboard() {
     exportersActive: 24
   };
 
-  // Helper functions for actions
-  const handleStartInspection = (inspectionId: string) => {
-    startInspectionMutation.mutate(inspectionId);
-  };
-
-  const handleCompleteInspection = (inspectionId: string, status: string) => {
-    completeInspectionMutation.mutate({
-      inspectionId,
-      data: { status, notes: `Inspection ${status}`, violations: null }
-    });
-  };
+  // Helper functions for actions - removed duplicate definitions
 
   // Document verification functions
   const verifyDocumentMutation = useMutation({
@@ -240,9 +235,39 @@ export default function PortInspectorDashboard() {
       case 'completed': return 'bg-green-100 text-green-800';
       case 'in_progress': return 'bg-blue-100 text-blue-800';
       case 'pending': return 'bg-orange-100 text-orange-800';
+      case 'assigned': return 'bg-blue-100 text-blue-800';
       case 'failed': return 'bg-red-100 text-red-800';
       default: return 'bg-gray-100 text-slate-800';
     }
+  };
+
+  // Inspection workflow handlers
+  const handleStartInspection = (inspectionId: string) => {
+    startInspectionMutation.mutate(inspectionId);
+  };
+
+  const handleCompleteInspection = (inspectionId: string) => {
+    const inspectionData = {
+      inspectionId,
+      data: {
+        status: 'completed',
+        quantityVerified: true,
+        qualityVerified: true,
+        eudrCompliant: true,
+        completedBy: 'James Kofi',
+        completedAt: new Date().toISOString()
+      }
+    };
+    completeInspectionMutation.mutate(inspectionData);
+  };
+
+  const handleQRScan = (inspectionId: string) => {
+    toast({
+      title: "QR Scanner Ready",
+      description: `Scan QR code for inspection ${inspectionId} to verify product details`,
+      duration: 3000
+    });
+    startCamera();
   };
 
   return (
@@ -472,7 +497,28 @@ export default function PortInspectorDashboard() {
                               <Eye className="w-4 h-4 mr-1" />
                               Review
                             </Button>
-                            {inspection.status === 'pending' ? (
+                            {inspection.status === 'assigned' ? (
+                              <>
+                                <Button 
+                                  size="sm" 
+                                  variant="outline"
+                                  onClick={() => handleQRScan(inspection.id)}
+                                  className="bg-blue-50 hover:bg-blue-100"
+                                >
+                                  <QrCode className="w-4 h-4 mr-1" />
+                                  QR Scanner
+                                </Button>
+                                <Button 
+                                  size="sm" 
+                                  onClick={() => handleCompleteInspection(inspection.id)}
+                                  className="bg-green-600 hover:bg-green-700 text-white"
+                                  disabled={completeInspectionMutation.isPending}
+                                >
+                                  <CheckSquare className="w-4 h-4 mr-1" />
+                                  Complete Inspection
+                                </Button>
+                              </>
+                            ) : inspection.status === 'pending' ? (
                               <Button 
                                 size="sm" 
                                 onClick={() => handleStartInspection(inspection.id)}
@@ -483,7 +529,7 @@ export default function PortInspectorDashboard() {
                             ) : (
                               <Button 
                                 size="sm"
-                                onClick={() => handleCompleteInspection(inspection.id, 'approved')}
+                                onClick={() => handleCompleteInspection(inspection.id)}
                                 disabled={completeInspectionMutation.isPending}
                               >
                                 Complete

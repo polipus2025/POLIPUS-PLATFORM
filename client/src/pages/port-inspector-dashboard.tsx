@@ -585,15 +585,6 @@ export default function PortInspectorDashboard() {
                           <h4 className="font-medium mb-2">Exporter Details</h4>
                           <p className="text-sm text-slate-600">ID: {inspection.exporterId}</p>
                           <p className="font-medium">{inspection.exporterName}</p>
-                          {inspection.exporterContactPerson && (
-                            <p className="text-sm text-slate-600">Contact: {inspection.exporterContactPerson}</p>
-                          )}
-                          {inspection.exporterEmail && (
-                            <p className="text-sm text-slate-600">Email: {inspection.exporterEmail}</p>
-                          )}
-                          {inspection.exporterPhone && (
-                            <p className="text-sm text-slate-600">Phone: {inspection.exporterPhone}</p>
-                          )}
                         </div>
                         
                         <div>

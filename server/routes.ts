@@ -14446,11 +14446,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
       if (inspectorId === 'INS-PORT-001') {
         const ddgotsInspections = [{
           id: 'PINSP-20250831-TEST',
-          exporterId: 'EXP-20250818-627',
-          exporterName: 'Premium Exports Liberia',
-          exporterContactPerson: 'Marcus Williams',
-          exporterEmail: 'marcus@premiumexports.lr',
-          exporterPhone: '+231-77-123-4567',
+          exporterId: 'EXP-TEST',
+          exporterName: 'Test Exporter',
           shipmentId: 'CUSTODY-SINGLE-001-20250830-T6M',
           commodity: 'Cocoa',
           quantity: '600 tons',

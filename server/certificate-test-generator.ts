@@ -776,200 +776,58 @@ export function addCertificateTestRoutes(app: Express) {
       
       yPos += 100;
 
-      // === LIBERIAN LAND AUTHORITY ENVIRONMENTAL DOCUMENTATION ===
-      doc.addPage();
-      yPos = 50;
+      // === PAGE 2 - ENVIRONMENTAL COMPLIANCE STATEMENT ===
+      if (yPos > 650) {
+        doc.addPage();
+        yPos = 50;
+      }
       
-      doc.fontSize(16).font('Helvetica-Bold').text('LIBERIAN LAND AUTHORITY ENVIRONMENTAL CLEARANCE', 40, yPos);
-      yPos += 30;
+      // === ENVIRONMENTAL COMPLIANCE CONFIRMATION ===
+      doc.fontSize(16).font('Helvetica-Bold').text('ENVIRONMENTAL COMPLIANCE CONFIRMATION', 40, yPos);
+      yPos += 25;
       
-      // Land Authority environmental header
-      doc.rect(40, yPos, 515, 40).fillColor('#228B22').fill();
-      doc.fillColor('#ffffff').fontSize(12).font('Helvetica-Bold');
-      doc.text('REPUBLIC OF LIBERIA - LAND AUTHORITY ENVIRONMENTAL DIVISION', 50, yPos + 8);
-      doc.fontSize(10).font('Helvetica');
-      doc.text('Forest Conservation and Anti-Deforestation Certification', 50, yPos + 25);
-      doc.fillColor('#000000');
-      yPos += 60;
+      // Compliance status box
+      doc.rect(40, yPos, 515, 100).strokeColor('#22c55e').lineWidth(3).stroke();
+      doc.rect(40, yPos, 515, 30).fillColor('#22c55e').fill();
       
-      // Environmental land documentation
-      const envLandInfo = [
-        ['Environmental Clearance Number:', `ENV-${landDoc.deedNumber}`],
-        ['Forest Assessment Date:', landDoc.registrationDate],
-        ['Conservation Area Size:', `${landDoc.landSize} hectares verified forest-free`],
-        ['GPS Environmental Markers:', landDoc.coordinates],
-        ['Conservation Status:', 'ZERO DEFORESTATION CERTIFIED'],
-        ['Environmental Surveyor:', landDoc.surveyorName],
-        ['LLA Environmental Officer:', landDoc.witnessOfficer],
-        ['Forest Impact Assessment:', 'NEGLIGIBLE IMPACT - APPROVED'],
-        ['Environmental Compliance Fee:', landDoc.registrationFee]
-      ];
+      doc.fillColor('#ffffff').fontSize(14).font('Helvetica-Bold');
+      doc.text('✓ ZERO DEFORESTATION CERTIFIED - ENVIRONMENTALLY APPROVED', 50, yPos + 8);
       
-      envLandInfo.forEach((info, index) => {
-        const infoY = yPos + (index * 20);
-        doc.fontSize(10).font('Helvetica-Bold').text(info[0], 50, infoY);
-        doc.font('Helvetica').text(info[1], 280, infoY);
-      });
+      doc.fillColor('#000000').fontSize(11).font('Helvetica');
+      doc.text(`Farm: ${farmer.fullName} - ${farmer.city}, ${farmer.county}`, 50, yPos + 45);
+      doc.text(`GPS Verified: ${farmer.gpsCoordinates}`, 50, yPos + 60);
+      doc.text(`Forest Impact: NEGLIGIBLE - Sustainable Agriculture`, 50, yPos + 75);
       
-      yPos += 200;
-      
-      // Environmental Land Authority certification box
-      doc.rect(40, yPos, 515, 80).strokeColor('#228B22').lineWidth(2).stroke();
-      doc.fontSize(11).font('Helvetica-Bold').text('OFFICIAL ENVIRONMENTAL LAND CERTIFICATION', 50, yPos + 15);
-      doc.fontSize(9).font('Helvetica').text(
-        'The Liberian Land Authority Environmental Division hereby certifies that this agricultural land has undergone ' +
-        'comprehensive forest impact assessment and maintains ZERO DEFORESTATION status. Satellite monitoring confirms ' +
-        'no forest loss within the designated agricultural boundaries. All environmental protection protocols are fully implemented.',
-        50, yPos + 35, { width: 500 }
-      );
-      
-      yPos += 100;
+      yPos += 120;
 
-      // === MINISTRY OF LABOUR ENVIRONMENTAL SUSTAINABILITY ===
-      yPos += 20;
-      doc.fontSize(16).font('Helvetica-Bold').text('MINISTRY OF LABOUR ENVIRONMENTAL SUSTAINABILITY', 40, yPos);
-      yPos += 30;
+      // === GOVERNMENT AUTHORITY CERTIFICATIONS ===
+      doc.fontSize(14).font('Helvetica-Bold').text('GOVERNMENT AUTHORITY CERTIFICATIONS', 40, yPos);
+      yPos += 25;
       
-      // Labour environmental header
-      doc.rect(40, yPos, 515, 40).fillColor('#2F4F4F').fill();
-      doc.fillColor('#ffffff').fontSize(12).font('Helvetica-Bold');
-      doc.text('MINISTRY OF LABOUR - ENVIRONMENTAL COMPLIANCE DIVISION', 50, yPos + 8);
-      doc.fontSize(10).font('Helvetica');
-      doc.text('Sustainable Environmental Farming Practices Certification', 50, yPos + 25);
-      doc.fillColor('#000000');
-      yPos += 60;
-      
-      // Environmental labour declaration
-      const envLabourInfo = [
-        ['Environmental Declaration:', `ENV-${labourDoc.declarationNumber}`],
-        ['Environmental Inspection:', labourDoc.inspectionDate],
-        ['Environmental Inspector:', labourDoc.inspectorName],
-        ['Farm Environmental Officer:', labourDoc.farmOwner],
-        ['Environmental Workforce Training:', `${labourDoc.workforceSize} workers certified`],
-        ['Sustainable Practices Status:', 'FULL ENVIRONMENTAL COMPLIANCE'],
-        ['Environmental Training Score:', labourDoc.workingConditionsScore],
-        ['Forest Protection Compliance:', labourDoc.safetyComplianceScore],
-        ['Environmental Sustainability Rating:', `${labourDoc.sustainabilityRating} - Forest Guardian`]
+      // Quick certification summary
+      const govCertifications = [
+        { authority: 'Liberian Land Authority', status: 'ENVIRONMENTAL CLEARANCE APPROVED', ref: `ENV-${landDoc.deedNumber}` },
+        { authority: 'Ministry of Labour', status: 'SUSTAINABLE PRACTICES CERTIFIED', ref: `ENV-${labourDoc.declarationNumber}` },
+        { authority: 'LACRA Environmental Division', status: 'BIODIVERSITY IMPACT APPROVED', ref: biodiversityDoc.assessmentId }
       ];
       
-      envLabourInfo.forEach((info, index) => {
-        const infoY = yPos + (index * 18);
-        doc.fontSize(9).font('Helvetica-Bold').text(info[0], 50, infoY);
-        doc.font('Helvetica').text(info[1], 280, infoY);
+      govCertifications.forEach((cert, index) => {
+        const certY = yPos + (index * 30);
+        
+        // Status indicator
+        doc.rect(40, certY, 20, 20).fillColor('#22c55e').fill();
+        doc.fillColor('#ffffff').fontSize(12).font('Helvetica-Bold');
+        doc.text('✓', 47, certY + 4);
+        
+        // Authority details
+        doc.fillColor('#000000').fontSize(11).font('Helvetica-Bold');
+        doc.text(cert.authority, 70, certY + 2);
+        doc.fontSize(10).font('Helvetica');
+        doc.text(cert.status, 70, certY + 16);
+        doc.fontSize(9).text(`Ref: ${cert.ref}`, 350, certY + 9);
       });
       
-      yPos += 180;
-      
-      // Environmental Labour certification box
-      doc.rect(40, yPos, 515, 80).strokeColor('#2F4F4F').lineWidth(2).stroke();
-      doc.fontSize(11).font('Helvetica-Bold').text('MINISTRY OF LABOUR ENVIRONMENTAL DECLARATION', 50, yPos + 15);
-      doc.fontSize(9).font('Helvetica').text(
-        'The Ministry of Labour Environmental Division certifies that all farming operations maintain exceptional ' +
-        'environmental standards with zero deforestation impact. Workers receive comprehensive environmental training, ' +
-        'sustainable farming practices are rigorously implemented, and forest conservation protocols are strictly followed.',
-        50, yPos + 35, { width: 500 }
-      );
-      
-      yPos += 100;
-
-      // === COMPREHENSIVE BIODIVERSITY ASSESSMENT ===
-      doc.addPage();
-      yPos = 50;
-      
-      doc.fontSize(16).font('Helvetica-Bold').text('COMPREHENSIVE BIODIVERSITY CONSERVATION ASSESSMENT', 40, yPos);
-      yPos += 30;
-      
-      // Enhanced biodiversity header
-      doc.rect(40, yPos, 515, 40).fillColor('#006400').fill();
-      doc.fillColor('#ffffff').fontSize(12).font('Helvetica-Bold');
-      doc.text('ADVANCED BIODIVERSITY CONSERVATION ANALYSIS', 50, yPos + 8);
-      doc.fontSize(10).font('Helvetica');
-      doc.text('Multi-Species Ecosystem Impact & Forest Conservation Assessment', 50, yPos + 25);
-      doc.fillColor('#000000');
-      yPos += 60;
-      
-      // Enhanced biodiversity details
-      const enhancedBiodiversityInfo = [
-        ['Conservation Assessment ID:', biodiversityDoc.assessmentId],
-        ['Lead Environmental Biologist:', biodiversityDoc.conductedBy],
-        ['Comprehensive Assessment Date:', biodiversityDoc.assessmentDate],
-        ['Forest Ecosystem Classification:', biodiversityDoc.ecosystemType],
-        ['Forest Habitat Conservation Quality:', biodiversityDoc.habitatQuality],
-        ['Species Conservation Status:', biodiversityDoc.conservationStatus],
-        ['Forest Soil Conservation Health:', biodiversityDoc.soilHealth],
-        ['Watershed Quality Assessment:', biodiversityDoc.waterQuality],
-        ['Forest Carbon Conservation Rate:', biodiversityDoc.carbonSequestration],
-        ['Total Biodiversity Conservation Score:', `${biodiversityDoc.biodiversityScore}/100 - EXCELLENT`]
-      ];
-      
-      enhancedBiodiversityInfo.forEach((info, index) => {
-        const infoY = yPos + (index * 18);
-        doc.fontSize(9).font('Helvetica-Bold').text(info[0], 50, infoY);
-        doc.font('Helvetica').text(info[1], 280, infoY);
-      });
-      
-      yPos += 200;
-      
-      // Enhanced species conservation chart
-      doc.fontSize(12).font('Helvetica-Bold').text('FOREST SPECIES CONSERVATION IMPACT ANALYSIS', 40, yPos);
-      yPos += 20;
-      
-      doc.rect(40, yPos, 515, 140).strokeColor('#e5e7eb').stroke();
-      
-      const conservationData = [
-        { species: 'Forest Birds', impact: 'POSITIVE', count: biodiversityDoc.speciesDiversity.birds, color: '#228B22' },
-        { species: 'Forest Mammals', impact: 'PROTECTED', count: biodiversityDoc.speciesDiversity.mammals, color: '#32CD32' },
-        { species: 'Native Plants', impact: 'CONSERVED', count: biodiversityDoc.speciesDiversity.plants, color: '#9ACD32' },
-        { species: 'Forest Insects', impact: 'THRIVING', count: biodiversityDoc.speciesDiversity.insects, color: '#6B8E23' }
-      ];
-      
-      let conservationChartX = 60;
-      conservationData.forEach((data, index) => {
-        const barHeight = (data.count / 200) * 80;
-        const barY = yPos + 110 - barHeight;
-        
-        // Conservation impact bar
-        doc.rect(conservationChartX, barY, 25, barHeight).fillColor(data.color).fill();
-        
-        // Species and impact labels
-        doc.fontSize(8).font('Helvetica').fillColor('#000000');
-        doc.text(data.species, conservationChartX - 20, yPos + 120);
-        doc.text(data.impact, conservationChartX - 15, yPos + 132);
-        doc.text(`${data.count}`, conservationChartX + 8, barY - 15);
-        
-        conservationChartX += 125;
-      });
-      
-      yPos += 160;
-
-      // === COMPREHENSIVE DUE DILIGENCE STATEMENT ===
-      yPos += 20;
-      doc.fontSize(16).font('Helvetica-Bold').text('COMPREHENSIVE ENVIRONMENTAL DUE DILIGENCE', 40, yPos);
-      yPos += 30;
-      
-      doc.rect(40, yPos, 515, 180).strokeColor('#1f2937').lineWidth(2).stroke();
-      
-      doc.fontSize(11).font('Helvetica-Bold').text('COMPLETE ENVIRONMENTAL DUE DILIGENCE VERIFICATION', 50, yPos + 15);
-      yPos += 35;
-      
-      const envDueDiligenceText = [
-        'This comprehensive environmental certificate represents complete due diligence verification incorporating:',
-        '',
-        '• Real-time satellite forest monitoring with 24-month continuous surveillance',
-        '• Official Liberian Land Authority environmental clearance and forest conservation certification',
-        '• Ministry of Labour environmental sustainability and forest protection validation',
-        '• Independent biodiversity conservation assessment with species impact analysis',
-        '• GPS-verified environmental boundaries with zero deforestation confirmation',
-        '• Complete environmental traceability with QR code verification system',
-        '• Multi-tier government environmental authority approvals and conservation documentation',
-        '• Advanced forest conservation metrics and biodiversity protection protocols',
-        '',
-        'All environmental documentation cross-verified through official Liberian environmental agencies.',
-        'This farm maintains ZERO deforestation impact and operates with exceptional environmental stewardship.',
-        'Forest conservation practices exceed international environmental protection standards.'
-      ];
-      
-      envDueDiligenceText.forEach((line, index) => {
+      yPos += 110;
         doc.fontSize(9).font(line.startsWith('•') ? 'Helvetica' : line === '' ? 'Helvetica' : 'Helvetica').text(line, 60, yPos + (index * 12), { width: 480 });
       });
       

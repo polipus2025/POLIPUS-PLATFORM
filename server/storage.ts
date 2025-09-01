@@ -3022,6 +3022,8 @@ export class DatabaseStorage implements IStorage {
   // Port Inspector Methods - Real Data Integration
   async getPortInspectorPendingInspections(): Promise<any[]> {
     try {
+      console.log('🔍 Fetching port inspector pending inspections...');
+      
       // Get inspection bookings assigned to port inspectors
       const pendingInspections = await db.select().from(portInspectionBookings).where(
         and(
@@ -3029,6 +3031,8 @@ export class DatabaseStorage implements IStorage {
           eq(portInspectionBookings.assignmentStatus, 'assigned')
         )
       ).orderBy(desc(portInspectionBookings.scheduledDate));
+
+      console.log(`✅ Found ${pendingInspections.length} port inspection bookings assigned to inspectors`);
 
       return pendingInspections.map(inspection => ({
         id: inspection.bookingId,
@@ -4332,6 +4336,10 @@ export class DatabaseStorage implements IStorage {
 
   async getPortInspectionBookingsByExporter(exporterId: string): Promise<PortInspectionBooking[]> {
     try {
+      if (exporterId === '') {
+        // Return all bookings when no specific exporter ID is provided
+        return await db.select().from(portInspectionBookings).orderBy(desc(portInspectionBookings.createdAt));
+      }
       return await db.select()
         .from(portInspectionBookings)
         .where(eq(portInspectionBookings.exporterId, exporterId))

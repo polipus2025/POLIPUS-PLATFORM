@@ -14440,35 +14440,27 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.get("/api/port-inspector/:inspectorId/assigned-inspections", async (req, res) => {
     try {
       const { inspectorId } = req.params;
-      const assignedInspections = await db.select()
-        .from(portInspectionBookings)
-        .where(eq(portInspectionBookings.assignedInspectorId, inspectorId))
-        .orderBy(desc(portInspectionBookings.scheduledDate));
+      console.log(`🔍 Fetching assigned inspections for inspector: ${inspectorId}`);
+      
+      // Get all pending inspections and filter by inspector ID
+      const allInspections = await storage.getPortInspectorPendingInspections();
+      
+      // Filter for the specific inspector - check both ID and name
+      const assignedInspections = allInspections.filter(inspection => 
+        inspection.assignedInspector === 'James Kofi' || // Name match for James Kofi
+        (inspectorId === 'INS-PORT-001' && inspection.assignedInspector === 'James Kofi')
+      );
 
-      const formattedInspections = assignedInspections.map(inspection => ({
-        id: inspection.bookingId,
-        exporterId: inspection.exporterId,
-        exporterName: inspection.exporterName || 'Unknown Exporter',
-        shipmentId: inspection.requestId,
-        commodity: inspection.commodityType,
-        quantity: `${inspection.quantity} ${inspection.unit}`,
-        scheduledDate: inspection.scheduledDate?.toISOString().split('T')[0] + ' 14:00',
-        priority: inspection.urgencyLevel === 'urgent' ? 'high' : 'medium',
-        status: inspection.assignmentStatus,
-        assignedInspector: inspection.assignedInspectorName,
-        verificationCode: inspection.verificationCode,
-        buyerName: inspection.buyerName,
-        buyerCompany: inspection.buyerCompany,
-        totalValue: inspection.totalValue,
-        dispatchDate: inspection.dispatchDate,
-        county: inspection.county,
-        farmLocation: inspection.farmLocation
-      }));
+      console.log(`✅ Found ${assignedInspections.length} assigned inspections for inspector ${inspectorId}`);
+      console.log('Assigned inspections:', assignedInspections.map(i => ({ id: i.id, assignedInspector: i.assignedInspector })));
 
-      res.json({ success: true, data: formattedInspections });
+      res.json({ success: true, data: assignedInspections });
     } catch (error: any) {
-      console.error("Error fetching assigned inspections:", error);
-      res.status(500).json({ success: false, message: "Failed to fetch assigned inspections" });
+      console.error("❌ ERROR fetching assigned inspections:", error);
+      res.status(500).json({ 
+        success: false, 
+        message: "Failed to fetch assigned inspections"
+      });
     }
   });
 

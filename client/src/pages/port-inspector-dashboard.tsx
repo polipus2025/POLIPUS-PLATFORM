@@ -251,7 +251,6 @@ export default function PortInspectorDashboard() {
 
   const handleCompleteInspection = (inspectionId: string) => {
     const inspectionData = {
-      inspectionId,
       data: {
         status: 'completed',
         quantityVerified: true,
@@ -261,7 +260,7 @@ export default function PortInspectorDashboard() {
         completedAt: new Date().toISOString()
       }
     };
-    completeInspectionMutation.mutate(inspectionData);
+    completeInspectionMutation.mutate({ inspectionId, data: inspectionData });
   };
 
   const handleQRScan = (inspectionId: string) => {

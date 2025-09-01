@@ -19,13 +19,9 @@ import {
   Leaf,
   MapPin,
   Award,
-  Shield,
-  Satellite,
-  TreePine,
-  User
+  Shield
 } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
-import { useQuery } from "@tanstack/react-query";
 
 interface CertificateDropdownProps {
   userType: "port-inspector" | "director";
@@ -38,43 +34,25 @@ interface CertificateFormData {
 export default function CertificateDropdown({ userType }: CertificateDropdownProps) {
   const [selectedCertificate, setSelectedCertificate] = useState<string>("");
   const [isFormOpen, setIsFormOpen] = useState(false);
-  const [isFarmerSelectOpen, setIsFarmerSelectOpen] = useState(false);
   const [formData, setFormData] = useState<CertificateFormData>({});
-  const [selectedFarmerId, setSelectedFarmerId] = useState<string>("");
   const [isGenerating, setIsGenerating] = useState(false);
   const { toast } = useToast();
-
-  // Fetch farmers for GPS-based certificates
-  const { data: farmers } = useQuery({
-    queryKey: ['/api/farmers'],
-    enabled: isFarmerSelectOpen
-  });
 
   // Certificate options based on user type
   const certificateOptions = userType === "port-inspector" 
     ? [
         { id: "phytosanitary", name: "Phytosanitary Certificate", icon: Leaf, type: "form" },
         { id: "origin", name: "Certificate of Origin", icon: MapPin, type: "form" },
-        { id: "quality", name: "Quality Control Certificate", icon: Award, type: "form" },
-        { id: "eudr", name: "EUDR Compliance Certificate", icon: Satellite, type: "auto" },
-        { id: "deforestation", name: "Deforestation Analysis Certificate", icon: TreePine, type: "auto" }
+        { id: "quality", name: "Quality Control Certificate", icon: Award, type: "form" }
       ]
     : [
         { id: "compliance", name: "Compliance Declaration Certificate", icon: Shield, type: "form" }
       ];
 
   const handleCertificateSelect = (certificateId: string) => {
-    const certificate = certificateOptions.find(cert => cert.id === certificateId);
     setSelectedCertificate(certificateId);
     setFormData({});
-    
-    if (certificate?.type === "auto") {
-      // GPS-based certificates need farmer selection
-      setIsFarmerSelectOpen(true);
-    } else {
-      // Form-based certificates
-      setIsFormOpen(true);
-    }
+    setIsFormOpen(true);
   };
 
   const handleFormSubmit = async (e: React.FormEvent) => {
@@ -82,26 +60,14 @@ export default function CertificateDropdown({ userType }: CertificateDropdownPro
     setIsGenerating(true);
 
     try {
-      let response;
-      let fileName;
-      
-      const certificate = certificateOptions.find(cert => cert.id === selectedCertificate);
-      
-      if (certificate?.type === "auto") {
-        // GPS-based certificates use farmer ID
-        response = await fetch(`/api/certificates/generate/${selectedCertificate}/${selectedFarmerId}`);
-        fileName = `${selectedCertificate}_certificate_${selectedFarmerId}.pdf`;
-      } else {
-        // Form-based certificates use form data
-        response = await fetch(`/api/certificates/generate/${selectedCertificate}`, {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-          },
-          body: JSON.stringify(formData),
-        });
-        fileName = `${selectedCertificate}_certificate.pdf`;
-      }
+      // Generate certificate with form data
+      const response = await fetch(`/api/certificates/generate/${selectedCertificate}`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(formData),
+      });
 
       if (!response.ok) {
         throw new Error('Failed to generate certificate');
@@ -113,7 +79,7 @@ export default function CertificateDropdown({ userType }: CertificateDropdownPro
       const a = document.createElement('a');
       a.style.display = 'none';
       a.href = url;
-      a.download = fileName;
+      a.download = `${selectedCertificate}_certificate.pdf`;
       document.body.appendChild(a);
       a.click();
       window.URL.revokeObjectURL(url);
@@ -124,9 +90,7 @@ export default function CertificateDropdown({ userType }: CertificateDropdownPro
       });
 
       setIsFormOpen(false);
-      setIsFarmerSelectOpen(false);
       setSelectedCertificate("");
-      setSelectedFarmerId("");
       setFormData({});
     } catch (error) {
       toast({
@@ -425,47 +389,6 @@ export default function CertificateDropdown({ userType }: CertificateDropdownPro
     }
   };
 
-  const handleFarmerSelect = async (farmerId: string) => {
-    setSelectedFarmerId(farmerId);
-    setIsGenerating(true);
-
-    try {
-      // Auto-generate certificate with farmer GPS data
-      const response = await fetch(`/api/certificates/generate/${selectedCertificate}/${farmerId}`);
-      
-      if (!response.ok) {
-        throw new Error('Failed to generate certificate');
-      }
-
-      // Download the generated certificate
-      const blob = await response.blob();
-      const url = window.URL.createObjectURL(blob);
-      const a = document.createElement('a');
-      a.style.display = 'none';
-      a.href = url;
-      a.download = `${selectedCertificate}_certificate_${farmerId}.pdf`;
-      document.body.appendChild(a);
-      a.click();
-      window.URL.revokeObjectURL(url);
-
-      toast({
-        title: "Certificate Generated",
-        description: "Certificate has been auto-generated from GPS data and downloaded successfully."
-      });
-
-      setIsFarmerSelectOpen(false);
-      setSelectedCertificate("");
-      setSelectedFarmerId("");
-    } catch (error) {
-      toast({
-        title: "Generation Failed",
-        description: "Failed to generate certificate. Please try again.",
-        variant: "destructive"
-      });
-    } finally {
-      setIsGenerating(false);
-    }
-  };
 
   return (
     <>
@@ -534,65 +457,6 @@ export default function CertificateDropdown({ userType }: CertificateDropdownPro
               </Button>
             </div>
           </form>
-        </DialogContent>
-      </Dialog>
-
-      {/* Farmer Selection Dialog for GPS-based Certificates */}
-      <Dialog open={isFarmerSelectOpen} onOpenChange={setIsFarmerSelectOpen}>
-        <DialogContent className="max-w-md">
-          <DialogHeader>
-            <DialogTitle className="flex items-center gap-2">
-              <User className="w-5 h-5" />
-              Select Farmer for {certificateOptions.find(cert => cert.id === selectedCertificate)?.name}
-            </DialogTitle>
-            <DialogDescription>
-              Choose a farmer to auto-generate certificate from GPS and farm data.
-            </DialogDescription>
-          </DialogHeader>
-          
-          <div className="space-y-4">
-            <div className="max-h-60 overflow-y-auto space-y-2">
-              {farmers && farmers.length > 0 ? (
-                farmers.map((farmer: any) => (
-                  <div
-                    key={farmer.id}
-                    onClick={() => handleFarmerSelect(farmer.id)}
-                    className="p-3 border rounded-lg cursor-pointer hover:bg-slate-50 transition-colors"
-                  >
-                    <div className="flex items-center justify-between">
-                      <div>
-                        <p className="font-medium">{farmer.fullName || farmer.name}</p>
-                        <p className="text-sm text-slate-600">
-                          {farmer.county} • {farmer.city} • {farmer.cropType}
-                        </p>
-                        <p className="text-xs text-slate-500">
-                          GPS: {farmer.gpsCoordinates} • {farmer.farmSize} hectares
-                        </p>
-                      </div>
-                      <div className="text-right text-xs">
-                        <span className="bg-green-100 text-green-800 px-2 py-1 rounded">
-                          ID: {farmer.id}
-                        </span>
-                      </div>
-                    </div>
-                  </div>
-                ))
-              ) : (
-                <p className="text-center text-slate-500 py-4">Loading farmers...</p>
-              )}
-            </div>
-            
-            <div className="flex justify-end gap-3 pt-4 border-t">
-              <Button
-                type="button"
-                variant="outline"
-                onClick={() => setIsFarmerSelectOpen(false)}
-                disabled={isGenerating}
-              >
-                Cancel
-              </Button>
-            </div>
-          </div>
         </DialogContent>
       </Dialog>
     </>

@@ -610,7 +610,7 @@ export function addCertificateTestRoutes(app: Express) {
         margin: 40,
         info: {
           Title: 'Enhanced Deforestation Analysis Certificate with Real Data Integration',
-          Author: 'LACRA Environmental Division & Government Authorities',
+          Author: 'LACRA Environmental Division & ECOENVIROS',
           Subject: 'Comprehensive Forest Impact Assessment with Government Verification',
           Creator: 'Polipus Environmental Monitoring - Real Supply Chain Integration'
         }
@@ -625,7 +625,7 @@ export function addCertificateTestRoutes(app: Express) {
       // === HEADER ===
       doc.rect(0, 0, 595, 80).fillColor('#059669').fill();
       
-      // Environmental logo area
+      // LACRA Logo area
       doc.rect(40, 15, 80, 50).strokeColor('#ffffff').stroke();
       doc.fillColor('#ffffff').fontSize(10).font('Helvetica-Bold').text('LACRA', 50, 25);
       doc.fontSize(8).text('Environmental', 50, 40);
@@ -636,11 +636,11 @@ export function addCertificateTestRoutes(app: Express) {
       doc.text('DEFORESTATION ANALYSIS', 140, 20);
       doc.fontSize(12).font('Helvetica').text('Environmental Impact Assessment Report', 140, 45);
       
-      // Satellite logo area
+      // ECOENVIROS Logo area
       doc.rect(475, 15, 80, 50).strokeColor('#ffffff').stroke();
-      doc.fontSize(9).text('SATELLITE', 485, 25);
-      doc.fontSize(7).text('MONITORING', 485, 38);
-      doc.text('NASA • ESA • USGS', 485, 52);
+      doc.fontSize(9).text('ECOENVIROS', 485, 25);
+      doc.fontSize(7).text('Audit & Certification', 485, 38);
+      doc.text('ISO 14001 Certified', 485, 52);
 
       doc.fillColor('#000000');
       let yPos = 120;
@@ -808,7 +808,7 @@ export function addCertificateTestRoutes(app: Express) {
       const govCertifications = [
         { authority: 'Liberian Land Authority', status: 'ENVIRONMENTAL CLEARANCE APPROVED', ref: `ENV-${landDoc.deedNumber}` },
         { authority: 'Ministry of Labour', status: 'SUSTAINABLE PRACTICES CERTIFIED', ref: `ENV-${labourDoc.declarationNumber}` },
-        { authority: 'LACRA Environmental Division', status: 'BIODIVERSITY IMPACT APPROVED', ref: biodiversityDoc.assessmentId }
+        { authority: 'LACRA & ECOENVIROS Joint Assessment', status: 'BIODIVERSITY IMPACT APPROVED', ref: biodiversityDoc.assessmentId }
       ];
       
       govCertifications.forEach((cert, index) => {
@@ -849,8 +849,8 @@ export function addCertificateTestRoutes(app: Express) {
       doc.fontSize(9).font('Helvetica').text('Digital Signature Applied', 45, yPos + 25);
       doc.text(`Date: ${analysisDate}`, 45, yPos + 40);
       
-      doc.fontSize(10).font('Helvetica-Bold').text('Government Environmental Auditor', 310, yPos + 10);
-      doc.fontSize(9).font('Helvetica').text('Environmental Verification', 310, yPos + 25);
+      doc.fontSize(10).font('Helvetica-Bold').text('ECOENVIROS Environmental Auditor', 310, yPos + 10);
+      doc.fontSize(9).font('Helvetica').text('Third-Party Verification', 310, yPos + 25);
       doc.text(`Audit Date: ${analysisDate}`, 310, yPos + 40);
 
       // === FOOTER ===

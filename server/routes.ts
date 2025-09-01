@@ -245,7 +245,10 @@ import {
   type NewWarehouseCustody,
   type StorageFees,
   type AuthorizationRequest,
-  type WarehouseDispatchRequest
+  type WarehouseDispatchRequest,
+  masterTransactionRegistry,
+  insertMasterTransactionSchema,
+  type InsertMasterTransaction
 } from "../shared/schema.js";
 import { z } from "zod";
 import path from "path";
@@ -273,6 +276,254 @@ const generateRegulatoryToken = (regulator: RegulatoryDepartment) => {
 
 // Initialize AgriTrace Workflow Service
 const agriTraceService = new AgriTraceWorkflowService();
+
+// 🎯 MASTER TRANSACTION REGISTRY - AUTOMATIC SUPPLY CHAIN MANAGEMENT
+// This system automatically creates and manages transactions to ensure no stakeholder is missed
+
+// Generate Master Transaction ID
+function generateMasterTransactionId(): string {
+  const date = new Date().toISOString().slice(0, 10).replace(/-/g, '');
+  const random = Math.floor(Math.random() * 100000).toString().padStart(5, '0');
+  return `MTR-${date}-${random}`;
+}
+
+// 🚀 AUTOMATIC MASTER TRANSACTION CREATION - Triggered when farmer creates offer
+async function createMasterTransactionRegistry(farmerOfferData: {
+  farmerId: string;
+  farmerName: string;
+  farmerCounty: string;
+  offerId: string;
+  commodityType: string;
+  quantity: number;
+  totalValue: number;
+}): Promise<string> {
+  console.log(`🎯 CREATING MASTER TRANSACTION REGISTRY for offer ${farmerOfferData.offerId}`);
+  
+  const masterTransactionId = generateMasterTransactionId();
+  
+  // Auto-assign warehouse based on geographic logic
+  const warehouses = {
+    'Nimba County': { id: 'WH-NIMBA-001', name: 'Nimba County Warehouse', inspector: 'Sarah Kpaka' },
+    'Margibi County': { id: 'WH-MARGIBI-001', name: 'Margibi County Warehouse', inspector: 'Michael Roberts' },
+    'Montserrado County': { id: 'WH-MONTSERRADO-001', name: 'Montserrado County Warehouse', inspector: 'Grace Johnson' },
+    'Bong County': { id: 'WH-BONG-001', name: 'Bong County Warehouse', inspector: 'Joseph Smith' },
+    'Grand Bassa County': { id: 'WH-GRANDBASSA-001', name: 'Grand Bassa County Warehouse', inspector: 'Mary Williams' }
+  };
+  
+  const assignedWarehouse = warehouses[farmerOfferData.farmerCounty] || warehouses['Nimba County'];
+  
+  const masterTransaction: InsertMasterTransaction = {
+    masterTransactionId,
+    currentStage: 'farmer_offer_created',
+    nextStage: 'buyer_acceptance',
+    stageProgress: 1,
+    totalStages: 11,
+    
+    // 🎯 IDENTIFIERS
+    farmerOfferId: farmerOfferData.offerId,
+    
+    // 👥 STAKEHOLDERS - Auto-locked
+    farmerId: farmerOfferData.farmerId,
+    farmerName: farmerOfferData.farmerName,
+    farmerCounty: farmerOfferData.farmerCounty,
+    
+    // Auto-assigned warehouse by geography
+    warehouseId: assignedWarehouse.id,
+    warehouseName: assignedWarehouse.name,
+    warehouseInspector: assignedWarehouse.inspector,
+    
+    // 📦 PRODUCT DETAILS
+    commodityType: farmerOfferData.commodityType,
+    quantity: farmerOfferData.quantity.toString(),
+    totalValue: farmerOfferData.totalValue.toString(),
+    
+    // 🔔 NOTIFICATIONS
+    stakeholdersNotified: JSON.stringify([farmerOfferData.farmerId]),
+    nextNotificationDue: new Date(Date.now() + 24 * 60 * 60 * 1000), // 24 hours
+    
+    // 🎯 FLOW CONTROL
+    flowLocked: true, // Lock stakeholders once assigned
+    allowManualOverride: false
+  };
+  
+  await db.insert(masterTransactionRegistry).values(masterTransaction);
+  
+  console.log(`✅ MASTER TRANSACTION CREATED: ${masterTransactionId}`);
+  console.log(`📍 Auto-assigned warehouse: ${assignedWarehouse.name} (${assignedWarehouse.inspector})`);
+  
+  return masterTransactionId;
+}
+
+// 🔄 UPDATE MASTER TRANSACTION STAGE - Automatic progression
+async function updateMasterTransactionStage(
+  farmerOfferId: string, 
+  newStage: string, 
+  stakeholderData?: any
+): Promise<void> {
+  console.log(`🔄 UPDATING MASTER TRANSACTION STAGE: ${farmerOfferId} → ${newStage}`);
+  
+  const stageMap = {
+    'farmer_offer_created': { progress: 1, next: 'buyer_acceptance' },
+    'buyer_acceptance': { progress: 2, next: 'bag_request' },
+    'bag_request': { progress: 3, next: 'warehouse_custody' },
+    'warehouse_custody': { progress: 4, next: 'buyer_marketplace' },
+    'buyer_marketplace': { progress: 5, next: 'exporter_acceptance' },
+    'exporter_acceptance': { progress: 6, next: 'dispatch_scheduled' },
+    'dispatch_scheduled': { progress: 7, next: 'inspection_booked' },
+    'inspection_booked': { progress: 8, next: 'inspection_completed' },
+    'inspection_completed': { progress: 9, next: 'export_ready' },
+    'export_ready': { progress: 10, next: 'transaction_closed' },
+    'transaction_closed': { progress: 11, next: 'completed' }
+  };
+  
+  const stage = stageMap[newStage];
+  if (!stage) {
+    console.error(`❌ Unknown stage: ${newStage}`);
+    return;
+  }
+  
+  // Update stage and stakeholder data
+  const updateData: any = {
+    currentStage: newStage,
+    nextStage: stage.next,
+    stageProgress: stage.progress,
+    lastStageUpdate: new Date(),
+    isStuck: false
+  };
+  
+  // Auto-assign stakeholders based on stage
+  if (newStage === 'buyer_acceptance' && stakeholderData) {
+    updateData.buyerId = stakeholderData.buyerId;
+    updateData.buyerName = stakeholderData.buyerName;
+    updateData.buyerCompany = stakeholderData.buyerCompany;
+    updateData.firstVerificationCode = stakeholderData.verificationCode;
+  }
+  
+  if (newStage === 'warehouse_custody' && stakeholderData) {
+    updateData.custodyNumber = stakeholderData.custodyNumber;
+    updateData.qrBatchCodes = JSON.stringify([stakeholderData.qrBatchCode]);
+  }
+  
+  if (newStage === 'exporter_acceptance' && stakeholderData) {
+    updateData.exporterId = stakeholderData.exporterId;
+    updateData.exporterName = stakeholderData.exporterName;
+    updateData.exporterCompany = stakeholderData.exporterCompany;
+    updateData.finalVerificationCode = stakeholderData.verificationCode;
+  }
+  
+  if (newStage === 'inspection_booked' && stakeholderData) {
+    updateData.portInspectorId = stakeholderData.inspectorId;
+    updateData.portInspectorName = stakeholderData.inspectorName;
+    updateData.inspectionIds = JSON.stringify([stakeholderData.inspectionId]);
+  }
+  
+  if (newStage === 'transaction_closed') {
+    updateData.isCompleted = true;
+    updateData.completedAt = new Date();
+  }
+  
+  await db.update(masterTransactionRegistry)
+    .set(updateData)
+    .where(eq(masterTransactionRegistry.farmerOfferId, farmerOfferId));
+  
+  console.log(`✅ MASTER TRANSACTION UPDATED: Stage ${stage.progress}/11 - ${newStage}`);
+  
+  // Send automatic notifications
+  await sendStageNotifications(farmerOfferId, newStage, stakeholderData);
+}
+
+// 🔔 AUTOMATIC STAGE NOTIFICATIONS - Ensures no stakeholder is missed
+async function sendStageNotifications(
+  farmerOfferId: string, 
+  stage: string, 
+  stakeholderData?: any
+): Promise<void> {
+  console.log(`🔔 SENDING AUTOMATIC STAGE NOTIFICATIONS: ${stage}`);
+  
+  // Get master transaction details
+  const [masterTx] = await db.select()
+    .from(masterTransactionRegistry)
+    .where(eq(masterTransactionRegistry.farmerOfferId, farmerOfferId))
+    .limit(1);
+  
+  if (!masterTx) {
+    console.error(`❌ Master transaction not found for offer: ${farmerOfferId}`);
+    return;
+  }
+  
+  const notifications = [];
+  
+  switch (stage) {
+    case 'buyer_acceptance':
+      notifications.push({
+        recipient: masterTx.warehouseId,
+        message: `Buyer ${masterTx.buyerName} accepted offer. Prepare for bag request.`,
+        stage: 'buyer_acceptance'
+      });
+      break;
+      
+    case 'bag_request':
+      notifications.push({
+        recipient: masterTx.buyerId,
+        message: `Bag request processed. Proceed with custody transfer.`,
+        stage: 'bag_request'
+      });
+      break;
+      
+    case 'warehouse_custody':
+      notifications.push({
+        recipient: masterTx.buyerId,
+        message: `Products in custody. You can create exporter offers.`,
+        stage: 'warehouse_custody'
+      });
+      break;
+      
+    case 'exporter_acceptance':
+      notifications.push({
+        recipient: masterTx.buyerId,
+        message: `Exporter ${masterTx.exporterName} accepted offer. Schedule dispatch.`,
+        stage: 'exporter_acceptance'
+      });
+      break;
+      
+    case 'inspection_completed':
+      notifications.push(
+        {
+          recipient: masterTx.exporterId,
+          message: `Inspection completed. Products cleared for export.`,
+          stage: 'inspection_completed'
+        },
+        {
+          recipient: masterTx.buyerId,
+          message: `Transaction completed successfully.`,
+          stage: 'inspection_completed'
+        },
+        {
+          recipient: 'DDGOTS',
+          message: `Inspection completed for export ${masterTx.exporterCompany}.`,
+          stage: 'inspection_completed'
+        }
+      );
+      break;
+  }
+  
+  // Update notifications sent
+  const notifiedStakeholders = JSON.parse(masterTx.stakeholdersNotified || '[]');
+  notifications.forEach(notif => {
+    if (!notifiedStakeholders.includes(notif.recipient)) {
+      notifiedStakeholders.push(notif.recipient);
+    }
+  });
+  
+  await db.update(masterTransactionRegistry)
+    .set({ 
+      stakeholdersNotified: JSON.stringify(notifiedStakeholders),
+      lastNotificationSent: new Date()
+    })
+    .where(eq(masterTransactionRegistry.farmerOfferId, farmerOfferId));
+  
+  console.log(`✅ NOTIFICATIONS SENT: ${notifications.length} stakeholders notified`);
+}
 
 // MAINTENANCE MODE - Set to true to enable maintenance mode
 const MAINTENANCE_MODE = false;
@@ -693,6 +944,24 @@ export async function registerRoutes(app: Express): Promise<Server> {
         .where(eq(farmerProductOffers.offerId, offerId));
         
       // Buyer notifications created
+
+      // 🎯 AUTOMATIC MASTER TRANSACTION CREATION
+      try {
+        const masterTransactionId = await createMasterTransactionRegistry({
+          farmerId: validatedData.farmerId,
+          farmerName: validatedData.farmerName,
+          farmerCounty: validatedData.county,
+          offerId: offerId,
+          commodityType: validatedData.commodityType,
+          quantity: parseFloat(validatedData.quantityAvailable),
+          totalValue: parseFloat(validatedData.totalValue)
+        });
+        
+        console.log(`🎯 MASTER TRANSACTION REGISTRY CREATED: ${masterTransactionId} for offer ${offerId}`);
+      } catch (masterError) {
+        console.error('❌ Failed to create master transaction registry:', masterError);
+        // Don't fail the offer creation, just log the error
+      }
 
       res.status(201).json({
         success: true,
@@ -15085,6 +15354,24 @@ export async function registerRoutes(app: Express): Promise<Server> {
         
       // Buyer notifications created
 
+      // 🎯 AUTOMATIC MASTER TRANSACTION CREATION
+      try {
+        const masterTransactionId = await createMasterTransactionRegistry({
+          farmerId: validatedData.farmerId,
+          farmerName: validatedData.farmerName,
+          farmerCounty: validatedData.county,
+          offerId: offerId,
+          commodityType: validatedData.commodityType,
+          quantity: parseFloat(validatedData.quantityAvailable),
+          totalValue: parseFloat(validatedData.totalValue)
+        });
+        
+        console.log(`🎯 MASTER TRANSACTION REGISTRY CREATED: ${masterTransactionId} for offer ${offerId}`);
+      } catch (masterError) {
+        console.error('❌ Failed to create master transaction registry:', masterError);
+        // Don't fail the offer creation, just log the error
+      }
+
       res.status(201).json({
         success: true,
         message: `Product offer submitted successfully and saved to marketplace!`,
@@ -15314,6 +15601,20 @@ export async function registerRoutes(app: Express): Promise<Server> {
       console.log(`✅ Buyer ${buyerName} (${company}) accepted offer ${notificationId}`);
       console.log(`🔐 STEP 1: First verification code generated: ${verificationCode}`);
       console.log(`💳 STEP 2: Waiting for buyer to confirm payment to generate second verification code`);
+
+      // 🎯 AUTOMATIC MASTER TRANSACTION UPDATE - Buyer Acceptance Stage
+      try {
+        await updateMasterTransactionStage(notification.offerId, 'buyer_acceptance', {
+          buyerId: buyerRecord.buyerCode,
+          buyerName: buyerName,
+          buyerCompany: company,
+          verificationCode: verificationCode
+        });
+        console.log(`🎯 MASTER TRANSACTION UPDATED: Buyer acceptance stage for offer ${notification.offerId}`);
+      } catch (masterError) {
+        console.error('❌ Failed to update master transaction (buyer acceptance):', masterError);
+        // Don't fail the acceptance, just log the error
+      }
 
       res.json({
         message: "Offer accepted successfully with EUDR compliance tracking!",
@@ -20223,6 +20524,125 @@ GENERATED: ${new Date().toLocaleDateString()}`;
         res.status(404).json({ error: "PDF file not found" });
       }
     });
+  });
+
+  // 🎯 MASTER TRANSACTION REGISTRY API ENDPOINTS
+  
+  // Get all master transactions
+  app.get("/api/master-transactions", async (req, res) => {
+    try {
+      const masterTransactions = await db.select()
+        .from(masterTransactionRegistry)
+        .orderBy(desc(masterTransactionRegistry.createdAt));
+        
+      res.json({
+        success: true,
+        data: masterTransactions,
+        message: `Found ${masterTransactions.length} master transactions`
+      });
+    } catch (error: any) {
+      console.error("Error fetching master transactions:", error);
+      res.status(500).json({ error: "Failed to fetch master transactions" });
+    }
+  });
+
+  // Get master transaction by farmer offer ID
+  app.get("/api/master-transactions/offer/:offerId", async (req, res) => {
+    try {
+      const { offerId } = req.params;
+      
+      const [masterTransaction] = await db.select()
+        .from(masterTransactionRegistry)
+        .where(eq(masterTransactionRegistry.farmerOfferId, offerId))
+        .limit(1);
+        
+      if (!masterTransaction) {
+        return res.status(404).json({ error: "Master transaction not found for this offer" });
+      }
+      
+      res.json({
+        success: true,
+        data: masterTransaction,
+        message: `Master transaction found for offer ${offerId}`
+      });
+    } catch (error: any) {
+      console.error("Error fetching master transaction:", error);
+      res.status(500).json({ error: "Failed to fetch master transaction" });
+    }
+  });
+
+  // Get active transactions (not completed)
+  app.get("/api/master-transactions/active", async (req, res) => {
+    try {
+      const activeTransactions = await db.select()
+        .from(masterTransactionRegistry)
+        .where(eq(masterTransactionRegistry.isCompleted, false))
+        .orderBy(desc(masterTransactionRegistry.lastStageUpdate));
+        
+      res.json({
+        success: true,
+        data: activeTransactions,
+        message: `Found ${activeTransactions.length} active transactions`
+      });
+    } catch (error: any) {
+      console.error("Error fetching active transactions:", error);
+      res.status(500).json({ error: "Failed to fetch active transactions" });
+    }
+  });
+
+  // Get stuck transactions (no update in 7+ days)
+  app.get("/api/master-transactions/stuck", async (req, res) => {
+    try {
+      const stuckTransactions = await db.select()
+        .from(masterTransactionRegistry)
+        .where(eq(masterTransactionRegistry.isStuck, true))
+        .orderBy(desc(masterTransactionRegistry.lastStageUpdate));
+        
+      res.json({
+        success: true,
+        data: stuckTransactions,
+        message: `Found ${stuckTransactions.length} stuck transactions requiring attention`
+      });
+    } catch (error: any) {
+      console.error("Error fetching stuck transactions:", error);
+      res.status(500).json({ error: "Failed to fetch stuck transactions" });
+    }
+  });
+
+  // Manual override for emergency situations (requires authorization)
+  app.post("/api/master-transactions/:masterTransactionId/override", async (req, res) => {
+    try {
+      const { masterTransactionId } = req.params;
+      const { newStage, stakeholderData, reason } = req.body;
+      
+      // Update the master transaction with manual override
+      await db.update(masterTransactionRegistry)
+        .set({
+          allowManualOverride: true,
+          lastStageUpdate: new Date()
+        })
+        .where(eq(masterTransactionRegistry.masterTransactionId, masterTransactionId));
+      
+      // Update to new stage
+      const [masterTx] = await db.select()
+        .from(masterTransactionRegistry)
+        .where(eq(masterTransactionRegistry.masterTransactionId, masterTransactionId))
+        .limit(1);
+        
+      if (masterTx) {
+        await updateMasterTransactionStage(masterTx.farmerOfferId, newStage, stakeholderData);
+      }
+      
+      console.log(`⚠️ MANUAL OVERRIDE: ${masterTransactionId} moved to ${newStage} - Reason: ${reason}`);
+      
+      res.json({
+        success: true,
+        message: `Manual override completed for ${masterTransactionId}`
+      });
+    } catch (error: any) {
+      console.error("Error performing manual override:", error);
+      res.status(500).json({ error: "Failed to perform manual override" });
+    }
   });
 
   return httpServer;

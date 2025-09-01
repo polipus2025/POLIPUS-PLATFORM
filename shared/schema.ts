@@ -320,6 +320,86 @@ export const insertWarehouseBagRequestSchema = createInsertSchema(warehouseBagRe
 export type InsertWarehouseBagRequest = z.infer<typeof insertWarehouseBagRequestSchema>;
 export type SelectWarehouseBagRequest = typeof warehouseBagRequests.$inferSelect;
 
+// 🎯 MASTER TRANSACTION REGISTRY - AUTOMATIC SUPPLY CHAIN TRACKING
+// This table automatically creates and tracks every transaction to ensure no stakeholder is missed
+export const masterTransactionRegistry = pgTable("master_transaction_registry", {
+  id: serial("id").primaryKey(),
+  masterTransactionId: text("master_transaction_id").notNull().unique(), // MTR-YYYYMMDD-XXXXX
+  
+  // 🔗 TRANSACTION LIFECYCLE STATUS
+  currentStage: text("current_stage").notNull().default("farmer_offer_created"), 
+  // farmer_offer_created → buyer_acceptance → bag_request → warehouse_custody → 
+  // buyer_marketplace → exporter_acceptance → dispatch_scheduled → inspection_booked → 
+  // inspection_completed → export_ready → transaction_closed
+  
+  nextStage: text("next_stage").notNull().default("buyer_acceptance"),
+  stageProgress: integer("stage_progress").default(1), // 1-11 stages
+  totalStages: integer("total_stages").default(11),
+  isCompleted: boolean("is_completed").default(false),
+  
+  // 🎯 ALL IDENTIFIERS - CONNECTED AUTOMATICALLY
+  farmerOfferId: text("farmer_offer_id").notNull(), // 1st identifier
+  firstVerificationCode: text("first_verification_code"), // 2nd identifier (buyer acceptance)
+  custodyNumber: text("custody_number"), // 3rd identifier (warehouse custody)
+  finalVerificationCode: text("final_verification_code"), // 4th identifier (exporter)
+  
+  // 👥 STAKEHOLDER REGISTRY - AUTO-LOCKED ON CREATION
+  farmerId: text("farmer_id").notNull(),
+  farmerName: text("farmer_name").notNull(),
+  farmerCounty: text("farmer_county").notNull(),
+  
+  buyerId: text("buyer_id"), // Auto-assigned when buyer accepts
+  buyerName: text("buyer_name"),
+  buyerCompany: text("buyer_company"),
+  
+  warehouseId: text("warehouse_id"), // Auto-assigned by geographic logic
+  warehouseName: text("warehouse_name"),
+  warehouseInspector: text("warehouse_inspector"),
+  
+  portInspectorId: text("port_inspector_id"), // Auto-assigned by DDGOTS
+  portInspectorName: text("port_inspector_name"),
+  
+  exporterId: text("exporter_id"), // Auto-assigned when exporter accepts
+  exporterName: text("exporter_name"),
+  exporterCompany: text("exporter_company"),
+  
+  // 📦 PRODUCT & TRANSACTION DETAILS
+  commodityType: text("commodity_type").notNull(),
+  quantity: decimal("quantity", { precision: 10, scale: 2 }).notNull(),
+  totalValue: decimal("total_value", { precision: 12, scale: 2 }).notNull(),
+  currency: text("currency").default("USD"),
+  
+  // 🔔 NOTIFICATION & TRACKING SYSTEM
+  stakeholdersNotified: jsonb("stakeholders_notified").default("[]"), // Array of notified stakeholder IDs
+  lastNotificationSent: timestamp("last_notification_sent"),
+  nextNotificationDue: timestamp("next_notification_due"),
+  autoNotificationsEnabled: boolean("auto_notifications_enabled").default(true),
+  
+  // 🚨 ALERT SYSTEM - PREVENTS SUPPLY CHAIN DISRUPTION  
+  alertsActive: jsonb("alerts_active").default("[]"), // Active alerts for this transaction
+  lastStageUpdate: timestamp("last_stage_update").defaultNow(),
+  stageTimeoutMinutes: integer("stage_timeout_minutes").default(10080), // 7 days default
+  isStuck: boolean("is_stuck").default(false), // Auto-flagged if stuck too long
+  
+  // 📍 GEOGRAPHIC & QR TRACKING
+  qrBatchCodes: jsonb("qr_batch_codes").default("[]"), // All QR codes generated
+  inspectionIds: jsonb("inspection_ids").default("[]"), // All inspection IDs
+  warehouseRequestIds: jsonb("warehouse_request_ids").default("[]"), // All warehouse requests
+  
+  // 🎯 AUTOMATIC FLOW CONTROL
+  flowLocked: boolean("flow_locked").default(true), // Once locked, stakeholders cannot be changed
+  allowManualOverride: boolean("allow_manual_override").default(false), // Emergency override only
+  
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+  completedAt: timestamp("completed_at"),
+});
+
+// Zod schemas for master transaction registry
+export const insertMasterTransactionSchema = createInsertSchema(masterTransactionRegistry);
+export type InsertMasterTransaction = z.infer<typeof insertMasterTransactionSchema>;
+export type SelectMasterTransaction = typeof masterTransactionRegistry.$inferSelect;
+
 // Buyer Verification Codes Table
 export const buyerVerificationCodes = pgTable("buyer_verification_codes", {
   id: serial("id").primaryKey(),

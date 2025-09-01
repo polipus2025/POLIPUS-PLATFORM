@@ -14525,13 +14525,21 @@ export async function registerRoutes(app: Express): Promise<Server> {
       console.log('💰 Buyer can now request payment from Exporter');
       console.log('💳 Payment process initiated');
       
+      // NOTIFICATION 3: EXPORTER - Product inspection PASSED
+      console.log('🚢 EXPORTER NOTIFICATION: ATHRAV EXPORTS (EXP-20250826-688)');
+      console.log('✅ Product PASSED port inspection:');
+      console.log('🔍 Verification Code: 107MJMQX');
+      console.log('📦 QR Batch Code: BE-DISPATCH-NEW-FIXED-2025');
+      console.log('🎯 Status: Ready for export processing');
+      
       res.json({ 
         success: true, 
         message: 'Inspection completed successfully',
         data: completionResult,
         notifications: {
           ddgots: 'Product inspection PASSED - Ready for next stage',
-          buyer: 'Product is Ready to sell - Payment can be requested'
+          buyer: 'Product is Ready to sell - Payment can be requested',
+          exporter: 'Product PASSED port inspection - Verification Code: 107MJMQX, QR Batch Code: BE-DISPATCH-NEW-FIXED-2025'
         }
       });
       

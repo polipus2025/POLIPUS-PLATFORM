@@ -703,18 +703,21 @@ export default function DDGOTSDashboard() {
                                   <p>🔄 <strong>Next Step:</strong> Ready for final export documentation</p>
                                 </div>
                               ) : (
-                                <p className="text-sm text-green-600 mt-1">
-                                  📅 Assigned on: {new Date(booking.assignedAt).toLocaleDateString('en-US', {
-                                  weekday: 'short',
-                                  month: 'short',
-                                  day: 'numeric',
-                                  year: 'numeric'
-                                })}
-                              </p>
-                              {booking.ddgotsNotes && (
-                                <p className="text-sm text-green-600 mt-1">
-                                  📝 Notes: {booking.ddgotsNotes}
-                                </p>
+                                <>
+                                  <p className="text-sm text-green-600 mt-1">
+                                    📅 Assigned on: {new Date(booking.assignedAt).toLocaleDateString('en-US', {
+                                      weekday: 'short',
+                                      month: 'short',
+                                      day: 'numeric',
+                                      year: 'numeric'
+                                    })}
+                                  </p>
+                                  {booking.ddgotsNotes && (
+                                    <p className="text-sm text-green-600 mt-1">
+                                      📝 Notes: {booking.ddgotsNotes}
+                                    </p>
+                                  )}
+                                </>
                               )}
                             </div>
                           ) : (

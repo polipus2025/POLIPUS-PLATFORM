@@ -147,7 +147,7 @@ function App() {
             <Route path="/carbon-trace" component={createLazyRoute(CarbonTracePortal)} />
             
             {/* CERTIFICATE TESTING DASHBOARD - HIGH PRIORITY */}
-            <Route path="/certificate-testing" component={CertificateTestingDashboard} />
+            <Route path="/certificate-testing-dashboard" component={CertificateTestingDashboard} />
             
             {/* AGRICULTURAL AUTHENTICATION ROUTES */}
             <Route path="/farmer-login" component={FarmerLogin} />

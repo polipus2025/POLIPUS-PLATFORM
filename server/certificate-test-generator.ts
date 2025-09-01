@@ -19,6 +19,7 @@ interface EnhancedFarmerData {
   farmSize: number;
   gpsCoordinates: string;
   cropType: string;
+  cropQuantity: number;
   exporterCompany: string;
   // Real supply chain data
   batchNumber?: string;
@@ -56,6 +57,7 @@ const getEnhancedFarmerData = async (farmerId: string): Promise<EnhancedFarmerDa
         farmSize: parseFloat(commodity.quantity) || 25.0,
         gpsCoordinates: commodity.gpsCoordinates || '6.5000° N, 10.3500° W',
         cropType: commodity.type,
+        cropQuantity: parseFloat(commodity.quantity) || 2450,
         exporterCompany: warehouseTx?.buyerName || 'Liberian Agricultural Export Ltd.',
         // Enhanced supply chain data
         batchNumber: commodity.batchNumber,
@@ -82,6 +84,7 @@ const getEnhancedFarmerData = async (farmerId: string): Promise<EnhancedFarmerDa
       farmSize: 25.5,
       gpsCoordinates: "7.0042° N, 9.4334° W",
       cropType: "Cocoa",
+      cropQuantity: 2450,
       exporterCompany: "Liberian Agricultural Export Ltd.",
       batchNumber: `BATCH-${Date.now().toString().slice(-6)}`,
       harvestDate: new Date('2024-11-15'),
@@ -98,6 +101,7 @@ const getEnhancedFarmerData = async (farmerId: string): Promise<EnhancedFarmerDa
       farmSize: 18.2,
       gpsCoordinates: "7.3625° N, 8.7196° W",
       cropType: "Coffee",
+      cropQuantity: 1850,
       exporterCompany: "West Africa Premium Exports",
       batchNumber: `BATCH-${Date.now().toString().slice(-6)}`,
       harvestDate: new Date('2024-12-02'),
@@ -114,6 +118,7 @@ const getEnhancedFarmerData = async (farmerId: string): Promise<EnhancedFarmerDa
       farmSize: 32.8,
       gpsCoordinates: "6.5000° N, 10.3500° W", 
       cropType: "Palm Oil",
+      cropQuantity: 3280,
       exporterCompany: "Tropical Commodities International",
       batchNumber: `BATCH-${Date.now().toString().slice(-6)}`,
       harvestDate: new Date('2024-11-28'),
@@ -143,8 +148,6 @@ const generateTraceabilityQR = async (data: any): Promise<string> => {
     const qrDataString = JSON.stringify(qrData);
     const qrCodeDataUrl = await QRCode.toDataURL(qrDataString, {
       errorCorrectionLevel: 'M',
-      type: 'image/png',
-      quality: 0.92,
       margin: 1,
       width: 150,
       color: {

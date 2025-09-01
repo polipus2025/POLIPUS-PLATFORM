@@ -505,16 +505,20 @@ const InspectionsAndPayments = memo(({ exporterId }: { exporterId: string }) => 
 
   const completedInspections = inspectionStatus?.data || [];
   
-  // Check if inspection is completed for a specific request
-  const isInspectionCompleted = (requestId: string) => {
-    return completedInspections.some((inspection: any) => 
-      inspection.requestId === requestId && inspection.status === 'COMPLETED'
-    );
+  // Check if inspection is completed for a specific pickup (using transactionId)
+  const isInspectionCompleted = (pickup: any) => {
+    console.log('🔍 Checking inspection for pickup transactionId:', pickup.transactionId);
+    console.log('📋 Available completed inspections:', completedInspections);
+    
+    return completedInspections.some((inspection: any) => {
+      console.log(`🔗 Comparing: "${inspection.requestId}" === "${pickup.transactionId}"`, inspection.requestId === pickup.transactionId);
+      return inspection.requestId === pickup.transactionId && inspection.status === 'COMPLETED';
+    });
   };
 
-  const getInspectionDetails = (requestId: string) => {
+  const getInspectionDetails = (pickup: any) => {
     return completedInspections.find((inspection: any) => 
-      inspection.requestId === requestId && inspection.status === 'COMPLETED'
+      inspection.requestId === pickup.transactionId && inspection.status === 'COMPLETED'
     );
   };
 
@@ -638,7 +642,7 @@ const InspectionsAndPayments = memo(({ exporterId }: { exporterId: string }) => 
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4 pt-4 border-t border-slate-200">
               
               {/* 1. Product Inspection Status */}
-              {isInspectionCompleted(pickup.requestId) ? (
+              {isInspectionCompleted(pickup) ? (
                 <div className="w-full">
                   <Button 
                     disabled
@@ -649,7 +653,7 @@ const InspectionsAndPayments = memo(({ exporterId }: { exporterId: string }) => 
                     ✅ Inspection Completed
                   </Button>
                   {(() => {
-                    const inspection = getInspectionDetails(pickup.requestId);
+                    const inspection = getInspectionDetails(pickup);
                     return inspection ? (
                       <div className="text-xs text-green-700 mt-2 space-y-1">
                         <p><strong>Inspector:</strong> {inspection.completedBy}</p>
@@ -697,23 +701,23 @@ const InspectionsAndPayments = memo(({ exporterId }: { exporterId: string }) => 
 
             {/* Status Indicator */}
             <div className={`mt-4 p-3 rounded-lg ${
-              isInspectionCompleted(pickup.requestId) 
+              isInspectionCompleted(pickup) 
                 ? 'bg-blue-50 border border-blue-200' 
                 : 'bg-green-50'
             }`}>
               <div className="flex items-center space-x-2">
                 <CheckCircle className={`h-4 w-4 ${
-                  isInspectionCompleted(pickup.requestId) 
+                  isInspectionCompleted(pickup) 
                     ? 'text-blue-600' 
                     : 'text-green-600'
                 }`} />
                 <p className={`text-sm ${
-                  isInspectionCompleted(pickup.requestId) 
+                  isInspectionCompleted(pickup) 
                     ? 'text-blue-800' 
                     : 'text-green-800'
                 }`}>
                   <span className="font-medium">Status:</span> {
-                    isInspectionCompleted(pickup.requestId) 
+                    isInspectionCompleted(pickup) 
                       ? 'Port inspection completed - Ready for export documentation'
                       : 'Ready for inspection booking and certification processing'
                   }

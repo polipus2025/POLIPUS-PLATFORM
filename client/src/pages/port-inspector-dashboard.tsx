@@ -30,6 +30,7 @@ import {
 } from "lucide-react";
 import { Label } from "@/components/ui/label";
 import ProfileDropdown from "@/components/ProfileDropdown";
+import CertificateDropdown from "@/components/CertificateDropdown";
 
 export default function PortInspectorDashboard() {
   const [selectedTab, setSelectedTab] = useState("overview");
@@ -313,6 +314,21 @@ export default function PortInspectorDashboard() {
                   <p className="text-2xl font-bold text-purple-600">{dashboardStats.exportersActive}</p>
                 </div>
                 <Building2 className="w-8 h-8 text-purple-600" />
+              </div>
+            </CardContent>
+          </Card>
+        </div>
+
+        {/* Certificate Generation Section */}
+        <div className="mb-6">
+          <Card className="bg-white/95 backdrop-blur-sm shadow-xl hover:shadow-2xl transition-all duration-300 border border-slate-200">
+            <CardContent className="p-6">
+              <div className="flex items-center justify-between">
+                <div>
+                  <h3 className="text-lg font-semibold text-slate-900 mb-2">Certificate Generation</h3>
+                  <p className="text-slate-600">Generate official certificates for export inspections</p>
+                </div>
+                <CertificateDropdown userType="port-inspector" />
               </div>
             </CardContent>
           </Card>

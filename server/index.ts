@@ -68,6 +68,10 @@ if (MAINTENANCE_MODE) {
       const { addCertificateTestRoutes } = await import('./certificate-test-generator');
       addCertificateTestRoutes(app);
       
+      // Certificate generation routes for dashboard integration
+      const certificateRoutes = await import('./certificate-routes');
+      app.use('/api/certificates', certificateRoutes.default);
+      
       // Setup Vite for development or serve static files for production
       if (process.env.NODE_ENV === 'production') {
         console.log('🏭 Production mode - serving static files...');

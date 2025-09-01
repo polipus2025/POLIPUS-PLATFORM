@@ -29,6 +29,7 @@ import {
 } from "lucide-react";
 import { apiRequest, queryClient } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
+import CertificateDropdown from "@/components/CertificateDropdown";
 
 // Field Agent Approval Manager Component
 function FieldAgentApprovalManager() {
@@ -426,6 +427,21 @@ export default function DirectorDashboard() {
                   </p>
                 </div>
                 <Smartphone className="h-8 w-8 text-blue-600" />
+              </div>
+            </CardContent>
+          </Card>
+        </div>
+
+        {/* Certificate Generation Section */}
+        <div className="mb-6">
+          <Card>
+            <CardContent className="p-6">
+              <div className="flex items-center justify-between">
+                <div>
+                  <h3 className="text-lg font-semibold text-gray-900 mb-2">Certificate Management</h3>
+                  <p className="text-gray-600">Generate compliance declaration certificates</p>
+                </div>
+                <CertificateDropdown userType="director" />
               </div>
             </CardContent>
           </Card>

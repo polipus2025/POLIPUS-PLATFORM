@@ -588,7 +588,7 @@ export default function PortInspectorDashboard() {
                         </div>
                         
                         <div>
-                          <h4 className="font-medium mb-2">Shipment Details</h4>
+                          <h4 className="font-medium mb-2">Product Details</h4>
                           <p className="text-sm text-slate-600">Commodity: {inspection.commodity}</p>
                           <p className="text-sm text-slate-600">Quantity: {inspection.quantity}</p>
                           <p className="text-sm text-slate-600">Custody ID: {inspection.shipmentId}</p>
@@ -598,7 +598,7 @@ export default function PortInspectorDashboard() {
                         </div>
                         
                         <div>
-                          <h4 className="font-medium mb-2">Shipping Details</h4>
+                          <h4 className="font-medium mb-2">Warehouse & Inspection Schedule details</h4>
                           <p className="text-sm text-slate-600">Vessel: {inspection.vesselName}</p>
                           <p className="text-sm text-slate-600">Destination: {inspection.destination}</p>
                           <p className="text-sm text-slate-600">Scheduled: {inspection.scheduledDate}</p>

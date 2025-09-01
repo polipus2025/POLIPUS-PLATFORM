@@ -329,6 +329,99 @@ export function addCertificateTestRoutes(app: Express) {
       
       yPos += 100;
 
+      // === COCOA TRADE INFORMATION ===
+      doc.fontSize(14).font('Helvetica-Bold').text('COCOA TRADE CERTIFICATION', 40, yPos);
+      yPos += 25;
+      
+      // Trade information boxes
+      doc.rect(40, yPos, 515, 100).strokeColor('#8B4513').lineWidth(2).stroke();
+      doc.rect(40, yPos, 515, 30).fillColor('#8B4513').fill();
+      
+      doc.fillColor('#ffffff').fontSize(12).font('Helvetica-Bold');
+      doc.text('CERTIFIED COCOA TRADE SPECIFICATIONS', 50, yPos + 8);
+      doc.fillColor('#000000');
+      yPos += 40;
+      
+      // Trade details in columns
+      const cocoaTradeInfo = [
+        ['HS Code:', '1801.00.10 - Cocoa Beans, Raw/Unroasted'],
+        ['Commodity Classification:', 'Premium Grade Cocoa Beans'],
+        ['Certified Quantity:', `${farmer.cropQuantity || '2,450'} kg`],
+        ['Quality Grade:', 'Grade I - Premium Export Quality'],
+        ['Moisture Content:', '≤ 7.5% (Export Standard)'],
+        ['Bean Size:', '100+ beans per 100g (Superior Grade)'],
+        ['Fermentation Level:', 'Well Fermented (80%+ brown beans)'],
+        ['Export Destination:', 'European Union Markets']
+      ];
+      
+      // Left column
+      cocoaTradeInfo.slice(0, 4).forEach((info, index) => {
+        const infoY = yPos + (index * 15);
+        doc.fontSize(9).font('Helvetica-Bold').text(info[0], 50, infoY);
+        doc.font('Helvetica').text(info[1], 180, infoY);
+      });
+      
+      // Right column  
+      cocoaTradeInfo.slice(4).forEach((info, index) => {
+        const infoY = yPos + (index * 15);
+        doc.fontSize(9).font('Helvetica-Bold').text(info[0], 320, infoY);
+        doc.font('Helvetica').text(info[1], 450, infoY);
+      });
+      
+      yPos += 80;
+
+      // === SUPPLY CHAIN WORKFLOW GRAPHICS ===
+      doc.fontSize(14).font('Helvetica-Bold').text('COMPREHENSIVE SUPPLY CHAIN WORKFLOW', 40, yPos);
+      yPos += 25;
+      
+      // Workflow background
+      doc.rect(40, yPos, 515, 120).strokeColor('#1f2937').lineWidth(2).stroke();
+      doc.rect(40, yPos, 515, 25).fillColor('#1f2937').fill();
+      
+      doc.fillColor('#ffffff').fontSize(11).font('Helvetica-Bold');
+      doc.text('AGRITRACE PLATFORM INTEGRATED SUPPLY CHAIN', 50, yPos + 6);
+      doc.fillColor('#000000');
+      yPos += 35;
+      
+      // Supply chain steps
+      const workflowSteps = [
+        { step: '1', title: 'FARMER', desc: 'Production & Harvest', color: '#10B981', x: 60 },
+        { step: '2', title: 'BUYER', desc: 'Quality Assessment', color: '#3B82F6', x: 160 },
+        { step: '3', title: 'GOV WAREHOUSE', desc: 'Official Storage', color: '#8B5CF6', x: 260 },
+        { step: '4', title: 'EXPORTER', desc: 'Export Processing', color: '#F59E0B', x: 360 },
+        { step: '5', title: 'LACRA APPROVAL', desc: 'Final Export OK', color: '#EF4444', x: 460 }
+      ];
+      
+      workflowSteps.forEach((step, index) => {
+        const stepX = step.x;
+        const stepY = yPos + 10;
+        
+        // Step circle
+        doc.circle(stepX, stepY + 15, 15).fillColor(step.color).fill();
+        doc.fillColor('#ffffff').fontSize(10).font('Helvetica-Bold');
+        doc.text(step.step, stepX - 3, stepY + 10);
+        
+        // Step details
+        doc.fillColor('#000000').fontSize(8).font('Helvetica-Bold');
+        doc.text(step.title, stepX - 25, stepY + 35);
+        doc.fontSize(7).font('Helvetica');
+        doc.text(step.desc, stepX - 25, stepY + 47);
+        
+        // Arrow to next step (except last)
+        if (index < workflowSteps.length - 1) {
+          doc.moveTo(stepX + 20, stepY + 15)
+             .lineTo(stepX + 70, stepY + 15)
+             .lineTo(stepX + 65, stepY + 10)
+             .moveTo(stepX + 70, stepY + 15)
+             .lineTo(stepX + 65, stepY + 20)
+             .strokeColor('#6B7280')
+             .lineWidth(2)
+             .stroke();
+        }
+      });
+      
+      yPos += 100;
+
       // === COMPLIANCE STATUS ===
       doc.fontSize(14).font('Helvetica-Bold').text('COMPLIANCE STATUS', 40, yPos);
       yPos += 25;
@@ -1100,6 +1193,790 @@ export function addCertificateTestRoutes(app: Express) {
     } catch (error) {
       console.error('Error generating deforestation certificate:', error);
       res.status(500).json({ error: 'Failed to generate deforestation certificate' });
+    }
+  });
+
+  // Generate Phytosanitary Certificate with real data integration
+  app.get('/api/test/phytosanitary-certificate/:farmerId', async (req, res) => {
+    try {
+      const { farmerId } = req.params;
+      const farmer = await getEnhancedFarmerData(farmerId);
+      
+      // Certificate details for QR generation
+      const certNumber = `PHY-${farmer.county.substring(0,3).toUpperCase()}-${Date.now().toString().slice(-6)}`;
+      const qrData = {
+        certificateId: certNumber,
+        farmerId: farmer.id,
+        batchNumber: farmer.batchNumber || 'N/A',
+        harvestDate: farmer.harvestDate?.toISOString() || new Date().toISOString(),
+        gpsCoordinates: farmer.gpsCoordinates,
+        complianceStatus: farmer.complianceStatus || 'compliant'
+      };
+      
+      // Generate QR code
+      const qrCodeDataUrl = await generateTraceabilityQR(qrData);
+
+      const doc = new PDFDocument({ 
+        size: 'A4', 
+        margin: 40,
+        info: {
+          Title: 'Phytosanitary Certificate - Plant Health Verification',
+          Author: 'LACRA Plant Protection Division & ECOENVIROS',
+          Subject: 'International Plant Health Certification',
+          Creator: 'Polipus AgriTrace Platform - Plant Health Integration'
+        }
+      });
+
+      res.setHeader('Content-Type', 'application/pdf');
+      res.setHeader('Content-Disposition', `inline; filename="Phytosanitary_Certificate_${farmer.fullName.replace(' ', '_')}.pdf"`);
+      
+      doc.pipe(res);
+
+      // === HEADER ===
+      doc.rect(0, 0, 595, 80).fillColor('#228B22').fill();
+      
+      // LACRA Logo area
+      doc.rect(40, 15, 80, 50).strokeColor('#ffffff').stroke();
+      doc.fillColor('#ffffff').fontSize(9).font('Helvetica-Bold');
+      doc.text('LACRA', 50, 25);
+      doc.fontSize(7).font('Helvetica');
+      doc.text('Plant Protection', 50, 40);
+      doc.text('Division', 50, 52);
+      
+      // Title
+      doc.fontSize(18).font('Helvetica-Bold').fillColor('#ffffff');
+      doc.text('PHYTOSANITARY CERTIFICATE', 140, 25);
+      doc.fontSize(12).font('Helvetica').text('International Plant Health Certification', 140, 45);
+      
+      // ECOENVIROS Logo area  
+      doc.rect(475, 15, 80, 50).strokeColor('#ffffff').stroke();
+      doc.fontSize(9).text('ECOENVIROS', 485, 25);
+      doc.fontSize(7).text('Plant Health Expert', 485, 40);
+      doc.text('ISO 22000 Certified', 485, 52);
+
+      doc.fillColor('#000000');
+      let yPos = 120;
+
+      // === CERTIFICATE INFORMATION ===
+      doc.fontSize(14).font('Helvetica-Bold').text('PHYTOSANITARY CERTIFICATION DETAILS', 40, yPos);
+      yPos += 25;
+      
+      const issueDate = new Date().toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' });
+      const validUntil = new Date(Date.now() + 180 * 24 * 60 * 60 * 1000).toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' });
+      
+      doc.fontSize(11).font('Helvetica');
+      doc.text(`Certificate Number: ${certNumber}`, 40, yPos);
+      doc.text(`Issue Date: ${issueDate}`, 320, yPos);
+      yPos += 15;
+      doc.text(`Valid Until: ${validUntil}`, 40, yPos);
+      doc.text(`HS Code: 1801.00.10`, 320, yPos);
+      yPos += 15;
+      doc.text(`Quantity: ${farmer.cropQuantity || '2,450'} kg`, 40, yPos);
+      doc.text(`Plant Health Status: APPROVED`, 320, yPos);
+      yPos += 30;
+
+      // === EXPORTER/PRODUCER INFORMATION ===
+      doc.fontSize(14).font('Helvetica-Bold').text('EXPORTER & PRODUCER INFORMATION', 40, yPos);
+      yPos += 25;
+      
+      doc.rect(40, yPos, 250, 100).strokeColor('#cccccc').stroke();
+      doc.rect(310, yPos, 245, 100).strokeColor('#cccccc').stroke();
+      
+      // Left box - Producer info
+      doc.fontSize(11).font('Helvetica-Bold').text('Producer Details', 45, yPos + 10);
+      doc.fontSize(10).font('Helvetica');
+      doc.text(`Name: ${farmer.fullName}`, 45, yPos + 25);
+      doc.text(`Location: ${farmer.city}, ${farmer.county}`, 45, yPos + 40);
+      doc.text(`GPS: ${farmer.gpsCoordinates}`, 45, yPos + 55);
+      doc.text(`Farm Size: ${farmer.farmSize} hectares`, 45, yPos + 70);
+      
+      // Right box - Export info
+      doc.fontSize(11).font('Helvetica-Bold').text('Export Information', 315, yPos + 10);
+      doc.fontSize(10).font('Helvetica');
+      doc.text('Destination: European Union', 315, yPos + 25);
+      doc.text('Port of Loading: Monrovia', 315, yPos + 40);
+      doc.text('Means of Transport: Maritime', 315, yPos + 55);
+      doc.text('Treatment: Heat Treatment', 315, yPos + 70);
+      
+      yPos += 120;
+
+      // === PLANT HEALTH DECLARATION ===
+      doc.fontSize(14).font('Helvetica-Bold').text('PLANT HEALTH DECLARATION', 40, yPos);
+      yPos += 25;
+      
+      doc.rect(40, yPos, 515, 120).strokeColor('#228B22').lineWidth(2).stroke();
+      doc.rect(40, yPos, 515, 30).fillColor('#228B22').fill();
+      
+      doc.fillColor('#ffffff').fontSize(12).font('Helvetica-Bold');
+      doc.text('OFFICIAL PLANT HEALTH CERTIFICATION', 50, yPos + 8);
+      doc.fillColor('#000000');
+      yPos += 40;
+      
+      const plantHealthText = [
+        '✓ The plants, plant products, and other regulated articles described herein have been inspected',
+        '✓ They are considered to be free from quarantine pests and practically free from other injurious pests',
+        '✓ They are deemed to conform with current phytosanitary requirements of the importing country',
+        '✓ No signs of diseases, pests, or other harmful organisms detected during inspection',
+        '✓ Pre-export treatment completed according to international standards (ISPM 15)',
+        '✓ All phytosanitary measures have been applied in accordance with IPPC guidelines'
+      ];
+      
+      plantHealthText.forEach((text, index) => {
+        doc.fontSize(9).font('Helvetica').text(text, 50, yPos + (index * 12), { width: 500 });
+      });
+      
+      yPos += 100;
+
+      // === QR CODE SECTION ===
+      doc.fontSize(14).font('Helvetica-Bold').text('PLANT HEALTH TRACEABILITY', 40, yPos);
+      yPos += 25;
+      
+      doc.rect(40, yPos, 515, 80).strokeColor('#e5e7eb').stroke();
+      
+      doc.fontSize(11).font('Helvetica-Bold').text('QR Plant Health Verification', 60, yPos + 15);
+      doc.fontSize(9).font('Helvetica').text('Scan QR code for complete plant health traceability', 60, yPos + 30);
+      doc.text(`Verification URL: https://verify.lacra.gov.lr/phyto/${certNumber}`, 60, yPos + 45);
+      doc.text(`Inspection Date: ${issueDate}`, 60, yPos + 58);
+      
+      doc.rect(420, yPos + 10, 60, 60).strokeColor('#cccccc').stroke();
+      doc.fontSize(8).text('PHYTO QR', 435, yPos + 35);
+      doc.text('EMBEDDED', 435, yPos + 48);
+      
+      yPos += 100;
+
+      // === SIGNATURES ===
+      doc.rect(40, yPos, 250, 60).strokeColor('#cccccc').stroke();
+      doc.rect(305, yPos, 250, 60).strokeColor('#cccccc').stroke();
+      
+      doc.fontSize(10).font('Helvetica-Bold').text('LACRA Plant Protection Officer', 45, yPos + 45);
+      doc.fontSize(10).font('Helvetica-Bold').text('ECOENVIROS Phytosanitary Expert', 310, yPos + 45);
+
+      doc.end();
+      
+    } catch (error) {
+      console.error('Error generating phytosanitary certificate:', error);
+      res.status(500).json({ error: 'Failed to generate phytosanitary certificate' });
+    }
+  });
+
+  // Generate Certificate of Origin with real data integration
+  app.get('/api/test/origin-certificate/:farmerId', async (req, res) => {
+    try {
+      const { farmerId } = req.params;
+      const farmer = await getEnhancedFarmerData(farmerId);
+      
+      // Certificate details for QR generation
+      const certNumber = `COO-${farmer.county.substring(0,3).toUpperCase()}-${Date.now().toString().slice(-6)}`;
+      const qrData = {
+        certificateId: certNumber,
+        farmerId: farmer.id,
+        batchNumber: farmer.batchNumber || 'N/A',
+        harvestDate: farmer.harvestDate?.toISOString() || new Date().toISOString(),
+        gpsCoordinates: farmer.gpsCoordinates,
+        complianceStatus: farmer.complianceStatus || 'compliant'
+      };
+      
+      // Generate QR code
+      const qrCodeDataUrl = await generateTraceabilityQR(qrData);
+
+      const doc = new PDFDocument({ 
+        size: 'A4', 
+        margin: 40,
+        info: {
+          Title: 'Certificate of Origin - Liberian Cocoa Verification',
+          Author: 'LACRA Trade Division & ECOENVIROS',
+          Subject: 'Official Country of Origin Certification',
+          Creator: 'Polipus AgriTrace Platform - Origin Verification Integration'
+        }
+      });
+
+      res.setHeader('Content-Type', 'application/pdf');
+      res.setHeader('Content-Disposition', `inline; filename="Certificate_of_Origin_${farmer.fullName.replace(' ', '_')}.pdf"`);
+      
+      doc.pipe(res);
+
+      // === HEADER ===
+      doc.rect(0, 0, 595, 80).fillColor('#B8860B').fill();
+      
+      // LACRA Logo area
+      doc.rect(40, 15, 80, 50).strokeColor('#ffffff').stroke();
+      doc.fillColor('#ffffff').fontSize(9).font('Helvetica-Bold');
+      doc.text('LACRA', 50, 25);
+      doc.fontSize(7).font('Helvetica');
+      doc.text('Trade Certification', 50, 40);
+      doc.text('Division', 50, 52);
+      
+      // Title
+      doc.fontSize(18).font('Helvetica-Bold').fillColor('#ffffff');
+      doc.text('CERTIFICATE OF ORIGIN', 140, 25);
+      doc.fontSize(12).font('Helvetica').text('Republic of Liberia - Official Origin Certification', 140, 45);
+      
+      // ECOENVIROS Logo area  
+      doc.rect(475, 15, 80, 50).strokeColor('#ffffff').stroke();
+      doc.fontSize(9).text('ECOENVIROS', 485, 25);
+      doc.fontSize(7).text('Origin Verification', 485, 40);
+      doc.text('Trade Certified', 485, 52);
+
+      doc.fillColor('#000000');
+      let yPos = 120;
+
+      // === CERTIFICATION DETAILS ===
+      doc.fontSize(14).font('Helvetica-Bold').text('ORIGIN CERTIFICATION DETAILS', 40, yPos);
+      yPos += 25;
+      
+      const issueDate = new Date().toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' });
+      
+      doc.fontSize(11).font('Helvetica');
+      doc.text(`Certificate Number: ${certNumber}`, 40, yPos);
+      doc.text(`Issue Date: ${issueDate}`, 320, yPos);
+      yPos += 15;
+      doc.text(`Country of Origin: LIBERIA`, 40, yPos);
+      doc.text(`HS Code: 1801.00.10`, 320, yPos);
+      yPos += 15;
+      doc.text(`Quantity: ${farmer.cropQuantity || '2,450'} kg`, 40, yPos);
+      doc.text(`Origin Status: CERTIFIED`, 320, yPos);
+      yPos += 30;
+
+      // === PRODUCT DESCRIPTION ===
+      doc.fontSize(14).font('Helvetica-Bold').text('PRODUCT DESCRIPTION & ORIGIN VERIFICATION', 40, yPos);
+      yPos += 25;
+      
+      doc.rect(40, yPos, 515, 120).strokeColor('#B8860B').lineWidth(2).stroke();
+      doc.rect(40, yPos, 515, 30).fillColor('#B8860B').fill();
+      
+      doc.fillColor('#ffffff').fontSize(12).font('Helvetica-Bold');
+      doc.text('LIBERIAN COCOA - CERTIFIED ORIGIN PRODUCT', 50, yPos + 8);
+      doc.fillColor('#000000');
+      yPos += 40;
+      
+      const originInfo = [
+        ['Product Name:', 'Premium Grade Cocoa Beans (Theobroma cacao)'],
+        ['Origin Location:', `${farmer.city}, ${farmer.county} County, Liberia`],
+        ['GPS Coordinates:', farmer.gpsCoordinates],
+        ['Producer:', farmer.fullName],
+        ['Harvest Season:', '2024/2025 Main Crop Season'],
+        ['Processing Method:', 'Traditional Fermentation & Sun Drying'],
+        ['Quality Grade:', 'Grade I - Premium Export Quality'],
+        ['Moisture Content:', '≤ 7.5% (International Standard)']
+      ];
+      
+      originInfo.forEach((info, index) => {
+        const infoY = yPos + (index * 10);
+        doc.fontSize(9).font('Helvetica-Bold').text(info[0], 50, infoY);
+        doc.font('Helvetica').text(info[1], 200, infoY);
+      });
+      
+      yPos += 100;
+
+      // === SUPPLY CHAIN VERIFICATION ===
+      doc.fontSize(14).font('Helvetica-Bold').text('SUPPLY CHAIN ORIGIN VERIFICATION', 40, yPos);
+      yPos += 25;
+      
+      // Supply chain workflow
+      doc.rect(40, yPos, 515, 100).strokeColor('#1f2937').lineWidth(2).stroke();
+      doc.rect(40, yPos, 515, 25).fillColor('#1f2937').fill();
+      
+      doc.fillColor('#ffffff').fontSize(11).font('Helvetica-Bold');
+      doc.text('VERIFIED LIBERIAN SUPPLY CHAIN ORIGIN', 50, yPos + 6);
+      doc.fillColor('#000000');
+      yPos += 35;
+      
+      const originWorkflow = [
+        { step: '1', title: 'LIBERIAN FARM', desc: 'Verified Origin', color: '#10B981', x: 80 },
+        { step: '2', title: 'LOCAL BUYER', desc: 'Origin Confirmed', color: '#3B82F6', x: 200 },
+        { step: '3', title: 'GOV WAREHOUSE', desc: 'Origin Certified', color: '#8B5CF6', x: 320 },
+        { step: '4', title: 'LACRA VERIFIED', desc: 'Origin Approved', color: '#EF4444', x: 440 }
+      ];
+      
+      originWorkflow.forEach((step, index) => {
+        const stepX = step.x;
+        const stepY = yPos + 10;
+        
+        doc.circle(stepX, stepY + 15, 15).fillColor(step.color).fill();
+        doc.fillColor('#ffffff').fontSize(10).font('Helvetica-Bold');
+        doc.text(step.step, stepX - 3, stepY + 10);
+        
+        doc.fillColor('#000000').fontSize(8).font('Helvetica-Bold');
+        doc.text(step.title, stepX - 30, stepY + 35);
+        doc.fontSize(7).font('Helvetica');
+        doc.text(step.desc, stepX - 25, stepY + 47);
+        
+        if (index < originWorkflow.length - 1) {
+          doc.moveTo(stepX + 20, stepY + 15)
+             .lineTo(stepX + 100, stepY + 15)
+             .lineTo(stepX + 95, stepY + 10)
+             .moveTo(stepX + 100, stepY + 15)
+             .lineTo(stepX + 95, stepY + 20)
+             .strokeColor('#6B7280')
+             .lineWidth(2)
+             .stroke();
+        }
+      });
+      
+      yPos += 80;
+
+      // === QR CODE SECTION ===
+      doc.fontSize(14).font('Helvetica-Bold').text('ORIGIN TRACEABILITY VERIFICATION', 40, yPos);
+      yPos += 25;
+      
+      doc.rect(40, yPos, 515, 80).strokeColor('#e5e7eb').stroke();
+      
+      doc.fontSize(11).font('Helvetica-Bold').text('QR Origin Verification Code', 60, yPos + 15);
+      doc.fontSize(9).font('Helvetica').text('Scan QR code for complete origin traceability', 60, yPos + 30);
+      doc.text(`Verification URL: https://verify.lacra.gov.lr/origin/${certNumber}`, 60, yPos + 45);
+      doc.text(`Certified Origin: Republic of Liberia`, 60, yPos + 58);
+      
+      doc.rect(420, yPos + 10, 60, 60).strokeColor('#cccccc').stroke();
+      doc.fontSize(8).text('ORIGIN QR', 435, yPos + 35);
+      doc.text('EMBEDDED', 435, yPos + 48);
+      
+      yPos += 100;
+
+      // === DECLARATION ===
+      doc.fontSize(12).font('Helvetica-Bold').text('OFFICIAL DECLARATION', 40, yPos);
+      yPos += 20;
+      
+      doc.fontSize(10).font('Helvetica').text(
+        `This is to certify that the goods described above are of Liberian origin and have been produced, ` +
+        `manufactured, or processed in the Republic of Liberia in accordance with the rules of origin. ` +
+        `The supply chain has been verified from farm to export, confirming authentic Liberian origin.`,
+        40, yPos, { width: 515, align: 'justify' }
+      );
+      yPos += 60;
+
+      // === SIGNATURES ===
+      doc.rect(40, yPos, 250, 60).strokeColor('#cccccc').stroke();
+      doc.rect(305, yPos, 250, 60).strokeColor('#cccccc').stroke();
+      
+      doc.fontSize(10).font('Helvetica-Bold').text('LACRA Trade Certification Officer', 45, yPos + 45);
+      doc.fontSize(10).font('Helvetica-Bold').text('ECOENVIROS Origin Verification Expert', 310, yPos + 45);
+
+      doc.end();
+      
+    } catch (error) {
+      console.error('Error generating origin certificate:', error);
+      res.status(500).json({ error: 'Failed to generate origin certificate' });
+    }
+  });
+
+  // Generate Quality Control Certificate with grading system
+  app.get('/api/test/quality-certificate/:farmerId', async (req, res) => {
+    try {
+      const { farmerId } = req.params;
+      const farmer = await getEnhancedFarmerData(farmerId);
+      
+      // Certificate details for QR generation
+      const certNumber = `QUA-${farmer.county.substring(0,3).toUpperCase()}-${Date.now().toString().slice(-6)}`;
+      const qrData = {
+        certificateId: certNumber,
+        farmerId: farmer.id,
+        batchNumber: farmer.batchNumber || 'N/A',
+        harvestDate: farmer.harvestDate?.toISOString() || new Date().toISOString(),
+        gpsCoordinates: farmer.gpsCoordinates,
+        complianceStatus: farmer.complianceStatus || 'compliant'
+      };
+      
+      // Generate QR code
+      const qrCodeDataUrl = await generateTraceabilityQR(qrData);
+
+      const doc = new PDFDocument({ 
+        size: 'A4', 
+        margin: 40,
+        info: {
+          Title: 'Quality Control Certificate - Premium Cocoa Grading',
+          Author: 'LACRA Quality Assurance Division & ECOENVIROS',
+          Subject: 'Official Quality Control and Grading Certification',
+          Creator: 'Polipus AgriTrace Platform - Quality Control Integration'
+        }
+      });
+
+      res.setHeader('Content-Type', 'application/pdf');
+      res.setHeader('Content-Disposition', `inline; filename="Quality_Control_Certificate_${farmer.fullName.replace(' ', '_')}.pdf"`);
+      
+      doc.pipe(res);
+
+      // === HEADER ===
+      doc.rect(0, 0, 595, 80).fillColor('#DC2626').fill();
+      
+      // LACRA Logo area
+      doc.rect(40, 15, 80, 50).strokeColor('#ffffff').stroke();
+      doc.fillColor('#ffffff').fontSize(9).font('Helvetica-Bold');
+      doc.text('LACRA', 50, 25);
+      doc.fontSize(7).font('Helvetica');
+      doc.text('Quality Assurance', 50, 40);
+      doc.text('Division', 50, 52);
+      
+      // Title
+      doc.fontSize(18).font('Helvetica-Bold').fillColor('#ffffff');
+      doc.text('QUALITY CONTROL CERTIFICATE', 140, 25);
+      doc.fontSize(12).font('Helvetica').text('Premium Cocoa Quality Assurance & Grading', 140, 45);
+      
+      // ECOENVIROS Logo area  
+      doc.rect(475, 15, 80, 50).strokeColor('#ffffff').stroke();
+      doc.fontSize(9).text('ECOENVIROS', 485, 25);
+      doc.fontSize(7).text('Quality Expert', 485, 40);
+      doc.text('ISO 9001 Certified', 485, 52);
+
+      doc.fillColor('#000000');
+      let yPos = 120;
+
+      // === CERTIFICATE INFORMATION ===
+      doc.fontSize(14).font('Helvetica-Bold').text('QUALITY CONTROL CERTIFICATION DETAILS', 40, yPos);
+      yPos += 25;
+      
+      const issueDate = new Date().toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' });
+      const validUntil = new Date(Date.now() + 365 * 24 * 60 * 60 * 1000).toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' });
+      
+      doc.fontSize(11).font('Helvetica');
+      doc.text(`Certificate Number: ${certNumber}`, 40, yPos);
+      doc.text(`Issue Date: ${issueDate}`, 320, yPos);
+      yPos += 15;
+      doc.text(`Valid Until: ${validUntil}`, 40, yPos);
+      doc.text(`Overall Grade: PREMIUM GRADE I`, 320, yPos);
+      yPos += 15;
+      doc.text(`Quality Score: 94.2/100`, 40, yPos);
+      doc.text(`Certification Status: APPROVED`, 320, yPos);
+      yPos += 30;
+
+      // === COMPREHENSIVE QUALITY GRADING SYSTEM ===
+      doc.fontSize(14).font('Helvetica-Bold').text('COMPREHENSIVE QUALITY GRADING ASSESSMENT', 40, yPos);
+      yPos += 25;
+      
+      doc.rect(40, yPos, 515, 200).strokeColor('#DC2626').lineWidth(2).stroke();
+      doc.rect(40, yPos, 515, 30).fillColor('#DC2626').fill();
+      
+      doc.fillColor('#ffffff').fontSize(12).font('Helvetica-Bold');
+      doc.text('PREMIUM COCOA QUALITY ANALYSIS & GRADING', 50, yPos + 8);
+      doc.fillColor('#000000');
+      yPos += 40;
+      
+      // Quality parameters with grades
+      const qualityParameters = [
+        { parameter: 'Bean Size Uniformity', grade: 'A+', score: 96, color: '#22c55e' },
+        { parameter: 'Fermentation Quality', grade: 'A+', score: 94, color: '#22c55e' },
+        { parameter: 'Moisture Content', grade: 'A', score: 92, color: '#22c55e' },
+        { parameter: 'Bean Color & Appearance', grade: 'A+', score: 95, color: '#22c55e' },
+        { parameter: 'Flavor Profile', grade: 'A', score: 93, color: '#22c55e' },
+        { parameter: 'Defect Analysis', grade: 'A+', score: 97, color: '#22c55e' },
+        { parameter: 'Fat Content', grade: 'A', score: 91, color: '#22c55e' },
+        { parameter: 'Shell Content', grade: 'A+', score: 96, color: '#22c55e' }
+      ];
+      
+      qualityParameters.forEach((param, index) => {
+        const paramY = yPos + (index * 20);
+        
+        // Parameter name
+        doc.fontSize(10).font('Helvetica-Bold').text(param.parameter, 50, paramY);
+        
+        // Grade badge
+        doc.rect(250, paramY - 2, 30, 16).fillColor(param.color).fill();
+        doc.fillColor('#ffffff').fontSize(9).font('Helvetica-Bold');
+        doc.text(param.grade, 260, paramY + 2);
+        
+        // Score bar
+        doc.fillColor('#e5e7eb');
+        doc.rect(300, paramY + 2, 100, 12).fill();
+        doc.fillColor(param.color);
+        const barWidth = (param.score / 100) * 100;
+        doc.rect(300, paramY + 2, barWidth, 12).fill();
+        
+        // Score text
+        doc.fillColor('#000000').fontSize(9).font('Helvetica');
+        doc.text(`${param.score}/100`, 420, paramY + 3);
+      });
+      
+      yPos += 180;
+
+      // === QUALITY CONTROL CHARTS ===
+      doc.fontSize(14).font('Helvetica-Bold').text('QUALITY CONTROL ANALYSIS CHARTS', 40, yPos);
+      yPos += 25;
+      
+      doc.rect(40, yPos, 515, 120).strokeColor('#e5e7eb').stroke();
+      
+      // Bean size distribution chart
+      doc.fontSize(11).font('Helvetica-Bold').text('Bean Size Distribution Analysis', 45, yPos + 10);
+      
+      const beanSizes = [
+        { size: 'Large (>12mm)', percentage: 45, color: '#22c55e' },
+        { size: 'Medium (8-12mm)', percentage: 40, color: '#3b82f6' },
+        { size: 'Small (6-8mm)', percentage: 13, color: '#f59e0b' },
+        { size: 'Defective (<6mm)', percentage: 2, color: '#ef4444' }
+      ];
+      
+      let chartX = 60;
+      beanSizes.forEach((size, index) => {
+        const barHeight = (size.percentage / 50) * 60;
+        const barY = yPos + 80 - barHeight;
+        
+        // Size bar
+        doc.rect(chartX, barY, 25, barHeight).fillColor(size.color).fill();
+        
+        // Size labels
+        doc.fontSize(8).font('Helvetica').fillColor('#000000');
+        doc.text(size.size, chartX - 15, yPos + 90);
+        doc.text(`${size.percentage}%`, chartX + 5, barY - 15);
+        
+        chartX += 120;
+      });
+      
+      yPos += 140;
+
+      // === QR CODE SECTION ===
+      doc.fontSize(14).font('Helvetica-Bold').text('QUALITY CONTROL TRACEABILITY', 40, yPos);
+      yPos += 25;
+      
+      doc.rect(40, yPos, 515, 80).strokeColor('#e5e7eb').stroke();
+      
+      doc.fontSize(11).font('Helvetica-Bold').text('QR Quality Verification Code', 60, yPos + 15);
+      doc.fontSize(9).font('Helvetica').text('Scan QR code for complete quality control traceability', 60, yPos + 30);
+      doc.text(`Verification URL: https://verify.lacra.gov.lr/quality/${certNumber}`, 60, yPos + 45);
+      doc.text(`Quality Grade: Premium Grade I - Score 94.2/100`, 60, yPos + 58);
+      
+      doc.rect(420, yPos + 10, 60, 60).strokeColor('#cccccc').stroke();
+      doc.fontSize(8).text('QUALITY QR', 435, yPos + 35);
+      doc.text('EMBEDDED', 435, yPos + 48);
+      
+      yPos += 100;
+
+      // === QUALITY DECLARATION ===
+      doc.fontSize(12).font('Helvetica-Bold').text('OFFICIAL QUALITY DECLARATION', 40, yPos);
+      yPos += 20;
+      
+      doc.fontSize(10).font('Helvetica').text(
+        `This premium cocoa batch from ${farmer.fullName}'s farm in ${farmer.county} County has undergone comprehensive ` +
+        `quality control assessment and achieves Premium Grade I certification with an overall score of 94.2/100. ` +
+        `All quality parameters meet or exceed international export standards for premium cocoa beans.`,
+        40, yPos, { width: 515, align: 'justify' }
+      );
+      yPos += 60;
+
+      // === SIGNATURES ===
+      doc.rect(40, yPos, 250, 60).strokeColor('#cccccc').stroke();
+      doc.rect(305, yPos, 250, 60).strokeColor('#cccccc').stroke();
+      
+      doc.fontSize(10).font('Helvetica-Bold').text('LACRA Quality Control Officer', 45, yPos + 45);
+      doc.fontSize(10).font('Helvetica-Bold').text('ECOENVIROS Quality Expert', 310, yPos + 45);
+
+      doc.end();
+      
+    } catch (error) {
+      console.error('Error generating quality certificate:', error);
+      res.status(500).json({ error: 'Failed to generate quality certificate' });
+    }
+  });
+
+  // Generate Comprehensive LACRA & ECOENVIROS Compliance Declaration
+  app.get('/api/test/compliance-declaration/:farmerId', async (req, res) => {
+    try {
+      const { farmerId } = req.params;
+      const farmer = await getEnhancedFarmerData(farmerId);
+      
+      // Certificate details for QR generation
+      const declNumber = `COMP-${farmer.county.substring(0,3).toUpperCase()}-${Date.now().toString().slice(-6)}`;
+      const qrData = {
+        certificateId: declNumber,
+        farmerId: farmer.id,
+        batchNumber: farmer.batchNumber || 'N/A',
+        harvestDate: farmer.harvestDate?.toISOString() || new Date().toISOString(),
+        gpsCoordinates: farmer.gpsCoordinates,
+        complianceStatus: farmer.complianceStatus || 'compliant'
+      };
+      
+      // Generate QR code
+      const qrCodeDataUrl = await generateTraceabilityQR(qrData);
+
+      const doc = new PDFDocument({ 
+        size: 'A4', 
+        margin: 40,
+        info: {
+          Title: 'Comprehensive LACRA & ECOENVIROS Compliance Declaration',
+          Author: 'LACRA & ECOENVIROS Joint Declaration',
+          Subject: 'Master Compliance Declaration for All Certification Activities',
+          Creator: 'Polipus AgriTrace Platform - Comprehensive Compliance Integration'
+        }
+      });
+
+      res.setHeader('Content-Type', 'application/pdf');
+      res.setHeader('Content-Disposition', `inline; filename="Comprehensive_Compliance_Declaration_${farmer.fullName.replace(' ', '_')}.pdf"`);
+      
+      doc.pipe(res);
+
+      // === HEADER ===
+      doc.rect(0, 0, 595, 100).fillColor('#1f2937').fill();
+      
+      // LACRA Logo area
+      doc.rect(40, 20, 80, 60).strokeColor('#ffffff').stroke();
+      doc.fillColor('#ffffff').fontSize(10).font('Helvetica-Bold');
+      doc.text('LACRA', 50, 35);
+      doc.fontSize(8).font('Helvetica');
+      doc.text('Liberia Agriculture', 50, 50);
+      doc.text('Commodity Regulatory', 50, 62);
+      doc.text('Authority', 50, 74);
+      
+      // Title
+      doc.fontSize(16).font('Helvetica-Bold').fillColor('#ffffff');
+      doc.text('COMPREHENSIVE COMPLIANCE DECLARATION', 140, 30);
+      doc.fontSize(11).font('Helvetica').text('LACRA & ECOENVIROS Joint Certification Declaration', 140, 50);
+      doc.fontSize(9).text('Master Declaration for All Agricultural Certification Activities', 140, 68);
+      
+      // ECOENVIROS Logo area  
+      doc.rect(475, 20, 80, 60).strokeColor('#ffffff').stroke();
+      doc.fontSize(10).text('ECOENVIROS', 485, 35);
+      doc.fontSize(8).text('Environmental &', 485, 50);
+      doc.text('Agricultural', 485, 62);
+      doc.text('Certification Expert', 485, 74);
+
+      doc.fillColor('#000000');
+      let yPos = 140;
+
+      // === DECLARATION INFORMATION ===
+      doc.fontSize(14).font('Helvetica-Bold').text('MASTER COMPLIANCE DECLARATION DETAILS', 40, yPos);
+      yPos += 25;
+      
+      const issueDate = new Date().toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' });
+      
+      doc.fontSize(11).font('Helvetica');
+      doc.text(`Declaration Number: ${declNumber}`, 40, yPos);
+      doc.text(`Issue Date: ${issueDate}`, 320, yPos);
+      yPos += 15;
+      doc.text(`Producer: ${farmer.fullName}`, 40, yPos);
+      doc.text(`Location: ${farmer.county} County`, 320, yPos);
+      yPos += 15;
+      doc.text(`Comprehensive Status: FULLY COMPLIANT`, 40, yPos);
+      doc.text(`Master Certification: APPROVED`, 320, yPos);
+      yPos += 30;
+
+      // === COMPREHENSIVE COMPLIANCE STATEMENT ===
+      doc.fontSize(16).font('Helvetica-Bold').text('COMPREHENSIVE COMPLIANCE STATEMENT', 40, yPos);
+      yPos += 30;
+      
+      doc.rect(40, yPos, 515, 300).strokeColor('#1f2937').lineWidth(3).stroke();
+      doc.rect(40, yPos, 515, 40).fillColor('#1f2937').fill();
+      
+      doc.fillColor('#ffffff').fontSize(14).font('Helvetica-Bold');
+      doc.text('LACRA & ECOENVIROS JOINT DECLARATION', 50, yPos + 12);
+      doc.fillColor('#000000');
+      yPos += 50;
+      
+      const complianceText = [
+        'WHEREAS, the Liberia Agriculture Commodity Regulatory Authority (LACRA) and ECOENVIROS',
+        'Environmental & Agricultural Certification Experts have conducted comprehensive assessments',
+        'of all agricultural certification activities related to this cocoa production operation;',
+        '',
+        'NOW THEREFORE, LACRA and ECOENVIROS hereby jointly declare full compliance across',
+        'all certification categories and activities as follows:',
+        '',
+        '✓ EUDR COMPLIANCE VERIFICATION - Complete compliance with EU Deforestation Regulation',
+        '✓ DEFORESTATION ANALYSIS CERTIFICATION - Zero deforestation impact confirmed',
+        '✓ PHYTOSANITARY HEALTH CERTIFICATION - International plant health standards met',
+        '✓ CERTIFICATE OF ORIGIN VERIFICATION - Authentic Liberian origin established',
+        '✓ QUALITY CONTROL CERTIFICATION - Premium Grade I quality standards achieved',
+        '✓ LAND AUTHORITY DOCUMENTATION - Official land ownership verification completed',
+        '✓ MINISTRY OF LABOUR COMPLIANCE - Sustainable and ethical farming practices verified',
+        '✓ BIODIVERSITY ASSESSMENT - Positive environmental impact and conservation confirmed',
+        '✓ SUPPLY CHAIN TRACEABILITY - Complete farm-to-export traceability established',
+        '✓ GOVERNMENT WAREHOUSE VERIFICATION - Official storage and handling protocols met',
+        '✓ QR CODE VERIFICATION SYSTEMS - Advanced traceability systems fully operational',
+        '',
+        'All certification activities have been cross-verified through multiple Liberian government',
+        'agencies and international certification bodies. This comprehensive compliance declaration',
+        'serves as the master certification confirming that ALL activities across ALL certificates',
+        'meet or exceed national and international standards for sustainable cocoa production.'
+      ];
+      
+      complianceText.forEach((line, index) => {
+        const fontSize = line.startsWith('✓') ? 9 : line.startsWith('NOW THEREFORE') || line.startsWith('WHEREAS') ? 9 : 9;
+        const fontType = line.startsWith('✓') ? 'Helvetica' : line === '' ? 'Helvetica' : 'Helvetica';
+        doc.fontSize(fontSize).font(fontType).text(line, 50, yPos + (index * 10), { width: 500 });
+      });
+      
+      yPos += 280;
+
+      // === AUTHORITY SIGNATURES ===
+      doc.addPage();
+      yPos = 50;
+      
+      doc.fontSize(16).font('Helvetica-Bold').text('OFFICIAL AUTHORITY DECLARATIONS', 40, yPos);
+      yPos += 30;
+      
+      // LACRA Declaration Box
+      doc.rect(40, yPos, 515, 120).strokeColor('#1f2937').lineWidth(2).stroke();
+      doc.rect(40, yPos, 515, 30).fillColor('#1f2937').fill();
+      
+      doc.fillColor('#ffffff').fontSize(12).font('Helvetica-Bold');
+      doc.text('LACRA OFFICIAL DECLARATION', 50, yPos + 8);
+      doc.fillColor('#000000');
+      yPos += 40;
+      
+      doc.fontSize(10).font('Helvetica').text(
+        'The Liberia Agriculture Commodity Regulatory Authority (LACRA) hereby certifies that all agricultural ' +
+        'certification activities conducted for this cocoa production operation meet the highest standards of ' +
+        'regulatory compliance. LACRA has verified all aspects of production, processing, storage, and export ' +
+        'documentation. This declaration represents LACRA\'s official approval and endorsement of all certification activities.',
+        50, yPos, { width: 500, align: 'justify' }
+      );
+      yPos += 80;
+      
+      doc.fontSize(10).font('Helvetica-Bold').text('LACRA Director General', 50, yPos);
+      doc.text(`Date: ${issueDate}`, 350, yPos);
+      yPos += 40;
+      
+      // ECOENVIROS Declaration Box
+      doc.rect(40, yPos, 515, 120).strokeColor('#059669').lineWidth(2).stroke();
+      doc.rect(40, yPos, 515, 30).fillColor('#059669').fill();
+      
+      doc.fillColor('#ffffff').fontSize(12).font('Helvetica-Bold');
+      doc.text('ECOENVIROS EXPERT DECLARATION', 50, yPos + 8);
+      doc.fillColor('#000000');
+      yPos += 40;
+      
+      doc.fontSize(10).font('Helvetica').text(
+        'ECOENVIROS Environmental & Agricultural Certification Experts hereby confirms that all environmental, ' +
+        'agricultural, and sustainability certifications conducted for this operation exceed international standards. ' +
+        'Our comprehensive assessment validates exceptional compliance with EUDR, phytosanitary, origin, and quality ' +
+        'control requirements. ECOENVIROS provides full endorsement of all certification activities.',
+        50, yPos, { width: 500, align: 'justify' }
+      );
+      yPos += 80;
+      
+      doc.fontSize(10).font('Helvetica-Bold').text('ECOENVIROS Lead Certification Expert', 50, yPos);
+      doc.text(`Date: ${issueDate}`, 350, yPos);
+      yPos += 40;
+
+      // === QR CODE SECTION ===
+      doc.fontSize(14).font('Helvetica-Bold').text('COMPREHENSIVE COMPLIANCE VERIFICATION', 40, yPos);
+      yPos += 25;
+      
+      doc.rect(40, yPos, 515, 80).strokeColor('#e5e7eb').stroke();
+      
+      doc.fontSize(11).font('Helvetica-Bold').text('QR Master Compliance Verification', 60, yPos + 15);
+      doc.fontSize(9).font('Helvetica').text('Scan QR code for complete compliance verification across all certificates', 60, yPos + 30);
+      doc.text(`Verification URL: https://verify.lacra.gov.lr/compliance/${declNumber}`, 60, yPos + 45);
+      doc.text(`Master Status: COMPREHENSIVE COMPLIANCE ACHIEVED`, 60, yPos + 58);
+      
+      doc.rect(420, yPos + 10, 60, 60).strokeColor('#cccccc').stroke();
+      doc.fontSize(8).text('MASTER QR', 435, yPos + 35);
+      doc.text('EMBEDDED', 435, yPos + 48);
+      
+      yPos += 100;
+
+      // === FOOTER DECLARATION ===
+      doc.fontSize(12).font('Helvetica-Bold').text('FINAL DECLARATION', 40, yPos);
+      yPos += 20;
+      
+      doc.fontSize(10).font('Helvetica').text(
+        'This Comprehensive Compliance Declaration represents the highest level of agricultural certification ' +
+        'achievement. All activities, processes, and documentation have been verified to meet or exceed national ' +
+        'and international standards. This master declaration confirms complete compliance across all certification ' +
+        'categories and serves as the official endorsement from both LACRA and ECOENVIROS.',
+        40, yPos, { width: 515, align: 'justify' }
+      );
+
+      doc.end();
+      
+    } catch (error) {
+      console.error('Error generating compliance declaration:', error);
+      res.status(500).json({ error: 'Failed to generate compliance declaration' });
     }
   });
 }

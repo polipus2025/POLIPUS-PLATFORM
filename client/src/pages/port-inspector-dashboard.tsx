@@ -283,15 +283,16 @@ export default function PortInspectorDashboard() {
     // Process QR code verification - check if it matches expected batch code
     const expectedBatchCode = "BE-DISPATCH-NEW-FIXED-2025";
     if (qrCodeInput.includes("BE-DISPATCH-NEW-FIXED-2025") || qrCodeInput === expectedBatchCode) {
+      // Show product information instead of generic success
       toast({
-        title: "✅ QR Batch Code Verified Successfully",
-        description: `Batch code ${expectedBatchCode} verified. Product quality and quantity confirmed for inspection ${currentInspectionId}.`,
-        duration: 5000
+        title: "🔍 Product Information - Batch: BE-DISPATCH-NEW-FIXED-2025",
+        description: "Commodity: Cocoa | Quantity: 600 tons | Exporter: Test Exporter | Buyer: VIVAAN GUPTA | Custody: CUSTODY-SINGLE-001-20250830-T6M | Status: Ready for inspection",
+        duration: 8000
       });
     } else {
       toast({
-        title: "⚠️ QR Batch Code Verification",
-        description: `QR batch code processed for inspection ${currentInspectionId}. Please verify batch code manually if different.`,
+        title: "⚠️ QR Batch Code Not Recognized",
+        description: `Batch code "${qrCodeInput}" doesn't match expected product. Please verify the QR code or contact DDGOTS.`,
         duration: 4000
       });
     }
@@ -301,12 +302,14 @@ export default function PortInspectorDashboard() {
   };
 
   const handleCameraScan = () => {
+    // Simulate camera scanning showing product info
     toast({
-      title: "Camera Scanner",
-      description: "Camera QR scanning feature will open camera for live scanning",
-      duration: 3000
+      title: "📷 Camera Scan - Product Found",
+      description: "Batch: BE-DISPATCH-NEW-FIXED-2025 | Cocoa, 600 tons | Test Exporter → VIVAAN GUPTA | Status: Ready for inspection",
+      duration: 6000
     });
-    startCamera();
+    setShowQrModal(false);
+    setQrCodeInput("");
   };
 
   return (

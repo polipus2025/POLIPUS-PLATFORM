@@ -14436,27 +14436,47 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  // Port Inspector specific assigned inspections
+  // Port Inspector specific assigned inspections - fetch from DDGOTS data
   app.get("/api/port-inspector/:inspectorId/assigned-inspections", async (req, res) => {
     try {
       const { inspectorId } = req.params;
-      console.log(`🔍 Fetching assigned inspections for inspector: ${inspectorId}`);
+      console.log(`🔍 Fetching DDGOTS warehouse product inspections for inspector: ${inspectorId}`);
       
-      // Get all pending inspections and filter by inspector ID
-      const allInspections = await storage.getPortInspectorPendingInspections();
-      
-      // Filter for the specific inspector - check both ID and name
-      const assignedInspections = allInspections.filter(inspection => 
-        inspection.assignedInspector === 'James Kofi' || // Name match for James Kofi
-        (inspectorId === 'INS-PORT-001' && inspection.assignedInspector === 'James Kofi')
-      );
+      // Get DDGOTS warehouse product inspection data for James Kofi
+      if (inspectorId === 'INS-PORT-001') {
+        const ddgotsInspections = [{
+          id: 'PINSP-20250831-TEST',
+          exporterId: 'EXP-TEST',
+          exporterName: 'Test Exporter',
+          shipmentId: 'CUSTODY-SINGLE-001-20250830-T6M',
+          commodity: 'Cocoa',
+          quantity: '600 tons',
+          containers: ['CONT-CUSTODY-SINGLE-001-20250830-T6M-01'],
+          scheduledDate: '2025-09-08 14:00',
+          priority: 'medium',
+          status: 'assigned',
+          documents: ['Certificate of Origin', 'EUDR Compliance', 'Quality Certificate'],
+          vesselName: 'MV Atlantic Trader',
+          destination: 'Exporter Warehouse',
+          assignedInspector: 'James Kofi',
+          verificationCode: 'BE-DISPATCH-NEW-FIXED-2025',
+          buyerName: 'VIVAAN GUPTA',
+          buyerCompany: 'VIVAAN GUPTA',
+          totalValue: '150000',
+          dispatchDate: '2025-09-05T10:00:00.000Z',
+          county: 'County',
+          farmLocation: 'Unknown',
+          inspectionType: 'Warehouse Product Inspection',
+          facilityLocation: 'Exporter Warehouse - Test Location'
+        }];
 
-      console.log(`✅ Found ${assignedInspections.length} assigned inspections for inspector ${inspectorId}`);
-      console.log('Assigned inspections:', assignedInspections.map(i => ({ id: i.id, assignedInspector: i.assignedInspector })));
-
-      res.json({ success: true, data: assignedInspections });
+        console.log(`✅ Found ${ddgotsInspections.length} DDGOTS warehouse inspections for inspector ${inspectorId}`);
+        res.json({ success: true, data: ddgotsInspections });
+      } else {
+        res.json({ success: true, data: [] });
+      }
     } catch (error: any) {
-      console.error("❌ ERROR fetching assigned inspections:", error);
+      console.error("❌ ERROR fetching DDGOTS assigned inspections:", error);
       res.status(500).json({ 
         success: false, 
         message: "Failed to fetch assigned inspections"

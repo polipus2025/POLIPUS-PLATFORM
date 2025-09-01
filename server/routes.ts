@@ -14456,7 +14456,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
           shipmentId: 'CUSTODY-SINGLE-001-20250830-T6M',
           commodity: 'Cocoa',
           quantity: '600 tons',
-          qrBatchCode: '107MJMQX',
+          qrBatchCode: 'BE-DISPATCH-NEW-FIXED-2025',
           scheduledDate: '2025-09-08 14:00',
           priority: 'medium',
           status: 'assigned',

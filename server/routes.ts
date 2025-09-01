@@ -15053,6 +15053,27 @@ export async function registerRoutes(app: Express): Promise<Server> {
         farmerId: transaction.farmerId
       });
 
+      // 🎯 AUTOMATIC MASTER TRANSACTION UPDATE - Inspection Completion Stage
+      try {
+        // Get the transaction from the master registry to update it
+        const transactionKey = Object.keys(masterTransactionRegistry).find(key => 
+          masterTransactionRegistry[key].portInspectorName && 
+          masterTransactionRegistry[key].masterTransactionId === 'TXN-FPO-20250830-817649-923'
+        );
+        
+        if (transactionKey && transaction) {
+          await updateMasterTransactionByMasterTxId(transaction.masterTransactionId, 'inspection_completed', {
+            inspectionId: inspectionId,
+            inspectorName: data.completedBy || 'James Kofi',
+            inspectionResults: completionResult.verificationResults
+          });
+          console.log(`🎯 MASTER TRANSACTION UPDATED: Inspection completion stage for ${transaction.masterTransactionId}`);
+        }
+      } catch (masterError) {
+        console.error('❌ Failed to update master transaction (inspection completion):', masterError);
+        // Don't fail the inspection completion, just log the error
+      }
+
       res.json({ 
         success: true, 
         message: 'Inspection completed successfully - All stakeholders notified',
@@ -17956,6 +17977,23 @@ VERIFY: ${qrCodeData.verificationUrl}`;
       await db.insert(storageFees).values(storageFeesRecord);
       console.log('✅ Storage fees record saved to database');
 
+      // 🎯 AUTOMATIC MASTER TRANSACTION UPDATE - Warehouse Custody Stage
+      try {
+        // Try to find the master transaction by buyer ID from the custody record
+        if (custodyRecord.buyerId) {
+          await updateMasterTransactionByBuyerId(custodyRecord.buyerId, 'warehouse_custody', {
+            custodyNumber: custodyId,
+            qrBatchCode: consolidatedQrCode,
+            warehouseInspector: custodyRecord.inspectorName,
+            storageAmount: storageAmount
+          });
+          console.log(`🎯 MASTER TRANSACTION UPDATED: Warehouse custody stage for buyer ${custodyRecord.buyerId}`);
+        }
+      } catch (masterError) {
+        console.error('❌ Failed to update master transaction (warehouse custody):', masterError);
+        // Don't fail the custody registration, just log the error
+      }
+
       res.json({
         success: true,
         custodyId,
@@ -18550,6 +18588,31 @@ VERIFY: ${qrCodeData.verificationUrl}`;
 
       console.log(`✅ Offer ${offerId} accepted by exporter ${exporterId} (First-Come-First-Serve)`);
       console.log(`🔐 Verification code generated: ${verificationCode}`);
+
+      // 🎯 AUTOMATIC MASTER TRANSACTION UPDATE - Exporter Acceptance Stage
+      try {
+        // Get offer details to find the farmer offer ID
+        const [offerDetails] = await db.execute(sql`
+          SELECT beo.custody_id, wc.buyer_id 
+          FROM buyer_exporter_offers beo
+          LEFT JOIN warehouse_custody wc ON beo.custody_id = wc.custody_id
+          WHERE beo.offer_id = ${offerId}
+          LIMIT 1
+        `);
+        
+        if (offerDetails && offerDetails.buyer_id) {
+          await updateMasterTransactionByBuyerId(offerDetails.buyer_id, 'exporter_acceptance', {
+            exporterId: exporterId,
+            exporterName: exporterCompany,
+            verificationCode: verificationCode,
+            responseId: responseId
+          });
+          console.log(`🎯 MASTER TRANSACTION UPDATED: Exporter acceptance stage for offer ${offerId}`);
+        }
+      } catch (masterError) {
+        console.error('❌ Failed to update master transaction (exporter acceptance):', masterError);
+        // Don't fail the acceptance, just log the error
+      }
 
       res.json({
         success: true,

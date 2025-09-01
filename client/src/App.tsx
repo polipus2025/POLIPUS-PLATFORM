@@ -73,6 +73,9 @@ import ExporterLogin from "@/pages/auth/exporter-login";
 import DDGAFLogin from "@/pages/auth/ddgaf-login";
 import DDGOTSLogin from "@/pages/auth/ddgots-login";
 import DGLogin from "@/pages/auth/dg-login";
+
+// CERTIFICATE TESTING - Direct import for instant access
+import CertificateTestingDashboard from "@/pages/certificate-testing-dashboard";
 import RegulatoryClassicLogin from "@/pages/auth/regulatory-classic-login";
 import SystemAdminLogin from "@/pages/auth/system-admin-login";
 import MonitoringLogin from "@/pages/auth/monitoring-login";
@@ -167,6 +170,9 @@ function App() {
             {/* AGRICULTURAL DASHBOARD ROUTES */}
             <Route path="/farmer-dashboard" component={createLazyRoute(FarmerDashboard)} />
             <Route path="/agricultural-buyer-dashboard" component={createLazyRoute(BuyerDashboard)} />
+            
+            {/* CERTIFICATE TESTING DASHBOARD */}
+            <Route path="/certificate-testing" component={CertificateTestingDashboard} />
             
             {/* AGRICULTURAL PAGES - Land Inspector Navigation */}
             <Route path="/onboard-farmer" component={createLazyRoute(OnboardFarmer)} />

@@ -671,13 +671,40 @@ export default function DDGOTSDashboard() {
                           </h4>
                           
                           {booking.assignmentStatus === 'assigned' ? (
-                            <div className="p-4 bg-green-50 border border-green-200 rounded-lg">
-                              <div className="flex items-center gap-2 text-green-800">
-                                <CheckCircle className="w-5 h-5 text-green-600" />
-                                <span className="font-semibold">Assigned to: {booking.assignedInspectorName}</span>
+                            <div className={`p-4 border rounded-lg ${
+                              booking.completionStatus === 'COMPLETED' 
+                                ? 'bg-blue-50 border-blue-200' 
+                                : 'bg-green-50 border-green-200'
+                            }`}>
+                              <div className={`flex items-center gap-2 ${
+                                booking.completionStatus === 'COMPLETED' 
+                                  ? 'text-blue-800' 
+                                  : 'text-green-800'
+                              }`}>
+                                {booking.completionStatus === 'COMPLETED' ? (
+                                  <CheckCircle className="w-5 h-5 text-blue-600" />
+                                ) : (
+                                  <CheckCircle className="w-5 h-5 text-green-600" />
+                                )}
+                                <span className="font-semibold">
+                                  {booking.completionStatus === 'COMPLETED' 
+                                    ? `✅ INSPECTION COMPLETED by ${booking.completedBy}` 
+                                    : `Assigned to: ${booking.assignedInspectorName}`
+                                  }
+                                </span>
                               </div>
-                              <p className="text-sm text-green-600 mt-1">
-                                📅 Assigned on: {new Date(booking.assignedAt).toLocaleDateString('en-US', {
+                              {booking.completionStatus === 'COMPLETED' ? (
+                                <div className="text-sm text-blue-600 mt-2 space-y-1">
+                                  <p>🎯 <strong>Status:</strong> {booking.inspectionResults?.status || 'PASSED'}</p>
+                                  <p>📋 <strong>Quality Verified:</strong> {booking.inspectionResults?.qualityVerified ? '✅ YES' : '❌ NO'}</p>
+                                  <p>📏 <strong>Quantity Verified:</strong> {booking.inspectionResults?.quantityVerified ? '✅ YES' : '❌ NO'}</p>
+                                  <p>🌍 <strong>EUDR Compliant:</strong> {booking.inspectionResults?.eudrCompliant ? '✅ YES' : '❌ NO'}</p>
+                                  <p>🕒 <strong>Completed:</strong> {new Date(booking.completedAt).toLocaleString()}</p>
+                                  <p>🔄 <strong>Next Step:</strong> Ready for final export documentation</p>
+                                </div>
+                              ) : (
+                                <p className="text-sm text-green-600 mt-1">
+                                  📅 Assigned on: {new Date(booking.assignedAt).toLocaleDateString('en-US', {
                                   weekday: 'short',
                                   month: 'short',
                                   day: 'numeric',

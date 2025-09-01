@@ -3082,7 +3082,7 @@ export class DatabaseStorage implements IStorage {
         commodityType: commodities.type
       })
       .from(exportOrders)
-      .leftJoin(exporters, eq(exportOrders.exporterId, exporters.exporterId))
+      .leftJoin(exporters, eq(exportOrders.exporterId, exporters.id))
       .leftJoin(commodities, eq(exportOrders.commodityId, commodities.id))
       .where(
         or(

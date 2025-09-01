@@ -510,231 +510,39 @@ export function addCertificateTestRoutes(app: Express) {
       
       yPos += 100;
 
-      // Check if we need a new page (page height is ~842, available ~762 with margins)
-      if (yPos > 680) {
-        doc.addPage();
-        yPos = 50;
-      } else {
-        yPos += 30; // Add some spacing if staying on same page
-      }
+      // === PAGE 2 - CERTIFICATION STATEMENT ===
+      doc.addPage();
+      yPos = 50;
 
-      // === LIBERIAN LAND AUTHORITY DOCUMENTATION ===
-      
-      doc.fontSize(16).font('Helvetica-Bold').text('LIBERIAN LAND AUTHORITY VERIFICATION', 40, yPos);
+      // === EUDR COMPLIANCE CONFIRMATION ===
+      doc.fontSize(16).font('Helvetica-Bold').text('EUDR COMPLIANCE CONFIRMATION', 40, yPos);
       yPos += 30;
       
-      // Land Authority header
-      doc.rect(40, yPos, 515, 40).fillColor('#8B4513').fill();
-      doc.fillColor('#ffffff').fontSize(12).font('Helvetica-Bold');
-      doc.text('REPUBLIC OF LIBERIA - LAND AUTHORITY', 50, yPos + 8);
-      doc.fontSize(10).font('Helvetica');
-      doc.text('Official Land Ownership and Deforestation-Free Certification', 50, yPos + 25);
-      doc.fillColor('#000000');
-      yPos += 60;
+      // Compliance status box
+      doc.rect(40, yPos, 515, 100).strokeColor('#22c55e').lineWidth(3).stroke();
+      doc.rect(40, yPos, 515, 30).fillColor('#22c55e').fill();
       
-      // Land documentation details
-      const landInfo = [
-        ['Deed Number:', landDoc.deedNumber],
-        ['Registration Date:', landDoc.registrationDate],
-        ['Land Size:', `${landDoc.landSize} hectares`],
-        ['GPS Coordinates:', landDoc.coordinates],
-        ['Ownership Type:', landDoc.ownershipType],
-        ['Legal Status:', landDoc.legalStatus],
-        ['Surveyor:', landDoc.surveyorName],
-        ['Witness Officer:', landDoc.witnessOfficer],
-        ['Registration Fee:', landDoc.registrationFee]
-      ];
+      doc.fillColor('#ffffff').fontSize(14).font('Helvetica-Bold');
+      doc.text('✓ EUDR COMPLIANT - APPROVED FOR EU EXPORT', 60, yPos + 8);
       
-      landInfo.forEach((info, index) => {
-        const infoY = yPos + (index * 20);
-        doc.fontSize(10).font('Helvetica-Bold').text(info[0], 50, infoY);
-        doc.font('Helvetica').text(info[1], 200, infoY);
-      });
+      doc.fillColor('#000000').fontSize(11).font('Helvetica');
+      doc.text(`Farm: ${farmer.fullName} - ${farmer.city}, ${farmer.county}`, 60, yPos + 45);
+      doc.text(`GPS Coordinates: ${farmer.gpsCoordinates}`, 60, yPos + 60);
+      doc.text(`Deforestation Risk: LOW - Verified Sustainable`, 60, yPos + 75);
       
-      yPos += 200;
-      
-      // Land Authority certification box
-      doc.rect(40, yPos, 515, 60).strokeColor('#8B4513').lineWidth(2).stroke();
-      doc.fontSize(11).font('Helvetica-Bold').text('OFFICIAL LAND AUTHORITY CERTIFICATION', 50, yPos + 15);
-      doc.fontSize(9).font('Helvetica').text(
-        'This land has been officially surveyed, registered, and verified as deforestation-free by the Liberian Land Authority. ' +
-        'All ownership documentation is complete and legally binding.',
-        50, yPos + 30, { width: 500 }
-      );
-      
-      yPos += 80;
-
-      // === MINISTRY OF LABOUR DECLARATION ===
-      yPos += 20;
-      doc.fontSize(16).font('Helvetica-Bold').text('MINISTRY OF LABOUR SUSTAINABILITY DECLARATION', 40, yPos);
-      yPos += 30;
-      
-      // Labour Ministry header
-      doc.rect(40, yPos, 515, 40).fillColor('#006400').fill();
-      doc.fillColor('#ffffff').fontSize(12).font('Helvetica-Bold');
-      doc.text('REPUBLIC OF LIBERIA - MINISTRY OF LABOUR', 50, yPos + 8);
-      doc.fontSize(10).font('Helvetica');
-      doc.text('Sustainable Farming & Child Labour Prevention Certification', 50, yPos + 25);
-      doc.fillColor('#000000');
-      yPos += 60;
-      
-      // Labour declaration details
-      const labourInfo = [
-        ['Declaration Number:', labourDoc.declarationNumber],
-        ['Inspection Date:', labourDoc.inspectionDate],
-        ['Labour Inspector:', labourDoc.inspectorName],
-        ['Farm Owner:', labourDoc.farmOwner],
-        ['Workforce Size:', `${labourDoc.workforceSize} workers`],
-        ['Child Labour Status:', labourDoc.childLabourStatus],
-        ['Fair Wages Status:', labourDoc.fairWagesStatus],
-        ['Working Conditions:', labourDoc.workingConditionsScore],
-        ['Safety Compliance:', labourDoc.safetyComplianceScore],
-        ['Sustainability Rating:', labourDoc.sustainabilityRating]
-      ];
-      
-      labourInfo.forEach((info, index) => {
-        const infoY = yPos + (index * 18);
-        doc.fontSize(9).font('Helvetica-Bold').text(info[0], 50, infoY);
-        doc.font('Helvetica').text(info[1], 220, infoY);
-      });
-      
-      yPos += 200;
-      
-      // Labour Ministry certification box
-      doc.rect(40, yPos, 515, 80).strokeColor('#006400').lineWidth(2).stroke();
-      doc.fontSize(11).font('Helvetica-Bold').text('MINISTRY OF LABOUR OFFICIAL DECLARATION', 50, yPos + 15);
-      doc.fontSize(9).font('Helvetica').text(
-        'The Ministry of Labour hereby certifies that this agricultural operation complies with all labour standards, ' +
-        'maintains excellent working conditions, provides fair wages above minimum standards, and operates completely ' +
-        'free from child labour. This farm demonstrates exceptional commitment to sustainable and ethical farming practices.',
-        50, yPos + 35, { width: 500 }
-      );
-      
-      yPos += 100;
-
-      // === BIODIVERSITY ASSESSMENT ===
-      // Check if we need a new page for biodiversity section
-      if (yPos > 650) {
-        doc.addPage();
-        yPos = 50;
-      } else {
-        yPos += 30; // Add spacing if staying on same page
-      }
-      
-      doc.fontSize(16).font('Helvetica-Bold').text('BIODIVERSITY IMPACT ASSESSMENT', 40, yPos);
-      yPos += 30;
-      
-      // Biodiversity header
-      doc.rect(40, yPos, 515, 40).fillColor('#228B22').fill();
-      doc.fillColor('#ffffff').fontSize(12).font('Helvetica-Bold');
-      doc.text('ENVIRONMENTAL BIODIVERSITY ANALYSIS', 50, yPos + 8);
-      doc.fontSize(10).font('Helvetica');
-      doc.text('Comprehensive Ecosystem Impact & Species Diversity Assessment', 50, yPos + 25);
-      doc.fillColor('#000000');
-      yPos += 60;
-      
-      // Biodiversity details
-      const biodiversityInfo = [
-        ['Assessment ID:', biodiversityDoc.assessmentId],
-        ['Conducted By:', biodiversityDoc.conductedBy],
-        ['Assessment Date:', biodiversityDoc.assessmentDate],
-        ['Ecosystem Type:', biodiversityDoc.ecosystemType],
-        ['Habitat Quality:', biodiversityDoc.habitatQuality],
-        ['Conservation Status:', biodiversityDoc.conservationStatus],
-        ['Soil Health:', biodiversityDoc.soilHealth],
-        ['Water Quality:', biodiversityDoc.waterQuality],
-        ['Carbon Sequestration:', biodiversityDoc.carbonSequestration],
-        ['Biodiversity Score:', `${biodiversityDoc.biodiversityScore}/100`]
-      ];
-      
-      biodiversityInfo.forEach((info, index) => {
-        const infoY = yPos + (index * 18);
-        doc.fontSize(9).font('Helvetica-Bold').text(info[0], 50, infoY);
-        doc.font('Helvetica').text(info[1], 220, infoY);
-      });
-      
-      yPos += 220;
-      
-      // Species diversity chart
-      doc.fontSize(12).font('Helvetica-Bold').text('SPECIES DIVERSITY ANALYSIS', 40, yPos);
-      yPos += 25;
-      
-      doc.rect(40, yPos, 515, 120).strokeColor('#e5e7eb').stroke();
-      
-      const speciesData = [
-        { species: 'Bird Species', count: biodiversityDoc.speciesDiversity.birds, color: '#3B82F6' },
-        { species: 'Mammal Species', count: biodiversityDoc.speciesDiversity.mammals, color: '#10B981' },
-        { species: 'Plant Species', count: biodiversityDoc.speciesDiversity.plants, color: '#F59E0B' },
-        { species: 'Insect Species', count: biodiversityDoc.speciesDiversity.insects, color: '#EF4444' }
-      ];
-      
-      let chartX = 60;
-      speciesData.forEach((data, index) => {
-        const barHeight = (data.count / 200) * 80;
-        const barY = yPos + 90 - barHeight;
-        
-        // Species bar
-        doc.rect(chartX, barY, 20, barHeight).fillColor(data.color).fill();
-        
-        // Species label
-        doc.fontSize(8).font('Helvetica').fillColor('#000000');
-        doc.text(data.species, chartX - 15, yPos + 100);
-        doc.text(`${data.count}`, chartX + 5, barY - 15);
-        
-        chartX += 120;
-      });
-      
-      yPos += 160;
-
-      // Check if we need a new page for due diligence section
-      if (yPos > 600) {
-        doc.addPage();
-        yPos = 50;
-      }
-
-      // === COMPREHENSIVE DUE DILIGENCE STATEMENT ===
-      doc.fontSize(16).font('Helvetica-Bold').text('COMPREHENSIVE DUE DILIGENCE STATEMENT', 40, yPos);
-      yPos += 35;
-      
-      doc.rect(40, yPos, 515, 150).strokeColor('#1f2937').lineWidth(2).stroke();
-      
-      doc.fontSize(11).font('Helvetica-Bold').text('COMPLETE DUE DILIGENCE VERIFICATION', 50, yPos + 15);
-      yPos += 35;
-      
-      const dueDiligenceText = [
-        'This comprehensive certificate represents complete due diligence verification incorporating:',
-        '',
-        '• Real-time supply chain data integration from Polipus AgriTrace platform',
-        '• Official Liberian Land Authority ownership and deforestation verification',
-        '• Ministry of Labour sustainability and ethical farming certification',
-        '• Independent biodiversity impact assessment with species diversity analysis',
-        '• GPS-verified coordinates with satellite monitoring confirmation',
-        '• Complete batch traceability with QR code verification system',
-        '• Multi-tier government authority approvals and official documentation',
-        '',
-        'All documentation has been cross-verified through official Liberian government channels.',
-        'This farm operates in full compliance with EUDR regulations and international standards.'
-      ];
-      
-      dueDiligenceText.forEach((line, index) => {
-        doc.fontSize(9).font(line.startsWith('•') ? 'Helvetica' : line === '' ? 'Helvetica' : 'Helvetica').text(line, 60, yPos + (index * 12), { width: 480 });
-      });
-      
-      yPos += 180;
+      yPos += 120;
 
       // === CERTIFICATION STATEMENT ===
-      doc.fontSize(12).font('Helvetica-Bold').text('ENHANCED CERTIFICATION STATEMENT', 40, yPos);
+      doc.fontSize(12).font('Helvetica-Bold').text('OFFICIAL CERTIFICATION STATEMENT', 40, yPos);
       yPos += 20;
       
       doc.fontSize(10).font('Helvetica').text(
-        `This enhanced certificate confirms that the agricultural production from ${farmer.fullName}'s farm in ${farmer.city}, ` +
-        `${farmer.county} County meets all requirements of the EU Deforestation Regulation (EUDR) with comprehensive ` +
-        `real data integration. The farm has been verified through multiple Liberian government authorities, ` +
-        `demonstrates exceptional environmental stewardship, maintains ethical labour practices, and provides ` +
-        `complete supply chain traceability through advanced QR code verification systems.`,
+        `This certificate confirms that the agricultural production from ${farmer.fullName}'s farm ` +
+        `meets all requirements of the EU Deforestation Regulation (EUDR). The farm has been verified ` +
+        `as deforestation-free with complete supply chain traceability.`,
         40, yPos, { width: 515, align: 'justify' }
       );
-      yPos += 80;
+      yPos += 60;
 
       // === SIGNATURES ===
       doc.rect(40, yPos, 250, 60).strokeColor('#cccccc').stroke();

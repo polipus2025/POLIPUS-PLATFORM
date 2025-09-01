@@ -585,6 +585,15 @@ export default function PortInspectorDashboard() {
                           <h4 className="font-medium mb-2">Exporter Details</h4>
                           <p className="text-sm text-slate-600">ID: {inspection.exporterId}</p>
                           <p className="font-medium">{inspection.exporterName}</p>
+                          {inspection.exporterContactPerson && (
+                            <p className="text-sm text-slate-600">Contact: {inspection.exporterContactPerson}</p>
+                          )}
+                          {inspection.exporterEmail && (
+                            <p className="text-sm text-slate-600">Email: {inspection.exporterEmail}</p>
+                          )}
+                          {inspection.exporterPhone && (
+                            <p className="text-sm text-slate-600">Phone: {inspection.exporterPhone}</p>
+                          )}
                         </div>
                         
                         <div>
@@ -599,9 +608,13 @@ export default function PortInspectorDashboard() {
                         
                         <div>
                           <h4 className="font-medium mb-2">Warehouse & Inspection Schedule details</h4>
+                          <p className="text-sm text-slate-600">Location: {inspection.warehouseLocation || inspection.destination}</p>
+                          <p className="text-sm text-slate-600">Address: {inspection.warehouseAddress || inspection.facilityLocation}</p>
+                          <p className="text-sm text-slate-600">Scheduled: {inspection.inspectionScheduled || inspection.scheduledDate}</p>
+                          {inspection.inspectionDuration && (
+                            <p className="text-sm text-slate-600">Duration: {inspection.inspectionDuration}</p>
+                          )}
                           <p className="text-sm text-slate-600">Vessel: {inspection.vesselName}</p>
-                          <p className="text-sm text-slate-600">Destination: {inspection.destination}</p>
-                          <p className="text-sm text-slate-600">Scheduled: {inspection.scheduledDate}</p>
                         </div>
                       </div>
                       

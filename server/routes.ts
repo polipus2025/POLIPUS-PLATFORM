@@ -14446,8 +14446,11 @@ export async function registerRoutes(app: Express): Promise<Server> {
       if (inspectorId === 'INS-PORT-001') {
         const ddgotsInspections = [{
           id: 'PINSP-20250831-TEST',
-          exporterId: 'EXP-TEST',
-          exporterName: 'Test Exporter',
+          exporterId: 'EXP-20250818-627',
+          exporterName: 'Premium Exports Liberia',
+          exporterContactPerson: 'Marcus Williams',
+          exporterEmail: 'marcus@premiumexports.lr',
+          exporterPhone: '+231-77-123-4567',
           shipmentId: 'CUSTODY-SINGLE-001-20250830-T6M',
           commodity: 'Cocoa',
           quantity: '600 tons',
@@ -14457,17 +14460,21 @@ export async function registerRoutes(app: Express): Promise<Server> {
           status: 'assigned',
           documents: ['Certificate of Origin', 'EUDR Compliance', 'Quality Certificate'],
           vesselName: 'MV Atlantic Trader',
-          destination: 'Exporter Warehouse',
+          destination: 'Premium Exports Warehouse',
+          warehouseLocation: 'Monrovia Free Port - Section C2',
+          warehouseAddress: 'Bushrod Island, Monrovia',
+          inspectionScheduled: '2025-09-08 14:00',
+          inspectionDuration: '2-3 hours',
           assignedInspector: 'James Kofi',
           verificationCode: 'BE-DISPATCH-NEW-FIXED-2025',
           buyerName: 'VIVAAN GUPTA',
           buyerCompany: 'VIVAAN GUPTA',
           totalValue: '150000',
           dispatchDate: '2025-09-05T10:00:00.000Z',
-          county: 'County',
-          farmLocation: 'Unknown',
+          county: 'Montserrado',
+          farmLocation: 'Bong County Cooperative',
           inspectionType: 'Warehouse Product Inspection',
-          facilityLocation: 'Exporter Warehouse - Test Location'
+          facilityLocation: 'Premium Exports Warehouse - Monrovia Free Port'
         }];
 
         console.log(`✅ Found ${ddgotsInspections.length} DDGOTS warehouse inspections for inspector ${inspectorId}`);

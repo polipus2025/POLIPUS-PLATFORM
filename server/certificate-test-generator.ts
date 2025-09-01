@@ -510,9 +510,15 @@ export function addCertificateTestRoutes(app: Express) {
       
       yPos += 100;
 
+      // Check if we need a new page (page height is ~842, available ~762 with margins)
+      if (yPos > 680) {
+        doc.addPage();
+        yPos = 50;
+      } else {
+        yPos += 30; // Add some spacing if staying on same page
+      }
+
       // === LIBERIAN LAND AUTHORITY DOCUMENTATION ===
-      doc.addPage();
-      yPos = 50;
       
       doc.fontSize(16).font('Helvetica-Bold').text('LIBERIAN LAND AUTHORITY VERIFICATION', 40, yPos);
       yPos += 30;
@@ -607,8 +613,13 @@ export function addCertificateTestRoutes(app: Express) {
       yPos += 100;
 
       // === BIODIVERSITY ASSESSMENT ===
-      doc.addPage();
-      yPos = 50;
+      // Check if we need a new page for biodiversity section
+      if (yPos > 650) {
+        doc.addPage();
+        yPos = 50;
+      } else {
+        yPos += 30; // Add spacing if staying on same page
+      }
       
       doc.fontSize(16).font('Helvetica-Bold').text('BIODIVERSITY IMPACT ASSESSMENT', 40, yPos);
       yPos += 30;
@@ -642,11 +653,11 @@ export function addCertificateTestRoutes(app: Express) {
         doc.font('Helvetica').text(info[1], 220, infoY);
       });
       
-      yPos += 200;
+      yPos += 220;
       
       // Species diversity chart
       doc.fontSize(12).font('Helvetica-Bold').text('SPECIES DIVERSITY ANALYSIS', 40, yPos);
-      yPos += 20;
+      yPos += 25;
       
       doc.rect(40, yPos, 515, 120).strokeColor('#e5e7eb').stroke();
       
@@ -673,12 +684,17 @@ export function addCertificateTestRoutes(app: Express) {
         chartX += 120;
       });
       
-      yPos += 140;
+      yPos += 160;
+
+      // Check if we need a new page for due diligence section
+      if (yPos > 600) {
+        doc.addPage();
+        yPos = 50;
+      }
 
       // === COMPREHENSIVE DUE DILIGENCE STATEMENT ===
-      yPos += 20;
       doc.fontSize(16).font('Helvetica-Bold').text('COMPREHENSIVE DUE DILIGENCE STATEMENT', 40, yPos);
-      yPos += 30;
+      yPos += 35;
       
       doc.rect(40, yPos, 515, 150).strokeColor('#1f2937').lineWidth(2).stroke();
       

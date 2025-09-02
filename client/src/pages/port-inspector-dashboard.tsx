@@ -56,19 +56,25 @@ export default function PortInspectorDashboard() {
   const getInspectorData = () => {
     try {
       const stored = localStorage.getItem("inspectorData");
+      console.log("🔍 RAW localStorage inspectorData:", stored);
       if (stored && stored !== "undefined" && stored !== "null") {
-        return JSON.parse(stored);
+        const parsed = JSON.parse(stored);
+        console.log("📋 PARSED inspectorData:", parsed);
+        return parsed;
       }
+      console.log("❌ No valid inspectorData in localStorage");
       return {};
     } catch (error) {
-      console.warn("Failed to parse inspector data from localStorage:", error);
+      console.warn("❌ Failed to parse inspector data from localStorage:", error);
       return {};
     }
   };
   
   const inspectorData = getInspectorData();
   const portFacility = inspectorData.portFacility || "Port of Monrovia";
-  const inspectorId = inspectorData.inspectorId || "INS-PORT-001"; // Default to James Kofi for testing
+  const inspectorId = inspectorData.inspectorId || "INS-PORT-001";
+  console.log("🎯 FINAL Inspector ID being used:", inspectorId);
+  console.log("👤 Inspector Data:", inspectorData);
 
   // Real data queries - Get inspections assigned to this specific inspector
   const { data: pendingInspections, isLoading: loadingInspections } = useQuery({

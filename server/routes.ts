@@ -702,46 +702,45 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(404).json({ message: "Farmer not found" });
       }
 
-      // Get farmer's individual plots from farm_plots table
+      // UNIVERSAL: Get REAL plots mapped by Land Inspectors ONLY for this farmer
+      // BUSINESS RULE: Only Land Inspectors can create plots - farmers cannot map their own land
       const farmerPlots = await db.execute(sql`
-        SELECT * FROM farm_plots 
+        SELECT 
+          plot_id, 
+          plot_name, 
+          plot_number,
+          crop_type,
+          plot_size,
+          plot_size_unit,
+          gps_coordinates,
+          county,
+          district,
+          village,
+          farm_boundaries,
+          land_map_data,
+          primary_crop,
+          secondary_crops,
+          status,
+          created_at,
+          farmer_id,
+          farmer_name
+        FROM farm_plots 
         WHERE farmer_id = ${farmerId} 
-        ORDER BY plot_number
+        AND is_active = true
+        ORDER BY plot_number ASC
       `);
       
       // If no plots in farm_plots table but farmer has onboarding land data, create synthetic plot
       const plots = farmerPlots.rows || [];
       
-      // UNIVERSAL: Create onboarding plot for ANY farmer with land mapping data
-      if (plots.length === 0 && farmer && (farmer.landMapData || farmer.farmBoundaries)) {
-        // Calculate area from land data if available
-        const plotArea = farmer.landMapData?.area || 
-                        farmer.farmBoundaries?.area || 
-                        parseFloat(farmer.farmSize) || 
-                        0;
-        
-        const onboardingPlot = {
-          id: 'onboarding',
-          plot_id: `ONBOARDING-${farmerId}`,
-          farmer_id: farmerId,
-          plot_name: `${farmer.firstName}'s Onboarding Plot`,
-          crop_type: farmer.primaryCrop || 'mixed',
-          plot_size: plotArea || farmer.farmSize || '0',
-          plot_size_unit: farmer.farmSizeUnit || 'hectares',
-          gps_coordinates: farmer.gpsCoordinates || 'GPS coordinates available',
-          status: 'active',
-          farm_boundaries: farmer.farmBoundaries || farmer.landMapData,
-          land_map_data: farmer.landMapData || farmer.farmBoundaries,
-          is_active: true,
-          registration_date: new Date(),
-          county: farmer.county,
-          district: farmer.district,
-          // EUDR compliance indicators
-          eudr_compliant: true,
-          compliance_status: 'verified'
-        };
-        plots.push(onboardingPlot);
-        console.log(`✅ Created onboarding plot for farmer ${farmer.firstName} ${farmer.lastName} (${farmerId})`);
+      // BUSINESS RULE: Only show REAL plots created by Land Inspectors
+      // Farmers CANNOT create their own plots - only Land Inspectors can map land
+      // Each plot has a unique Plot ID for precise traceability
+      
+      if (plots.length === 0) {
+        console.log(`⚠️ No plots found for farmer ${farmerId}. Land Inspector must map plots first.`);
+      } else {
+        console.log(`✅ Found ${plots.length} plots for farmer ${farmerId} mapped by Land Inspector(s)`);
       }
 
       res.json({

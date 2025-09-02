@@ -177,12 +177,12 @@ export default function FarmerDashboard() {
     const quantityAvailable = parseFloat(formData.get('quantityAvailable') as string);
     const pricePerUnit = parseFloat(formData.get('pricePerUnit') as string);
     
-    // CRITICAL FIX: Include plotId for EUDR compliance verification
+    // UNIVERSAL: Real Plot ID from Land Inspector mapping required for EUDR compliance
     const selectedPlotId = formData.get('plotId') as string;
     if (!selectedPlotId) {
       toast({
         title: "Plot Selection Required",
-        description: "You must select a farm plot for EUDR compliance verification.",
+        description: "You must select a plot mapped by Land Inspector for EUDR compliance.",
         variant: "destructive"
       });
       setIsSubmitting(false);
@@ -190,11 +190,11 @@ export default function FarmerDashboard() {
     }
 
     const offerData = {
-      farmerId: farmerId, // 🔒 FIXED: Send full farmer ID string for proper backend lookup
+      farmerId: farmerId, // Real farmer ID for database lookup
       
-      // CRITICAL: Connect offer to GPS-mapped plot for EUDR compliance
-      plotId: parseInt(selectedPlotId), // Required for EUDR compliance
-      plotReference: formData.get('plotReference') as string, // Human-readable plot reference
+      // BUSINESS RULE: Use real Plot ID from Land Inspector mapping
+      plotId: selectedPlotId, // Real plot_id string (e.g., "PLOT-FARMER-123-456789")
+      plotReference: selectedPlotId, // Plot ID is the reference for traceability
       
       commodityType: formData.get('commodityType') as string,
       quantityAvailable: quantityAvailable.toString(),
@@ -622,7 +622,7 @@ export default function FarmerDashboard() {
                         required
                         data-testid="select-plot"
                         onChange={(e) => {
-                          const selectedPlot = farmPlots?.find((p: any) => p.id == e.target.value);
+                          const selectedPlot = farmPlots?.find((p: any) => p.plot_id === e.target.value);
                           if (selectedPlot) {
                             // Show detailed GPS and EUDR info when plot is selected
                             const plotInfoDiv = document.getElementById('selected-plot-info');
@@ -671,8 +671,8 @@ export default function FarmerDashboard() {
                       >
                         <option value="">Select GPS-mapped plot...</option>
                         {farmPlots && farmPlots.map((plot: any) => (
-                          <option key={plot.id} value={plot.id}>
-                            {plot.plot_name || plot.plotReference} - {plot.crop_type || plot.cropType} ({plot.plot_size || plot.totalAreaHectares}ha)
+                          <option key={plot.plot_id} value={plot.plot_id}>
+                            Plot ID: {plot.plot_id} | {plot.plot_name} - {plot.crop_type || plot.primary_crop} ({plot.plot_size}ha)
                           </option>
                         ))}
                       </select>

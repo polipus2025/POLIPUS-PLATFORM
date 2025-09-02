@@ -14700,40 +14700,48 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Get ALL inspector assignments for DDGOTS - PENDING AND ASSIGNED
   app.get("/api/ddgots/pending-inspector-assignments", async (req, res) => {
     try {
-      // Return the real data from database directly
+      // Get actual pending assignments from database
+      const pendingBookings = await db
+        .select()
+        .from(portInspectionBookings)
+        .where(eq(portInspectionBookings.assignmentStatus, 'pending_assignment'))
+        .orderBy(desc(portInspectionBookings.bookedAt));
+
+      console.log(`🔍 Found ${pendingBookings.length} pending inspection assignments for DDGOTS`);
+      
       res.json({ 
         success: true, 
-        data: [{
-          bookingId: 'PINSP-20250831-TEST',
-          requestId: 'CUSTODY-SINGLE-001-20250830-T6M',
-          transactionId: 'CUSTODY-SINGLE-001-20250830-T6M',
-          commodityType: 'Cocoa',
-          quantity: '600',
-          unit: 'tons',
-          totalValue: 150000,
-          dispatchDate: '2025-09-05T10:00:00.000Z',
-          buyerName: 'MARIA THOMPSON',
-          buyerCompany: 'MARGIBI TRADING COMPANY',
-          verificationCode: '107MJMQX',
-          county: 'Margibi County',
-          farmLocation: 'DIMO',
-          exporterId: 'EXP-20250826-688',
-          exporterName: 'ATHRAV EXPORTS',
-          exporterCompany: 'Test Export Company',
-          portFacility: 'Exporter Warehouse',
-          inspectionType: 'quality_compliance',
-          scheduledDate: '2025-09-08T14:00:00.000Z',
-          urgencyLevel: 'normal',
-          assignmentStatus: 'assigned',
-          assignedInspectorId: 'INS-PORT-001',
-          assignedInspectorName: 'Port Inspector',
-          assignedBy: 'DDGOTS Admin',
-          assignedAt: '2025-08-31T14:54:29.160Z',
-          ddgotsNotes: 'Test assignment',
-          bookedAt: '2025-08-31T14:25:56.453Z',
-          bookedBy: 'exporter-system',
-          inspectionDate: 'Sunday, September 8, 2025'
-        }]
+        data: pendingBookings.map(booking => ({
+          bookingId: booking.bookingId,
+          requestId: booking.requestId,
+          transactionId: booking.transactionId,
+          commodityType: booking.commodityType,
+          quantity: booking.quantity,
+          unit: booking.unit,
+          totalValue: parseFloat(booking.totalValue || '0'),
+          dispatchDate: booking.dispatchDate,
+          buyerName: booking.buyerName,
+          buyerCompany: booking.buyerCompany,
+          verificationCode: booking.verificationCode,
+          county: booking.county,
+          farmLocation: booking.farmLocation,
+          exporterId: booking.exporterId,
+          exporterName: booking.exporterName,
+          exporterCompany: booking.exporterCompany,
+          portFacility: booking.portFacility,
+          inspectionType: booking.inspectionType,
+          scheduledDate: booking.scheduledDate,
+          urgencyLevel: booking.urgencyLevel,
+          assignmentStatus: booking.assignmentStatus,
+          assignedInspectorId: booking.assignedInspectorId,
+          assignedInspectorName: booking.assignedInspectorName,
+          assignedBy: booking.assignedBy,
+          assignedAt: booking.assignedAt,
+          ddgotsNotes: booking.ddgotsNotes,
+          bookedAt: booking.bookedAt,
+          bookedBy: booking.bookedBy,
+          inspectionDate: booking.scheduledDate
+        }))
       });
     } catch (error: any) {
       console.error("Error fetching assignments:", error);

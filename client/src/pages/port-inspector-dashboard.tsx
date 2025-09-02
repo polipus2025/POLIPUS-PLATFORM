@@ -508,35 +508,6 @@ export default function PortInspectorDashboard() {
 
           {/* Overview Tab */}
           <TabsContent value="overview" className="space-y-6">
-            {/* Quick Actions */}
-            <Card className="bg-gradient-to-r from-blue-50 to-indigo-50 border-2 border-blue-200 shadow-lg">
-              <CardHeader>
-                <CardTitle className="flex items-center gap-2 text-blue-900">
-                  <QrCode className="w-5 h-5" />
-                  QR Code Actions
-                </CardTitle>
-                <CardDescription className="text-blue-700">
-                  View and print warehouse QR codes for batch verification
-                </CardDescription>
-              </CardHeader>
-              <CardContent>
-                <Button 
-                  onClick={() => {
-                    // Use the first available inspection or set a default
-                    setCurrentInspectionId("PINSP-20250902-XEZS");
-                    setShowQrPrintModal(true);
-                  }}
-                  className="bg-blue-600 hover:bg-blue-700 text-white px-6 py-3 text-lg"
-                  size="lg"
-                >
-                  <Printer className="w-5 h-5 mr-2" />
-                  View/Print QR Code
-                </Button>
-                <p className="text-sm text-blue-600 mt-2">
-                  Access QR code for batch: WH-BATCH-1756811448157-LEZW
-                </p>
-              </CardContent>
-            </Card>
 
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
               {/* Recent Export Inspections */}
@@ -554,15 +525,29 @@ export default function PortInspectorDashboard() {
                     ) : pendingInspections && pendingInspections.length > 0 ? (
                       pendingInspections.slice(0, 3).map((inspection: any) => (
                         <div key={inspection.id} className="flex items-center justify-between p-3 border rounded-lg">
-                          <div>
+                          <div className="flex-1">
                             <p className="font-medium">{inspection.exporterName}</p>
                             <p className="text-sm text-slate-600">{inspection.commodity} • {inspection.quantity}</p>
                           </div>
-                          <div className="text-right">
-                            <Badge className={getPriorityColor(inspection.priority)}>
-                              {inspection.priority}
-                            </Badge>
-                            <p className="text-xs text-slate-500 mt-1">{inspection.scheduledDate}</p>
+                          <div className="flex items-center gap-3">
+                            <Button 
+                              onClick={() => {
+                                setCurrentInspectionId(inspection.id);
+                                setShowQrPrintModal(true);
+                              }}
+                              variant="outline"
+                              size="sm"
+                              className="border-blue-300 text-blue-700 hover:bg-blue-100"
+                            >
+                              <QrCode className="w-4 h-4 mr-1" />
+                              QR
+                            </Button>
+                            <div className="text-right">
+                              <Badge className={getPriorityColor(inspection.priority)}>
+                                {inspection.priority}
+                              </Badge>
+                              <p className="text-xs text-slate-500 mt-1">{inspection.scheduledDate}</p>
+                            </div>
                           </div>
                         </div>
                       ))
@@ -648,6 +633,18 @@ export default function PortInspectorDashboard() {
                             <Button size="sm" variant="outline">
                               <Eye className="w-4 h-4 mr-1" />
                               Review
+                            </Button>
+                            <Button 
+                              size="sm" 
+                              variant="outline"
+                              onClick={() => {
+                                setCurrentInspectionId(inspection.id);
+                                setShowQrPrintModal(true);
+                              }}
+                              className="border-blue-300 text-blue-700 hover:bg-blue-100"
+                            >
+                              <Printer className="w-4 h-4 mr-1" />
+                              Print QR
                             </Button>
                             {inspection.status === 'assigned' ? (
                               <>

@@ -15206,32 +15206,54 @@ export async function registerRoutes(app: Express): Promise<Server> {
         ORDER BY scheduled_date ASC
       `);
 
-      const assignedInspections = inspectionResult.rows.map((booking: any) => ({
-        id: booking.booking_id,
-        exporterId: booking.exporter_id,
-        exporterName: booking.exporter_name,
-        exporterCompany: booking.exporter_company,
-        shipmentId: booking.transaction_id,
-        commodity: booking.commodity_type,
-        quantity: `${booking.quantity} ${booking.unit}`,
-        qrBatchCode: booking.verification_code,
-        scheduledDate: new Date(booking.scheduled_date).toLocaleString(),
-        priority: booking.urgency_level === 'urgent' ? 'high' : 'medium',
-        status: 'assigned',
-        documents: ['Certificate of Origin', 'EUDR Compliance', 'Quality Certificate'], // Required documents
-        warehouseLocation: booking.farm_location, // This is actually exporter warehouse address
-        inspectionScheduled: new Date(booking.scheduled_date).toLocaleString(),
-        assignedInspector: booking.assigned_inspector_name,
-        verificationCode: booking.verification_code,
-        buyerName: booking.buyer_name,
-        buyerCompany: booking.buyer_company,
-        totalValue: booking.total_value,
-        dispatchDate: booking.dispatch_date,
-        county: booking.county,
-        inspectionType: booking.inspection_type,
-        facilityLocation: booking.farm_location, // Warehouse address
-        ddgotsNotes: booking.ddgots_notes,
-        specialInstructions: booking.special_instructions
+      // For each inspection, get the correct warehouse QR batch code from warehouse_custody table
+      const assignedInspections = await Promise.all(inspectionResult.rows.map(async (booking: any) => {
+        let correctQrBatchCode = booking.verification_code; // Default fallback
+        
+        // Fetch correct warehouse QR batch code from warehouse_custody table using custody_id (transaction_id)
+        try {
+          const warehouseCustodyResult = await db.execute(sql`
+            SELECT product_qr_codes FROM warehouse_custody WHERE custody_id = ${booking.transaction_id}
+          `);
+          
+          if (warehouseCustodyResult.rows.length > 0) {
+            const productQrCodes = warehouseCustodyResult.rows[0].product_qr_codes;
+            if (productQrCodes && Array.isArray(productQrCodes) && productQrCodes.length > 0) {
+              correctQrBatchCode = productQrCodes[0]; // Use the first QR batch code from warehouse
+              console.log(`✅ Fixed QR code for ${booking.booking_id}: ${correctQrBatchCode} (was: ${booking.verification_code})`);
+            }
+          }
+        } catch (error) {
+          console.error(`⚠️ Could not fetch warehouse QR for ${booking.transaction_id}:`, error);
+        }
+
+        return {
+          id: booking.booking_id,
+          exporterId: booking.exporter_id,
+          exporterName: booking.exporter_name,
+          exporterCompany: booking.exporter_company,
+          shipmentId: booking.transaction_id,
+          commodity: booking.commodity_type,
+          quantity: `${booking.quantity} ${booking.unit}`,
+          qrBatchCode: correctQrBatchCode, // Use correct warehouse QR batch code
+          scheduledDate: new Date(booking.scheduled_date).toLocaleString(),
+          priority: booking.urgency_level === 'urgent' ? 'high' : 'medium',
+          status: 'assigned',
+          documents: ['Certificate of Origin', 'EUDR Compliance', 'Quality Certificate'], // Required documents
+          warehouseLocation: booking.farm_location, // This is actually exporter warehouse address
+          inspectionScheduled: new Date(booking.scheduled_date).toLocaleString(),
+          assignedInspector: booking.assigned_inspector_name,
+          verificationCode: correctQrBatchCode, // Use correct warehouse QR batch code
+          buyerName: booking.buyer_name,
+          buyerCompany: booking.buyer_company,
+          totalValue: booking.total_value,
+          dispatchDate: booking.dispatch_date,
+          county: booking.county,
+          inspectionType: booking.inspection_type,
+          facilityLocation: booking.farm_location, // Warehouse address
+          ddgotsNotes: booking.ddgots_notes,
+          specialInstructions: booking.special_instructions
+        };
       }));
 
       console.log(`✅ Found ${assignedInspections.length} assigned inspections for inspector ${inspectorId}`);

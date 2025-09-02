@@ -69,18 +69,6 @@ export default function RealMapBoundaryMapper({
   const [deforestationReport, setDeforestationReport] = useState<DeforestationReport | null>(null);
   const [isAnalyzing, setIsAnalyzing] = useState(false);
 
-  // Image Enhancement States
-  const [imageFilters, setImageFilters] = useState({
-    brightness: 110,      // Default slightly brighter for clarity
-    contrast: 120,        // Enhanced contrast for details
-    saturation: 130,      // Boosted saturation for vegetation
-    sharpness: 1.2,      // Sharpening for edges
-    hueRotate: 0,        // Color adjustment
-    gamma: 1.0,          // Gamma correction
-    noise: 0             // Noise reduction
-  });
-  const [filterPreset, setFilterPreset] = useState('enhanced');
-  const [showImageControls, setShowImageControls] = useState(false);
 
   // Enhanced function to get location-specific high-resolution satellite imagery
   const getSatelliteTiles = (lat: number, lng: number, zoom: number = 18) => {
@@ -179,12 +167,6 @@ export default function RealMapBoundaryMapper({
             background: url('${tileInfo.url}') center/cover;
             cursor: crosshair;
             overflow: hidden;
-            filter: brightness(${imageFilters.brightness}%) 
-                   contrast(${imageFilters.contrast}%) 
-                   saturate(${imageFilters.saturation}%)
-                   hue-rotate(${imageFilters.hueRotate}deg)
-                   ${imageFilters.sharpness > 1 ? `url("data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg'><filter id='sharpen'><feConvolveMatrix kernelMatrix='0 -${imageFilters.sharpness} 0 -${imageFilters.sharpness} ${5 + imageFilters.sharpness * 4} -${imageFilters.sharpness} 0 -${imageFilters.sharpness} 0'/></filter></svg>#sharpen")` : ''};
-            transition: filter 0.3s ease;
           }
           .map-overlay {
             position: absolute;

@@ -14728,9 +14728,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
         });
       }
 
-      // GET EXPORTER WAREHOUSE ADDRESS FROM FLOW
+      // GET EXPORTER WAREHOUSE ADDRESS AND DETAILS FROM DATABASE
       const exporterResult = await db.execute(sql`
-        SELECT business_address, city, county
+        SELECT business_address, city, county, business_name, company_name
         FROM exporters 
         WHERE exporter_id = ${exporterId}
         LIMIT 1
@@ -14740,6 +14740,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const warehouseAddress = exporterData ? 
         `${exporterData.business_address}, ${exporterData.city}, ${exporterData.county}` : 
         `${dispatchData.county} Exporter Warehouse`;
+      
+      // 🎯 FIX: Get exporter name and company from database instead of request body
+      const actualExporterName = exporterData?.business_name || exporterName || 'Unknown Exporter';
+      const actualExporterCompany = exporterData?.company_name || exporterData?.business_name || exporterCompany || 'Export Company';
 
       // Generate unique booking ID
       const bookingId = `PINSP-${new Date().getFullYear()}${(new Date().getMonth() + 1).toString().padStart(2, '0')}${new Date().getDate().toString().padStart(2, '0')}-${Math.random().toString(36).substr(2, 4).toUpperCase()}`;
@@ -14774,8 +14778,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
         confirmedBy: 'exporter-system',
         confirmedAt: new Date(),
         exporterId: exporterId,
-        exporterName: exporterName,
-        exporterCompany: exporterCompany,
+        exporterName: actualExporterName,
+        exporterCompany: actualExporterCompany,
         portFacility: `${dispatchData.county} Port Facility`,
         inspectionType: 'quality_compliance',
         urgencyLevel: urgencyLevel || 'normal',

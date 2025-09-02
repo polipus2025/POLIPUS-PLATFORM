@@ -338,7 +338,7 @@ async function createMasterTransactionRegistry(farmerOfferData: {
     totalValue: farmerOfferData.totalValue.toString(),
     
     // 🔔 NOTIFICATIONS
-    stakeholdersNotified: JSON.stringify([farmerOfferData.farmerId]),
+    stakeholdersNotified: [farmerOfferData.farmerId],
     nextNotificationDue: new Date(Date.now() + 24 * 60 * 60 * 1000), // 24 hours
     
     // 🎯 FLOW CONTROL
@@ -508,7 +508,7 @@ async function sendStageNotifications(
   }
   
   // Update notifications sent
-  const notifiedStakeholders = JSON.parse(masterTx.stakeholdersNotified || '[]');
+  const notifiedStakeholders = Array.isArray(masterTx.stakeholdersNotified) ? masterTx.stakeholdersNotified : [];
   notifications.forEach(notif => {
     if (!notifiedStakeholders.includes(notif.recipient)) {
       notifiedStakeholders.push(notif.recipient);
@@ -517,7 +517,7 @@ async function sendStageNotifications(
   
   await db.update(masterTransactionRegistry)
     .set({ 
-      stakeholdersNotified: JSON.stringify(notifiedStakeholders),
+      stakeholdersNotified: notifiedStakeholders,
       lastNotificationSent: new Date()
     })
     .where(eq(masterTransactionRegistry.farmerOfferId, farmerOfferId));

@@ -642,7 +642,7 @@ export default function AgriculturalBuyerDashboard() {
   // 🎯 GET PAYMENT WORKFLOW STATUS
   const getPaymentWorkflowStatus = (custodyId: string) => {
     // Find the lot with this custody ID to get payment workflow status
-    const lot = custodyLotsData?.data?.find((l: any) => l.custodyId === custodyId);
+    const lot = custodyData?.data?.find((l: any) => l.custodyId === custodyId);
     const paymentWorkflow = lot?.paymentWorkflow;
     
     if (!paymentWorkflow) {

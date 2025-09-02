@@ -42,10 +42,19 @@ export default function FarmerDashboard() {
   const storedFarmerId = localStorage.getItem("farmerId");
   const credentialId = localStorage.getItem("credentialId");
   
-  // For Paolo Jr, ensure we use the correct farmer ID regardless of what's stored
-  const farmerId = (credentialId === "FRM434923" || storedFarmerId === "FRM434923") 
-    ? "FARMER-1755883520291-288" 
-    : (storedFarmerId || "FARMER-1755883520291-288");
+  // Handle different farmer credentials properly
+  const farmerId = (() => {
+    // Paolo Jr's special test account
+    if (credentialId === "FRM434923" || storedFarmerId === "FRM434923") {
+      return "FARMER-1755883520291-288";
+    }
+    // claudio big's account
+    if (credentialId === "FRM76386081") {
+      return "FARMER-1756314707545-846";
+    }
+    // Default fallback or use stored ID
+    return storedFarmerId || "FARMER-1755883520291-288";
+  })();
     
   const farmerName = localStorage.getItem("farmerFirstName") || "Farmer";
   const farmerFullName = localStorage.getItem("farmerFullName") || "Farmer";

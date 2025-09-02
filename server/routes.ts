@@ -741,19 +741,44 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(404).json({ message: "Farmer not found" });
       }
 
-      // Get farmer's individual plots
+      // Get farmer's individual plots from farm_plots table
       const farmerPlots = await db.execute(sql`
         SELECT * FROM farm_plots 
         WHERE farmer_id = ${farmerId} 
         ORDER BY plot_number
       `);
+      
+      // If no plots in farm_plots table but farmer has onboarding land data, create synthetic plot
+      const plots = farmerPlots.rows || [];
+      
+      // Create onboarding plot if farmer has land mapping but no formal plots
+      if (plots.length === 0 && farmer.landMapData && farmer.landMapData.area > 0) {
+        const onboardingPlot = {
+          id: 'onboarding',
+          plot_id: `ONBOARDING-${farmerId}`,
+          farmer_id: farmerId,
+          plot_name: `${farmer.firstName}'s Onboarding Plot`,
+          crop_type: farmer.primaryCrop || 'mixed',
+          plot_size: farmer.farmSize || farmer.landMapData.area,
+          plot_size_unit: farmer.farmSizeUnit || 'hectares',
+          gps_coordinates: farmer.gpsCoordinates,
+          status: 'active',
+          farm_boundaries: farmer.farmBoundaries || farmer.landMapData,
+          land_map_data: farmer.landMapData,
+          is_active: true,
+          registration_date: new Date(),
+          county: farmer.county,
+          district: farmer.district
+        };
+        plots.push(onboardingPlot);
+      }
 
       res.json({
         success: true,
         farmer,
-        farmPlots: farmerPlots.rows || [],
-        totalPlots: farmerPlots.rows?.length || 0,
-        landMappingAvailable: !!(farmer.landMapData || farmer.farmBoundaries || farmerPlots.rows?.length > 0),
+        farmPlots: plots,
+        totalPlots: plots.length,
+        landMappingAvailable: !!(farmer.landMapData || farmer.farmBoundaries || plots.length > 0),
       });
     } catch (error: any) {
       console.error("Error fetching farmer land data:", error);

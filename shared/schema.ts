@@ -1798,7 +1798,7 @@ export const farmPlots = pgTable("farm_plots", {
 export const cropPlanning = pgTable("crop_planning", {
   id: serial("id").primaryKey(),
   farmerId: integer("farmer_id").references(() => farmers.id).notNull(),
-  plotId: integer("plot_id").references(() => farmPlots.id).notNull(),
+  plotId: text("plot_id").references(() => farmPlots.plotId).notNull(),
   season: text("season").notNull(), // rainy, dry
   year: integer("year").notNull(),
   cropType: text("crop_type").notNull(),
@@ -1816,7 +1816,7 @@ export const cropPlanning = pgTable("crop_planning", {
 export const harvestRecords = pgTable("harvest_records", {
   id: serial("id").primaryKey(),
   farmerId: integer("farmer_id").references(() => farmers.id).notNull(),
-  plotId: integer("plot_id").references(() => farmPlots.id).notNull(),
+  plotId: text("plot_id").references(() => farmPlots.plotId).notNull(),
   cropPlanId: integer("crop_plan_id").references(() => cropPlanning.id),
   harvestDate: timestamp("harvest_date").notNull(),
   cropType: text("crop_type").notNull(),
@@ -2584,7 +2584,7 @@ export const farmerProductOffers = pgTable("farmer_product_offers", {
   farmerName: text("farmer_name").notNull(),
   
   // CRITICAL: Connect offers to specific GPS-mapped farm plots for EUDR compliance
-  plotId: integer("plot_id").references(() => farmPlots.id).notNull(), // Links to specific GPS-mapped plot
+  plotId: integer("plot_id").references(() => farmPlots.id).notNull(), // Links to specific GPS-mapped plot by integer ID
   plotReference: text("plot_reference"), // Human-readable plot reference (PLOT-FARM001-001)
   
   // Product Details
@@ -2867,7 +2867,7 @@ export const insertFarmerProductOfferSchema = createInsertSchema(farmerProductOf
   createdAt: true,
   updatedAt: true,
 }).extend({
-  // plotId is required for EUDR compliance verification
+  // plotId is required for EUDR compliance verification - INTEGER ID for database
   plotId: z.number().int().positive({ message: "Must select a valid farm plot for EUDR compliance" }),
 });
 
@@ -3985,7 +3985,7 @@ export type InsertStandardsSyncLog = z.infer<typeof insertStandardsSyncLogSchema
 // GPS Farm Mapping for EUDR Compliance
 export const farmGpsMapping = pgTable("farm_gps_mapping", {
   id: serial("id").primaryKey(),
-  farmPlotId: integer("farm_plot_id").references(() => farmPlots.id),
+  farmPlotId: text("farm_plot_id").references(() => farmPlots.plotId),
   mappingId: varchar("mapping_id").notNull().unique(),
   farmerId: integer("farmer_id").references(() => farmers.id),
   coordinates: text("coordinates").notNull(), // JSON array of GPS coordinates for polygon

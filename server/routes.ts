@@ -845,7 +845,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         })
         .from(farmPlots)
         .where(and(
-          eq(farmPlots.id, plotId),
+          eq(farmPlots.plotId, plotId), // Match string plot_id with string plotId
           eq(farmPlots.farmerId, req.body.farmerId) // Ensure plot belongs to this farmer
         ))
         .limit(1);
@@ -860,8 +860,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const transformedData = {
         farmerId: dbId, // Use CORRECT numeric ID for database
         
-        // CRITICAL: Include plot data for EUDR compliance
-        plotId: plotId, // Link to GPS-mapped plot
+        // CRITICAL: Include plot data for EUDR compliance - CONVERT STRING TO INTEGER
+        plotId: plotValidation.id, // ✅ FIXED: Use integer ID for database foreign key
         plotReference: plotValidation.plotReference, // Human-readable reference
         
         commodityType: req.body.commodityType,

@@ -14864,31 +14864,21 @@ export async function registerRoutes(app: Express): Promise<Server> {
       console.log(`🏛️ Land Inspector filtering farmers for county: ${county}`);
       
       // Get farmers from specific county only (land inspectors have county-specific authority)
-      const countyFarmers = await db
-        .select({
-          id: farmers.id,
-          farmerId: farmers.farmerId,
-          firstName: farmers.firstName,
-          lastName: farmers.lastName,
-          email: farmers.email,
-          phoneNumber: farmers.phoneNumber,
-          county: farmers.county,
-          district: farmers.district,
-          isActive: farmers.isActive
-        })
-        .from(farmers)
-        .where(
-          and(
-            eq(farmers.isActive, true),
-            // Flexible county matching (Nimba = Nimba County)
-            or(
-              eq(farmers.county, county),
-              eq(farmers.county, `${county} County`),
-              eq(farmers.county, county.replace(' County', ''))
-            )
-          )
-        )
-        .orderBy(farmers.firstName, farmers.lastName);
+      // Use storage method instead of direct DB query to avoid field name issues
+      const allFarmers = await storage.getFarmers();
+      
+      const countyFarmers = allFarmers.filter(farmer => {
+        if (!farmer.county) return false;
+        
+        // Flexible county matching (Nimba = Nimba County = Nimba County)
+        const farmerCounty = farmer.county.toLowerCase().trim();
+        const targetCounty = county.toLowerCase().trim();
+        
+        return farmerCounty === targetCounty || 
+               farmerCounty === `${targetCounty} county` ||
+               farmerCounty === targetCounty.replace(' county', '') ||
+               farmerCounty.includes(targetCounty.replace(' county', ''));
+      }).sort((a, b) => `${a.firstName} ${a.lastName}`.localeCompare(`${b.firstName} ${b.lastName}`));
       
       console.log(`✅ Found ${countyFarmers.length} farmers in ${county} for land inspector`);
       

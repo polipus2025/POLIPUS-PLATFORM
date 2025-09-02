@@ -15272,6 +15272,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     try {
       const { inspectionId } = req.params;
       console.log(`🖼️ FETCHING QR CODE IMAGE for inspection: ${inspectionId}`);
+      console.log(`🔍 Request received at: ${new Date().toISOString()}`);
       
       // First get the inspection to find the transaction ID
       const inspectionResult = await db.execute(sql`

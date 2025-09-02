@@ -1254,22 +1254,33 @@ function QRCodePrintModal({
   const [loading, setLoading] = useState(false);
   
   const fetchQRImage = async () => {
-    if (!currentInspectionId) return;
+    console.log("🔍 fetchQRImage called with currentInspectionId:", currentInspectionId);
+    if (!currentInspectionId) {
+      console.log("❌ No currentInspectionId - returning early");
+      return;
+    }
     
     setLoading(true);
+    console.log("🔄 Starting QR image fetch for:", currentInspectionId);
     try {
-      const response = await fetch(`/api/port-inspector/qr-image/${currentInspectionId}`);
+      const url = `/api/port-inspector/qr-image/${currentInspectionId}`;
+      console.log("📡 Fetching from URL:", url);
+      const response = await fetch(url);
+      console.log("📡 Response status:", response.status);
       const data = await response.json();
+      console.log("📡 Response data:", data);
       
       if (data.success) {
         setQrImageData(data.data);
+        console.log("✅ QR image data set successfully");
       } else {
-        console.error("Failed to fetch QR image:", data.message);
+        console.error("❌ Failed to fetch QR image:", data.message);
       }
     } catch (error) {
-      console.error("Error fetching QR image:", error);
+      console.error("❌ Error fetching QR image:", error);
     } finally {
       setLoading(false);
+      console.log("🔄 Loading set to false");
     }
   };
 

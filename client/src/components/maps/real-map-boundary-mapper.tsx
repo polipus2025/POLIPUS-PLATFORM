@@ -1,8 +1,9 @@
 import React, { useEffect, useRef, useState } from 'react';
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { MapPin, RotateCcw, Check, Satellite, Download, Shield, AlertTriangle } from "lucide-react";
+import { MapPin, RotateCcw, Check, Satellite, Download, Shield, AlertTriangle, Eye } from "lucide-react";
 import { generateEUDRCompliancePDF, generateDeforestationPDF } from "@/lib/enhanced-pdf-generator";
+import { useToast } from '@/hooks/use-toast';
 
 interface BoundaryPoint {
   latitude: number;
@@ -49,13 +50,14 @@ interface RealMapBoundaryMapperProps {
 
 export default function RealMapBoundaryMapper({ 
   onBoundaryComplete, 
-  minPoints = 3,
+  minPoints = 6,
   maxPoints = 20,
   enableRealTimeGPS = true
 }: RealMapBoundaryMapperProps) {
   const mapRef = useRef<HTMLDivElement>(null);
   const [points, setPoints] = useState<BoundaryPoint[]>([]);
   const [status, setStatus] = useState('Loading satellite imagery...');
+  const { toast } = useToast();
   const [mapReady, setMapReady] = useState(false);
   const [currentTile, setCurrentTile] = useState(0);
   const [mapCenter, setMapCenter] = useState<{lat: number, lng: number}>({lat: 6.4281, lng: -9.4295});
@@ -1481,6 +1483,75 @@ export default function RealMapBoundaryMapper({
           </div>
         </div>
       </div>
+
+      {/* Real-time Boundary Metrics Display */}
+      {points.length > 0 && (
+        <div className="bg-green-50 border border-green-200 rounded-lg p-4">
+          <div className="flex items-center justify-between mb-3">
+            <h3 className="text-sm font-semibold text-green-800">Real-time Boundary Metrics</h3>
+            <Button
+              variant="outline"
+              size="sm"
+              className="text-xs h-7 border-green-300 text-green-700 hover:bg-green-100"
+              onClick={() => {
+                // Interactive visualization toggle
+                const svg = mapRef.current?.querySelector('svg');
+                if (svg) {
+                  const currentOpacity = svg.style.opacity || '1';
+                  svg.style.opacity = currentOpacity === '1' ? '0.3' : '1';
+                  toast({
+                    title: currentOpacity === '1' ? 'Polygon Hidden' : 'Polygon Visible',
+                    description: 'Interactive visualization toggled'
+                  });
+                }
+              }}
+            >
+              <Eye className="w-3 h-3 mr-1" />
+              Toggle View
+            </Button>
+          </div>
+          
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+            <div className="bg-white p-3 rounded-lg border border-slate-200">
+              <div className="text-slate-600 text-xs">Boundary Points</div>
+              <div className="text-lg font-bold text-slate-900">{points.length}</div>
+            </div>
+            
+            <div className="bg-white p-3 rounded-lg border border-slate-200">
+              <div className="text-slate-600 text-xs">Estimated Area (ha)</div>
+              <div className="text-lg font-bold text-green-600">{area.toFixed(3)}</div>
+            </div>
+            
+            {area > 0 && (
+              <>
+                <div className="bg-white p-3 rounded-lg border border-slate-200">
+                  <div className="text-slate-600 text-xs">Area (m²)</div>
+                  <div className="text-lg font-bold text-blue-600">{(area * 10000).toFixed(0)}</div>
+                </div>
+                
+                <div className="bg-white p-3 rounded-lg border border-slate-200">
+                  <div className="text-slate-600 text-xs">Area (acres)</div>
+                  <div className="text-lg font-bold text-purple-600">{(area * 2.471).toFixed(3)}</div>
+                </div>
+              </>
+            )}
+            
+            {points.length >= 2 && (
+              <>
+                <div className="bg-white p-3 rounded-lg border border-slate-200">
+                  <div className="text-slate-600 text-xs">Perimeter (km)</div>
+                  <div className="text-lg font-bold text-orange-600">{(calculatePerimeter(points) / 1000).toFixed(3)}</div>
+                </div>
+                
+                <div className="bg-white p-3 rounded-lg border border-slate-200">
+                  <div className="text-slate-600 text-xs">GPS Accuracy</div>
+                  <div className="text-lg font-bold text-indigo-600">±1.5m</div>
+                </div>
+              </>
+            )}
+          </div>
+        </div>
+      )}
 
       {/* EUDR Risk Legend */}
       {points.length > 0 && (

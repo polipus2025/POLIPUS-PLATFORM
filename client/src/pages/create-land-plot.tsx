@@ -11,7 +11,7 @@ import { useMutation, useQuery } from "@tanstack/react-query";
 import { apiRequest } from "@/lib/queryClient";
 import { ArrowLeft, MapPin, Globe, TreePine, Target, Users, Crosshair, Satellite, Zap, RefreshCw, Download } from "lucide-react";
 import { Link } from "wouter";
-import EnhancedSatelliteMapper from '@/components/maps/enhanced-satellite-mapper';
+import RealMapBoundaryMapper from '@/components/maps/real-map-boundary-mapper';
 
 export default function CreateLandPlot() {
   const { toast } = useToast();
@@ -668,8 +668,7 @@ export default function CreateLandPlot() {
                       </div>
                     </div>
 
-                    <EnhancedSatelliteMapper 
-                      minPoints={6}
+                    <RealMapBoundaryMapper 
                       onBoundaryComplete={(boundary) => {
                         setLandPlotData(prev => ({
                           ...prev,
@@ -680,8 +679,8 @@ export default function CreateLandPlot() {
                             prev.coordinates
                         }));
                         toast({
-                          title: "✅ Land Boundary Completed",
-                          description: `${boundary.points.length} GPS points mapped - Area: ${boundary.area.toFixed(3)} hectares, Perimeter: ${(boundary.perimeter / 1000).toFixed(2)} km`,
+                          title: "Land Boundary Mapped Successfully",
+                          description: `Land plot mapped with ${boundary.points.length} GPS points (${boundary.area?.toFixed(2)} hectares)`,
                         });
                       }}
                     />

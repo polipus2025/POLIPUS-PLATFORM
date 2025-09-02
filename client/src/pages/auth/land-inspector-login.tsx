@@ -23,6 +23,20 @@ export default function LandInspectorLogin() {
       });
 
       if (response.ok) {
+        const data = await response.json();
+        
+        // Save inspector data to localStorage
+        localStorage.setItem("inspectorData", JSON.stringify({
+          id: data.inspector?.id || "land_inspector",
+          firstName: data.inspector?.firstName || "Land",
+          lastName: data.inspector?.lastName || "Inspector",
+          username: credentials.username,
+          inspectorType: "land-mapping"
+        }));
+        localStorage.setItem("inspectorId", data.inspector?.id || "land_inspector");
+        localStorage.setItem("inspectorName", `${data.inspector?.firstName || "Land"} ${data.inspector?.lastName || "Inspector"}`);
+        localStorage.setItem("userType", "land-inspector");
+        
         // Successful login - redirect to land inspector dashboard
         setLocation("/unified-land-inspector-dashboard");
       } else {

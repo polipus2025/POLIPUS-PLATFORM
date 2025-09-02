@@ -14625,7 +14625,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         buyerCompany: dispatchData.buyer_company,
         verificationCode: dispatchData.verification_code, // FROM FLOW
         county: dispatchData.county, // FROM FLOW
-        farmLocation: dispatchData.farm_location, // FROM FLOW
+        farmLocation: `${dispatchData.county} Port Area`, // PORT LOCATION NOT FARM
         confirmedBy: 'exporter-system',
         confirmedAt: new Date(),
         exporterId: exporterId,

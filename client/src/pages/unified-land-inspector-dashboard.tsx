@@ -27,7 +27,19 @@ import { useToast } from "@/hooks/use-toast";
 
 export default function UnifiedLandInspectorDashboard() {
   const [activeTab, setActiveTab] = useState("overview");
-  const inspectorName = JSON.parse(localStorage.getItem("inspectorData") || '{}')?.firstName || "Land Inspector";
+  
+  // Safe JSON parsing for inspector data
+  const getInspectorData = () => {
+    try {
+      const data = localStorage.getItem("inspectorData");
+      if (!data || data === "undefined" || data === "null") return {};
+      return JSON.parse(data);
+    } catch {
+      return {};
+    }
+  };
+  
+  const inspectorName = getInspectorData()?.firstName || "Land Inspector";
 
   // Get dashboard statistics
   const { data: stats } = useQuery({

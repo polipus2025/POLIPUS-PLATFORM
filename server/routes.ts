@@ -18951,12 +18951,12 @@ VERIFY: ${qrCodeData.verificationUrl}`;
     }
   });
 
-  // Generate Buyer-Exporter QR codes for warehouse dispatch (same format as Farmer-Buyer)
-  app.post("/api/warehouse-inspector/generate-dispatch-qr", async (req, res) => {
+  // Display existing QR codes for warehouse dispatch (no new QR generation)
+  app.post("/api/warehouse-inspector/get-dispatch-qr", async (req, res) => {
     try {
       const { dispatchRequestId, warehouseId, inspectorId } = req.body;
       
-      console.log(`📦 Generating Buyer-Exporter QR code for dispatch request ${dispatchRequestId}`);
+      console.log(`📦 Retrieving existing QR codes for dispatch request ${dispatchRequestId}`);
 
       // Get dispatch request details
       const dispatchResult = await db.execute(sql`
@@ -18967,135 +18967,62 @@ VERIFY: ${qrCodeData.verificationUrl}`;
       if (dispatchResult.rows.length === 0) {
         return res.status(404).json({
           success: false,
-          message: "Dispatch request not found or already processed"
+          message: "Dispatch request not found"
         });
       }
 
       const dispatchRequest = dispatchResult.rows[0];
 
-      // Generate QR batch code using same format as Farmer-Buyer
-      const batchCode = `BE-DISPATCH-${Date.now()}-${Math.random().toString(36).substr(2, 4).toUpperCase()}`;
-      
-      // Create QR data in same format as Farmer-Buyer system
-      const qrCodeData = {
-        type: "buyer_exporter_dispatch",
-        batchCode: batchCode,
-        dispatchRequestId: dispatchRequestId,
-        buyerId: dispatchRequest.buyer_id,
-        buyerName: dispatchRequest.buyer_name,
-        buyerCompany: dispatchRequest.buyer_company,
-        commodityType: dispatchRequest.commodity_type,
-        quantity: dispatchRequest.quantity,
-        unit: dispatchRequest.unit,
-        totalValue: dispatchRequest.total_value,
-        county: dispatchRequest.county,
-        warehouseId: warehouseId,
-        verificationCode: dispatchRequest.verification_code,
-        timestamp: new Date().toISOString(),
-        processedBy: inspectorId
-      };
-
-      // 🌍 GET REAL EUDR DATA FOR FIRST QR GENERATION - Fetch farmer GPS coordinates
-      let eudrData1 = {
-        gpsLat: 'N/A',
-        gpsLon: 'N/A', 
-        deforestationRisk: 'UNKNOWN',
-        eudrCompliance: 'PENDING',
-        forestCoverStatus: 'UNASSESSED'
-      };
-
-      try {
-        // Get farmer GPS coordinates from custody chain  
-        const farmerGpsResult1 = await db.execute(sql`
-          SELECT fp.gps_latitude, fp.gps_longitude, fp.farmer_id, f.farmer_name
-          FROM warehouse_custody wc
-          LEFT JOIN farm_plots fp ON wc.farmer_id = fp.farmer_id  
-          LEFT JOIN farmers f ON wc.farmer_id = f.farmer_id
-          WHERE wc.custody_id = ${dispatchRequest.transaction_id}
-          LIMIT 1
-        `);
-        
-        const farmerPlot1 = farmerGpsResult1.rows[0];
-        if (farmerPlot1 && farmerPlot1.gps_latitude && farmerPlot1.gps_longitude) {
-          const lat = parseFloat(farmerPlot1.gps_latitude);
-          const lon = parseFloat(farmerPlot1.gps_longitude);
-          
-          // 🌍 REAL EUDR ANALYSIS - Use actual GPS coordinates
-          const county = dispatchRequest.county || 'Nimba County';
-          const plotSize = 1000; // Default plot size
-          
-          const deforestationRisk = calculateLiberiaNimbaDeforestationRisk(lat, lon, county);
-          const complianceScore = generateEudrComplianceScore(lat, lon, plotSize, county);
-          const forestAnalysis = analyzeLiberiaNimbaForestCover(lat, lon);
-          
-          eudrData1.gpsLat = lat.toFixed(6);
-          eudrData1.gpsLon = lon.toFixed(6);
-          eudrData1.deforestationRisk = `${deforestationRisk.toFixed(1)}%`;
-          eudrData1.eudrCompliance = complianceScore >= 70 ? `COMPLIANT (${complianceScore.toFixed(0)}/100)` : `NON-COMPLIANT (${complianceScore.toFixed(0)}/100)`;
-          eudrData1.forestCoverStatus = `${forestAnalysis.forestCoverPercentage.toFixed(1)}% COVER`;
-          
-          console.log(`🌍 REAL EUDR DATA (QR1): GPS(${lat},${lon}) → Risk:${eudrData1.deforestationRisk} Compliance:${eudrData1.eudrCompliance}`);
-        }
-      } catch (eudrError) {
-        console.log(`⚠️ EUDR data fetch failed for QR1, using defaults:`, eudrError);
-      }
-
-      // Generate enhanced QR data with REAL EUDR compliance
-      const readableQrData = `AGRITRACE360 BUYER-EXPORTER DISPATCH
-BATCH: ${batchCode}
-BUYER: ${dispatchRequest.buyer_name} (${dispatchRequest.buyer_company})
-COMMODITY: ${dispatchRequest.commodity_type}
-QUANTITY: ${dispatchRequest.quantity} ${dispatchRequest.unit}
-VALUE: $${dispatchRequest.total_value}
-COUNTY: ${dispatchRequest.county}
-VERIFICATION: ${dispatchRequest.verification_code}
-🌍 EUDR COMPLIANCE: ${eudrData1.eudrCompliance}
-📍 GPS ORIGIN: ${eudrData1.gpsLat}, ${eudrData1.gpsLon}
-🌳 DEFORESTATION RISK: ${eudrData1.deforestationRisk}
-🌲 FOREST STATUS: ${eudrData1.forestCoverStatus}
-GENERATED: ${new Date().toLocaleDateString()}`;
-
-      // Generate QR code image using same service as Farmer-Buyer
-      const { QrBatchService } = await import('./qr-batch-service');
-      const qrCodeUrl = await QrBatchService.generateQrCodeImage(readableQrData);
-
-      // Create QR batch entry in same table as Farmer-Buyer QR codes
-      await db.execute(sql`
-        INSERT INTO qr_batches (
-          batch_code, warehouse_id, buyer_id, buyer_name,
-          commodity_type, total_bags, bag_weight, total_weight,
-          quality_grade, harvest_date, qr_code_data, qr_code_url,
-          status, created_at, type
-        ) VALUES (
-          ${batchCode}, ${warehouseId}, ${dispatchRequest.buyer_id}, ${dispatchRequest.buyer_name},
-          ${dispatchRequest.commodity_type}, ${1}, ${dispatchRequest.quantity}, ${dispatchRequest.quantity},
-          ${'Grade A'}, NOW(), ${readableQrData}, ${qrCodeUrl},
-          ${'generated'}, NOW(), ${'buyer_exporter_dispatch'}
-        )
+      // Find existing QR codes for this buyer/transaction
+      const existingQrResult = await db.execute(sql`
+        SELECT batch_code, qr_code_data, qr_code_url, total_bags, bag_weight, 
+               commodity_type, farmer_name, created_at, status
+        FROM qr_batches 
+        WHERE buyer_name = ${dispatchRequest.buyer_name}
+        AND commodity_type = ${dispatchRequest.commodity_type}
+        AND status = 'generated'
+        ORDER BY created_at DESC
       `);
 
-      // Update dispatch request status
+      if (existingQrResult.rows.length === 0) {
+        return res.status(404).json({
+          success: false,
+          message: "No existing QR codes found for this buyer/commodity. QR codes must be generated when bags are first requested."
+        });
+      }
+
+      const existingQrCodes = existingQrResult.rows;
+
+      console.log(`✅ Found ${existingQrCodes.length} existing QR codes for buyer ${dispatchRequest.buyer_name}`);
+
+      // Update dispatch request status to confirmed (no QR generation needed)
       await db.execute(sql`
         UPDATE warehouse_dispatch_requests 
-        SET status = 'qr_generated', qr_batch_code = ${batchCode}, processed_at = NOW()
+        SET status = 'confirmed', processed_at = NOW()
         WHERE request_id = ${dispatchRequestId}
       `);
 
-      console.log(`✅ Buyer-Exporter QR code generated: ${batchCode}`);
+      console.log(`✅ Dispatch confirmed with ${existingQrCodes.length} existing QR codes displayed`);
 
       res.json({
         success: true,
-        message: "Dispatch QR code generated successfully",
-        batchCode: batchCode,
-        qrCodeUrl: qrCodeUrl,
-        dispatchRequestId: dispatchRequestId
+        message: `Dispatch confirmed successfully. Displaying ${existingQrCodes.length} existing QR code${existingQrCodes.length > 1 ? 's' : ''}`,
+        qrCodes: existingQrCodes.map(qr => ({
+          batchCode: qr.batch_code,
+          qrCodeUrl: qr.qr_code_url,
+          totalBags: qr.total_bags,
+          farmerName: qr.farmer_name,
+          createdAt: qr.created_at
+        })),
+        dispatchRequestId: dispatchRequestId,
+        totalQrCodes: existingQrCodes.length
       });
 
     } catch (error: any) {
-      console.error("Error generating dispatch QR code:", error);
+      console.error("Error retrieving dispatch QR codes:", error);
       res.status(500).json({
         success: false,
-        message: "Failed to generate dispatch QR code"
+        message: "Failed to retrieve existing QR codes for dispatch"
       });
     }
   });

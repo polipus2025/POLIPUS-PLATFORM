@@ -3116,28 +3116,38 @@ export default function WarehouseInspectorDashboard() {
                                   console.log('Inspector Data:', inspectorData);
                                   console.log('Request Data:', request);
                                   
-                                  const response = await apiRequest('/api/warehouse-inspector/confirm-dispatch', {
+                                  const response = await apiRequest('/api/warehouse-inspector/get-dispatch-qr', {
                                     method: 'POST',
                                     body: JSON.stringify({
                                       dispatchRequestId: request.requestId,
                                       warehouseId: inspectorData.warehouseId || inspectorData.username || 'WH-NIMBA-001',
-                                      inspectorId: inspectorData.inspectorId || inspectorData.username || 'WH-INS-001',
-                                      confirmationNotes: 'Dispatch approved by warehouse inspector'
+                                      inspectorId: inspectorData.inspectorId || inspectorData.username || 'WH-INS-001'
                                     })
                                   });
                                   
-                                  console.log('API Response:', response);
+                                  console.log('Dispatch QR Response:', response);
                                   
                                   if (response.success) {
+                                    const qrCount = response.totalQrCodes || 0;
                                     toast({
-                                      title: "Dispatch Confirmed",
-                                      description: `QR batch ${response.batchCode} generated for pickup`,
+                                      title: "✅ Dispatch Confirmed Successfully",
+                                      description: `Displaying ${qrCount} existing QR code${qrCount > 1 ? 's' : ''} from original bag request`,
                                     });
+                                    
+                                    // Display QR codes for dispatch
+                                    if (response.qrCodes && response.qrCodes.length > 0) {
+                                      console.log('QR Codes for dispatch:', response.qrCodes);
+                                      response.qrCodes.forEach((qr: any, index: number) => {
+                                        console.log(`QR ${index + 1}: ${qr.batchCode} (${qr.totalBags} bags)`);
+                                      });
+                                    }
+                                    
                                     queryClient.invalidateQueries({ queryKey: ['/api/warehouse-inspector/pending-dispatch-requests'] });
+                                    queryClient.invalidateQueries({ queryKey: ['/api/warehouse-inspector/confirmed-dispatches'] });
                                   } else {
                                     toast({
                                       title: "Error",
-                                      description: response.message || "Failed to confirm dispatch",
+                                      description: response.message || "Failed to retrieve existing QR codes",
                                       variant: "destructive"
                                     });
                                   }
@@ -3153,7 +3163,7 @@ export default function WarehouseInspectorDashboard() {
                               data-testid={`confirm-dispatch-${request.requestId}`}
                             >
                               <CheckCircle className="h-4 w-4 mr-1" />
-                              Confirm Pickup & Generate QR
+                              Confirm Pickup & Display QR
                             </Button>
                           </div>
                         </div>

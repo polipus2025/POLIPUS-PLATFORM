@@ -1709,10 +1709,11 @@ export default function AgriculturalBuyerDashboard() {
                                     </p>
                                   )}
 
-                                  {/* 🎯 ENHANCED PAYMENT WORKFLOW - Request → Validate → Complete - FIXED LOGIC */}
-                                  {(lot.custody_status === 'authorized' || 
-                                    lot.custody_status === 'payment_requested' || 
-                                    lot.custody_status === 'payment_completed') && (
+                                  {/* 🎯 ENHANCED PAYMENT WORKFLOW - Request → Validate → Complete - CONDITION FIXED */}
+                                  {(lot.inspection_status === 'PASSED' || 
+                                    lot.custody_status?.includes('PASSED') || 
+                                    lot.custody_status?.includes('Request Payment') ||
+                                    lot.custodyStatus === 'authorized') && (
                                     <div className="mt-3 p-3 bg-green-50 border border-green-200 rounded-lg">
                                       <div className="flex items-center justify-between">
                                         <div>

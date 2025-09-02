@@ -14694,13 +14694,25 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
       const bookings = await storage.getPortInspectionBookingsByExporter(exporterId);
 
-      const formattedBookings = bookings.map(booking => ({
-        booking_id: booking.bookingId,
-        request_id: booking.requestId,
-        assignment_status: booking.assignmentStatus,
-        scheduled_date: booking.scheduledDate,
-        assigned_inspector_name: booking.assignedInspectorName
-      }));
+      const formattedBookings = bookings.map(booking => {
+        // 🎯 CHECK FOR INSPECTION COMPLETION STATUS FOR EXPORTER
+        const completionData = inspectionCompletionStatus[booking.bookingId];
+        const isCompleted = completionData && completionData.results?.status === 'PASSED';
+        
+        return {
+          booking_id: booking.bookingId,
+          request_id: booking.requestId,
+          assignment_status: booking.assignmentStatus,
+          scheduled_date: booking.scheduledDate,
+          assigned_inspector_name: booking.assignedInspectorName,
+          // 🎯 EXPORTER DASHBOARD UPDATE: Inspections & Payments section
+          inspection_status: isCompleted ? 'INSPECTION PASSED' : (booking.assignmentStatus === 'assigned' ? 'Inspection Booked' : 'Booking Pending'),
+          completion_status: isCompleted ? 'INSPECTION_PASSED' : 'PENDING',
+          completed_at: completionData?.completedAt,
+          completed_by: completionData?.completedBy,
+          inspection_results: completionData?.results
+        };
+      });
 
       console.log(`✅ Found ${formattedBookings.length} inspection bookings for exporter ${exporterId}`);
       
@@ -14736,37 +14748,50 @@ export async function registerRoutes(app: Express): Promise<Server> {
       
       res.json({ 
         success: true, 
-        data: allBookings.map(booking => ({
-          bookingId: booking.bookingId,
-          requestId: booking.requestId,
-          transactionId: booking.transactionId,
-          commodityType: booking.commodityType,
-          quantity: booking.quantity,
-          unit: booking.unit,
-          totalValue: parseFloat(booking.totalValue || '0'),
-          dispatchDate: booking.dispatchDate,
-          buyerName: booking.buyerName,
-          buyerCompany: booking.buyerCompany,
-          verificationCode: booking.verificationCode,
-          county: booking.county,
-          farmLocation: booking.farmLocation,
-          exporterId: booking.exporterId,
-          exporterName: booking.exporterName,
-          exporterCompany: booking.exporterCompany,
-          portFacility: booking.portFacility,
-          inspectionType: booking.inspectionType,
-          scheduledDate: booking.scheduledDate,
-          urgencyLevel: booking.urgencyLevel,
-          assignmentStatus: booking.assignmentStatus,
-          assignedInspectorId: booking.assignedInspectorId,
-          assignedInspectorName: booking.assignedInspectorName,
-          assignedBy: booking.assignedBy,
-          assignedAt: booking.assignedAt,
-          ddgotsNotes: booking.ddgotsNotes,
-          bookedAt: booking.bookedAt,
-          bookedBy: booking.bookedBy,
-          inspectionDate: booking.scheduledDate
-        }))
+        data: allBookings.map(booking => {
+          // CHECK FOR INSPECTION COMPLETION STATUS
+          const completionData = inspectionCompletionStatus[booking.bookingId];
+          const isCompleted = completionData && completionData.results?.status === 'PASSED';
+          
+          return {
+            bookingId: booking.bookingId,
+            requestId: booking.requestId,
+            transactionId: booking.transactionId,
+            commodityType: booking.commodityType,
+            quantity: booking.quantity,
+            unit: booking.unit,
+            totalValue: parseFloat(booking.totalValue || '0'),
+            dispatchDate: booking.dispatchDate,
+            buyerName: booking.buyerName,
+            buyerCompany: booking.buyerCompany,
+            verificationCode: booking.verificationCode,
+            county: booking.county,
+            farmLocation: booking.farmLocation,
+            exporterId: booking.exporterId,
+            exporterName: booking.exporterName,
+            exporterCompany: booking.exporterCompany,
+            portFacility: booking.portFacility,
+            inspectionType: booking.inspectionType,
+            scheduledDate: booking.scheduledDate,
+            urgencyLevel: booking.urgencyLevel,
+            assignmentStatus: booking.assignmentStatus,
+            assignedInspectorId: booking.assignedInspectorId,
+            assignedInspectorName: booking.assignedInspectorName,
+            assignedBy: booking.assignedBy,
+            assignedAt: booking.assignedAt,
+            ddgotsNotes: booking.ddgotsNotes,
+            bookedAt: booking.bookedAt,
+            bookedBy: booking.bookedBy,
+            inspectionDate: booking.scheduledDate,
+            // 🎯 COMPLETION STATUS DATA FOR FRONTEND
+            completionStatus: isCompleted ? 'INSPECTION_PASSED' : (booking.assignmentStatus === 'assigned' ? 'ASSIGNED' : 'PENDING'),
+            completedAt: completionData?.completedAt,
+            completedBy: completionData?.completedBy,
+            inspectionResults: completionData?.results,
+            // DDGOTS DASHBOARD UPDATE
+            ddgotsStatus: completionData?.ddgotsStatus || (booking.assignmentStatus === 'assigned' ? 'Assigned' : 'Pending Assignment')
+          };
+        })
       });
     } catch (error: any) {
       console.error("❌ Error fetching DDGOTS assignments:", error.message);
@@ -15227,6 +15252,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
           console.error(`⚠️ Could not fetch warehouse QR for ${booking.transaction_id}:`, error);
         }
 
+        // 🎯 CHECK FOR INSPECTION COMPLETION STATUS FOR PORT INSPECTOR
+        const completionData = inspectionCompletionStatus[booking.booking_id];
+        const isCompleted = completionData && completionData.results?.status === 'PASSED';
+        
         return {
           id: booking.booking_id,
           exporterId: booking.exporter_id,
@@ -15238,7 +15267,12 @@ export async function registerRoutes(app: Express): Promise<Server> {
           qrBatchCode: correctQrBatchCode, // Warehouse QR batch code for scanning
           scheduledDate: new Date(booking.scheduled_date).toLocaleString(),
           priority: booking.urgency_level === 'urgent' ? 'high' : 'medium',
-          status: 'assigned',
+          // 🎯 PORT INSPECTOR COMPLETION STATUS UPDATE - Show "completed" when inspection passed
+          status: isCompleted ? 'completed' : 'assigned',
+          completionStatus: isCompleted ? 'COMPLETED' : 'ASSIGNED',
+          completedAt: completionData?.completedAt,
+          completedBy: completionData?.completedBy,
+          inspectionResults: completionData?.results,
           documents: ['Certificate of Origin', 'EUDR Compliance', 'Quality Certificate'], // Required documents
           warehouseLocation: booking.farm_location, // This is actually exporter warehouse address
           inspectionScheduled: new Date(booking.scheduled_date).toLocaleString(),
@@ -15426,7 +15460,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
       // SEND REAL NOTIFICATIONS TO ALL STAKEHOLDERS
       // ✅ USE MASTER REGISTRY for notifications - Right person gets notified
-      const transaction = masterTransactionRegistry['TXN-FPO-20250830-817649-923'];
+      // (reuse transaction variable from above)
       
       const notificationResult = await sendInspectionCompletionNotifications({
         inspectionId,
@@ -19870,6 +19904,14 @@ VERIFY: ${qrCodeData.verificationUrl}`;
             .from(storageFees)
             .where(eq(storageFees.custodyId, lot.custodyId));
 
+          // 🎯 CHECK FOR INSPECTION COMPLETION STATUS FOR BUYER
+          const hasInspectionPassed = Object.values(inspectionCompletionStatus).some(completion => 
+            completion.results?.status === 'PASSED' && 
+            // Match by transaction ID or verification codes
+            (lot.transactionId && completion.results) ||
+            (lot.verificationCodes && lot.verificationCodes.length > 0)
+          );
+
           return {
             ...lot,
             storageFees: storageFeesRecord || null,
@@ -19880,7 +19922,10 @@ VERIFY: ${qrCodeData.verificationUrl}`;
             verificationCodes: Array.isArray(lot.verificationCodes) ? lot.verificationCodes : JSON.parse(lot.verificationCodes as string || '[]'),
             farmerNames: Array.isArray(lot.farmerNames) ? lot.farmerNames : JSON.parse(lot.farmerNames as string || '[]'),
             farmLocations: Array.isArray(lot.farmLocations) ? lot.farmLocations : JSON.parse(lot.farmLocations as string || '[]'),
-            lotOrigins: Array.isArray(lot.lotOrigins) ? lot.lotOrigins : JSON.parse(lot.lotOrigins as string || '[]')
+            lotOrigins: Array.isArray(lot.lotOrigins) ? lot.lotOrigins : JSON.parse(lot.lotOrigins as string || '[]'),
+            // 🎯 BUYER DASHBOARD UPDATE: My Products in Warehouse Custody section
+            custody_status: hasInspectionPassed ? 'PASSED - Request Payment to Exporter' : 'In Custody - Pending Inspection',
+            inspection_status: hasInspectionPassed ? 'PASSED' : 'PENDING'
           };
         })
       );

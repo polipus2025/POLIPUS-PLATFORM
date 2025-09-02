@@ -86,7 +86,7 @@ const ExporterInspections = memo(() => {
 
   const scheduledPickups = scheduledPickupsData?.data || [];
 
-  // Fetch existing inspection bookings for this exporter
+  // Fetch existing inspection bookings for this exporter - WITH COMPLETION STATUS
   const { data: existingBookingsData } = useQuery<{
     success: boolean;
     data: Array<{
@@ -95,11 +95,17 @@ const ExporterInspections = memo(() => {
       assignment_status: string;
       scheduled_date: string;
       assigned_inspector_name?: string;
+      // 🎯 NEW FIELDS FOR COMPLETION STATUS
+      inspection_status?: string;
+      completion_status?: string;
+      completed_at?: string;
+      completed_by?: string;
+      inspection_results?: any;
     }>;
   }>({
     queryKey: [`/api/exporter/${exporterId}/inspection-bookings`],
     enabled: !!exporterId,
-    staleTime: 60000, // 1 minute cache
+    staleTime: 30000, // Reduced cache to get fresh completion status
   });
 
   const existingBookings = existingBookingsData?.data || [];
@@ -370,10 +376,27 @@ const ExporterInspections = memo(() => {
                                       <p><strong>Date:</strong> {new Date(booking.scheduled_date).toLocaleDateString()}</p>
                                     )}
                                     <p><strong>Status:</strong> 
-                                      <Badge className="ml-2 text-xs">
-                                        {booking?.assignment_status?.replace('_', ' ') || 'pending'}
+                                      <Badge className={`ml-2 text-xs ${
+                                        booking?.inspection_status === 'INSPECTION PASSED' 
+                                          ? 'bg-green-100 text-green-800 border-green-300' 
+                                          : 'bg-blue-100 text-blue-800 border-blue-300'
+                                      }`}>
+                                        {booking?.inspection_status || booking?.assignment_status?.replace('_', ' ') || 'pending'}
                                       </Badge>
                                     </p>
+                                    {/* 🎯 INSPECTION COMPLETION DETAILS */}
+                                    {booking?.completion_status === 'INSPECTION_PASSED' && (
+                                      <div className="mt-2 p-2 bg-green-50 border border-green-200 rounded text-xs">
+                                        <div className="text-green-800 font-semibold">✅ Inspection Completed</div>
+                                        <div className="text-green-700 mt-1">
+                                          <p>Completed by: {booking.completed_by}</p>
+                                          <p>Results: {booking.inspection_results?.status || 'PASSED'}</p>
+                                          {booking.completed_at && (
+                                            <p>Date: {new Date(booking.completed_at).toLocaleString()}</p>
+                                          )}
+                                        </div>
+                                      </div>
+                                    )}
                                   </div>
                                 );
                               })()}

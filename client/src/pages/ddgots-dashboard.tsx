@@ -646,35 +646,35 @@ export default function DDGOTSDashboard() {
                           
                           {booking.assignmentStatus === 'assigned' ? (
                             <div className={`p-4 border rounded-lg ${
-                              booking.completionStatus === 'COMPLETED' 
-                                ? 'bg-blue-50 border-blue-200' 
-                                : 'bg-green-50 border-green-200'
+                              booking.completionStatus === 'INSPECTION_PASSED' 
+                                ? 'bg-green-50 border-green-500' 
+                                : 'bg-blue-50 border-blue-200'
                             }`}>
                               <div className={`flex items-center gap-2 ${
-                                booking.completionStatus === 'COMPLETED' 
-                                  ? 'text-blue-800' 
-                                  : 'text-green-800'
+                                booking.completionStatus === 'INSPECTION_PASSED' 
+                                  ? 'text-green-800' 
+                                  : 'text-blue-800'
                               }`}>
-                                {booking.completionStatus === 'COMPLETED' ? (
-                                  <CheckCircle className="w-5 h-5 text-blue-600" />
-                                ) : (
+                                {booking.completionStatus === 'INSPECTION_PASSED' ? (
                                   <CheckCircle className="w-5 h-5 text-green-600" />
+                                ) : (
+                                  <CheckCircle className="w-5 h-5 text-blue-600" />
                                 )}
                                 <span className="font-semibold">
-                                  {booking.completionStatus === 'COMPLETED' 
-                                    ? `✅ INSPECTION COMPLETED by ${booking.completedBy}` 
+                                  {booking.completionStatus === 'INSPECTION_PASSED' 
+                                    ? `🎯 INSPECTION PASSED by ${booking.completedBy}` 
                                     : `Assigned to: ${booking.assignedInspectorName}`
                                   }
                                 </span>
                               </div>
-                              {booking.completionStatus === 'COMPLETED' ? (
-                                <div className="text-sm text-blue-600 mt-2 space-y-1">
-                                  <p>🎯 <strong>Status:</strong> {booking.inspectionResults?.status || 'PASSED'}</p>
+                              {booking.completionStatus === 'INSPECTION_PASSED' ? (
+                                <div className="text-sm text-green-700 mt-2 space-y-1 bg-green-100 p-3 rounded border border-green-300">
+                                  <p>🎯 <strong>Final Status:</strong> <span className="text-green-800 font-bold">INSPECTION PASSED</span></p>
                                   <p>📋 <strong>Quality Verified:</strong> {booking.inspectionResults?.qualityVerified ? '✅ YES' : '❌ NO'}</p>
                                   <p>📏 <strong>Quantity Verified:</strong> {booking.inspectionResults?.quantityVerified ? '✅ YES' : '❌ NO'}</p>
                                   <p>🌍 <strong>EUDR Compliant:</strong> {booking.inspectionResults?.eudrCompliant ? '✅ YES' : '❌ NO'}</p>
                                   <p>🕒 <strong>Completed:</strong> {new Date(booking.completedAt).toLocaleString()}</p>
-                                  <p>🔄 <strong>Next Step:</strong> Ready for final export documentation</p>
+                                  <p>🔄 <strong>Next Step:</strong> ✅ Ready for final export documentation and payment processing</p>
                                 </div>
                               ) : (
                                 <>

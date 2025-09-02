@@ -646,7 +646,21 @@ export default function PortInspectorDashboard() {
                               <Printer className="w-4 h-4 mr-1" />
                               Print QR
                             </Button>
-                            {inspection.status === 'assigned' ? (
+                            {inspection.status === 'completed' ? (
+                              <div className="bg-green-50 border border-green-200 rounded-lg p-3">
+                                <div className="flex items-center text-green-800 mb-2">
+                                  <CheckCircle className="w-4 h-4 mr-2" />
+                                  <span className="font-semibold text-sm">✅ INSPECTION COMPLETED</span>
+                                </div>
+                                <div className="text-xs text-green-700">
+                                  <p>Completed by: {inspection.completedBy || 'Inspector'}</p>
+                                  <p>Status: {inspection.inspectionResults?.status || 'PASSED'}</p>
+                                  {inspection.completedAt && (
+                                    <p>Completed: {new Date(inspection.completedAt).toLocaleString()}</p>
+                                  )}
+                                </div>
+                              </div>
+                            ) : inspection.status === 'assigned' ? (
                               <>
                                 <Button 
                                   size="sm" 

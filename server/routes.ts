@@ -18956,7 +18956,8 @@ VERIFY: ${qrCodeData.verificationUrl}`;
         totalValue, 
         county, 
         farmLocation,
-        dispatchDate 
+        dispatchDate,
+        warehouseAddress // CAPTURE EXPORTER WAREHOUSE ADDRESS
       } = req.body;
       
       console.log(`🚛 Warehouse dispatch scheduled by buyer ${buyerId} for transaction ${transactionId} on ${dispatchDate}`);

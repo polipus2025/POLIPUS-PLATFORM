@@ -1680,27 +1680,18 @@ export default function AgriculturalBuyerDashboard() {
                                       {lot.custody_status || lot.custodyStatus}
                                     </Badge>
                                   </p>
-                                  {/* 🎯 INSPECTION STATUS DISPLAY - Fixed to use custody_status */}
+                                  {/* 🎯 INSPECTION STATUS DISPLAY - FINALLY FIXED to use inspection_status */}
                                   <p>
                                     <span className="font-medium">Inspection Status:</span>
                                     <Badge 
-                                      variant={
-                                        lot.custody_status === 'payment_completed' || 
-                                        lot.custody_status === 'payment_requested' || 
-                                        lot.custody_status === 'authorized' 
-                                          ? 'default' : 'outline'
-                                      }
+                                      variant={lot.inspection_status === 'PASSED' ? 'default' : 'outline'}
                                       className={`ml-2 text-xs ${
-                                        lot.custody_status === 'payment_completed' || 
-                                        lot.custody_status === 'payment_requested' || 
-                                        lot.custody_status === 'authorized'
+                                        lot.inspection_status === 'PASSED'
                                           ? 'bg-green-100 text-green-800 border-green-300' 
                                           : 'bg-orange-100 text-orange-800 border-orange-300'
                                       }`}
                                     >
-                                      {lot.custody_status === 'payment_completed' ? 'COMPLETED' : 
-                                       lot.custody_status === 'payment_requested' ? 'PASSED' :
-                                       lot.custody_status === 'authorized' ? 'PASSED' : 'PENDING'}
+                                      {lot.inspection_status || 'PENDING'}
                                     </Badge>
                                   </p>
                                   <p>

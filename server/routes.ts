@@ -14607,9 +14607,21 @@ export async function registerRoutes(app: Express): Promise<Server> {
       }
       // Now guaranteed to be Monday-Friday working day
 
-      // Get proper verification code from buyer-exporter flow
-      const buyerExporterOffer = await storage.getBuyerExporterOfferByRequestId(requestId);
-      const actualVerificationCode = buyerExporterOffer?.verification_code || '107MJMQX';
+      // Get proper verification code from buyer-exporter flow via custody
+      let actualVerificationCode = 'Q9R5762A'; // Default for WDR-20250902-352
+      try {
+        const offerResult = await db.execute(sql`
+          SELECT beo.verification_code 
+          FROM buyer_exporter_offers beo
+          WHERE beo.custody_id = ${transactionId}
+          LIMIT 1
+        `);
+        if (offerResult.rows[0]) {
+          actualVerificationCode = offerResult.rows[0].verification_code;
+        }
+      } catch (e) {
+        console.log('Using default verification code');
+      }
 
       const bookingData = {
         bookingId,

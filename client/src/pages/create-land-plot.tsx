@@ -11,7 +11,7 @@ import { useMutation, useQuery } from "@tanstack/react-query";
 import { apiRequest } from "@/lib/queryClient";
 import { ArrowLeft, MapPin, Globe, TreePine, Target, Users, Crosshair, Satellite, Zap, RefreshCw, Download } from "lucide-react";
 import { Link } from "wouter";
-import { InteractiveBoundaryMapper } from '@/components/maps/interactive-boundary-mapper';
+import RealMapBoundaryMapper from '@/components/maps/real-map-boundary-mapper';
 
 export default function CreateLandPlot() {
   const { toast } = useToast();
@@ -668,8 +668,7 @@ export default function CreateLandPlot() {
                       </div>
                     </div>
 
-                    <InteractiveBoundaryMapper 
-                      minPoints={3}
+                    <RealMapBoundaryMapper 
                       onBoundaryComplete={(boundary) => {
                         setLandPlotData(prev => ({
                           ...prev,
@@ -679,15 +678,9 @@ export default function CreateLandPlot() {
                             `${boundary.points[0].latitude.toFixed(6)}, ${boundary.points[0].longitude.toFixed(6)}` : 
                             prev.coordinates
                         }));
-                        
-                        // Store compliance reports for later use
-                        if (boundary.complianceReports) {
-                          localStorage.setItem('latestComplianceReports', JSON.stringify(boundary.complianceReports));
-                        }
-                        
                         toast({
-                          title: "✅ Land Boundary Completed with LACRA Reports",
-                          description: `Land plot mapped with ${boundary.points.length} GPS points (${boundary.area?.toFixed(2)} hectares). EUDR and deforestation reports generated!`,
+                          title: "Land Boundary Mapped Successfully",
+                          description: `Land plot mapped with ${boundary.points.length} GPS points (${boundary.area?.toFixed(2)} hectares)`,
                         });
                       }}
                     />

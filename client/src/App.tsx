@@ -90,6 +90,7 @@ const ExporterManagement = lazy(() => import("@/pages/exporter-management"));
 const ProfileRouter = lazy(() => import("@/pages/profile"));
 const WorldMarketPricing = lazy(() => import("@/pages/world-market-pricing"));
 const SellersHub = lazy(() => import("@/pages/sellers-hub"));
+const QRViewer = lazy(() => import("@/pages/qr-viewer"));
 
 // AGRICULTURAL PAGES - Required for land inspector navigation
 const OnboardFarmer = lazy(() => import("@/pages/onboard-farmer"));
@@ -219,6 +220,9 @@ function App() {
             {/* PROFILE MANAGEMENT SYSTEM */}
             <Route path="/profile/:path*" component={createLazyRoute(ProfileRouter)} />
             <Route path="/profile" component={createLazyRoute(ProfileRouter)} />
+
+            {/* QR CODE VIEWER */}
+            <Route path="/qr/:batchCode" component={createLazyRoute(QRViewer)} />
 
             {/* POLIPUS REDIRECT */}
             <Route path="/polipus" component={FrontPage} />

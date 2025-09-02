@@ -19336,16 +19336,35 @@ GENERATED: ${new Date().toLocaleDateString()}`;
         qrCodeUrl = `data:image/svg+xml;base64,${Buffer.from(`<svg xmlns="http://www.w3.org/2000/svg" width="200" height="200"><rect width="200" height="200" fill="white"/><text x="100" y="100" text-anchor="middle" font-family="Arial" font-size="12">${batchCode}</text></svg>`).toString('base64')}`;
       }
 
-      // Create QR batch entry for the generated code
+      // Create QR batch entry for the generated code - Fix JSON storage issue
       try {
+        // Store QR data as proper JSON string for JSONB column
+        const qrDataForStorage = JSON.stringify(readableQrData);
+        
+        // Get farmer information from custody data for required fields
+        let farmerInfo = { farmerId: 'FARMER-001', farmerName: 'Unknown Farmer' };
+        try {
+          const custodyResult = await db.execute(sql`
+            SELECT farmer_names FROM warehouse_custody WHERE custody_id = ${dispatchRequest.transaction_id} LIMIT 1
+          `);
+          if (custodyResult.rows[0]) {
+            const farmerNames = JSON.parse(custodyResult.rows[0].farmer_names || '["Unknown Farmer"]');
+            farmerInfo.farmerName = farmerNames[0] || 'Unknown Farmer';
+          }
+        } catch (e) {
+          console.log('Using default farmer info:', e.message);
+        }
+
         await db.execute(sql`
           INSERT INTO qr_batches (
-            batch_code, warehouse_id, buyer_id, commodity_type, 
-            total_bags, total_weight, qr_code_data, qr_code_url, status
+            batch_code, warehouse_id, warehouse_name, buyer_id, buyer_name, 
+            farmer_id, farmer_name, commodity_type, total_bags, total_weight, 
+            qr_code_data, qr_code_url, status
           ) VALUES (
-            ${batchCode}, ${'WH-NIMBA-001'}, ${dispatchRequest.buyer_id}, 
+            ${batchCode}, ${'WH-NIMBA-001'}, ${'Nimba County Warehouse'}, ${dispatchRequest.buyer_id}, 
+            ${dispatchRequest.buyer_name}, ${farmerInfo.farmerId}, ${farmerInfo.farmerName}, 
             ${dispatchRequest.commodity_type}, ${1}, ${parseFloat(dispatchRequest.quantity) || 1}, 
-            ${readableQrData}, ${qrCodeUrl}, ${'generated'}
+            ${qrDataForStorage}, ${qrCodeUrl}, ${'generated'}
           )
         `);
         console.log(`📱 QR batch ${batchCode} created successfully`);

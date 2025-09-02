@@ -580,7 +580,10 @@ export default function WarehouseInspectorDashboard() {
                                 title: 'Payment Verified & Custody Authorized',
                                 description: `Payment verified and custody ${record.custodyId} authorized successfully`,
                               });
+                              // CROSS-PORTAL REAL-TIME SYNC: Invalidate both warehouse AND buyer caches
                               queryClient.invalidateQueries({ queryKey: ['/api/warehouse-custody/records'] });
+                              // Invalidate buyer's custody cache to show real-time authorization status
+                              queryClient.invalidateQueries({ queryKey: ['/api/buyer/custody-lots'] });
                             } catch (error: any) {
                               toast({
                                 title: 'Verification/Authorization Failed',
@@ -614,7 +617,10 @@ export default function WarehouseInspectorDashboard() {
                                 title: 'Custody Authorized',
                                 description: `Custody ${record.custodyId} has been authorized successfully`,
                               });
+                              // CROSS-PORTAL REAL-TIME SYNC: Invalidate both warehouse AND buyer caches
                               queryClient.invalidateQueries({ queryKey: ['/api/warehouse-custody/records'] });
+                              // Invalidate buyer's custody cache to show real-time authorization status
+                              queryClient.invalidateQueries({ queryKey: ['/api/buyer/custody-lots'] });
                             } catch (error: any) {
                               toast({
                                 title: 'Authorization Failed',

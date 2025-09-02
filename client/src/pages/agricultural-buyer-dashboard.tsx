@@ -564,7 +564,8 @@ export default function AgriculturalBuyerDashboard() {
         description: `Authorization request submitted successfully. Reference: ${response.requestId}`,
       });
 
-      // Refresh custody lots data
+      // REAL-TIME UI UPDATE: Invalidate React Query cache
+      queryClient.invalidateQueries({ queryKey: ['/api/buyer/custody-lots', buyerId] });
       refetchCustodyLots();
       
     } catch (error) {

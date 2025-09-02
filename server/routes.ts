@@ -14596,6 +14596,27 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
       const dispatchData = dispatchResult.rows[0];
 
+      // CHECK IF BOOKING ALREADY EXISTS FOR THIS REQUEST (PREVENT DUPLICATES)
+      const existingBookingResult = await db.execute(sql`
+        SELECT booking_id, assignment_status, assigned_inspector_id
+        FROM port_inspection_bookings 
+        WHERE request_id = ${requestId}
+        LIMIT 1
+      `);
+
+      if (existingBookingResult.rows[0]) {
+        const existingBooking = existingBookingResult.rows[0];
+        return res.json({ 
+          success: true, 
+          data: { 
+            bookingId: existingBooking.booking_id,
+            message: "Inspection already booked for this request",
+            status: existingBooking.assignment_status,
+            assignedInspector: existingBooking.assigned_inspector_id
+          } 
+        });
+      }
+
       // GET EXPORTER WAREHOUSE ADDRESS FROM FLOW
       const exporterResult = await db.execute(sql`
         SELECT business_address, city, county

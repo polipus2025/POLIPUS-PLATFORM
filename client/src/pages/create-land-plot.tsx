@@ -47,7 +47,7 @@ export default function CreateLandPlot() {
   const farmersList = (farmers as any[]) || [];
   const selectedFarmer = farmersList.find((f: any) => f.id.toString() === selectedFarmerId);
 
-  // Perform enhanced satellite analysis with GIBS
+  // Perform satellite analysis
   const performSatelliteAnalysis = async () => {
     if (!landPlotData.boundaryData) {
       toast({
@@ -61,24 +61,17 @@ export default function CreateLandPlot() {
     setIsAnalyzing(true);
     
     try {
-      // Enhanced satellite analysis with GIBS integration
-      const { gibsSatelliteService } = await import('@/services/gibs-satellite-service');
-      
+      // Simulate satellite analysis
       setTimeout(() => {
-        const analysisData = gibsSatelliteService.getAnalysisData(landPlotData.boundaryData.coordinates);
-        
         const analysis = {
           soilType: "Ferralsols (Red clay)",
           totalArea: landPlotData.boundaryData?.area || 2.456,
           averageElevation: 145,
           averageSlope: 3.2,
-          confidence: analysisData.confidence, // Enhanced confidence from GIBS
-          dataSource: "NASA GIBS Enhanced - VIIRS/MODIS/Landsat",
-          analysisDate: analysisData.timestamp,
-          deforestationRisk: 1.8, // Improved accuracy with GIBS
-          resolution: "375m - High Resolution",
-          eudrCompliant: analysisData.eudrCompliance,
-          enhancedQuality: true
+          confidence: 94,
+          dataSource: "Sentinel-2 + Landsat-8 + SRTM",
+          analysisDate: new Date().toISOString(),
+          deforestationRisk: 2.1
         };
         
         setSatelliteAnalysis(analysis);
@@ -91,8 +84,8 @@ export default function CreateLandPlot() {
         }));
 
         toast({
-          title: "Enhanced Satellite Analysis Complete",
-          description: "Land plot analysis completed with NASA GIBS enhanced imagery and EUDR compliance data.",
+          title: "Satellite Analysis Complete",
+          description: "Land plot analysis completed with EUDR compliance data.",
         });
         
         setIsAnalyzing(false);

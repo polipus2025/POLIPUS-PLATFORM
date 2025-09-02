@@ -14856,6 +14856,49 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // ===== LAND MAPPING API ROUTES =====
   // Multiple Land Mappings per Farmer - Created by Land Inspectors
 
+  // Get farmers by county for land inspectors (county-specific authority)
+  app.get("/api/farmers/by-county/:county", async (req, res) => {
+    try {
+      const { county } = req.params;
+      
+      console.log(`🏛️ Land Inspector filtering farmers for county: ${county}`);
+      
+      // Get farmers from specific county only (land inspectors have county-specific authority)
+      const countyFarmers = await db
+        .select({
+          id: farmers.id,
+          farmerId: farmers.farmerId,
+          firstName: farmers.firstName,
+          lastName: farmers.lastName,
+          email: farmers.email,
+          phoneNumber: farmers.phoneNumber,
+          county: farmers.county,
+          district: farmers.district,
+          isActive: farmers.isActive
+        })
+        .from(farmers)
+        .where(
+          and(
+            eq(farmers.isActive, true),
+            // Flexible county matching (Nimba = Nimba County)
+            or(
+              eq(farmers.county, county),
+              eq(farmers.county, `${county} County`),
+              eq(farmers.county, county.replace(' County', ''))
+            )
+          )
+        )
+        .orderBy(farmers.firstName, farmers.lastName);
+      
+      console.log(`✅ Found ${countyFarmers.length} farmers in ${county} for land inspector`);
+      
+      res.json(countyFarmers);
+    } catch (error: any) {
+      console.error("Error fetching county farmers:", error);
+      res.status(500).json({ message: "Failed to fetch county farmers" });
+    }
+  });
+
   // Get all farmers for land mapping
   app.get("/api/farmers", async (req, res) => {
     try {

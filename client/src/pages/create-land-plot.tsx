@@ -37,10 +37,14 @@ export default function CreateLandPlot() {
   const [currentLocation, setCurrentLocation] = useState<{lat: number, lng: number} | null>(null);
 
   const inspectorId = localStorage.getItem("inspectorId") || "land_inspector";
-
-  // Get list of farmers
+  
+  // Get inspector's county for county-based farmer filtering
+  const inspectorCounty = localStorage.getItem("inspectorCounty") || "Nimba County";
+  
+  // Get list of farmers - FILTERED BY INSPECTOR'S COUNTY ONLY
   const { data: farmers } = useQuery({
-    queryKey: ["/api/farmers"],
+    queryKey: ["/api/farmers/by-county", inspectorCounty],
+    queryFn: () => apiRequest(`/api/farmers/by-county/${encodeURIComponent(inspectorCounty)}`),
     retry: false
   });
 
@@ -236,7 +240,7 @@ export default function CreateLandPlot() {
                 <CardHeader>
                   <CardTitle className="flex items-center">
                     <Users className="w-5 h-5 mr-2 text-blue-600" />
-                    Select Farmer
+                    Select Farmer ({inspectorCounty})
                   </CardTitle>
                 </CardHeader>
                 <CardContent className="space-y-4">
@@ -244,7 +248,7 @@ export default function CreateLandPlot() {
                     <Label htmlFor="farmerId">Choose Farmer</Label>
                     <Select value={selectedFarmerId} onValueChange={setSelectedFarmerId}>
                       <SelectTrigger>
-                        <SelectValue placeholder="Select a farmer" />
+                        <SelectValue placeholder={`Select farmer from ${inspectorCounty}`} />
                       </SelectTrigger>
                       <SelectContent>
                         {farmersList.map((farmer: any) => (

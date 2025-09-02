@@ -42,8 +42,8 @@ import { useLocation } from "wouter";
 export default function DDGOTSDashboard() {
   const [, navigate] = useLocation();
   const [activeTab, setActiveTab] = useState('operations');
-  const [selectedInspector, setSelectedInspector] = useState('');
-  const [assignmentNotes, setAssignmentNotes] = useState('');
+  const [selectedInspectors, setSelectedInspectors] = useState<Record<string, string>>({});
+  const [assignmentNotes, setAssignmentNotes] = useState<Record<string, string>>({});
   const { toast } = useToast();
   const queryClient = useQueryClient();
   
@@ -153,11 +153,17 @@ export default function DDGOTSDashboard() {
       if (!response.ok) throw new Error('Failed to assign inspector');
       return response.json();
     },
-    onSuccess: () => {
+    onSuccess: (data, variables) => {
       toast({ title: "Success!", description: "Inspector assigned successfully. They will receive the inspection request." });
       queryClient.invalidateQueries({ queryKey: ['/api/ddgots/pending-inspector-assignments'] });
-      setSelectedInspector('');
-      setAssignmentNotes('');
+      // Clear the specific booking's state
+      const updatedInspectors = {...selectedInspectors};
+      delete updatedInspectors[variables.bookingId];
+      setSelectedInspectors(updatedInspectors);
+      
+      const updatedNotes = {...assignmentNotes};
+      delete updatedNotes[variables.bookingId];
+      setAssignmentNotes(updatedNotes);
     },
     onError: () => {
       toast({ title: "Error", description: "Failed to assign inspector. Please try again.", variant: "destructive" });
@@ -685,7 +691,7 @@ export default function DDGOTSDashboard() {
                               )}
                             </div>
                           ) : (
-                            <Select value={selectedInspector} onValueChange={setSelectedInspector}>
+                            <Select value={selectedInspectors[booking.bookingId] || ''} onValueChange={(value) => setSelectedInspectors({...selectedInspectors, [booking.bookingId]: value})}>
                               <SelectTrigger className="w-full">
                                 <SelectValue placeholder={`Select Port Inspector at ${booking.portFacility}`} />
                               </SelectTrigger>
@@ -711,8 +717,8 @@ export default function DDGOTSDashboard() {
                           ) : (
                             <Textarea
                               placeholder="Add any special instructions for the inspector..."
-                              value={assignmentNotes}
-                              onChange={(e) => setAssignmentNotes(e.target.value)}
+                              value={assignmentNotes[booking.bookingId] || ''}
+                              onChange={(e) => setAssignmentNotes({...assignmentNotes, [booking.bookingId]: e.target.value})}
                               className="h-20"
                             />
                           )}
@@ -725,10 +731,10 @@ export default function DDGOTSDashboard() {
                           <Button
                             onClick={() => assignInspectorMutation.mutate({
                               bookingId: booking.bookingId,
-                              inspectorId: selectedInspector,
-                              notes: assignmentNotes
+                              inspectorId: selectedInspectors[booking.bookingId],
+                              notes: assignmentNotes[booking.bookingId] || ''
                             })}
-                            disabled={!selectedInspector || assignInspectorMutation.isPending}
+                            disabled={!selectedInspectors[booking.bookingId] || assignInspectorMutation.isPending}
                             className="bg-green-600 hover:bg-green-700 text-white shadow-lg"
                           >
                             {assignInspectorMutation.isPending ? (

@@ -42,18 +42,17 @@ export default function FarmerDashboard() {
   const storedFarmerId = localStorage.getItem("farmerId");
   const credentialId = localStorage.getItem("credentialId");
   
-  // Handle different farmer credentials properly
+  // REAL FARMERS ONLY: Get farmerId from authenticated login session
   const farmerId = (() => {
-    // Paolo Jr's special test account
-    if (credentialId === "FRM434923" || storedFarmerId === "FRM434923") {
-      return "FARMER-1755883520291-288";
+    // Primary: farmerId stored during real farmer login
+    const authenticatedFarmerId = localStorage.getItem("farmerIdValue") || localStorage.getItem("farmerId");
+    
+    if (!authenticatedFarmerId) {
+      console.error("No farmer ID found - user must login first");
+      return null;
     }
-    // claudio big's account
-    if (credentialId === "FRM76386081") {
-      return "FARMER-1756314707545-846";
-    }
-    // Default fallback or use stored ID
-    return storedFarmerId || "FARMER-1755883520291-288";
+    
+    return authenticatedFarmerId;
   })();
     
   const farmerName = localStorage.getItem("farmerFirstName") || "Farmer";
@@ -62,11 +61,11 @@ export default function FarmerDashboard() {
   
   // Dashboard initialized for farmer: ${farmerId}
   
-  // Fetch farmer-specific data
+  // REAL FARMERS ONLY: Fetch authenticated farmer data
   const { data: farmerLandData, isLoading: landDataLoading, error: landDataError } = useQuery({ 
     queryKey: ["/api/farmer-land-data", farmerId],
     queryFn: () => apiRequest(`/api/farmer-land-data/${farmerId}`),
-    enabled: !!farmerId,
+    enabled: !!farmerId, // Only fetch if farmer is authenticated
     staleTime: 5 * 60 * 1000, // Cache for 5 minutes
     gcTime: 10 * 60 * 1000, // Keep in cache for 10 minutes
   });

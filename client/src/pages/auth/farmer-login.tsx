@@ -85,14 +85,17 @@ export default function FarmerBuyerLogin() {
           description: "Welcome to your Farmer Portal",
         });
         
+        // UNIVERSAL: Store authentication data for ANY real farmer
         localStorage.setItem("authToken", result.token);
         localStorage.setItem("userRole", "farmer");
         localStorage.setItem("userType", "farmer");
         localStorage.setItem("farmerId", result.farmer.farmerId);
+        localStorage.setItem("farmerIdValue", result.farmer.farmerId); // Key for dashboard compatibility
         localStorage.setItem("credentialId", data.farmerId);
         localStorage.setItem("farmerFirstName", result.farmer.firstName);
         localStorage.setItem("farmerLastName", result.farmer.lastName);
         localStorage.setItem("farmerFullName", `${result.farmer.firstName} ${result.farmer.lastName}`);
+        localStorage.setItem("farmerCounty", result.farmer.county || "Unknown County");
         
         window.location.href = "/farmer-dashboard";
       }

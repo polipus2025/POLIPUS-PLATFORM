@@ -31,7 +31,8 @@ import {
   CheckSquare,
   AlertCircle,
   Play,
-  Square
+  Square,
+  Printer
 } from "lucide-react";
 import { Label } from "@/components/ui/label";
 import ProfileDropdown from "@/components/ProfileDropdown";
@@ -47,6 +48,7 @@ export default function PortInspectorDashboard() {
   const [cameraStream, setCameraStream] = useState<MediaStream | null>(null);
   const [qrCodeInput, setQrCodeInput] = useState("");
   const [showQrModal, setShowQrModal] = useState(false);
+  const [showQrPrintModal, setShowQrPrintModal] = useState(false);
   const [currentInspectionId, setCurrentInspectionId] = useState<string | null>(null);
   const videoRef = useRef<HTMLVideoElement>(null);
   const { toast } = useToast();
@@ -807,6 +809,38 @@ export default function PortInspectorDashboard() {
                     </Button>
                   </div>
 
+                  {/* View QR Code Section */}
+                  <div className="mt-6 p-4 bg-blue-50 border border-blue-200 rounded-lg">
+                    <h3 className="font-semibold text-blue-900 mb-2 flex items-center gap-2">
+                      <QrCode className="w-4 h-4" />
+                      Warehouse QR Code
+                    </h3>
+                    <p className="text-sm text-blue-700 mb-3">
+                      View or print the official warehouse QR code containing all product data
+                    </p>
+                    <Button 
+                      onClick={() => {
+                        // Set the current inspection ID from the first pending inspection
+                        const firstInspection = pendingInspections?.[0];
+                        if (firstInspection) {
+                          setCurrentInspectionId(firstInspection.id);
+                          setShowQrPrintModal(true);
+                        } else {
+                          toast({
+                            title: "No Inspection Selected",
+                            description: "Please select an inspection first",
+                            variant: "destructive"
+                          });
+                        }
+                      }}
+                      variant="outline"
+                      className="border-blue-300 text-blue-700 hover:bg-blue-100"
+                    >
+                      <Printer className="w-4 h-4 mr-2" />
+                      View/Print QR Code
+                    </Button>
+                  </div>
+
                   {/* Camera View */}
                   {isScanning && (
                     <div className="mt-4">
@@ -1192,7 +1226,194 @@ export default function PortInspectorDashboard() {
             </Card>
           </div>
         )}
+
+        {/* QR Code Print Modal */}
+        {showQrPrintModal && (
+          <QRCodePrintModal 
+            isOpen={showQrPrintModal}
+            onClose={() => setShowQrPrintModal(false)}
+            currentInspectionId={currentInspectionId}
+          />
+        )}
       </div>
+    </div>
+  );
+}
+
+// QR Code Print Modal Component
+function QRCodePrintModal({ 
+  isOpen, 
+  onClose, 
+  currentInspectionId 
+}: { 
+  isOpen: boolean; 
+  onClose: () => void; 
+  currentInspectionId: string | null;
+}) {
+  const [qrImageData, setQrImageData] = useState<any>(null);
+  const [loading, setLoading] = useState(false);
+  
+  const fetchQRImage = async () => {
+    if (!currentInspectionId) return;
+    
+    setLoading(true);
+    try {
+      const response = await fetch(`/api/port-inspector/qr-image/${currentInspectionId}`);
+      const data = await response.json();
+      
+      if (data.success) {
+        setQrImageData(data.data);
+      } else {
+        console.error("Failed to fetch QR image:", data.message);
+      }
+    } catch (error) {
+      console.error("Error fetching QR image:", error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  React.useEffect(() => {
+    if (isOpen && currentInspectionId) {
+      fetchQRImage();
+    }
+  }, [isOpen, currentInspectionId]);
+
+  const handlePrint = () => {
+    const printWindow = window.open('', '_blank');
+    if (printWindow && qrImageData) {
+      printWindow.document.write(`
+        <html>
+          <head>
+            <title>Warehouse QR Code - ${qrImageData.batchCode}</title>
+            <style>
+              body { 
+                font-family: Arial, sans-serif; 
+                text-align: center; 
+                padding: 20px;
+                background: white;
+              }
+              .qr-container {
+                border: 2px solid #000;
+                padding: 20px;
+                margin: 20px auto;
+                max-width: 600px;
+                background: white;
+              }
+              .qr-image {
+                max-width: 300px;
+                margin: 20px auto;
+              }
+              .product-info {
+                text-align: left;
+                margin: 20px 0;
+                font-size: 14px;
+              }
+              .batch-code {
+                font-size: 24px;
+                font-weight: bold;
+                margin: 20px 0;
+                color: #2563eb;
+              }
+              @media print {
+                body { margin: 0; }
+                .no-print { display: none; }
+              }
+            </style>
+          </head>
+          <body>
+            <div class="qr-container">
+              <h1>WAREHOUSE QR CODE</h1>
+              <div class="batch-code">${qrImageData.batchCode}</div>
+              <img src="${qrImageData.qrCodeImage}" alt="QR Code" class="qr-image" />
+              <div class="product-info">
+                <strong>Product Information:</strong><br/>
+                Commodity: ${qrImageData.productInfo.commodity}<br/>
+                Quantity: ${qrImageData.productInfo.totalBags} bags × ${qrImageData.productInfo.bagWeight} = ${qrImageData.productInfo.totalWeight}<br/>
+                Quality: ${qrImageData.productInfo.qualityGrade}<br/>
+                Farmer: ${qrImageData.productInfo.farmer}<br/>
+                Buyer: ${qrImageData.productInfo.buyer}<br/>
+                Warehouse: ${qrImageData.productInfo.warehouse}<br/>
+                <br/>
+                <strong>Instructions:</strong><br/>
+                Scan this QR code during port inspection to verify complete product traceability including EUDR compliance, farmer details, and GPS coordinates.
+              </div>
+            </div>
+            <script>window.print(); window.close();</script>
+          </body>
+        </html>
+      `);
+      printWindow.document.close();
+    }
+  };
+
+  if (!isOpen) return null;
+
+  return (
+    <div className="fixed inset-0 bg-black/50 flex items-center justify-center p-4 z-50">
+      <Card className="w-full max-w-2xl bg-white max-h-[90vh] overflow-y-auto">
+        <CardHeader>
+          <CardTitle className="flex items-center gap-2">
+            <QrCode className="w-5 h-5" />
+            Warehouse QR Code
+          </CardTitle>
+          <CardDescription>
+            Official warehouse QR code containing complete product traceability data
+          </CardDescription>
+        </CardHeader>
+        <CardContent className="space-y-4">
+          {loading ? (
+            <div className="text-center py-8">
+              <Clock className="w-8 h-8 animate-spin mx-auto mb-4" />
+              <p>Loading QR code...</p>
+            </div>
+          ) : qrImageData ? (
+            <div className="text-center">
+              <div className="border-2 border-blue-200 rounded-lg p-6 bg-blue-50 mb-4">
+                <h3 className="text-xl font-bold text-blue-900 mb-4">
+                  {qrImageData.batchCode}
+                </h3>
+                <img 
+                  src={qrImageData.qrCodeImage} 
+                  alt="Warehouse QR Code" 
+                  className="max-w-xs mx-auto mb-4 border rounded"
+                />
+                <div className="text-left space-y-2 text-sm">
+                  <div><strong>Commodity:</strong> {qrImageData.productInfo.commodity}</div>
+                  <div><strong>Quantity:</strong> {qrImageData.productInfo.totalBags} bags × {qrImageData.productInfo.bagWeight} = {qrImageData.productInfo.totalWeight}</div>
+                  <div><strong>Quality:</strong> {qrImageData.productInfo.qualityGrade}</div>
+                  <div><strong>Farmer:</strong> {qrImageData.productInfo.farmer}</div>
+                  <div><strong>Buyer:</strong> {qrImageData.productInfo.buyer}</div>
+                  <div><strong>Warehouse:</strong> {qrImageData.productInfo.warehouse}</div>
+                </div>
+              </div>
+              
+              <div className="bg-green-50 border border-green-200 rounded p-4 mb-4">
+                <p className="text-green-800 text-sm">
+                  ✅ <strong>Scanning this QR code will display:</strong><br/>
+                  Complete product traceability • EUDR compliance status • Farmer GPS coordinates • 
+                  Forest cover analysis • Quality certifications • Chain of custody details
+                </p>
+              </div>
+              
+              <div className="flex gap-3">
+                <Button onClick={handlePrint} className="flex-1">
+                  <Printer className="w-4 h-4 mr-2" />
+                  Print QR Code
+                </Button>
+                <Button variant="outline" onClick={onClose} className="flex-1">
+                  Close
+                </Button>
+              </div>
+            </div>
+          ) : (
+            <div className="text-center py-8 text-red-600">
+              <AlertCircle className="w-8 h-8 mx-auto mb-4" />
+              <p>Failed to load QR code. Please try again.</p>
+            </div>
+          )}
+        </CardContent>
+      </Card>
     </div>
   );
 }

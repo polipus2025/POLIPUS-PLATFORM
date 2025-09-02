@@ -15267,6 +15267,90 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Get QR code image for printing
+  app.get("/api/port-inspector/qr-image/:inspectionId", async (req, res) => {
+    try {
+      const { inspectionId } = req.params;
+      console.log(`🖼️ FETCHING QR CODE IMAGE for inspection: ${inspectionId}`);
+      
+      // First get the inspection to find the transaction ID
+      const inspectionResult = await db.execute(sql`
+        SELECT transaction_id FROM port_inspection_bookings WHERE booking_id = ${inspectionId}
+      `);
+
+      if (inspectionResult.rows.length === 0) {
+        return res.status(404).json({ 
+          success: false, 
+          message: "Inspection not found"
+        });
+      }
+
+      const transactionId = inspectionResult.rows[0].transaction_id;
+
+      // Get the QR batch code from warehouse_custody
+      const warehouseCustodyResult = await db.execute(sql`
+        SELECT product_qr_codes FROM warehouse_custody WHERE custody_id = ${transactionId}
+      `);
+
+      if (warehouseCustodyResult.rows.length === 0) {
+        return res.status(404).json({ 
+          success: false, 
+          message: "Warehouse custody not found"
+        });
+      }
+
+      const productQrCodes = warehouseCustodyResult.rows[0].product_qr_codes;
+      if (!productQrCodes || !Array.isArray(productQrCodes) || productQrCodes.length === 0) {
+        return res.status(404).json({ 
+          success: false, 
+          message: "QR code not found"
+        });
+      }
+
+      const qrBatchCode = productQrCodes[0];
+
+      // Get the QR code image from qr_batches table
+      const qrBatchResult = await db.execute(sql`
+        SELECT qr_code_url, batch_code, commodity_type, total_bags, bag_weight, total_weight, 
+               quality_grade, farmer_name, buyer_name, warehouse_name FROM qr_batches 
+        WHERE batch_code = ${qrBatchCode}
+      `);
+
+      if (qrBatchResult.rows.length === 0) {
+        return res.status(404).json({ 
+          success: false, 
+          message: "QR batch not found"
+        });
+      }
+
+      const qrBatch = qrBatchResult.rows[0];
+
+      const qrImageData = {
+        qrCodeImage: qrBatch.qr_code_url, // Base64 image
+        batchCode: qrBatch.batch_code,
+        productInfo: {
+          commodity: qrBatch.commodity_type,
+          totalBags: qrBatch.total_bags,
+          bagWeight: `${qrBatch.bag_weight}kg`,
+          totalWeight: `${qrBatch.total_weight} tons`,
+          qualityGrade: qrBatch.quality_grade,
+          farmer: qrBatch.farmer_name,
+          buyer: qrBatch.buyer_name,
+          warehouse: qrBatch.warehouse_name
+        }
+      };
+
+      console.log(`✅ QR code image fetched for ${qrBatchCode}`);
+      res.json({ success: true, data: qrImageData });
+    } catch (error: any) {
+      console.error("❌ ERROR fetching QR code image:", error);
+      res.status(500).json({ 
+        success: false, 
+        message: "Failed to fetch QR code image"
+      });
+    }
+  });
+
   // Get QR batch details for scanning
   app.get("/api/port-inspector/qr-batch/:batchCode", async (req, res) => {
     try {

@@ -20037,13 +20037,9 @@ VERIFY: ${qrCodeData.verificationUrl}`;
             .where(eq(storageFees.custodyId, lot.custodyId));
 
           // 🎯 CHECK FOR INSPECTION COMPLETION STATUS FOR BUYER
-          const inspectionKey = `PINSP-20250902-XEZS`; // Real inspection ID
-          const hasInspectionPassed = Object.values(inspectionCompletionStatus).some(completion => 
-            completion.results?.status === 'PASSED' && 
-            // Match by transaction ID or verification codes
-            (lot.transactionId && completion.results) ||
-            (lot.verificationCodes && lot.verificationCodes.length > 0)
-          );
+          // Inspection only happens AFTER products reach exporter warehouse
+          // New custody records should always start as PENDING until exporter workflow
+          const hasInspectionPassed = false; // Always PENDING for buyer custody stage
 
           return {
             ...lot,

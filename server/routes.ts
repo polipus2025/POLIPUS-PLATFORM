@@ -246,7 +246,6 @@ import {
   insertFarmerBuyerTransactionSchema,
   farmerBuyerTransactions,
   buyers,
-  farmPlots,
   
   // Blue Carbon 360 Schemas
   insertBlueCarbon360ProjectSchema,
@@ -19498,6 +19497,80 @@ GENERATED: ${new Date().toLocaleDateString()}`;
       res.status(500).json({
         success: false,
         message: "Failed to schedule warehouse pickup"
+      });
+    }
+  });
+
+  // 🚚 Warehouse Pickup Scheduling Route - Missing Route Added
+  app.post("/api/warehouse-pickup/schedule", async (req, res) => {
+    try {
+      const { custodyId, pickupDate, pickupTime, warehouseNotes } = req.body;
+      
+      console.log(`🚚 Scheduling warehouse pickup for custody: ${custodyId}`);
+      
+      // Validate custody exists and is authorized
+      const custodyResult = await db.execute(sql`
+        SELECT custody_id, authorization_status, buyer_id 
+        FROM warehouse_custody 
+        WHERE custody_id = ${custodyId}
+      `);
+      
+      if (!custodyResult.rows[0]) {
+        return res.status(404).json({
+          success: false,
+          message: "Custody record not found"
+        });
+      }
+      
+      const custody = custodyResult.rows[0];
+      
+      if (custody.authorization_status !== 'authorized') {
+        return res.status(400).json({
+          success: false,
+          message: "Custody must be authorized before scheduling pickup"
+        });
+      }
+      
+      // Create pickup schedule record
+      const scheduleId = `WPS-${Date.now()}-${Math.floor(Math.random() * 1000).toString().padStart(3, '0')}`;
+      const scheduledAt = new Date(`${pickupDate}T${pickupTime}:00`);
+      
+      await db.execute(sql`
+        INSERT INTO warehouse_pickup_schedules (
+          schedule_id,
+          custody_id,
+          buyer_id,
+          scheduled_pickup_date,
+          warehouse_notes,
+          status,
+          created_at
+        ) VALUES (
+          ${scheduleId},
+          ${custodyId},
+          ${custody.buyer_id},
+          ${scheduledAt.toISOString()},
+          ${warehouseNotes || 'Pickup scheduled by warehouse inspector'},
+          'scheduled',
+          NOW()
+        )
+      `);
+      
+      console.log(`✅ Warehouse pickup scheduled: ${scheduleId} for ${pickupDate} at ${pickupTime}`);
+      
+      res.json({
+        success: true,
+        scheduleId,
+        message: "Warehouse pickup scheduled successfully",
+        pickupDate,
+        pickupTime
+      });
+      
+    } catch (error: any) {
+      console.error("Error scheduling warehouse pickup:", error);
+      res.status(500).json({
+        success: false,
+        message: "Failed to schedule warehouse pickup",
+        error: error.message
       });
     }
   });

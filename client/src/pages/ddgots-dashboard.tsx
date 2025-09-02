@@ -146,11 +146,14 @@ export default function DDGOTSDashboard() {
         body: JSON.stringify({
           bookingId,
           inspectorId,
-          assignedBy: JSON.parse(ddgotsUser || '{}').username,
+          assignedBy: JSON.parse(ddgotsUser || '{}').username || 'ddgots.admin',
           ddgotsNotes: notes
         })
       });
-      if (!response.ok) throw new Error('Failed to assign inspector');
+      if (!response.ok) {
+        const errorData = await response.json().catch(() => ({ error: 'Unknown error' }));
+        throw new Error(`Assignment failed: ${errorData.error || response.statusText}`);
+      }
       return response.json();
     },
     onSuccess: (data, variables) => {
@@ -165,8 +168,9 @@ export default function DDGOTSDashboard() {
       delete updatedNotes[variables.bookingId];
       setAssignmentNotes(updatedNotes);
     },
-    onError: () => {
-      toast({ title: "Error", description: "Failed to assign inspector. Please try again.", variant: "destructive" });
+    onError: (error: any) => {
+      console.error('Assignment error:', error);
+      toast({ title: "Assignment Error", description: error?.message || "Failed to assign inspector. Please try again.", variant: "destructive" });
     }
   });
 

@@ -19444,15 +19444,15 @@ GENERATED: ${new Date().toLocaleDateString()}`;
 
       // Get proper buyer details and current location
       const buyerResult = await db.execute(sql`
-        SELECT buyer_name, buyer_company, buyer_address, county
+        SELECT business_name, business_address, county
         FROM buyers 
         WHERE buyer_id = ${buyerId}
       `);
       
       const buyerDetails = buyerResult.rows?.[0] || buyerResult[0];
-      const finalBuyerName = buyerDetails?.buyer_name || buyerName || 'Unknown Buyer';
-      const finalBuyerCompany = buyerDetails?.buyer_company || buyerCompany || 'Unknown Company';
-      const pickupLocation = buyerDetails?.buyer_address || custody.warehouse_location || 'Buyer Warehouse Location';
+      const finalBuyerName = buyerDetails?.business_name || buyerName || 'Unknown Buyer';
+      const finalBuyerCompany = buyerDetails?.business_name || buyerCompany || 'Unknown Company';
+      const pickupLocation = buyerDetails?.business_address || custody.warehouse_location || 'Buyer Warehouse Location';
 
       // Generate dispatch request ID
       const requestId = `WDR-${new Date().toISOString().split('T')[0].replace(/-/g, '')}-${Math.floor(Math.random() * 999).toString().padStart(3, '0')}`;

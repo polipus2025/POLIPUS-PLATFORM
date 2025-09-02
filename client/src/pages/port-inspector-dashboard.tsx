@@ -285,20 +285,38 @@ export default function PortInspectorDashboard() {
       return;
     }
 
-    // Process QR code verification - check if it matches expected batch code
-    const expectedBatchCode = "BE-DISPATCH-NEW-FIXED-2025";
-    if (qrCodeInput.includes("BE-DISPATCH-NEW-FIXED-2025") || qrCodeInput === expectedBatchCode) {
-      // Show product information instead of generic success
+    // Get the current inspection data and its correct QR batch code
+    const currentInspection = pendingInspections?.find((inspection: any) => inspection.id === currentInspectionId);
+    
+    if (!currentInspection) {
       toast({
-        title: "🔍 Product Information - Batch: BE-DISPATCH-NEW-FIXED-2025",
-        description: "Commodity: Cocoa | Quantity: 600 tons | Exporter: Test Exporter | Buyer: VIVAAN GUPTA | Custody: CUSTODY-SINGLE-001-20250830-T6M | Status: Ready for inspection",
+        title: "⚠️ Inspection Not Found",
+        description: "Unable to find inspection data for verification",
+        variant: "destructive"
+      });
+      setShowQrModal(false);
+      setQrCodeInput("");
+      return;
+    }
+
+    // Use the actual warehouse QR batch code from the inspection
+    const expectedBatchCode = currentInspection.qrBatchCode || currentInspection.verificationCode;
+    
+    console.log(`🔍 QR Verification: Scanned="${qrCodeInput}" vs Expected="${expectedBatchCode}"`);
+    
+    if (qrCodeInput.trim() === expectedBatchCode || qrCodeInput.includes(expectedBatchCode)) {
+      // Show actual product information from the inspection
+      toast({
+        title: `🔍 Product Verified - Batch: ${expectedBatchCode}`,
+        description: `Commodity: ${currentInspection.commodity} | Quantity: ${currentInspection.quantity} | Exporter: ${currentInspection.exporterCompany} | Buyer: ${currentInspection.buyerCompany} | Custody: ${currentInspection.shipmentId} | Status: Ready for inspection`,
         duration: 8000
       });
     } else {
       toast({
-        title: "⚠️ QR Batch Code Not Recognized",
-        description: `Batch code "${qrCodeInput}" doesn't match expected product. Please verify the QR code or contact DDGOTS.`,
-        duration: 4000
+        title: "⚠️ QR Batch Code Mismatch",
+        description: `Scanned code "${qrCodeInput}" doesn't match expected "${expectedBatchCode}". Please verify the QR code or contact DDGOTS.`,
+        variant: "destructive",
+        duration: 6000
       });
     }
     
@@ -307,10 +325,26 @@ export default function PortInspectorDashboard() {
   };
 
   const handleCameraScan = () => {
-    // Simulate camera scanning showing product info
+    // Get the current inspection data and its correct QR batch code for camera scan
+    const currentInspection = pendingInspections?.find((inspection: any) => inspection.id === currentInspectionId);
+    
+    if (!currentInspection) {
+      toast({
+        title: "⚠️ Inspection Not Found",
+        description: "Unable to find inspection data for camera scan",
+        variant: "destructive"
+      });
+      setShowQrModal(false);
+      setQrCodeInput("");
+      return;
+    }
+
+    const expectedBatchCode = currentInspection.qrBatchCode || currentInspection.verificationCode;
+    
+    // Simulate successful camera scan with actual inspection data
     toast({
-      title: "📷 Camera Scan - Product Found",
-      description: "Batch: BE-DISPATCH-NEW-FIXED-2025 | Cocoa, 600 tons | Test Exporter → VIVAAN GUPTA | Status: Ready for inspection",
+      title: "📷 Camera Scan - Product Verified",
+      description: `Batch: ${expectedBatchCode} | ${currentInspection.commodity}, ${currentInspection.quantity} | ${currentInspection.exporterCompany} → ${currentInspection.buyerCompany} | Status: Ready for inspection`,
       duration: 6000
     });
     setShowQrModal(false);

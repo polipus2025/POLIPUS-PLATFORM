@@ -303,6 +303,7 @@ export default function AgriculturalBuyerDashboard() {
   const [offerType, setOfferType] = useState<'direct' | 'broadcast_county' | 'broadcast_all' | 'broadcast_commodity'>('broadcast_county');
   const [selectedExporter, setSelectedExporter] = useState('');
   const [pricePerUnit, setPricePerUnit] = useState('');
+  const [quantity, setQuantity] = useState('');
   const [deliveryTerms, setDeliveryTerms] = useState('');
   const [paymentTerms, setPaymentTerms] = useState('');
   const [qualitySpecifications, setQualitySpecifications] = useState('');
@@ -771,6 +772,7 @@ export default function AgriculturalBuyerDashboard() {
     setOfferType('broadcast_county');
     setSelectedExporter('');
     setPricePerUnit('');
+    setQuantity('');
     setDeliveryTerms('');
     setPaymentTerms('');
     setQualitySpecifications('');
@@ -785,10 +787,10 @@ export default function AgriculturalBuyerDashboard() {
     
     try {
       const lot = sellOfferDialog.lot;
-      if (!lot || !pricePerUnit || !deliveryTerms || !paymentTerms) {
+      if (!lot || !pricePerUnit || !quantity || !deliveryTerms || !paymentTerms) {
         toast({
           title: "Missing Information",
-          description: "Please fill in all required fields.",
+          description: "Please fill in price, quantity, delivery terms, and payment terms.",
           variant: "destructive",
         });
         return;
@@ -805,6 +807,7 @@ export default function AgriculturalBuyerDashboard() {
           offerType,
           targetExporterId: offerType === 'direct' ? selectedExporter : null,
           pricePerUnit,
+          quantity,
           deliveryTerms,
           paymentTerms,
           qualitySpecifications,
@@ -2418,7 +2421,7 @@ export default function AgriculturalBuyerDashboard() {
                 <h3 className="font-medium text-slate-800 mb-2">Lot Summary</h3>
                 <div className="grid grid-cols-2 gap-3 text-sm">
                   <div><span className="font-medium">Product:</span> {sellOfferDialog.lot.commodityType}</div>
-                  <div><span className="font-medium">Weight:</span> {sellOfferDialog.lot.totalWeight} {sellOfferDialog.lot.unit}</div>
+                  <div><span className="font-medium">Available:</span> {sellOfferDialog.lot.totalWeight} {sellOfferDialog.lot.unit}</div>
                   <div><span className="font-medium">Grade:</span> {sellOfferDialog.lot.qualityGrade || 'Standard'}</div>
                   <div><span className="font-medium">County:</span> {buyerCounty}</div>
                 </div>
@@ -2517,6 +2520,23 @@ export default function AgriculturalBuyerDashboard() {
               {/* Offer Details */}
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div className="space-y-2">
+                  <Label htmlFor="quantity">Quantity ({sellOfferDialog.lot?.unit || 'units'}) *</Label>
+                  <Input
+                    id="quantity"
+                    type="number"
+                    step="0.01"
+                    min="0"
+                    max={sellOfferDialog.lot?.totalWeight || 1000}
+                    placeholder={`Max: ${sellOfferDialog.lot?.totalWeight || 'N/A'}`}
+                    value={quantity}
+                    onChange={(e) => setQuantity(e.target.value)}
+                    onFocus={(e) => e.target.select()}
+                  />
+                  <div className="text-xs text-slate-500">
+                    Enter quantity you want to sell
+                  </div>
+                </div>
+                <div className="space-y-2">
                   <Label htmlFor="price-per-unit">Price per {sellOfferDialog.lot?.unit || 'unit'} ($) *</Label>
                   <Input
                     id="price-per-unit"
@@ -2600,12 +2620,12 @@ export default function AgriculturalBuyerDashboard() {
                 />
               </div>
 
-              {pricePerUnit && sellOfferDialog.lot && (
+              {pricePerUnit && quantity && (
                 <div className="p-3 bg-green-50 border border-green-200 rounded-lg">
                   <div className="text-sm">
                     <span className="font-medium text-green-800">Total Offer Value: </span>
                     <span className="text-lg font-bold text-green-900">
-                      ${(parseFloat(pricePerUnit) * parseFloat(sellOfferDialog.lot.totalWeight)).toFixed(2)}
+                      ${(parseFloat(pricePerUnit) * parseFloat(quantity)).toFixed(2)}
                     </span>
                   </div>
                 </div>

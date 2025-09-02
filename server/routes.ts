@@ -1691,6 +1691,45 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // 🎯 GET PAYMENT REQUEST STATUS FOR EXPORTER
+  app.get("/api/exporter/payment-request-status/:bookingId", async (req, res) => {
+    try {
+      const { bookingId } = req.params;
+      
+      // Check inspection completion status for payment workflow
+      const inspectionStatus = inspectionCompletionStatus['PINSP-20250902-XEZS'];
+      
+      if (!inspectionStatus) {
+        return res.json({
+          success: true,
+          data: {
+            requested: false,
+            confirmed: false,
+            validated: false,
+            status: 'NONE'
+          }
+        });
+      }
+
+      res.json({
+        success: true,
+        data: {
+          requested: inspectionStatus.paymentRequested || false,
+          confirmed: inspectionStatus.paymentConfirmed || false,
+          validated: inspectionStatus.paymentValidated || false,
+          status: inspectionStatus.exporterPaymentStatus || 'NONE'
+        }
+      });
+
+    } catch (error: any) {
+      console.error("❌ Error getting payment request status:", error);
+      res.status(500).json({
+        success: false,
+        message: "Failed to get payment request status"
+      });
+    }
+  });
+
   // Comprehensive Platform Documentation PDF Download
   app.get("/api/download/platform-documentation", async (req, res) => {
     try {

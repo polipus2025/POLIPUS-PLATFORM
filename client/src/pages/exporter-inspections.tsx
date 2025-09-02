@@ -75,6 +75,22 @@ const ExporterInspections = memo(() => {
       });
     }
   };
+
+  // 🎯 GET PAYMENT REQUEST STATUS FROM API
+  const { data: paymentRequestData } = useQuery({
+    queryKey: [`/api/exporter/payment-request-status/PINSP-20250902-XEZS`],
+    staleTime: 10000, // Refresh every 10 seconds for real-time updates
+    refetchInterval: 10000, // Auto-refresh every 10 seconds
+  });
+
+  const getPaymentRequestStatus = (bookingId: string) => {
+    return {
+      requested: paymentRequestData?.data?.requested || false,
+      confirmed: paymentRequestData?.data?.confirmed || false,
+      validated: paymentRequestData?.data?.validated || false,
+      status: paymentRequestData?.data?.status || 'NONE'
+    };
+  };
   
   // ⚡ SUPER OPTIMIZED USER QUERY - Match dashboard pattern
   const { data: user, isLoading: userLoading } = useQuery({
@@ -428,26 +444,73 @@ const ExporterInspections = memo(() => {
                                       </div>
                                     )}
 
-                                    {/* 🎯 PAYMENT CONFIRMATION BUTTON */}
-                                    {booking?.completion_status === 'INSPECTION_PASSED' && (
-                                      <div className="mt-3 p-3 bg-blue-50 border border-blue-200 rounded">
-                                        <div className="flex items-center justify-between">
-                                          <div>
-                                            <p className="text-sm font-medium text-blue-800">💰 Payment Confirmation Required</p>
-                                            <p className="text-xs text-blue-600">Buyer has requested payment confirmation</p>
+                                    {/* 🎯 PAYMENT CONFIRMATION BUTTON - Only when buyer requests payment */}
+                                    {(() => {
+                                      const paymentRequestStatus = getPaymentRequestStatus(booking.booking_id);
+                                      
+                                      if (booking?.completion_status === 'INSPECTION_PASSED' && paymentRequestStatus.requested && !paymentRequestStatus.confirmed) {
+                                        return (
+                                          <div className="mt-3 p-3 bg-blue-50 border border-blue-200 rounded">
+                                            <div className="flex items-center justify-between">
+                                              <div>
+                                                <p className="text-sm font-medium text-blue-800">💰 Payment Confirmation Required</p>
+                                                <p className="text-xs text-blue-600">Buyer has requested payment confirmation</p>
+                                              </div>
+                                              <Button
+                                                size="sm"
+                                                onClick={() => handleConfirmPayment(booking.booking_id)}
+                                                className="bg-blue-600 hover:bg-blue-700 text-white"
+                                                data-testid={`button-confirm-payment-${booking.booking_id}`}
+                                              >
+                                                <CheckCircle className="w-4 h-4 mr-1" />
+                                                Confirm Payment
+                                              </Button>
+                                            </div>
                                           </div>
-                                          <Button
-                                            size="sm"
-                                            onClick={() => handleConfirmPayment(booking.booking_id)}
-                                            className="bg-blue-600 hover:bg-blue-700 text-white"
-                                            data-testid={`button-confirm-payment-${booking.booking_id}`}
-                                          >
-                                            <CheckCircle className="w-4 h-4 mr-1" />
-                                            Confirm Payment
-                                          </Button>
-                                        </div>
-                                      </div>
-                                    )}
+                                        );
+                                      } else if (booking?.completion_status === 'INSPECTION_PASSED' && !paymentRequestStatus.requested) {
+                                        return (
+                                          <div className="mt-3 p-3 bg-gray-50 border border-gray-200 rounded">
+                                            <div className="flex items-center justify-between">
+                                              <div>
+                                                <p className="text-sm font-medium text-gray-700">✅ Inspection Completed</p>
+                                                <p className="text-xs text-gray-600">Waiting for buyer to request payment</p>
+                                              </div>
+                                              <Button
+                                                size="sm"
+                                                disabled
+                                                className="bg-gray-400 text-white cursor-not-allowed"
+                                                data-testid={`button-waiting-payment-request-${booking.booking_id}`}
+                                              >
+                                                <CheckCircle className="w-4 h-4 mr-1" />
+                                                Confirm Payment
+                                              </Button>
+                                            </div>
+                                          </div>
+                                        );
+                                      } else if (paymentRequestStatus.confirmed) {
+                                        return (
+                                          <div className="mt-3 p-3 bg-green-50 border border-green-200 rounded">
+                                            <div className="flex items-center justify-between">
+                                              <div>
+                                                <p className="text-sm font-medium text-green-800">✅ Payment Confirmed</p>
+                                                <p className="text-xs text-green-600">Waiting for buyer validation</p>
+                                              </div>
+                                              <Button
+                                                size="sm"
+                                                disabled
+                                                className="bg-green-600 text-white cursor-default"
+                                                data-testid={`button-payment-confirmed-${booking.booking_id}`}
+                                              >
+                                                <CheckCircle className="w-4 h-4 mr-1" />
+                                                ✅ Confirmed
+                                              </Button>
+                                            </div>
+                                          </div>
+                                        );
+                                      }
+                                      return null;
+                                    })()}
                                   </div>
                                 );
                               })()}

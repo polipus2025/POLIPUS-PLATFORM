@@ -14596,6 +14596,19 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
       const dispatchData = dispatchResult.rows[0];
 
+      // GET EXPORTER WAREHOUSE ADDRESS FROM FLOW
+      const exporterResult = await db.execute(sql`
+        SELECT business_address, city, county
+        FROM exporters 
+        WHERE exporter_id = ${exporterId}
+        LIMIT 1
+      `);
+
+      const exporterData = exporterResult.rows[0];
+      const warehouseAddress = exporterData ? 
+        `${exporterData.business_address}, ${exporterData.city}, ${exporterData.county}` : 
+        `${dispatchData.county} Exporter Warehouse`;
+
       // Generate unique booking ID
       const bookingId = `PINSP-${new Date().getFullYear()}${(new Date().getMonth() + 1).toString().padStart(2, '0')}${new Date().getDate().toString().padStart(2, '0')}-${Math.random().toString(36).substr(2, 4).toUpperCase()}`;
       
@@ -14625,7 +14638,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         buyerCompany: dispatchData.buyer_company,
         verificationCode: dispatchData.verification_code, // FROM FLOW
         county: dispatchData.county, // FROM FLOW
-        farmLocation: `${dispatchData.county} Port Area`, // PORT LOCATION NOT FARM
+        farmLocation: warehouseAddress, // EXPORTER WAREHOUSE ADDRESS
         confirmedBy: 'exporter-system',
         confirmedAt: new Date(),
         exporterId: exporterId,

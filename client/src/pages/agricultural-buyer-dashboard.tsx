@@ -2520,16 +2520,12 @@ export default function AgriculturalBuyerDashboard() {
                   <Label htmlFor="price-per-unit">Price per {sellOfferDialog.lot?.unit || 'unit'} ($) *</Label>
                   <Input
                     id="price-per-unit"
-                    type="text"
-                    inputMode="numeric"
-                    pattern="[0-9]*"
+                    type="number"
+                    step="0.01"
+                    min="0"
                     placeholder="Enter price like: 500"
                     value={pricePerUnit}
-                    onChange={(e) => {
-                      // Only allow numbers and clear formatting
-                      const value = e.target.value.replace(/[^0-9]/g, '');
-                      setPricePerUnit(value);
-                    }}
+                    onChange={(e) => setPricePerUnit(e.target.value)}
                     onFocus={(e) => e.target.select()}
                   />
                   <div className="text-xs text-slate-500">

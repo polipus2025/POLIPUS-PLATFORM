@@ -18995,7 +18995,52 @@ VERIFY: ${qrCodeData.verificationUrl}`;
         processedBy: inspectorId
       };
 
-      // Generate human-readable QR data (same format as Farmer-Buyer)
+      // 🌍 GET REAL EUDR DATA FOR FIRST QR GENERATION - Fetch farmer GPS coordinates
+      let eudrData1 = {
+        gpsLat: 'N/A',
+        gpsLon: 'N/A', 
+        deforestationRisk: 'UNKNOWN',
+        eudrCompliance: 'PENDING',
+        forestCoverStatus: 'UNASSESSED'
+      };
+
+      try {
+        // Get farmer GPS coordinates from custody chain  
+        const farmerGpsResult1 = await db.execute(sql`
+          SELECT fp.gps_latitude, fp.gps_longitude, fp.farmer_id, f.farmer_name
+          FROM warehouse_custody wc
+          LEFT JOIN farm_plots fp ON wc.farmer_id = fp.farmer_id  
+          LEFT JOIN farmers f ON wc.farmer_id = f.farmer_id
+          WHERE wc.custody_id = ${dispatchRequest.transaction_id}
+          LIMIT 1
+        `);
+        
+        const farmerPlot1 = farmerGpsResult1.rows[0];
+        if (farmerPlot1 && farmerPlot1.gps_latitude && farmerPlot1.gps_longitude) {
+          const lat = parseFloat(farmerPlot1.gps_latitude);
+          const lon = parseFloat(farmerPlot1.gps_longitude);
+          
+          // 🌍 REAL EUDR ANALYSIS - Use actual GPS coordinates
+          const county = dispatchRequest.county || 'Nimba County';
+          const plotSize = 1000; // Default plot size
+          
+          const deforestationRisk = calculateLiberiaNimbaDeforestationRisk(lat, lon, county);
+          const complianceScore = generateEudrComplianceScore(lat, lon, plotSize, county);
+          const forestAnalysis = analyzeLiberiaNimbaForestCover(lat, lon);
+          
+          eudrData1.gpsLat = lat.toFixed(6);
+          eudrData1.gpsLon = lon.toFixed(6);
+          eudrData1.deforestationRisk = `${deforestationRisk.toFixed(1)}%`;
+          eudrData1.eudrCompliance = complianceScore >= 70 ? `COMPLIANT (${complianceScore.toFixed(0)}/100)` : `NON-COMPLIANT (${complianceScore.toFixed(0)}/100)`;
+          eudrData1.forestCoverStatus = `${forestAnalysis.forestCoverPercentage.toFixed(1)}% COVER`;
+          
+          console.log(`🌍 REAL EUDR DATA (QR1): GPS(${lat},${lon}) → Risk:${eudrData1.deforestationRisk} Compliance:${eudrData1.eudrCompliance}`);
+        }
+      } catch (eudrError) {
+        console.log(`⚠️ EUDR data fetch failed for QR1, using defaults:`, eudrError);
+      }
+
+      // Generate enhanced QR data with REAL EUDR compliance
       const readableQrData = `AGRITRACE360 BUYER-EXPORTER DISPATCH
 BATCH: ${batchCode}
 BUYER: ${dispatchRequest.buyer_name} (${dispatchRequest.buyer_company})
@@ -19004,6 +19049,10 @@ QUANTITY: ${dispatchRequest.quantity} ${dispatchRequest.unit}
 VALUE: $${dispatchRequest.total_value}
 COUNTY: ${dispatchRequest.county}
 VERIFICATION: ${dispatchRequest.verification_code}
+🌍 EUDR COMPLIANCE: ${eudrData1.eudrCompliance}
+📍 GPS ORIGIN: ${eudrData1.gpsLat}, ${eudrData1.gpsLon}
+🌳 DEFORESTATION RISK: ${eudrData1.deforestationRisk}
+🌲 FOREST STATUS: ${eudrData1.forestCoverStatus}
 GENERATED: ${new Date().toLocaleDateString()}`;
 
       // Generate QR code image using same service as Farmer-Buyer
@@ -19214,7 +19263,53 @@ GENERATED: ${new Date().toLocaleDateString()}`;
         processedBy: inspectorId
       };
 
-      // Generate human-readable QR data (same format as Farmer-Buyer)
+      // 🌍 GET REAL EUDR DATA - Fetch farmer GPS coordinates for authentic deforestation analysis
+      let eudrData = {
+        gpsLat: 'N/A',
+        gpsLon: 'N/A', 
+        deforestationRisk: 'UNKNOWN',
+        eudrCompliance: 'PENDING',
+        forestCoverStatus: 'UNASSESSED'
+      };
+
+      try {
+        // Get farmer GPS coordinates from custody chain
+        const farmerGpsResult = await db.execute(sql`
+          SELECT fp.gps_latitude, fp.gps_longitude, fp.farmer_id, f.farmer_name
+          FROM warehouse_custody wc
+          LEFT JOIN farm_plots fp ON wc.farmer_id = fp.farmer_id  
+          LEFT JOIN farmers f ON wc.farmer_id = f.farmer_id
+          WHERE wc.custody_id = ${dispatchRequest.transaction_id}
+          LIMIT 1
+        `);
+        
+        const farmerPlot = farmerGpsResult.rows[0];
+        if (farmerPlot && farmerPlot.gps_latitude && farmerPlot.gps_longitude) {
+          const lat = parseFloat(farmerPlot.gps_latitude);
+          const lon = parseFloat(farmerPlot.gps_longitude);
+          
+          // 🌍 REAL EUDR ANALYSIS - Use actual GPS coordinates
+          eudrData.gpsLat = lat.toFixed(6);
+          eudrData.gpsLon = lon.toFixed(6);
+          
+          const county = dispatchRequest.county || 'Nimba County';
+          const plotSize = 1000; // Default plot size
+          
+          const deforestationRisk = calculateLiberiaNimbaDeforestationRisk(lat, lon, county);
+          const complianceScore = generateEudrComplianceScore(lat, lon, plotSize, county);
+          const forestAnalysis = analyzeLiberiaNimbaForestCover(lat, lon);
+          
+          eudrData.deforestationRisk = `${deforestationRisk.toFixed(1)}%`;
+          eudrData.eudrCompliance = complianceScore >= 70 ? `COMPLIANT (${complianceScore.toFixed(0)}/100)` : `NON-COMPLIANT (${complianceScore.toFixed(0)}/100)`;
+          eudrData.forestCoverStatus = `${forestAnalysis.forestCoverPercentage.toFixed(1)}% COVER`;
+          
+          console.log(`🌍 REAL EUDR DATA: GPS(${lat},${lon}) → Risk:${eudrData.deforestationRisk} Compliance:${eudrData.eudrCompliance}`);
+        }
+      } catch (eudrError) {
+        console.log(`⚠️ EUDR data fetch failed, using defaults:`, eudrError);
+      }
+
+      // Generate enhanced QR data with REAL EUDR compliance
       const readableQrData = `AGRITRACE360 BUYER-EXPORTER DISPATCH
 BATCH: ${batchCode}
 BUYER: ${dispatchRequest.buyer_name} (${dispatchRequest.buyer_company})
@@ -19224,6 +19319,10 @@ VALUE: $${dispatchRequest.total_value}
 COUNTY: ${dispatchRequest.county}
 DISPATCH DATE: ${new Date(dispatchRequest.dispatch_date).toLocaleDateString()}
 VERIFICATION: ${dispatchRequest.verification_code}
+🌍 EUDR COMPLIANCE: ${eudrData.eudrCompliance}
+📍 GPS ORIGIN: ${eudrData.gpsLat}, ${eudrData.gpsLon}
+🌳 DEFORESTATION RISK: ${eudrData.deforestationRisk}
+🌲 FOREST STATUS: ${eudrData.forestCoverStatus}
 GENERATED: ${new Date().toLocaleDateString()}`;
 
       // Generate QR code image using same service as warehouse bags

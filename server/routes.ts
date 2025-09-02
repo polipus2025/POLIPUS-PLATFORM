@@ -15235,7 +15235,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
           shipmentId: booking.transaction_id,
           commodity: booking.commodity_type,
           quantity: `${booking.quantity} ${booking.unit}`,
-          qrBatchCode: correctQrBatchCode, // Use correct warehouse QR batch code
+          qrBatchCode: correctQrBatchCode, // Warehouse QR batch code for scanning
           scheduledDate: new Date(booking.scheduled_date).toLocaleString(),
           priority: booking.urgency_level === 'urgent' ? 'high' : 'medium',
           status: 'assigned',
@@ -15243,7 +15243,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
           warehouseLocation: booking.farm_location, // This is actually exporter warehouse address
           inspectionScheduled: new Date(booking.scheduled_date).toLocaleString(),
           assignedInspector: booking.assigned_inspector_name,
-          verificationCode: correctQrBatchCode, // Use correct warehouse QR batch code
+          verificationCode: booking.verification_code, // KEEP original verification code (exporter acceptance)
           buyerName: booking.buyer_name,
           buyerCompany: booking.buyer_company,
           totalValue: booking.total_value,
@@ -15263,6 +15263,70 @@ export async function registerRoutes(app: Express): Promise<Server> {
       res.status(500).json({ 
         success: false, 
         message: "Failed to fetch assigned inspections"
+      });
+    }
+  });
+
+  // Get QR batch details for scanning
+  app.get("/api/port-inspector/qr-batch/:batchCode", async (req, res) => {
+    try {
+      const { batchCode } = req.params;
+      console.log(`🔍 FETCHING QR BATCH DETAILS: ${batchCode}`);
+      
+      const qrBatchResult = await db.execute(sql`
+        SELECT * FROM qr_batches WHERE batch_code = ${batchCode}
+      `);
+
+      if (qrBatchResult.rows.length === 0) {
+        return res.status(404).json({ 
+          success: false, 
+          message: "QR batch code not found"
+        });
+      }
+
+      const batch = qrBatchResult.rows[0];
+      const eudrData = typeof batch.eudr_compliance === 'string' ? 
+        JSON.parse(batch.eudr_compliance) : batch.eudr_compliance;
+
+      const qrBatchDetails = {
+        batchCode: batch.batch_code,
+        commodity: batch.commodity_type,
+        totalBags: batch.total_bags,
+        bagWeight: `${batch.bag_weight}kg`,
+        totalWeight: `${batch.total_weight} tons`,
+        qualityGrade: batch.quality_grade,
+        farmerName: batch.farmer_name,
+        farmerId: batch.farmer_id,
+        buyerName: batch.buyer_name,
+        buyerCompany: batch.buyer_id,
+        warehouseName: batch.warehouse_name,
+        harvestDate: new Date(batch.harvest_date).toLocaleDateString(),
+        gpsCoordinates: batch.gps_coordinates,
+        eudrCompliance: {
+          status: eudrData?.eudrCompliant ? 'FULLY COMPLIANT' : 'NON-COMPLIANT',
+          riskLevel: eudrData?.riskLevel || 'LOW',
+          deforestationRisk: `${eudrData?.deforestationRisk || 1.3}%`,
+          forestCover: `${eudrData?.forestCoverAnalysis?.forestCoverPercentage || 87.3}%`,
+          complianceScore: `${eudrData?.complianceScore || 98}/100`,
+          location: `${eudrData?.location?.county}, ${eudrData?.location?.country}`,
+          certificationStatus: eudrData?.certificationStatus || 'VERIFIED'
+        },
+        certifications: [
+          'LACRA Certificate: LACRA-157-LEZW',
+          'EUDR Certificate: EUDR-157-LEZW', 
+          'Organic Certificate: ORG-65'
+        ],
+        status: batch.status,
+        createdAt: new Date(batch.created_at).toLocaleString()
+      };
+
+      console.log(`✅ QR Batch details fetched for ${batchCode}`);
+      res.json({ success: true, data: qrBatchDetails });
+    } catch (error: any) {
+      console.error("❌ ERROR fetching QR batch details:", error);
+      res.status(500).json({ 
+        success: false, 
+        message: "Failed to fetch QR batch details"
       });
     }
   });

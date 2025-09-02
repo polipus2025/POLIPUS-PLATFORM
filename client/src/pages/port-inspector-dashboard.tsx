@@ -275,7 +275,7 @@ export default function PortInspectorDashboard() {
     setQrCodeInput("");
   };
 
-  const handleQrCodeSubmit = () => {
+  const handleQrCodeSubmit = async () => {
     if (!qrCodeInput.trim()) {
       toast({
         title: "QR Code Required",
@@ -300,17 +300,36 @@ export default function PortInspectorDashboard() {
     }
 
     // Use the actual warehouse QR batch code from the inspection
-    const expectedBatchCode = currentInspection.qrBatchCode || currentInspection.verificationCode;
+    const expectedBatchCode = currentInspection.qrBatchCode;
     
     console.log(`🔍 QR Verification: Scanned="${qrCodeInput}" vs Expected="${expectedBatchCode}"`);
     
     if (qrCodeInput.trim() === expectedBatchCode || qrCodeInput.includes(expectedBatchCode)) {
-      // Show actual product information from the inspection
-      toast({
-        title: `🔍 Product Verified - Batch: ${expectedBatchCode}`,
-        description: `Commodity: ${currentInspection.commodity} | Quantity: ${currentInspection.quantity} | Exporter: ${currentInspection.exporterCompany} | Buyer: ${currentInspection.buyerCompany} | Custody: ${currentInspection.shipmentId} | Status: Ready for inspection`,
-        duration: 8000
-      });
+      try {
+        // Fetch detailed QR batch information
+        const response = await fetch(`/api/port-inspector/qr-batch/${qrCodeInput.trim()}`);
+        const qrData = await response.json();
+        
+        if (qrData.success && qrData.data) {
+          const batch = qrData.data;
+          // Show comprehensive QR batch information
+          toast({
+            title: `🔍 QR Batch Verified - ${batch.batchCode}`,
+            description: `${batch.commodity} | ${batch.totalBags} bags × ${batch.bagWeight} = ${batch.totalWeight} | Quality: ${batch.qualityGrade} | Farmer: ${batch.farmerName} | EUDR: ${batch.eudrCompliance.status} (${batch.eudrCompliance.riskLevel} risk, ${batch.eudrCompliance.forestCover} forest cover) | Location: ${batch.eudrCompliance.location} | GPS: ${batch.gpsCoordinates}`,
+            duration: 12000
+          });
+        } else {
+          throw new Error("Failed to fetch QR batch details");
+        }
+      } catch (error) {
+        console.error("Error fetching QR details:", error);
+        // Fallback to basic inspection info
+        toast({
+          title: `🔍 Product Verified - Batch: ${expectedBatchCode}`,
+          description: `Commodity: ${currentInspection.commodity} | Quantity: ${currentInspection.quantity} | Exporter: ${currentInspection.exporterCompany} | Buyer: ${currentInspection.buyerCompany}`,
+          duration: 8000
+        });
+      }
     } else {
       toast({
         title: "⚠️ QR Batch Code Mismatch",
@@ -324,7 +343,7 @@ export default function PortInspectorDashboard() {
     setQrCodeInput("");
   };
 
-  const handleCameraScan = () => {
+  const handleCameraScan = async () => {
     // Get the current inspection data and its correct QR batch code for camera scan
     const currentInspection = pendingInspections?.find((inspection: any) => inspection.id === currentInspectionId);
     
@@ -339,14 +358,34 @@ export default function PortInspectorDashboard() {
       return;
     }
 
-    const expectedBatchCode = currentInspection.qrBatchCode || currentInspection.verificationCode;
+    const expectedBatchCode = currentInspection.qrBatchCode;
     
-    // Simulate successful camera scan with actual inspection data
-    toast({
-      title: "📷 Camera Scan - Product Verified",
-      description: `Batch: ${expectedBatchCode} | ${currentInspection.commodity}, ${currentInspection.quantity} | ${currentInspection.exporterCompany} → ${currentInspection.buyerCompany} | Status: Ready for inspection`,
-      duration: 6000
-    });
+    try {
+      // Fetch detailed QR batch information for camera scan
+      const response = await fetch(`/api/port-inspector/qr-batch/${expectedBatchCode}`);
+      const qrData = await response.json();
+      
+      if (qrData.success && qrData.data) {
+        const batch = qrData.data;
+        // Show comprehensive camera scan information
+        toast({
+          title: `📷 Camera Scan - QR Verified: ${batch.batchCode}`,
+          description: `${batch.commodity} | ${batch.totalBags} bags × ${batch.bagWeight} = ${batch.totalWeight} | Quality: ${batch.qualityGrade} | Farmer: ${batch.farmerName} | EUDR: ${batch.eudrCompliance.status} (${batch.eudrCompliance.riskLevel} risk, ${batch.eudrCompliance.forestCover} forest cover) | Location: ${batch.eudrCompliance.location}`,
+          duration: 12000
+        });
+      } else {
+        throw new Error("Failed to fetch QR batch details");
+      }
+    } catch (error) {
+      console.error("Error fetching QR details for camera scan:", error);
+      // Fallback to basic inspection info
+      toast({
+        title: "📷 Camera Scan - Product Verified",
+        description: `Batch: ${expectedBatchCode} | ${currentInspection.commodity}, ${currentInspection.quantity} | ${currentInspection.exporterCompany} → ${currentInspection.buyerCompany} | Status: Ready for inspection`,
+        duration: 6000
+      });
+    }
+    
     setShowQrModal(false);
     setQrCodeInput("");
   };

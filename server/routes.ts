@@ -15079,33 +15079,36 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  // Check inspection completion status for exporter
+  // 🔒 LOCKED: Dynamic inspection status for ANY exporter
   app.get("/api/exporter/:exporterId/inspection-status", async (req, res) => {
     try {
       const { exporterId } = req.params;
       
-      // Check if there are completed inspections for this exporter
-      const completionData = inspectionCompletionStatus['PINSP-20250902-XEZS'];
+      // 🔗 DYNAMIC LOOKUP: Get all inspection bookings for this exporter
+      const exporterBookings = await db
+        .select()
+        .from(portInspectionBookings)
+        .where(eq(portInspectionBookings.exporterId, exporterId));
       
-      if (exporterId === 'EXP-20250826-688' && completionData) {
-        res.json({ 
-          success: true, 
-          data: [{
-            inspectionId: 'PINSP-20250902-XEZS',
-            exporterId: 'EXP-20250826-688',
-            exporterName: 'ATHRAV EXPORTS',
-            requestId: 'WDR-20250902-352',
-            verificationCode: 'Q9R5762A',
-            qrBatchCode: 'WH-BATCH-1756811448157-LEZW',
+      const completedInspections = exporterBookings
+        .filter(booking => inspectionCompletionStatus[booking.bookingId])
+        .map(booking => {
+          const completionData = inspectionCompletionStatus[booking.bookingId];
+          return {
+            inspectionId: booking.bookingId,
+            exporterId: booking.exporterId,
+            exporterName: booking.exporterName,
+            requestId: booking.requestId,
+            verificationCode: booking.verificationCode,
+            qrBatchCode: booking.verificationCode, // QR batch code from booking
             status: 'COMPLETED',
             completedAt: completionData.completedAt,
             completedBy: completionData.completedBy,
             results: completionData.results
-          }]
+          };
         });
-      } else {
-        res.json({ success: true, data: [] });
-      }
+      
+      res.json({ success: true, data: completedInspections });
     } catch (error: any) {
       console.error("Error checking inspection status:", error);
       res.status(500).json({ error: "Failed to check inspection status" });
@@ -15679,21 +15682,34 @@ export async function registerRoutes(app: Express): Promise<Server> {
       };
       console.log(`✅ 1️⃣ DDGOTS Dashboard Updated: Inspection ${inspectionId} marked as PASSED in Assign Port Inspector section`);
 
-      // 2️⃣ UPDATE EXPORTER "Inspections & Payments" SECTION  
-      const transaction = masterTransactionRegistry['TXN-FPO-20250830-817649-923'];
-      if (transaction && transaction.exporterId) {
-        // Update status from "Inspection Booked" to "Inspection PASSED"
+      // 🔗 DYNAMIC LOOKUP: Find the transaction for this inspection
+      const inspectionBooking = await db
+        .select()
+        .from(portInspectionBookings)
+        .where(eq(portInspectionBookings.bookingId, inspectionId))
+        .limit(1);
+      
+      if (inspectionBooking[0]) {
+        const booking = inspectionBooking[0];
+        
+        // 2️⃣ UPDATE EXPORTER "Inspections & Payments" SECTION (DYNAMIC)
         inspectionCompletionStatus[inspectionId].exporterStatus = 'INSPECTION PASSED';
         inspectionCompletionStatus[inspectionId].exporterPaymentSection = 'Inspection PASSED (was Inspection Booked)';
-        console.log(`✅ 2️⃣ EXPORTER Dashboard Updated: ${transaction.exporterId} Inspections & Payments section changed to PASSED`);
-      }
+        console.log(`✅ 2️⃣ EXPORTER Dashboard Updated: ${booking.exporterId} Inspections & Payments section changed to PASSED`);
 
-      // 3️⃣ UPDATE BUYER "My Products in Warehouse Custody" SECTION
-      if (transaction && transaction.buyerId) {
-        // Update to "PASSED - Request Payment to Exporter"
-        inspectionCompletionStatus[inspectionId].buyerStatus = 'PASSED - Request Payment to Exporter';
-        inspectionCompletionStatus[inspectionId].warehouseCustodyStatus = 'PASSED - Request Payment to Exporter';
-        console.log(`✅ 3️⃣ BUYER Dashboard Updated: ${transaction.buyerId} My Products in Warehouse Custody changed to PASSED - Request Payment`);
+        // 3️⃣ UPDATE BUYER "My Products in Warehouse Custody" SECTION (DYNAMIC)
+        // Find custody record for this transaction
+        const custodyRecord = await db
+          .select()
+          .from(warehouseCustody)
+          .where(eq(warehouseCustody.custodyId, booking.transactionId))
+          .limit(1);
+        
+        if (custodyRecord[0]) {
+          inspectionCompletionStatus[inspectionId].buyerStatus = 'PASSED - Request Payment to Exporter';
+          inspectionCompletionStatus[inspectionId].warehouseCustodyStatus = 'PASSED - Request Payment to Exporter';
+          console.log(`✅ 3️⃣ BUYER Dashboard Updated: ${custodyRecord[0].buyerId} My Products in Warehouse Custody changed to PASSED - Request Payment`);
+        }
       }
 
       console.log(`🎯 ALL 3 DASHBOARD UPDATES COMPLETED SIMULTANEOUSLY for inspection ${inspectionId}`);
@@ -15702,36 +15718,32 @@ export async function registerRoutes(app: Express): Promise<Server> {
       // ✅ USE MASTER REGISTRY for notifications - Right person gets notified
       // (reuse transaction variable from above)
       
+      // 🔒 DYNAMIC NOTIFICATION: Send to real stakeholders from booking data
       const notificationResult = await sendInspectionCompletionNotifications({
         inspectionId,
-        // 🚢 REAL EXPORTER from Master Registry
-        exporterId: transaction.exporterId,
-        exporterName: transaction.exporterName,
-        // 🛒 REAL BUYER (whoever accepted from registry)
-        buyerName: transaction.buyerName || 'Buyer TBD', 
-        // 🔐 REAL VERIFICATION CODES from Master Registry
-        verificationCode: transaction.finalVerificationCode,
-        firstVerificationCode: transaction.firstVerificationCode, // S071XV57
-        qrBatchCode: transaction.qrBatchCode,
-        commodity: 'Cocoa',
-        quantity: '600 tons',
-        inspectorName: transaction.portInspectorName,
+        // 🚢 REAL EXPORTER from booking data
+        exporterId: booking.exporterId,
+        exporterName: booking.exporterName,
+        // 🛒 REAL BUYER from custody record
+        buyerName: custodyRecord[0]?.buyerName || 'Buyer TBD', 
+        // 🔐 REAL VERIFICATION CODES from booking
+        verificationCode: booking.verificationCode,
+        firstVerificationCode: booking.verificationCode,
+        qrBatchCode: booking.verificationCode, // Use booking verification as QR code
+        commodity: booking.commodityType,
+        quantity: `${booking.quantity} ${booking.unit}`,
+        inspectorName: booking.assignedInspectorName,
         // 📋 TRANSACTION TRACEABILITY
-        masterTransactionId: 'TXN-FPO-20250830-817649-923',
-        farmerName: transaction.farmerName, // Claudio Big (for reference, not notification)
-        farmerId: transaction.farmerId
+        masterTransactionId: booking.transactionId,
+        farmerName: 'System Generated', // Farmer name not available in booking
+        farmerId: 'SYSTEM'
       });
 
-      // 🎯 AUTOMATIC MASTER TRANSACTION UPDATE - Inspection Completion Stage
+      // 🔒 DYNAMIC MASTER TRANSACTION UPDATE - Works for ANY inspection
       try {
-        // Get the transaction from the master registry to update it
-        const transactionKey = Object.keys(masterTransactionRegistry).find(key => 
-          masterTransactionRegistry[key].portInspectorName && 
-          masterTransactionRegistry[key].masterTransactionId === 'TXN-FPO-20250830-817649-923'
-        );
-        
-        if (transactionKey && transaction) {
-          await updateMasterTransactionByMasterTxId(transaction.masterTransactionId, 'inspection_completed', {
+        // Update transaction using booking's transaction ID
+        if (booking.transactionId) {
+          await updateMasterTransactionByMasterTxId(booking.transactionId, 'inspection_completed', {
             inspectionId: inspectionId,
             inspectorName: data.completedBy || 'James Kofi',
             inspectionResults: completionResult.verificationResults

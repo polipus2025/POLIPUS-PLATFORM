@@ -19115,7 +19115,7 @@ VERIFY: ${qrCodeData.verificationUrl}`;
     }
   });
 
-  // Get confirmed dispatch requests 
+  // Get confirmed dispatch requests with correct QR codes from custody
   app.get("/api/warehouse-inspector/confirmed-dispatches", async (req, res) => {
     try {
       const confirmedRequests = await db.execute(sql`
@@ -19135,32 +19135,43 @@ VERIFY: ${qrCodeData.verificationUrl}`;
           wdr.dispatch_date as "dispatchDate", 
           wdr.confirmed_at as "confirmedAt",
           wdr.confirmed_by as "confirmedBy",
-          wdr.qr_batch_code as "qrBatchCode"
+          wc.product_qr_codes
         FROM warehouse_dispatch_requests wdr
+        LEFT JOIN warehouse_custody wc ON wc.custody_id = wdr.transaction_id
         WHERE wdr.status = 'confirmed'
         ORDER BY wdr.confirmed_at DESC
       `);
 
       res.json({
         success: true,
-        data: confirmedRequests.rows.map((row: any) => ({
-          requestId: row.requestId,
-          transactionId: row.transactionId,
-          verificationCode: row.verificationCode,
-          buyerId: row.buyerId,
-          buyerName: row.buyerName,
-          buyerCompany: row.buyerCompany,
-          commodityType: row.commodityType,
-          quantity: row.quantity,
-          unit: row.unit,
-          totalValue: row.totalValue,
-          county: row.county,
-          farmLocation: row.farmLocation,
-          dispatchDate: row.dispatchDate,
-          confirmedAt: row.confirmedAt,
-          confirmedBy: row.confirmedBy,
-          qrBatchCode: row.qrBatchCode
-        }))
+        data: confirmedRequests.rows.map((row: any) => {
+          console.log(`🔍 Dispatch ${row.requestId} - QR codes from custody:`, row.product_qr_codes);
+          
+          // Extract first QR code from custody JSONB array for display
+          let qrBatchCode = null;
+          if (row.product_qr_codes && Array.isArray(row.product_qr_codes) && row.product_qr_codes.length > 0) {
+            qrBatchCode = row.product_qr_codes[0];
+          }
+          
+          return {
+            requestId: row.requestId,
+            transactionId: row.transactionId,
+            verificationCode: row.verificationCode,
+            buyerId: row.buyerId,
+            buyerName: row.buyerName,
+            buyerCompany: row.buyerCompany,
+            commodityType: row.commodityType,
+            quantity: row.quantity,
+            unit: row.unit,
+            totalValue: row.totalValue,
+            county: row.county,
+            farmLocation: row.farmLocation,
+            dispatchDate: row.dispatchDate,
+            confirmedAt: row.confirmedAt,
+            confirmedBy: row.confirmedBy,
+            qrBatchCode: qrBatchCode
+          };
+        })
       });
 
     } catch (error: any) {

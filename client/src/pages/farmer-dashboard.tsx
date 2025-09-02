@@ -626,7 +626,7 @@ export default function FarmerDashboard() {
                         <option value="">Select GPS-mapped plot...</option>
                         {farmPlots && farmPlots.map((plot: any) => (
                           <option key={plot.id} value={plot.id}>
-                            {plot.plotReference} - {plot.cropType} ({plot.totalAreaHectares}ha)
+                            {plot.plot_name || plot.plotReference} - {plot.crop_type || plot.cropType} ({plot.plot_size || plot.totalAreaHectares}ha)
                           </option>
                         ))}
                       </select>

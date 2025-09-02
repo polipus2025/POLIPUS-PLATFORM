@@ -297,7 +297,8 @@ import {
   type WarehouseDispatchRequest,
   masterTransactionRegistry,
   insertMasterTransactionSchema,
-  type InsertMasterTransaction
+  type InsertMasterTransaction,
+  portInspectionBookings
 } from "../shared/schema.js";
 import { z } from "zod";
 import path from "path";
@@ -14700,7 +14701,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Get ALL inspector assignments for DDGOTS - PENDING AND ASSIGNED
   app.get("/api/ddgots/pending-inspector-assignments", async (req, res) => {
     try {
-      // Get actual pending assignments from database
+      console.log('🔍 DDGOTS requesting pending inspection assignments...');
+      
+      // Get actual pending assignments directly from database  
       const pendingBookings = await db
         .select()
         .from(portInspectionBookings)
@@ -14744,8 +14747,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
         }))
       });
     } catch (error: any) {
-      console.error("Error fetching assignments:", error);
-      res.status(500).json({ error: "Failed to fetch assignments" });
+      console.error("❌ Error fetching DDGOTS assignments:", error.message);
+      console.error("Full error:", error);
+      res.status(500).json({ error: "Failed to fetch assignments", details: error.message });
     }
   });
 

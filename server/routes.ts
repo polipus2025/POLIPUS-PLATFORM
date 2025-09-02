@@ -14703,18 +14703,21 @@ export async function registerRoutes(app: Express): Promise<Server> {
     try {
       console.log('🔍 DDGOTS requesting pending inspection assignments...');
       
-      // Get actual pending assignments directly from database  
-      const pendingBookings = await db
+      // Get all inspection bookings (pending + assigned) for DDGOTS tracking
+      const allBookings = await db
         .select()
         .from(portInspectionBookings)
-        .where(eq(portInspectionBookings.assignmentStatus, 'pending_assignment'))
+        .where(or(
+          eq(portInspectionBookings.assignmentStatus, 'pending_assignment'),
+          eq(portInspectionBookings.assignmentStatus, 'assigned')
+        ))
         .orderBy(desc(portInspectionBookings.bookedAt));
 
-      console.log(`🔍 Found ${pendingBookings.length} pending inspection assignments for DDGOTS`);
+      console.log(`🔍 Found ${allBookings.length} inspection assignments for DDGOTS (pending + assigned)`);
       
       res.json({ 
         success: true, 
-        data: pendingBookings.map(booking => ({
+        data: allBookings.map(booking => ({
           bookingId: booking.bookingId,
           requestId: booking.requestId,
           transactionId: booking.transactionId,

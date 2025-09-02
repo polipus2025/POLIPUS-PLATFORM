@@ -2583,6 +2583,10 @@ export const farmerProductOffers = pgTable("farmer_product_offers", {
   farmerId: integer("farmer_id").references(() => farmers.id).notNull(),
   farmerName: text("farmer_name").notNull(),
   
+  // CRITICAL: Connect offers to specific GPS-mapped farm plots for EUDR compliance
+  plotId: integer("plot_id").references(() => farmPlots.id).notNull(), // Links to specific GPS-mapped plot
+  plotReference: text("plot_reference"), // Human-readable plot reference (PLOT-FARM001-001)
+  
   // Product Details
   commodityType: text("commodity_type").notNull(), // cocoa, coffee, palm_oil, rubber, cassava, coconut_oil, tobacco, robusta_coffee
   quantityAvailable: decimal("quantity_available", { precision: 10, scale: 2 }).notNull(),
@@ -2862,6 +2866,9 @@ export const insertFarmerProductOfferSchema = createInsertSchema(farmerProductOf
   totalNotificationsSent: true,
   createdAt: true,
   updatedAt: true,
+}).extend({
+  // plotId is required for EUDR compliance verification
+  plotId: z.number().int().positive({ message: "Must select a valid farm plot for EUDR compliance" }),
 });
 
 export const insertBuyerNotificationSchema = createInsertSchema(buyerNotifications).omit({

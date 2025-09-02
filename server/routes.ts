@@ -118,6 +118,7 @@ async function sendInspectionCompletionNotifications(data: {
 
 import { 
   farmers,
+  farmPlots, // CRITICAL: Added for plot validation in EUDR compliance
   farmerProductOffers,
   buyerNotifications,
   buyerVerificationCodes,
@@ -834,9 +835,40 @@ export async function registerRoutes(app: Express): Promise<Server> {
         console.log(`📍 County resolved: Profile: ${farmerProfile?.county}, Form: ${req.body.county}, Final: ${finalCounty}`);
       }
 
+      // CRITICAL: Validate plotId for EUDR compliance
+      const plotId = req.body.plotId;
+      if (!plotId) {
+        return res.status(400).json({ error: "Farm plot selection is required for EUDR compliance verification" });
+      }
+      
+      // Verify the plot belongs to this farmer and get plot reference
+      const [plotValidation] = await db
+        .select({ 
+          id: farmPlots.id, 
+          plotReference: farmPlots.plotId,
+          farmerId: farmPlots.farmerId 
+        })
+        .from(farmPlots)
+        .where(and(
+          eq(farmPlots.id, plotId),
+          eq(farmPlots.farmerId, req.body.farmerId) // Ensure plot belongs to this farmer
+        ))
+        .limit(1);
+      
+      if (!plotValidation) {
+        return res.status(400).json({ error: "Selected farm plot does not exist or does not belong to this farmer" });
+      }
+      
+      console.log(`✅ Plot validation passed: ${plotValidation.plotReference} belongs to farmer ${dbId}`);
+
       // Transform data to match schema expectations
       const transformedData = {
         farmerId: dbId, // Use CORRECT numeric ID for database
+        
+        // CRITICAL: Include plot data for EUDR compliance
+        plotId: plotId, // Link to GPS-mapped plot
+        plotReference: plotValidation.plotReference, // Human-readable reference
+        
         commodityType: req.body.commodityType,
         quantityAvailable: req.body.quantityAvailable.toString(),
         unit: req.body.unit,

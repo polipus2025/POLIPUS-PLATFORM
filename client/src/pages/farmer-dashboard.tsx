@@ -169,8 +169,25 @@ export default function FarmerDashboard() {
     const quantityAvailable = parseFloat(formData.get('quantityAvailable') as string);
     const pricePerUnit = parseFloat(formData.get('pricePerUnit') as string);
     
+    // CRITICAL FIX: Include plotId for EUDR compliance verification
+    const selectedPlotId = formData.get('plotId') as string;
+    if (!selectedPlotId) {
+      toast({
+        title: "Plot Selection Required",
+        description: "You must select a farm plot for EUDR compliance verification.",
+        variant: "destructive"
+      });
+      setIsSubmitting(false);
+      return;
+    }
+
     const offerData = {
       farmerId: farmerId, // 🔒 FIXED: Send full farmer ID string for proper backend lookup
+      
+      // CRITICAL: Connect offer to GPS-mapped plot for EUDR compliance
+      plotId: parseInt(selectedPlotId), // Required for EUDR compliance
+      plotReference: formData.get('plotReference') as string, // Human-readable plot reference
+      
       commodityType: formData.get('commodityType') as string,
       quantityAvailable: quantityAvailable.toString(),
       unit: formData.get('unit') as string || 'tons',
@@ -577,6 +594,54 @@ export default function FarmerDashboard() {
             </CardHeader>
             <CardContent>
               <form className="space-y-4" onSubmit={handleSubmitOffer}>
+                {/* CRITICAL: Plot Selection for EUDR Compliance */}
+                <div className="bg-blue-50 border border-blue-200 rounded-lg p-4 mb-4">
+                  <h4 className="font-medium text-blue-800 mb-2 flex items-center">
+                    <MapPin className="w-4 h-4 mr-2" />
+                    Farm Plot Selection (EUDR Compliance Required)
+                  </h4>
+                  <p className="text-sm text-blue-700 mb-3">
+                    Select the GPS-mapped farm plot where this product was grown for EUDR compliance verification.
+                  </p>
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div>
+                      <label className="block text-sm font-medium text-blue-800 mb-2">
+                        Farm Plot <span className="text-red-500">*</span>
+                      </label>
+                      <select 
+                        name="plotId"
+                        className="w-full p-3 border border-blue-300 rounded-md bg-white"
+                        required
+                        data-testid="select-plot"
+                      >
+                        <option value="">Select GPS-mapped plot...</option>
+                        {farmPlots && farmPlots.map((plot: any) => (
+                          <option key={plot.id} value={plot.id}>
+                            {plot.plotReference} - {plot.cropType} ({plot.totalAreaHectares}ha)
+                          </option>
+                        ))}
+                      </select>
+                    </div>
+                    <div>
+                      <label className="block text-sm font-medium text-blue-800 mb-2">
+                        Plot Reference
+                      </label>
+                      <input 
+                        name="plotReference"
+                        type="text"
+                        className="w-full p-3 border border-blue-300 rounded-md bg-blue-50"
+                        placeholder="Auto-filled from selection"
+                        readOnly
+                      />
+                    </div>
+                  </div>
+                  <div className="mt-3 p-3 bg-green-50 border border-green-200 rounded">
+                    <p className="text-xs text-green-700">
+                      ✅ This connects your offer to GPS coordinates and EUDR compliance data for buyers
+                    </p>
+                  </div>
+                </div>
+
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   <div>
                     <label className="block text-sm font-medium text-slate-700 mb-2">

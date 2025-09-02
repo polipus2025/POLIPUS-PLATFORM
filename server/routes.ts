@@ -15218,6 +15218,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         scheduledDate: new Date(booking.scheduled_date).toLocaleString(),
         priority: booking.urgency_level === 'urgent' ? 'high' : 'medium',
         status: 'assigned',
+        documents: ['Certificate of Origin', 'EUDR Compliance', 'Quality Certificate'], // Required documents
         warehouseLocation: booking.farm_location, // This is actually exporter warehouse address
         inspectionScheduled: new Date(booking.scheduled_date).toLocaleString(),
         assignedInspector: booking.assigned_inspector_name,

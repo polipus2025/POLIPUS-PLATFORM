@@ -7190,6 +7190,40 @@ export async function registerRoutes(app: Express): Promise<Server> {
       
       const farmer = await storage.createFarmer(dbData);
       
+      // BUSINESS RULE: Automatically create Plot #1 during basic farmer registration
+      if (farmer && farmer.farmerId && (validatedData.landMapData || validatedData.farmBoundaries)) {
+        try {
+          console.log(`🎯 Auto-creating Plot #1 for farmer ${farmer.farmerId} during registration`);
+          
+          const plotId = `PLOT-${farmer.farmerId}-${Date.now()}`;
+          const plotSize = validatedData.landMapData?.area || validatedData.farmBoundaries?.area || parseFloat(validatedData.farmSize) || 0;
+          
+          await db.execute(sql`
+            INSERT INTO farm_plots (
+              plot_id, farmer_id, farmer_name, plot_name, plot_number,
+              crop_type, primary_crop, plot_size, plot_size_unit,
+              gps_coordinates, county, district, village,
+              farm_boundaries, land_map_data, status, is_active, registration_date
+            ) VALUES (
+              ${plotId}, ${farmer.farmerId}, ${validatedData.firstName + ' ' + validatedData.lastName}, 
+              ${validatedData.firstName + "'s Farm Plot #1"}, 1,
+              ${validatedData.primaryCrop || 'mixed'}, ${validatedData.primaryCrop || 'mixed'}, 
+              ${plotSize}, 'hectares',
+              ${validatedData.gpsCoordinates || 'GPS coordinates available'}, 
+              ${validatedData.county}, ${validatedData.district}, ${validatedData.village},
+              ${JSON.stringify(validatedData.farmBoundaries || validatedData.landMapData)},
+              ${JSON.stringify(validatedData.landMapData || validatedData.farmBoundaries)},
+              'active', true, NOW()
+            )
+          `);
+          
+          console.log(`✅ Auto-created Plot #1 (${plotId}) for farmer ${farmer.farmerId}`);
+        } catch (plotError) {
+          console.error(`⚠️ Failed to auto-create plot for farmer ${farmer.farmerId}:`, plotError);
+          // Don't fail farmer creation if plot creation fails
+        }
+      }
+      
       // AUTO-GENERATE EUDR COMPLIANCE PACK upon farmer registration
       const eudrPackId = `EUDR-${farmer.id || farmer.farmerId}-${Date.now()}`;
       console.log(`✅ AUTO-GENERATED EUDR Pack ${eudrPackId} for farmer ${farmer.firstName} ${farmer.lastName}`);
@@ -7198,7 +7232,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         ...farmer, 
         eudrPackId,
         eudrStatus: 'APPROVED',
-        message: 'Farmer registered with automatic EUDR compliance pack generated'
+        message: 'Farmer registered with automatic EUDR compliance pack and Plot #1 generated'
       });
     } catch (error: any) {
       if (error instanceof z.ZodError) {
@@ -12140,6 +12174,40 @@ export async function registerRoutes(app: Express): Promise<Server> {
     try {
       const farmerData = req.body;
       const workflow = await agriTraceService.onboardFarmer(farmerData);
+      
+      // BUSINESS RULE: Auto-create Plot #1 for AgriTrace farmers too
+      if (workflow.farmer && workflow.farmer.farmerId && (farmerData.landMapData || farmerData.farmBoundaries)) {
+        try {
+          console.log(`🎯 Auto-creating Plot #1 for AgriTrace farmer ${workflow.farmer.farmerId}`);
+          
+          const plotId = `PLOT-${workflow.farmer.farmerId}-${Date.now()}`;
+          const plotSize = farmerData.landMapData?.area || farmerData.farmBoundaries?.area || parseFloat(farmerData.farmSize) || 0;
+          
+          await db.execute(sql`
+            INSERT INTO farm_plots (
+              plot_id, farmer_id, farmer_name, plot_name, plot_number,
+              crop_type, primary_crop, plot_size, plot_size_unit,
+              gps_coordinates, county, district, village,
+              farm_boundaries, land_map_data, status, is_active, registration_date
+            ) VALUES (
+              ${plotId}, ${workflow.farmer.farmerId}, ${farmerData.firstName + ' ' + farmerData.lastName}, 
+              ${farmerData.firstName + "'s Farm Plot #1"}, 1,
+              ${farmerData.primaryCrop || 'mixed'}, ${farmerData.primaryCrop || 'mixed'}, 
+              ${plotSize}, 'hectares',
+              ${farmerData.gpsCoordinates || 'GPS coordinates available'}, 
+              ${farmerData.county}, ${farmerData.district}, ${farmerData.village},
+              ${JSON.stringify(farmerData.farmBoundaries || farmerData.landMapData)},
+              ${JSON.stringify(farmerData.landMapData || farmerData.farmBoundaries)},
+              'active', true, NOW()
+            )
+          `);
+          
+          console.log(`✅ Auto-created Plot #1 (${plotId}) for AgriTrace farmer ${workflow.farmer.farmerId}`);
+        } catch (plotError) {
+          console.error(`⚠️ Failed to auto-create plot for AgriTrace farmer:`, plotError);
+        }
+      }
+      
       res.json(workflow);
     } catch (error: any) {
       console.error('Error onboarding farmer:', error);

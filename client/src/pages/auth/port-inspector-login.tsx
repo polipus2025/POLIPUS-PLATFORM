@@ -26,7 +26,7 @@ export default function PortInspectorLogin() {
         localStorage.setItem('authToken', data.token);
         localStorage.setItem('userType', 'port-inspector');
         localStorage.setItem('inspectorType', 'port');
-        localStorage.setItem('inspectorData', JSON.stringify(data.inspector));
+        localStorage.setItem('inspectorData', JSON.stringify(data.user));
         
         // For now, redirect directly to dashboard (password change can be handled later)
         setLocation("/port-inspector-dashboard");

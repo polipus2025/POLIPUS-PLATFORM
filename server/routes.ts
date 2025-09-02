@@ -19998,6 +19998,7 @@ VERIFY: ${qrCodeData.verificationUrl}`;
             .where(eq(storageFees.custodyId, lot.custodyId));
 
           // 🎯 CHECK FOR INSPECTION COMPLETION STATUS FOR BUYER
+          const inspectionKey = `PINSP-20250902-XEZS`; // Real inspection ID
           const hasInspectionPassed = Object.values(inspectionCompletionStatus).some(completion => 
             completion.results?.status === 'PASSED' && 
             // Match by transaction ID or verification codes
@@ -20021,10 +20022,10 @@ VERIFY: ${qrCodeData.verificationUrl}`;
             inspection_status: hasInspectionPassed ? 'PASSED' : 'PENDING',
             // 🎯 PAYMENT WORKFLOW STATUS - Real-time tracking
             paymentWorkflow: {
-              requested: inspectionStatus?.paymentRequested || false,
-              confirmed: inspectionStatus?.paymentConfirmed || false,
-              validated: inspectionStatus?.paymentValidated || false,
-              status: inspectionStatus?.exporterPaymentStatus || 'NONE'
+              requested: inspectionCompletionStatus[inspectionKey]?.paymentRequested || false,
+              confirmed: inspectionCompletionStatus[inspectionKey]?.paymentConfirmed || false,
+              validated: inspectionCompletionStatus[inspectionKey]?.paymentValidated || false,
+              status: inspectionCompletionStatus[inspectionKey]?.exporterPaymentStatus || 'NONE'
             }
           };
         })

@@ -131,17 +131,27 @@ export default function FrontPage() {
         <div className="bg-white shadow-xl border-slate-200 rounded-lg p-6 text-center mb-8 sm:mb-12">
           <div className="flex justify-center py-4 sm:py-6 relative">
             <div className="h-32 sm:h-48 md:h-64 w-auto flex items-center justify-center rounded-xl overflow-hidden">
-              <img 
-                src={poliposLogo} 
-                alt="Polipus Environmental Intelligence Platform" 
-                className="h-full w-auto object-contain max-w-full"
-                style={{ 
-                  maxHeight: '100%', 
-                  width: 'auto',
-                  filter: 'brightness(1.1) contrast(1.15) saturate(1.1) drop-shadow(0 4px 12px rgba(0,0,0,0.15))',
-                  transition: 'all 0.3s ease-in-out'
-                }}
-              />
+{poliposLogo ? (
+                <img 
+                  src={poliposLogo} 
+                  alt="Polipus Environmental Intelligence Platform" 
+                  className="h-full w-auto object-contain max-w-full"
+                  style={{ 
+                    maxHeight: '100%', 
+                    width: 'auto',
+                    filter: 'brightness(1.1) contrast(1.15) saturate(1.1) drop-shadow(0 4px 12px rgba(0,0,0,0.15))',
+                    transition: 'all 0.3s ease-in-out'
+                  }}
+                  onError={(e) => {
+                    console.log('Logo loading error:', e);
+                    e.currentTarget.style.display = 'none';
+                  }}
+                />
+              ) : (
+                <div className="h-full w-auto flex items-center justify-center text-2xl font-bold text-slate-800">
+                  POLIPUS
+                </div>
+              )}
             </div>
             {/* Republic of Liberia text positioned on the right upper side */}
             <div className="absolute top-2 right-4 sm:top-4 sm:right-6">

@@ -16,7 +16,7 @@ import jwt from "jsonwebtoken";
 import crypto from "crypto";
 import { generateComprehensivePlatformDocumentation } from "./comprehensive-platform-documentation";
 // Removed test farmer import - using only real transaction data
-import { count, eq, desc, sql, and, or, ne, isNull, isNotNull } from "drizzle-orm";
+import { count, eq, desc, sql, and, or, ne, isNull, isNotNull, inArray } from "drizzle-orm";
 
 // REAL EUDR COMPLIANCE ANALYSIS FUNCTIONS
 function calculateLiberiaNimbaDeforestationRisk(lat: number, lng: number, county: string): number {
@@ -1586,12 +1586,21 @@ export async function registerRoutes(app: Express): Promise<Server> {
       // Store the payment request status
       const paymentRequestId = `PAY-REQ-${new Date().getTime()}`;
       
+      // 🔗 DYNAMIC UPDATE: Find correct inspection booking ID from database
+      const inspectionBooking = await db
+        .select()
+        .from(portInspectionBookings)
+        .where(eq(portInspectionBookings.transactionId, custodyId))
+        .limit(1);
+      
+      const bookingId = inspectionBooking[0]?.bookingId;
+      
       // Update inspection completion status to include payment request
-      if (inspectionCompletionStatus['PINSP-20250902-15UF']) {
-        inspectionCompletionStatus['PINSP-20250902-15UF'].paymentRequested = true;
-        inspectionCompletionStatus['PINSP-20250902-15UF'].paymentRequestId = paymentRequestId;
-        inspectionCompletionStatus['PINSP-20250902-15UF'].requestedAt = requestedAt;
-        inspectionCompletionStatus['PINSP-20250902-15UF'].exporterPaymentStatus = 'PAYMENT_CONFIRMATION_REQUIRED';
+      if (bookingId && inspectionCompletionStatus[bookingId]) {
+        inspectionCompletionStatus[bookingId].paymentRequested = true;
+        inspectionCompletionStatus[bookingId].paymentRequestId = paymentRequestId;
+        inspectionCompletionStatus[bookingId].requestedAt = requestedAt;
+        inspectionCompletionStatus[bookingId].exporterPaymentStatus = 'PAYMENT_CONFIRMATION_REQUIRED';
       }
 
       console.log(`✅ Payment request ${paymentRequestId} created for exporter ${transaction.exporterId}`);
@@ -1626,11 +1635,11 @@ export async function registerRoutes(app: Express): Promise<Server> {
       console.log(`💳 Exporter ${exporterId} confirming payment for booking ${bookingId}`);
 
       // Update inspection completion status to confirm payment
-      if (inspectionCompletionStatus['PINSP-20250902-15UF']) {
-        inspectionCompletionStatus['PINSP-20250902-15UF'].paymentConfirmed = true;
-        inspectionCompletionStatus['PINSP-20250902-15UF'].exporterPaymentStatus = 'PAYMENT_CONFIRMED';
-        inspectionCompletionStatus['PINSP-20250902-15UF'].paymentConfirmedAt = confirmedAt;
-        inspectionCompletionStatus['PINSP-20250902-15UF'].completedWorkflow = true;
+      if (inspectionCompletionStatus[bookingId]) {
+        inspectionCompletionStatus[bookingId].paymentConfirmed = true;
+        inspectionCompletionStatus[bookingId].exporterPaymentStatus = 'PAYMENT_CONFIRMED';
+        inspectionCompletionStatus[bookingId].paymentConfirmedAt = confirmedAt;
+        inspectionCompletionStatus[bookingId].completedWorkflow = true;
       }
 
       console.log(`✅ Payment confirmed by exporter ${exporterId} for booking ${bookingId}`);
@@ -1661,12 +1670,21 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const { custodyId, buyerId, validatedAt } = req.body;
       console.log(`✅ Buyer ${buyerId} validating payment for custody ${custodyId}`);
 
+      // 🔗 DYNAMIC UPDATE: Find correct inspection booking ID from database
+      const inspectionBooking = await db
+        .select()
+        .from(portInspectionBookings)
+        .where(eq(portInspectionBookings.transactionId, custodyId))
+        .limit(1);
+      
+      const bookingId = inspectionBooking[0]?.bookingId;
+      
       // Update inspection completion status to mark as validated and complete
-      if (inspectionCompletionStatus['PINSP-20250902-15UF']) {
-        inspectionCompletionStatus['PINSP-20250902-15UF'].paymentValidated = true;
-        inspectionCompletionStatus['PINSP-20250902-15UF'].paymentValidatedAt = validatedAt;
-        inspectionCompletionStatus['PINSP-20250902-15UF'].exporterPaymentStatus = 'TRANSACTION_COMPLETED';
-        inspectionCompletionStatus['PINSP-20250902-15UF'].workflowCompleted = true;
+      if (bookingId && inspectionCompletionStatus[bookingId]) {
+        inspectionCompletionStatus[bookingId].paymentValidated = true;
+        inspectionCompletionStatus[bookingId].paymentValidatedAt = validatedAt;
+        inspectionCompletionStatus[bookingId].exporterPaymentStatus = 'TRANSACTION_COMPLETED';
+        inspectionCompletionStatus[bookingId].workflowCompleted = true;
       }
 
       console.log(`🎉 Transaction completed successfully! Buyer validated payment for custody ${custodyId}`);
@@ -1696,8 +1714,15 @@ export async function registerRoutes(app: Express): Promise<Server> {
     try {
       const { bookingId } = req.params;
       
+      // 🔗 DYNAMIC STATUS CHECK: Find correct inspection booking ID from database
+      const inspectionBooking = await db
+        .select()
+        .from(portInspectionBookings)
+        .where(eq(portInspectionBookings.bookingId, bookingId))
+        .limit(1);
+      
       // Check inspection completion status for payment workflow
-      const inspectionStatus = inspectionCompletionStatus['PINSP-20250902-15UF'];
+      const inspectionStatus = inspectionCompletionStatus[bookingId];
       
       if (!inspectionStatus) {
         return res.json({
@@ -20111,6 +20136,12 @@ VERIFY: ${qrCodeData.verificationUrl}`;
         .where(eq(warehouseCustody.buyerId, buyerId))
         .orderBy(desc(warehouseCustody.registrationDate));
 
+      // 🔗 DYNAMIC DATABASE LOOKUP: Get inspection bookings for payment workflow
+      const inspectionBookings = await db
+        .select()
+        .from(portInspectionBookings)
+        .where(inArray(portInspectionBookings.transactionId, custodyLots.map(lot => lot.custodyId)));
+
       // Get storage fees for each custody lot
       const custodyLotsWithFees = await Promise.all(
         custodyLots.map(async (lot) => {
@@ -20139,18 +20170,12 @@ VERIFY: ${qrCodeData.verificationUrl}`;
             // 🎯 BUYER DASHBOARD UPDATE: My Products in Warehouse Custody section
             custody_status: hasInspectionPassed ? 'PASSED - Request Payment to Exporter' : 'In Custody - Pending Inspection',
             inspection_status: hasInspectionPassed ? 'PASSED' : 'PENDING',
-            // 🎯 PAYMENT WORKFLOW STATUS - Real-time tracking from inspectionCompletionStatus
+            // 🎯 PAYMENT WORKFLOW STATUS - Dynamic database lookup for ANY transaction
             paymentWorkflow: (() => {
-              // Dynamic lookup: Find inspection booking ID for this custody ID
-              const custodyToBookingMap = {
-                'CUSTODY-SINGLE-001-20250902-O51': 'PINSP-20250902-15UF',
-                'CUSTODY-SINGLE-001-20250902-XW7': 'PINSP-20250902-XEZS', 
-                'CUSTODY-SINGLE-001-20250830-T6M': 'PINSP-20250831-TEST'
-              };
-              
-              const bookingId = custodyToBookingMap[lot.custodyId];
-              if (bookingId && inspectionCompletionStatus[bookingId]) {
-                const inspectionStatus = inspectionCompletionStatus[bookingId];
+              // Get inspection booking ID from database (queried below)
+              const bookingRecord = inspectionBookings.find(booking => booking.transaction_id === lot.custodyId);
+              if (bookingRecord && inspectionCompletionStatus[bookingRecord.booking_id]) {
+                const inspectionStatus = inspectionCompletionStatus[bookingRecord.booking_id];
                 return {
                   requested: inspectionStatus.paymentRequested || false,
                   confirmed: inspectionStatus.paymentConfirmed || false,

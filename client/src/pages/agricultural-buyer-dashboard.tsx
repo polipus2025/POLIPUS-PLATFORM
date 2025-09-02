@@ -1680,22 +1680,29 @@ export default function AgriculturalBuyerDashboard() {
                                       {lot.custody_status || lot.custodyStatus}
                                     </Badge>
                                   </p>
-                                  {/* 🎯 INSPECTION STATUS DISPLAY */}
-                                  {lot.inspection_status && (
-                                    <p>
-                                      <span className="font-medium">Inspection Status:</span>
-                                      <Badge 
-                                        variant={lot.inspection_status === 'PASSED' ? 'default' : 'outline'}
-                                        className={`ml-2 text-xs ${
-                                          lot.inspection_status === 'PASSED' 
-                                            ? 'bg-green-100 text-green-800 border-green-300' 
-                                            : 'bg-orange-100 text-orange-800 border-orange-300'
-                                        }`}
-                                      >
-                                        {lot.inspection_status}
-                                      </Badge>
-                                    </p>
-                                  )}
+                                  {/* 🎯 INSPECTION STATUS DISPLAY - Fixed to use custody_status */}
+                                  <p>
+                                    <span className="font-medium">Inspection Status:</span>
+                                    <Badge 
+                                      variant={
+                                        lot.custody_status === 'payment_completed' || 
+                                        lot.custody_status === 'payment_requested' || 
+                                        lot.custody_status === 'authorized' 
+                                          ? 'default' : 'outline'
+                                      }
+                                      className={`ml-2 text-xs ${
+                                        lot.custody_status === 'payment_completed' || 
+                                        lot.custody_status === 'payment_requested' || 
+                                        lot.custody_status === 'authorized'
+                                          ? 'bg-green-100 text-green-800 border-green-300' 
+                                          : 'bg-orange-100 text-orange-800 border-orange-300'
+                                      }`}
+                                    >
+                                      {lot.custody_status === 'payment_completed' ? 'COMPLETED' : 
+                                       lot.custody_status === 'payment_requested' ? 'PASSED' :
+                                       lot.custody_status === 'authorized' ? 'PASSED' : 'PENDING'}
+                                    </Badge>
+                                  </p>
                                   <p>
                                     <span className="font-medium">Authorization:</span>
                                     <Badge 
@@ -1711,8 +1718,10 @@ export default function AgriculturalBuyerDashboard() {
                                     </p>
                                   )}
 
-                                  {/* 🎯 ENHANCED PAYMENT WORKFLOW - Request → Validate → Complete */}
-                                  {lot.inspection_status === 'PASSED' && lot.custody_status?.includes('PASSED') && (
+                                  {/* 🎯 ENHANCED PAYMENT WORKFLOW - Request → Validate → Complete - FIXED LOGIC */}
+                                  {(lot.custody_status === 'authorized' || 
+                                    lot.custody_status === 'payment_requested' || 
+                                    lot.custody_status === 'payment_completed') && (
                                     <div className="mt-3 p-3 bg-green-50 border border-green-200 rounded-lg">
                                       <div className="flex items-center justify-between">
                                         <div>

@@ -624,47 +624,66 @@ export default function CreateLandPlot() {
                       </Badge>
                     </div>
 
-                    {/* GPS Location Helper */}
-                    <div className="p-4 bg-yellow-50 border border-yellow-200 rounded-lg">
-                      <div className="flex items-center justify-between mb-3">
-                        <div className="flex items-center">
-                          <Crosshair className="h-4 w-4 text-yellow-600 mr-2" />
-                          <h4 className="font-medium text-yellow-800">Current Location</h4>
-                        </div>
+                    {/* Enhanced GPS Section - Style from tracedirect.org */}
+                    <div className="space-y-4">
+                      {/* Current Location Section */}
+                      <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
+                        <h4 className="font-medium text-blue-800 mb-3 flex items-center">
+                          <Crosshair className="w-4 h-4 mr-2" />
+                          Current Location
+                        </h4>
                         <Button
                           type="button"
-                          variant="outline"
-                          size="sm"
                           onClick={getCurrentLocation}
                           disabled={isGettingLocation}
-                          className="border-yellow-300 text-yellow-700 hover:bg-yellow-100"
+                          className="w-full mb-3 bg-blue-600 hover:bg-blue-700"
                         >
                           {isGettingLocation ? (
                             <>
-                              <div className="animate-spin rounded-full h-3 w-3 border-b-2 border-yellow-600 mr-1"></div>
+                              <RefreshCw className="w-4 h-4 mr-2 animate-spin" />
                               Getting Location...
                             </>
                           ) : (
                             <>
-                              <Crosshair className="h-3 w-3 mr-1" />
+                              <Target className="w-4 h-4 mr-2" />
                               Get My Location
                             </>
                           )}
                         </Button>
-                      </div>
-                      
-                      <div className="text-sm text-yellow-700">
+                        
                         {currentLocation ? (
-                          <div className="space-y-1">
-                            <p className="font-medium">📍 Current GPS Coordinates:</p>
-                            <p className="font-mono bg-white px-2 py-1 rounded text-xs">
-                              {currentLocation.lat.toFixed(6)}, {currentLocation.lng.toFixed(6)}
-                            </p>
-                            <p className="text-xs">Use this as a reference point before mapping the plot boundaries</p>
+                          <div className="text-sm text-blue-700 space-y-1">
+                            <p><strong>Lat:</strong> {currentLocation.lat.toFixed(6)}</p>
+                            <p><strong>Lng:</strong> {currentLocation.lng.toFixed(6)}</p>
+                            <p className="text-xs text-green-600 mt-1">✅ GPS signal acquired</p>
                           </div>
                         ) : (
-                          <p>Click "Get My Location" to acquire your current GPS coordinates as a reference point for mapping.</p>
+                          <p className="text-sm text-blue-700">
+                            Click "Get My Location" to acquire your current GPS coordinates as a reference point for mapping.
+                          </p>
                         )}
+                      </div>
+
+                      {/* Real-Time GPS Field Boundary Mapping Section */}
+                      <div className="bg-green-50 border border-green-200 rounded-lg p-4">
+                        <h4 className="font-medium text-green-800 mb-2 flex items-center">
+                          <Globe className="w-4 h-4 mr-2" />
+                          Real-Time GPS Field Boundary Mapping
+                        </h4>
+                        <div className="bg-blue-50 border-l-4 border-blue-400 p-3 mb-3">
+                          <p className="text-sm text-blue-800">
+                            💡 <strong>High-precision mapping:</strong> Points can only be placed when GPS accuracy is ≤2.5 meters. Move to open areas for best GPS signal.
+                          </p>
+                        </div>
+                        <p className="text-sm text-green-700 mb-3">
+                          Walk around your field and add GPS points in real-time to create accurate boundaries. Supports 6-20 points for precise mapping.
+                        </p>
+                        <div className="text-center">
+                          <Badge className="bg-gray-100 text-gray-700">
+                            <Target className="w-3 h-3 mr-1" />
+                            📍 GPS Tracking Inactive
+                          </Badge>
+                        </div>
                       </div>
                     </div>
 

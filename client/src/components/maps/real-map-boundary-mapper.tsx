@@ -1402,12 +1402,24 @@ export default function RealMapBoundaryMapper({
             </Button>
             <Button
               onClick={addCurrentGPSPoint}
-              disabled={!isTrackingGPS || !currentGPSPosition || points.length >= maxPoints}
+              disabled={!isTrackingGPS || !currentGPSPosition || points.length >= maxPoints || (trackingAccuracy && trackingAccuracy > 2.5)}
               size="sm"
               variant="default"
-              className="flex-1 sm:flex-none"
+              className={`flex-1 sm:flex-none ${
+                trackingAccuracy && trackingAccuracy <= 2.5 
+                  ? 'bg-green-600 hover:bg-green-700' 
+                  : 'bg-gray-400 cursor-not-allowed'
+              }`}
+              title={trackingAccuracy && trackingAccuracy > 2.5 ? 'GPS accuracy must be ≤2.5m to add points (currently ' + trackingAccuracy.toFixed(1) + 'm)' : 'High-precision GPS ready'}
             >
-              <span className="hidden sm:inline">Add GPS Point ({points.length}/{maxPoints})</span>
+              <span className="hidden sm:inline">
+                Add GPS Point ({points.length}/{maxPoints})
+                {trackingAccuracy && (
+                  <span className={`ml-1 text-xs ${trackingAccuracy <= 2.5 ? 'text-green-200' : 'text-red-200'}`}>
+                    {trackingAccuracy <= 2.5 ? '✅' : '⚠️'}
+                  </span>
+                )}
+              </span>
               <span className="sm:hidden">Add Point ({points.length}/{maxPoints})</span>
             </Button>
           </div>

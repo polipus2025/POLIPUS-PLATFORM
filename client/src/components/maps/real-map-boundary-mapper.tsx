@@ -36,11 +36,12 @@ export default function RealMapBoundaryMapper({
 }: RealMapBoundaryMapperProps) {
   const mapRef = useRef<HTMLDivElement>(null);
   const [points, setPoints] = useState<BoundaryPoint[]>([]);
-  const [status, setStatus] = useState('Loading satellite imagery...');
+  const [status, setStatus] = useState('🗺️ Loading satellite imagery...');
   const [mapReady, setMapReady] = useState(false);
   const [mapCenter, setMapCenter] = useState<{lat: number, lng: number}>({lat: 6.4281, lng: -9.4295});
   const [tileBounds, setTileBounds] = useState<{north: number, south: number, east: number, west: number} | null>(null);
   const [zoomLevel, setZoomLevel] = useState(18);
+  const [currentProvider, setCurrentProvider] = useState('Loading...');
 
   // Calculate precise tile bounds for coordinate alignment
   const calculateTileBounds = (lat: number, lng: number, zoom: number) => {
@@ -48,7 +49,6 @@ export default function RealMapBoundaryMapper({
     const x = Math.floor(n * ((lng + 180) / 360));
     const y = Math.floor(n * (1 - Math.log(Math.tan((lat * Math.PI) / 180) + 1 / Math.cos((lat * Math.PI) / 180)) / Math.PI) / 2);
     
-    // Calculate exact bounds of the tile
     const west = (x / n) * 360 - 180;
     const east = ((x + 1) / n) * 360 - 180;
     const north = Math.atan(Math.sinh(Math.PI * (1 - 2 * y / n))) * 180 / Math.PI;
@@ -71,44 +71,123 @@ export default function RealMapBoundaryMapper({
     return { x, y };
   };
 
+  // Robust satellite imagery loading with multiple fallbacks
+  const loadSatelliteImagery = async (lat: number, lng: number, zoom: number): Promise<{url: string, provider: string}> => {
+    const n = Math.pow(2, zoom);
+    const x = Math.floor(n * ((lng + 180) / 360));
+    const y = Math.floor(n * (1 - Math.log(Math.tan((lat * Math.PI) / 180) + 1 / Math.cos((lat * Math.PI) / 180)) / Math.PI) / 2);
+    
+    const providers = [
+      {
+        url: `https://tile.openstreetmap.org/${zoom}/${x}/${y}.png`,
+        name: 'OpenStreetMap',
+        timeout: 2000
+      },
+      {
+        url: `https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/${zoom}/${y}/${x}`,
+        name: 'Esri Satellite',
+        timeout: 3000
+      },
+      {
+        url: `https://mt1.google.com/vt/lyrs=s&x=${x}&y=${y}&z=${zoom}`,
+        name: 'Google Satellite',
+        timeout: 3000
+      },
+      {
+        url: `https://api.mapbox.com/styles/v1/mapbox/satellite-v9/tiles/${zoom}/${x}/${y}@2x?access_token=pk.eyJ1IjoibWFwYm94IiwiYSI6ImNpejY4NXVycTA2emYycXBndHRqcmZ3N3gifQ.rJcFIG214AriISLbB6B5aw`,
+        name: 'Mapbox Satellite',
+        timeout: 3000
+      }
+    ];
+
+    for (let i = 0; i < providers.length; i++) {
+      try {
+        const provider = providers[i];
+        console.log(`🛰️ Trying provider ${i + 1}: ${provider.name}`);
+        
+        const imageLoaded = await new Promise<boolean>((resolve) => {
+          const img = new Image();
+          const timer = setTimeout(() => {
+            console.log(`⏰ Provider ${i + 1} timeout`);
+            resolve(false);
+          }, provider.timeout);
+          
+          img.onload = () => {
+            clearTimeout(timer);
+            console.log(`✅ Provider ${i + 1} loaded successfully`);
+            resolve(true);
+          };
+          
+          img.onerror = () => {
+            clearTimeout(timer);
+            console.log(`❌ Provider ${i + 1} failed`);
+            resolve(false);
+          };
+          
+          img.src = provider.url;
+        });
+
+        if (imageLoaded) {
+          return { url: provider.url, provider: provider.name };
+        }
+      } catch (error) {
+        console.log(`❌ Provider ${i + 1} error:`, error);
+        continue;
+      }
+    }
+
+    // Final fallback - use terrain gradient
+    console.log('🗺️ Using terrain fallback');
+    return { url: '', provider: 'Terrain Map' };
+  };
+
   useEffect(() => {
     if (!mapRef.current) return;
 
+    setStatus('🌍 Getting location...');
+    
     // Get user's GPS location or use default
     navigator.geolocation.getCurrentPosition(
       (position) => {
         const lat = position.coords.latitude;
         const lng = position.coords.longitude;
         setMapCenter({lat, lng});
-        setStatus(`Loading satellite imagery for ${lat.toFixed(6)}, ${lng.toFixed(6)}...`);
+        setStatus(`📍 Location: ${lat.toFixed(6)}, ${lng.toFixed(6)}`);
         initMapWithCoordinates(lat, lng);
       },
       (error) => {
-        console.log('GPS not available, using default location');
-        setStatus('Loading satellite imagery for default location...');
+        console.log('📍 GPS not available, using default location');
+        setStatus('🗺️ Using default location (Liberia)');
         initMapWithCoordinates(mapCenter.lat, mapCenter.lng);
       },
       { timeout: 5000, enableHighAccuracy: true }
     );
 
-    const initMapWithCoordinates = (lat: number, lng: number) => {
+    const initMapWithCoordinates = async (lat: number, lng: number) => {
+      setStatus('🛰️ Loading satellite imagery...');
+      
       // Calculate precise tile bounds for coordinate alignment
       const bounds = calculateTileBounds(lat, lng, zoomLevel);
       setTileBounds(bounds);
       
-      console.log('🗺️ Tile bounds calculated:', bounds);
+      console.log('🗺️ Tile bounds:', bounds);
       console.log('📍 Map center:', { lat, lng });
       
-      createMapWithTile(lat, lng, bounds);
+      // Load satellite imagery with fallbacks
+      const imagery = await loadSatelliteImagery(lat, lng, zoomLevel);
+      setCurrentProvider(imagery.provider);
+      
+      createMapWithImagery(lat, lng, bounds, imagery);
     };
 
-    const createMapWithTile = (centerLat: number, centerLng: number, bounds: {north: number, south: number, east: number, west: number}) => {
-      // Calculate tile coordinates
+    const createMapWithImagery = (centerLat: number, centerLng: number, bounds: any, imagery: {url: string, provider: string}) => {
       const n = Math.pow(2, zoomLevel);
       const x = Math.floor(n * ((centerLng + 180) / 360));
       const y = Math.floor(n * (1 - Math.log(Math.tan((centerLat * Math.PI) / 180) + 1 / Math.cos((centerLat * Math.PI) / 180)) / Math.PI) / 2);
       
-      const tileUrl = `https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/${zoomLevel}/${y}/${x}`;
+      const backgroundStyle = imagery.url ? 
+        `background-image: url('${imagery.url}'); background-size: cover; background-position: center; background-repeat: no-repeat;` :
+        `background: linear-gradient(45deg, #059669 0%, #047857 50%, #065f46 100%);`;
       
       mapRef.current!.innerHTML = `
         <style>
@@ -118,7 +197,7 @@ export default function RealMapBoundaryMapper({
             border: 2px solid #e5e7eb;
             border-radius: 8px;
             position: relative;
-            background: url('${tileUrl}') center/cover no-repeat;
+            ${backgroundStyle}
             cursor: crosshair;
             overflow: hidden;
           }
@@ -131,7 +210,20 @@ export default function RealMapBoundaryMapper({
             padding: 8px 12px;
             border-radius: 4px;
             font-family: monospace;
-            font-size: 12px;
+            font-size: 11px;
+            z-index: 100;
+            max-width: 200px;
+          }
+          .provider-badge {
+            position: absolute;
+            top: 8px;
+            right: 8px;
+            background: rgba(34, 197, 94, 0.9);
+            color: white;
+            padding: 4px 8px;
+            border-radius: 4px;
+            font-size: 10px;
+            font-weight: bold;
             z-index: 100;
           }
           .map-marker {
@@ -165,10 +257,14 @@ export default function RealMapBoundaryMapper({
         </style>
         <div class="real-map" id="real-map">
           <div class="coordinate-overlay">
-            Bounds: N${bounds.north.toFixed(6)} S${bounds.south.toFixed(6)}<br>
-            E${bounds.east.toFixed(6)} W${bounds.west.toFixed(6)}<br>
-            Zoom: ${zoomLevel} | Tile: ${x},${y}
+            <div>N: ${bounds.north.toFixed(6)}</div>
+            <div>S: ${bounds.south.toFixed(6)}</div>
+            <div>E: ${bounds.east.toFixed(6)}</div>
+            <div>W: ${bounds.west.toFixed(6)}</div>
+            <div style="margin-top: 4px;">Zoom: ${zoomLevel}</div>
+            <div>Tile: ${x},${y}</div>
           </div>
+          <div class="provider-badge">${imagery.provider}</div>
           <svg class="map-polygon" style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; pointer-events: none;">
           </svg>
         </div>
@@ -180,15 +276,15 @@ export default function RealMapBoundaryMapper({
       // Aligned click handler using precise tile bounds
       mapElement.addEventListener('click', (e) => {
         const rect = mapElement.getBoundingClientRect();
-        const x = e.clientX - rect.left;
-        const y = e.clientY - rect.top;
+        const clickX = e.clientX - rect.left;
+        const clickY = e.clientY - rect.top;
         
-        console.log(`🖱️ Map clicked at pixel: ${x}, ${y}`);
+        console.log(`🖱️ Map clicked at pixel: ${clickX}, ${clickY}`);
         
         // Convert pixel coordinates to GPS using precise tile bounds
-        const { lat, lng } = pixelToGPS(x, y, rect, bounds);
+        const { lat, lng } = pixelToGPS(clickX, clickY, rect, bounds);
         
-        console.log(`🎯 Aligned GPS coordinates: ${lat.toFixed(8)}, ${lng.toFixed(8)}`);
+        console.log(`🎯 GPS coordinates: ${lat.toFixed(8)}, ${lng.toFixed(8)}`);
         
         const newPoint: BoundaryPoint = { 
           latitude: lat, 
@@ -200,12 +296,14 @@ export default function RealMapBoundaryMapper({
         
         setPoints(prev => {
           const updated = [...prev, newPoint];
-          console.log(`✅ Points total: ${updated.length}`);
+          console.log(`✅ Total points: ${updated.length}`);
           return updated;
         });
       });
       
-      setStatus(`Satellite imagery loaded - Coordinates aligned with tile bounds`);
+      setStatus(imagery.url ? 
+        `✅ ${imagery.provider} loaded - Click to mark boundaries` : 
+        `🗺️ Terrain map ready - Click to mark boundaries`);
       setMapReady(true);
     };
   }, [zoomLevel]);
@@ -252,10 +350,12 @@ export default function RealMapBoundaryMapper({
 
   const resetBoundary = () => {
     setPoints([]);
+    setStatus('🗺️ Boundary reset - Click to mark new boundaries');
   };
 
   const completeBoundary = () => {
     if (points.length < minPoints) {
+      setStatus(`❌ Need at least ${minPoints} points to complete boundary`);
       return;
     }
 
@@ -268,7 +368,7 @@ export default function RealMapBoundaryMapper({
       area -= points[j].latitude * points[i].longitude;
     }
     area = Math.abs(area) / 2.0;
-    const areaInHectares = area * 111000 * 111000 / 10000; // Convert to hectares
+    const areaInHectares = area * 111000 * 111000 / 10000;
 
     // Calculate bounds
     const latitudes = points.map(p => p.latitude);
@@ -285,6 +385,7 @@ export default function RealMapBoundaryMapper({
       }
     };
 
+    setStatus(`✅ Boundary completed - ${areaInHectares.toFixed(2)} hectares`);
     onBoundaryComplete(boundaryData);
   };
 
@@ -292,12 +393,13 @@ export default function RealMapBoundaryMapper({
     <div className="space-y-4">
       <div className="text-center">
         <p className="text-sm text-gray-600 mb-2">{status}</p>
-        <div className="flex gap-2 justify-center">
+        <div className="flex gap-2 justify-center mb-2">
           <Button
             onClick={() => setZoomLevel(prev => Math.min(prev + 1, 20))}
             variant="outline"
             size="sm"
           >
+            <Satellite className="h-4 w-4 mr-1" />
             Zoom In
           </Button>
           <Button
@@ -305,16 +407,18 @@ export default function RealMapBoundaryMapper({
             variant="outline"
             size="sm"
           >
+            <Satellite className="h-4 w-4 mr-1" />
             Zoom Out
           </Button>
         </div>
+        <p className="text-xs text-gray-500">Provider: {currentProvider}</p>
       </div>
       
       <div ref={mapRef} className="w-full" />
       
       <div className="flex justify-between items-center">
         <div className="text-sm text-gray-600">
-          Points marked: {points.length}/{maxPoints} (Min: {minPoints})
+          Points: {points.length}/{maxPoints} (Min: {minPoints})
         </div>
         <div className="flex gap-2">
           <Button
@@ -332,7 +436,7 @@ export default function RealMapBoundaryMapper({
             size="sm"
           >
             <Check className="h-4 w-4 mr-1" />
-            Complete Boundary
+            Complete ({points.length})
           </Button>
         </div>
       </div>

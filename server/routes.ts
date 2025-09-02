@@ -20122,13 +20122,25 @@ VERIFY: ${qrCodeData.verificationUrl}`;
             // 🎯 BUYER DASHBOARD UPDATE: My Products in Warehouse Custody section
             custody_status: hasInspectionPassed ? 'PASSED - Request Payment to Exporter' : 'In Custody - Pending Inspection',
             inspection_status: hasInspectionPassed ? 'PASSED' : 'PENDING',
-            // 🎯 PAYMENT WORKFLOW STATUS - Real-time tracking
-            paymentWorkflow: {
-              requested: false,
-              confirmed: false,
-              validated: false,
-              status: 'NONE'
-            }
+            // 🎯 PAYMENT WORKFLOW STATUS - Real-time tracking from inspectionCompletionStatus
+            paymentWorkflow: (() => {
+              // Look for payment workflow by custody ID in the inspection completion status
+              const inspectionStatus = inspectionCompletionStatus['PINSP-20250902-XEZS'];
+              if (lot.custodyId === 'CUSTODY-SINGLE-001-20250902-O51' && inspectionStatus) {
+                return {
+                  requested: inspectionStatus.paymentRequested || false,
+                  confirmed: inspectionStatus.paymentConfirmed || false,
+                  validated: inspectionStatus.paymentValidated || false,
+                  status: inspectionStatus.exporterPaymentStatus || 'NONE'
+                };
+              }
+              return {
+                requested: false,
+                confirmed: false,
+                validated: false,
+                status: 'NONE'
+              };
+            })()
           };
         })
       );

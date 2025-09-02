@@ -20102,10 +20102,11 @@ VERIFY: ${qrCodeData.verificationUrl}`;
             .from(storageFees)
             .where(eq(storageFees.custodyId, lot.custodyId));
 
-          // 🎯 CHECK FOR INSPECTION COMPLETION STATUS FOR BUYER
-          // Inspection only happens AFTER products reach exporter warehouse
-          // New custody records should always start as PENDING until exporter workflow
-          const hasInspectionPassed = false; // Always PENDING for buyer custody stage
+          // 🎯 CHECK FOR INSPECTION COMPLETION STATUS FOR BUYER - FIXED
+          // Use actual database custodyStatus instead of hardcoded false
+          const hasInspectionPassed = lot.custodyStatus === 'payment_completed' || 
+                                     lot.custodyStatus === 'payment_requested' || 
+                                     lot.custodyStatus === 'authorized';
 
           return {
             ...lot,

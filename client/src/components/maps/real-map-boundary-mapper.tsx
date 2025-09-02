@@ -42,6 +42,10 @@ export default function RealMapBoundaryMapper({
   const [tileBounds, setTileBounds] = useState<{north: number, south: number, east: number, west: number} | null>(null);
   const [zoomLevel, setZoomLevel] = useState(18);
   const [currentProvider, setCurrentProvider] = useState('Loading...');
+  const [isTrackingGPS, setIsTrackingGPS] = useState(false);
+  const [gpsWatchId, setGpsWatchId] = useState<number | null>(null);
+  const [currentGPSPosition, setCurrentGPSPosition] = useState<{lat: number, lng: number} | null>(null);
+  const [trackingAccuracy, setTrackingAccuracy] = useState<number | null>(null);
 
   // Calculate precise tile bounds for coordinate alignment
   const calculateTileBounds = (lat: number, lng: number, zoom: number) => {
@@ -77,26 +81,32 @@ export default function RealMapBoundaryMapper({
     const x = Math.floor(n * ((lng + 180) / 360));
     const y = Math.floor(n * (1 - Math.log(Math.tan((lat * Math.PI) / 180) + 1 / Math.cos((lat * Math.PI) / 180)) / Math.PI) / 2);
     
+    // Prioritize REAL SATELLITE IMAGERY for farmers' land mapping
     const providers = [
-      {
-        url: `https://tile.openstreetmap.org/${zoom}/${x}/${y}.png`,
-        name: 'OpenStreetMap',
-        timeout: 2000
-      },
       {
         url: `https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/${zoom}/${y}/${x}`,
         name: 'Esri Satellite',
-        timeout: 3000
+        timeout: 4000
       },
       {
         url: `https://mt1.google.com/vt/lyrs=s&x=${x}&y=${y}&z=${zoom}`,
         name: 'Google Satellite',
-        timeout: 3000
+        timeout: 4000
       },
       {
         url: `https://api.mapbox.com/styles/v1/mapbox/satellite-v9/tiles/${zoom}/${x}/${y}@2x?access_token=pk.eyJ1IjoibWFwYm94IiwiYSI6ImNpejY4NXVycTA2emYycXBndHRqcmZ3N3gifQ.rJcFIG214AriISLbB6B5aw`,
         name: 'Mapbox Satellite',
-        timeout: 3000
+        timeout: 4000
+      },
+      {
+        url: `https://tiles.maps.eox.at/wmts/1.0.0/s2cloudless-2020_3857/default/g/${zoom}/${y}/${x}.jpg`,
+        name: 'Sentinel-2 Satellite',
+        timeout: 4000
+      },
+      {
+        url: `https://tile.openstreetmap.org/${zoom}/${x}/${y}.png`,
+        name: 'OpenStreetMap (fallback)',
+        timeout: 2000
       }
     ];
 
@@ -226,6 +236,34 @@ export default function RealMapBoundaryMapper({
             font-weight: bold;
             z-index: 100;
           }
+          .gps-indicator {
+            position: absolute;
+            bottom: 8px;
+            left: 8px;
+            background: rgba(59, 130, 246, 0.9);
+            color: white;
+            padding: 4px 8px;
+            border-radius: 4px;
+            font-size: 10px;
+            font-weight: bold;
+            z-index: 100;
+          }
+          .gps-marker {
+            position: absolute;
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
+            background: rgba(59, 130, 246, 0.8);
+            border: 3px solid white;
+            transform: translate(-50%, -50%);
+            z-index: 15;
+            animation: pulse-gps 2s infinite;
+          }
+          @keyframes pulse-gps {
+            0% { box-shadow: 0 0 0 0 rgba(59, 130, 246, 0.7); }
+            70% { box-shadow: 0 0 0 10px rgba(59, 130, 246, 0); }
+            100% { box-shadow: 0 0 0 0 rgba(59, 130, 246, 0); }
+          }
           .map-marker {
             position: absolute;
             width: 16px;
@@ -265,6 +303,7 @@ export default function RealMapBoundaryMapper({
             <div>Tile: ${x},${y}</div>
           </div>
           <div class="provider-badge">${imagery.provider}</div>
+          <div class="gps-indicator" id="gps-indicator" style="display: none;">GPS Active</div>
           <svg class="map-polygon" style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; pointer-events: none;">
           </svg>
         </div>
@@ -333,6 +372,34 @@ export default function RealMapBoundaryMapper({
       mapContainer.appendChild(marker);
     });
 
+    // Show GPS indicator and current position if tracking
+    const gpsIndicator = mapContainer.querySelector('#gps-indicator') as HTMLElement;
+    if (gpsIndicator) {
+      if (isTrackingGPS) {
+        gpsIndicator.style.display = 'block';
+        gpsIndicator.textContent = `GPS: ±${trackingAccuracy?.toFixed(1)}m`;
+      } else {
+        gpsIndicator.style.display = 'none';
+      }
+    }
+
+    // Remove existing GPS marker
+    mapContainer.querySelectorAll('.gps-marker').forEach(marker => marker.remove());
+
+    // Add current GPS position marker if tracking
+    if (isTrackingGPS && currentGPSPosition && tileBounds) {
+      const gpsMarker = document.createElement('div');
+      gpsMarker.className = 'gps-marker';
+      
+      const rect = mapContainer.getBoundingClientRect();
+      const { x, y } = gpsToPixel(currentGPSPosition.lat, currentGPSPosition.lng, rect, tileBounds);
+      
+      gpsMarker.style.left = `${x}px`;
+      gpsMarker.style.top = `${y}px`;
+      
+      mapContainer.appendChild(gpsMarker);
+    }
+
     // Draw polygon if we have 3 or more points
     if (points.length >= 3) {
       const svg = mapContainer.querySelector('svg');
@@ -346,7 +413,76 @@ export default function RealMapBoundaryMapper({
         svg.innerHTML = `<polygon points="${pathPoints.join(' ')}" />`;
       }
     }
-  }, [points, mapReady, tileBounds]);
+  }, [points, mapReady, tileBounds, isTrackingGPS, currentGPSPosition, trackingAccuracy]);
+
+  // GPS Tracking Functions
+  const startGPSTracking = () => {
+    if (!navigator.geolocation) {
+      setStatus('❌ GPS not supported on this device');
+      return;
+    }
+
+    setStatus('🛰️ Starting GPS tracking...');
+    setIsTrackingGPS(true);
+
+    const watchId = navigator.geolocation.watchPosition(
+      (position) => {
+        const lat = position.coords.latitude;
+        const lng = position.coords.longitude;
+        const accuracy = position.coords.accuracy;
+        
+        setCurrentGPSPosition({ lat, lng });
+        setTrackingAccuracy(accuracy);
+        setStatus(`📍 GPS Active - Accuracy: ${accuracy.toFixed(1)}m`);
+        
+        console.log(`🎯 GPS Update: ${lat.toFixed(8)}, ${lng.toFixed(8)} (±${accuracy.toFixed(1)}m)`);
+      },
+      (error) => {
+        console.error('GPS Error:', error);
+        setStatus('❌ GPS tracking failed');
+        setIsTrackingGPS(false);
+      },
+      {
+        enableHighAccuracy: true,
+        timeout: 10000,
+        maximumAge: 1000
+      }
+    );
+
+    setGpsWatchId(watchId);
+  };
+
+  const stopGPSTracking = () => {
+    if (gpsWatchId !== null) {
+      navigator.geolocation.clearWatch(gpsWatchId);
+      setGpsWatchId(null);
+    }
+    setIsTrackingGPS(false);
+    setCurrentGPSPosition(null);
+    setTrackingAccuracy(null);
+    setStatus('🗺️ GPS tracking stopped');
+  };
+
+  const addCurrentGPSPoint = () => {
+    if (!currentGPSPosition) {
+      setStatus('❌ No GPS position available');
+      return;
+    }
+
+    const newPoint: BoundaryPoint = {
+      latitude: currentGPSPosition.lat,
+      longitude: currentGPSPosition.lng,
+      id: `gps-point-${Date.now()}`,
+      timestamp: new Date(),
+      accuracy: trackingAccuracy || 1.0
+    };
+
+    setPoints(prev => {
+      const updated = [...prev, newPoint];
+      setStatus(`📍 GPS point added - Total: ${updated.length} (±${trackingAccuracy?.toFixed(1)}m)`);
+      return updated;
+    });
+  };
 
   const resetBoundary = () => {
     setPoints([]);
@@ -410,6 +546,41 @@ export default function RealMapBoundaryMapper({
             <Satellite className="h-4 w-4 mr-1" />
             Zoom Out
           </Button>
+        </div>
+        
+        <div className="flex gap-2 justify-center mb-2">
+          {!isTrackingGPS ? (
+            <Button
+              onClick={startGPSTracking}
+              variant="default"
+              size="sm"
+              className="bg-blue-600 hover:bg-blue-700"
+            >
+              <MapPin className="h-4 w-4 mr-1" />
+              Start GPS
+            </Button>
+          ) : (
+            <>
+              <Button
+                onClick={stopGPSTracking}
+                variant="destructive"
+                size="sm"
+              >
+                <MapPin className="h-4 w-4 mr-1" />
+                Stop GPS
+              </Button>
+              <Button
+                onClick={addCurrentGPSPoint}
+                variant="default"
+                size="sm"
+                disabled={!currentGPSPosition}
+                className="bg-green-600 hover:bg-green-700"
+              >
+                <MapPin className="h-4 w-4 mr-1" />
+                Add GPS Point
+              </Button>
+            </>
+          )}
         </div>
         <p className="text-xs text-gray-500">Provider: {currentProvider}</p>
       </div>

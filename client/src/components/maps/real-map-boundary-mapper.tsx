@@ -1,5 +1,6 @@
 import React, { useEffect, useRef, useState } from 'react';
 import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { MapPin, RotateCcw, Check, Satellite, Download, Shield, AlertTriangle } from "lucide-react";
 import { generateEUDRCompliancePDF, generateDeforestationPDF } from "@/lib/enhanced-pdf-generator";
 
@@ -65,6 +66,19 @@ export default function RealMapBoundaryMapper({
   const [eudrReport, setEudrReport] = useState<EUDRComplianceReport | null>(null);
   const [deforestationReport, setDeforestationReport] = useState<DeforestationReport | null>(null);
   const [isAnalyzing, setIsAnalyzing] = useState(false);
+
+  // Image Enhancement States
+  const [imageFilters, setImageFilters] = useState({
+    brightness: 110,      // Default slightly brighter for clarity
+    contrast: 120,        // Enhanced contrast for details
+    saturation: 130,      // Boosted saturation for vegetation
+    sharpness: 1.2,      // Sharpening for edges
+    hueRotate: 0,        // Color adjustment
+    gamma: 1.0,          // Gamma correction
+    noise: 0             // Noise reduction
+  });
+  const [filterPreset, setFilterPreset] = useState('enhanced');
+  const [showImageControls, setShowImageControls] = useState(false);
 
   // Enhanced function to get location-specific high-resolution satellite imagery
   const getSatelliteTiles = (lat: number, lng: number, zoom: number = 18) => {
@@ -163,6 +177,12 @@ export default function RealMapBoundaryMapper({
             background: url('${tileInfo.url}') center/cover;
             cursor: crosshair;
             overflow: hidden;
+            filter: brightness(${imageFilters.brightness}%) 
+                   contrast(${imageFilters.contrast}%) 
+                   saturate(${imageFilters.saturation}%)
+                   hue-rotate(${imageFilters.hueRotate}deg)
+                   ${imageFilters.sharpness > 1 ? `url("data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg'><filter id='sharpen'><feConvolveMatrix kernelMatrix='0 -${imageFilters.sharpness} 0 -${imageFilters.sharpness} ${5 + imageFilters.sharpness * 4} -${imageFilters.sharpness} 0 -${imageFilters.sharpness} 0'/></filter></svg>#sharpen")` : ''};
+            transition: filter 0.3s ease;
           }
           .map-overlay {
             position: absolute;
@@ -865,6 +885,44 @@ export default function RealMapBoundaryMapper({
     if (points.length + 1 >= 3) {
       setTimeout(() => analyzeEUDRCompliance([...points, newPoint]), 500);
     }
+  };
+
+  // Image Enhancement Functions
+  const applyFilterPreset = (preset: string) => {
+    const presets = {
+      'enhanced': { brightness: 110, contrast: 120, saturation: 130, sharpness: 1.2, hueRotate: 0, gamma: 1.0, noise: 0 },
+      'clarity': { brightness: 105, contrast: 140, saturation: 110, sharpness: 1.5, hueRotate: 0, gamma: 0.9, noise: 0 },
+      'vegetation': { brightness: 115, contrast: 115, saturation: 160, sharpness: 1.1, hueRotate: 10, gamma: 1.0, noise: 0 },
+      'terrain': { brightness: 120, contrast: 135, saturation: 90, sharpness: 1.3, hueRotate: -5, gamma: 0.95, noise: 0 },
+      'cloudy': { brightness: 130, contrast: 150, saturation: 120, sharpness: 1.4, hueRotate: 0, gamma: 0.85, noise: 0 },
+      'original': { brightness: 100, contrast: 100, saturation: 100, sharpness: 1.0, hueRotate: 0, gamma: 1.0, noise: 0 }
+    };
+    
+    if (presets[preset as keyof typeof presets]) {
+      setImageFilters(presets[preset as keyof typeof presets]);
+      setFilterPreset(preset);
+      
+      // Refresh map with new filters
+      setTimeout(() => {
+        if (mapRef.current) {
+          initMapWithCoordinates(mapCenter.lat, mapCenter.lng);
+        }
+      }, 100);
+    }
+  };
+
+  const updateFilter = (filterName: string, value: number) => {
+    setImageFilters(prev => ({
+      ...prev,
+      [filterName]: value
+    }));
+    
+    // Update map in real time
+    setTimeout(() => {
+      if (mapRef.current) {
+        initMapWithCoordinates(mapCenter.lat, mapCenter.lng);
+      }
+    }, 50);
   };
 
   const calculateArea = (points: BoundaryPoint[]): number => {
@@ -1604,6 +1662,98 @@ export default function RealMapBoundaryMapper({
           </p>
         </div>
       )}
+
+      {/* Satellite Image Enhancement Controls */}
+      <Card className="bg-blue-50 border-blue-200">
+        <CardHeader className="pb-2">
+          <div className="flex items-center justify-between">
+            <CardTitle className="text-sm flex items-center gap-2">
+              <Satellite className="h-4 w-4" />
+              Satellite Image Enhancement
+            </CardTitle>
+            <Button
+              onClick={() => setShowImageControls(!showImageControls)}
+              variant="outline"
+              size="sm"
+              className="h-7 text-xs"
+            >
+              {showImageControls ? 'Hide' : 'Enhance'}
+            </Button>
+          </div>
+        </CardHeader>
+        {showImageControls && (
+          <CardContent className="pt-0">
+            {/* Preset Filters */}
+            <div className="grid grid-cols-3 gap-2 mb-4">
+              {['enhanced', 'clarity', 'vegetation', 'terrain', 'cloudy', 'original'].map(preset => (
+                <Button
+                  key={preset}
+                  onClick={() => applyFilterPreset(preset)}
+                  variant={filterPreset === preset ? "default" : "outline"}
+                  size="sm"
+                  className="text-xs h-7"
+                >
+                  {preset.charAt(0).toUpperCase() + preset.slice(1)}
+                </Button>
+              ))}
+            </div>
+            
+            {/* Manual Controls */}
+            <div className="space-y-3">
+              <div className="grid grid-cols-2 gap-3">
+                <div>
+                  <label className="text-xs font-medium">Brightness: {imageFilters.brightness}%</label>
+                  <input
+                    type="range"
+                    min="50"
+                    max="200"
+                    value={imageFilters.brightness}
+                    onChange={(e) => updateFilter('brightness', parseInt(e.target.value))}
+                    className="w-full h-1 bg-gray-200 rounded-lg appearance-none cursor-pointer"
+                  />
+                </div>
+                <div>
+                  <label className="text-xs font-medium">Contrast: {imageFilters.contrast}%</label>
+                  <input
+                    type="range"
+                    min="50"
+                    max="200"
+                    value={imageFilters.contrast}
+                    onChange={(e) => updateFilter('contrast', parseInt(e.target.value))}
+                    className="w-full h-1 bg-gray-200 rounded-lg appearance-none cursor-pointer"
+                  />
+                </div>
+                <div>
+                  <label className="text-xs font-medium">Saturation: {imageFilters.saturation}%</label>
+                  <input
+                    type="range"
+                    min="0"
+                    max="300"
+                    value={imageFilters.saturation}
+                    onChange={(e) => updateFilter('saturation', parseInt(e.target.value))}
+                    className="w-full h-1 bg-gray-200 rounded-lg appearance-none cursor-pointer"
+                  />
+                </div>
+                <div>
+                  <label className="text-xs font-medium">Sharpness: {imageFilters.sharpness}</label>
+                  <input
+                    type="range"
+                    min="0.5"
+                    max="3"
+                    step="0.1"
+                    value={imageFilters.sharpness}
+                    onChange={(e) => updateFilter('sharpness', parseFloat(e.target.value))}
+                    className="w-full h-1 bg-gray-200 rounded-lg appearance-none cursor-pointer"
+                  />
+                </div>
+              </div>
+            </div>
+            <div className="text-xs text-blue-600 mt-2">
+              🎯 Adjust satellite imagery for better land boundary detection and EUDR compliance analysis
+            </div>
+          </CardContent>
+        )}
+      </Card>
 
       {/* Controls */}
       <div className="flex justify-between items-center">

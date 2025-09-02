@@ -15191,50 +15191,50 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.get("/api/port-inspector/:inspectorId/assigned-inspections", async (req, res) => {
     try {
       const { inspectorId } = req.params;
-      console.log(`🔍 Fetching DDGOTS warehouse product inspections for inspector: ${inspectorId}`);
+      console.log(`🔍 Fetching assigned inspections for inspector: ${inspectorId}`);
       
-      // Get DDGOTS warehouse product inspection data for James Kofi
-      if (inspectorId === 'INS-PORT-001') {
-        const ddgotsInspections = [{
-          id: 'PINSP-20250831-TEST',
-          exporterId: 'EXP-20250826-688',
-          exporterName: 'ATHRAV EXPORTS',
-          exporterContactPerson: 'ATHRAV GUPTA',
-          exporterEmail: 'athrav@athravexport.com',
-          exporterPhone: '+231 555 9999',
-          exporterAddress: 'B-102, HDHFJD JDHFJD JHFJDK, DIMO, Margibi County',
-          exporterLicense: 'EXP-475647475',
-          shipmentId: 'CUSTODY-SINGLE-001-20250830-T6M',
-          commodity: 'Cocoa',
-          quantity: '600 tons',
-          qrBatchCode: 'BE-DISPATCH-NEW-FIXED-2025',
-          scheduledDate: '2025-09-08 14:00',
-          priority: 'medium',
-          status: 'assigned',
-          documents: ['Certificate of Origin', 'EUDR Compliance', 'Quality Certificate'],
-          vesselName: 'MV Atlantic Trader',
-          destination: 'Premium Exports Warehouse',
-          warehouseLocation: 'Monrovia Free Port - Section C2',
-          warehouseAddress: 'Bushrod Island, Monrovia',
-          inspectionScheduled: '2025-09-08 14:00',
-          inspectionDuration: '2-3 hours',
-          assignedInspector: 'James Kofi',
-          verificationCode: '107MJMQX',
-          buyerName: 'MARIA THOMPSON',
-          buyerCompany: 'MARGIBI TRADING COMPANY',
-          totalValue: '150000',
-          dispatchDate: '2025-09-05T10:00:00.000Z',
-          county: 'Montserrado',
-          farmLocation: 'Bong County Cooperative',
-          inspectionType: 'Warehouse Product Inspection',
-          facilityLocation: 'Premium Exports Warehouse - Monrovia Free Port'
-        }];
+      // Get real assigned inspections from port_inspection_bookings table
+      const inspectionResult = await db.execute(sql`
+        SELECT booking_id, request_id, transaction_id, commodity_type, quantity, unit, total_value,
+               buyer_name, buyer_company, verification_code, county, farm_location,
+               exporter_id, exporter_name, exporter_company, port_facility, inspection_type,
+               scheduled_date, urgency_level, assignment_status, assigned_inspector_name,
+               ddgots_notes, special_instructions, dispatch_date
+        FROM port_inspection_bookings 
+        WHERE assigned_inspector_id = ${inspectorId}
+        AND assignment_status = 'assigned'
+        ORDER BY scheduled_date ASC
+      `);
 
-        console.log(`✅ Found ${ddgotsInspections.length} DDGOTS warehouse inspections for inspector ${inspectorId}`);
-        res.json({ success: true, data: ddgotsInspections });
-      } else {
-        res.json({ success: true, data: [] });
-      }
+      const assignedInspections = inspectionResult.rows.map((booking: any) => ({
+        id: booking.booking_id,
+        exporterId: booking.exporter_id,
+        exporterName: booking.exporter_name,
+        exporterCompany: booking.exporter_company,
+        shipmentId: booking.transaction_id,
+        commodity: booking.commodity_type,
+        quantity: `${booking.quantity} ${booking.unit}`,
+        qrBatchCode: booking.verification_code,
+        scheduledDate: new Date(booking.scheduled_date).toLocaleString(),
+        priority: booking.urgency_level === 'urgent' ? 'high' : 'medium',
+        status: 'assigned',
+        warehouseLocation: booking.farm_location, // This is actually exporter warehouse address
+        inspectionScheduled: new Date(booking.scheduled_date).toLocaleString(),
+        assignedInspector: booking.assigned_inspector_name,
+        verificationCode: booking.verification_code,
+        buyerName: booking.buyer_name,
+        buyerCompany: booking.buyer_company,
+        totalValue: booking.total_value,
+        dispatchDate: booking.dispatch_date,
+        county: booking.county,
+        inspectionType: booking.inspection_type,
+        facilityLocation: booking.farm_location, // Warehouse address
+        ddgotsNotes: booking.ddgots_notes,
+        specialInstructions: booking.special_instructions
+      }));
+
+      console.log(`✅ Found ${assignedInspections.length} assigned inspections for inspector ${inspectorId}`);
+      res.json({ success: true, data: assignedInspections });
     } catch (error: any) {
       console.error("❌ ERROR fetching DDGOTS assigned inspections:", error);
       res.status(500).json({ 

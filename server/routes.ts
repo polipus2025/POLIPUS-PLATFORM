@@ -18973,27 +18973,52 @@ VERIFY: ${qrCodeData.verificationUrl}`;
 
       const dispatchRequest = dispatchResult.rows[0];
 
-      // Find existing QR codes for this buyer/transaction
-      const existingQrResult = await db.execute(sql`
-        SELECT batch_code, qr_code_data, qr_code_url, total_bags, bag_weight, 
-               commodity_type, farmer_name, created_at, status
-        FROM qr_batches 
-        WHERE buyer_name = ${dispatchRequest.buyer_name}
-        AND commodity_type = ${dispatchRequest.commodity_type}
-        AND status = 'generated'
-        ORDER BY created_at DESC
+      // Find the custody record and extract QR codes using JSONB array elements
+      const custodyResult = await db.execute(sql`
+        SELECT custody_id, 
+               jsonb_array_elements_text(product_qr_codes) as qr_batch_code,
+               buyer_name, commodity_type
+        FROM warehouse_custody 
+        WHERE custody_id = ${dispatchRequest.transaction_id}
+        AND product_qr_codes IS NOT NULL
       `);
 
-      if (existingQrResult.rows.length === 0) {
+      if (custodyResult.rows.length === 0) {
         return res.status(404).json({
           success: false,
-          message: "No existing QR codes found for this buyer/commodity. QR codes must be generated when bags are first requested."
+          message: "No QR codes found in custody record for this dispatch request."
         });
       }
 
-      const existingQrCodes = existingQrResult.rows;
+      // Extract QR batch codes from the JSONB array
+      const qrCodes = custodyResult.rows.map(row => row.qr_batch_code);
+      const custody = custodyResult.rows[0];
 
-      console.log(`✅ Found ${existingQrCodes.length} existing QR codes for buyer ${dispatchRequest.buyer_name}`);
+      if (!qrCodes || qrCodes.length === 0) {
+        return res.status(404).json({
+          success: false,
+          message: "No QR codes found in custody record. QR codes must be generated when bags are first requested."
+        });
+      }
+
+      console.log(`📦 Found ${qrCodes.length} QR codes in custody ${custody.custody_id}:`, qrCodes);
+
+      // Get full QR batch details for each QR code in the custody
+      const qrBatchDetails = [];
+      for (const qrBatchCode of qrCodes) {
+        const qrBatchResult = await db.execute(sql`
+          SELECT batch_code, qr_code_data, qr_code_url, total_bags, bag_weight, 
+                 commodity_type, farmer_name, created_at, status
+          FROM qr_batches 
+          WHERE batch_code = ${qrBatchCode}
+        `);
+        
+        if (qrBatchResult.rows.length > 0) {
+          qrBatchDetails.push(qrBatchResult.rows[0]);
+        }
+      }
+
+      console.log(`✅ Found ${qrBatchDetails.length} QR codes from custody for dispatch ${dispatchRequestId}`);
 
       // Update dispatch request status to confirmed (no QR generation needed)
       await db.execute(sql`
@@ -19002,20 +19027,22 @@ VERIFY: ${qrCodeData.verificationUrl}`;
         WHERE request_id = ${dispatchRequestId}
       `);
 
-      console.log(`✅ Dispatch confirmed with ${existingQrCodes.length} existing QR codes displayed`);
+      console.log(`✅ Dispatch confirmed - displaying ${qrBatchDetails.length} original QR codes from custody ${custody.custody_id}`);
 
       res.json({
         success: true,
-        message: `Dispatch confirmed successfully. Displaying ${existingQrCodes.length} existing QR code${existingQrCodes.length > 1 ? 's' : ''}`,
-        qrCodes: existingQrCodes.map(qr => ({
+        message: `Dispatch confirmed successfully. Displaying ${qrBatchDetails.length} original QR code${qrBatchDetails.length > 1 ? 's' : ''} from custody`,
+        qrCodes: qrBatchDetails.map(qr => ({
           batchCode: qr.batch_code,
           qrCodeUrl: qr.qr_code_url,
           totalBags: qr.total_bags,
           farmerName: qr.farmer_name,
-          createdAt: qr.created_at
+          createdAt: qr.created_at,
+          commodityType: qr.commodity_type
         })),
+        custodyId: custody.custody_id,
         dispatchRequestId: dispatchRequestId,
-        totalQrCodes: existingQrCodes.length
+        totalQrCodes: qrBatchDetails.length
       });
 
     } catch (error: any) {

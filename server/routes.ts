@@ -20057,10 +20057,10 @@ VERIFY: ${qrCodeData.verificationUrl}`;
             inspection_status: hasInspectionPassed ? 'PASSED' : 'PENDING',
             // 🎯 PAYMENT WORKFLOW STATUS - Real-time tracking
             paymentWorkflow: {
-              requested: inspectionCompletionStatus[inspectionKey]?.paymentRequested || false,
-              confirmed: inspectionCompletionStatus[inspectionKey]?.paymentConfirmed || false,
-              validated: inspectionCompletionStatus[inspectionKey]?.paymentValidated || false,
-              status: inspectionCompletionStatus[inspectionKey]?.exporterPaymentStatus || 'NONE'
+              requested: false,
+              confirmed: false,
+              validated: false,
+              status: 'NONE'
             }
           };
         })

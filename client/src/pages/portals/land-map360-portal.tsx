@@ -2,8 +2,8 @@ import { Helmet } from "react-helmet";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Shield, Leaf, Users, ArrowRight, MapPin, BarChart3, FileCheck, Globe, Package, Clock, Calendar, Cloud, Sun, CloudRain, Map, Layers, Compass, Satellite } from "lucide-react";
-import agriTraceLogo from "../../assets/agritrace-logo.jpg";
-import lacraLogo from "../../assets/lacra-logo.jpg";
+import agriTraceLogo from "@assets/IMG-20250724-WA0007_1753362990630.jpg";
+import lacraLogo from "@assets/LACRA LOGO_1753406166355.jpg";
 import { useState, useEffect } from "react";
 
 export default function LandMap360Portal() {

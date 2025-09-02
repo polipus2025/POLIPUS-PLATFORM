@@ -15787,19 +15787,6 @@ export async function registerRoutes(app: Express): Promise<Server> {
       console.log(`✅ Bag request ${requestId} sent to ${warehouse.warehouseName}`);
       console.log(`📍 Warehouse: ${warehouse.warehouseId} - ${county}`);
 
-      // 🎯 AUTOMATIC MASTER TRANSACTION UPDATE - Bag Request Stage
-      try {
-        await updateMasterTransactionByBuyerId(buyerId, 'bag_request', {
-          bagRequestId: requestId,
-          warehouseId: warehouse.warehouseId,
-          warehouseName: warehouse.warehouseName
-        });
-        console.log(`🎯 MASTER TRANSACTION UPDATED: Bag request stage for buyer ${buyerId}`);
-      } catch (masterError) {
-        console.error('❌ Failed to update master transaction (bag request):', masterError);
-        // Don't fail the bag request, just log the error
-      }
-
       res.json({
         message: "Bag request sent to warehouse successfully!",
         requestId,
@@ -18685,19 +18672,6 @@ VERIFY: ${qrCodeData.verificationUrl}`;
 
       console.log(`📦 Warehouse dispatch request ${requestId} created for ${dispatchDate} - awaiting warehouse confirmation`);
 
-      // 🎯 AUTOMATIC MASTER TRANSACTION UPDATE - Dispatch Scheduling Stage
-      try {
-        await updateMasterTransactionByBuyerId(buyerId, 'dispatch_scheduled', {
-          dispatchRequestId: requestId,
-          scheduledDate: dispatchDate,
-          dispatchLocation: farmLocation
-        });
-        console.log(`🎯 MASTER TRANSACTION UPDATED: Dispatch scheduled stage for buyer ${buyerId}`);
-      } catch (masterError) {
-        console.error('❌ Failed to update master transaction (dispatch scheduled):', masterError);
-        // Don't fail the dispatch scheduling, just log the error
-      }
-
       res.json({
         success: true,
         message: "Warehouse dispatch scheduled successfully",
@@ -20735,44 +20709,4 @@ GENERATED: ${new Date().toLocaleDateString()}`;
   });
 
   return httpServer;
-}
-
-// Helper function to find and update master transaction by buyer ID
-async function updateMasterTransactionByBuyerId(buyerId: string, stage: string, stakeholderData: any) {
-  try {
-    // Find transaction by buyer ID
-    const transaction = await db.select()
-      .from(masterTransactionRegistry)
-      .where(eq(masterTransactionRegistry.buyerId, buyerId))
-      .orderBy(desc(masterTransactionRegistry.createdAt))
-      .limit(1);
-      
-    if (transaction.length > 0) {
-      await updateMasterTransactionStage(transaction[0].farmerOfferId, stage, stakeholderData);
-    } else {
-      console.warn(`⚠️ No master transaction found for buyer ID: ${buyerId}`);
-    }
-  } catch (error) {
-    console.error(`❌ Error updating master transaction by buyer ID ${buyerId}:`, error);
-    throw error;
-  }
-}
-
-// Helper function to update master transaction by master transaction ID
-async function updateMasterTransactionByMasterTxId(masterTxId: string, stage: string, stakeholderData: any) {
-  try {
-    const [transaction] = await db.select()
-      .from(masterTransactionRegistry)
-      .where(eq(masterTransactionRegistry.masterTransactionId, masterTxId))
-      .limit(1);
-      
-    if (transaction) {
-      await updateMasterTransactionStage(transaction.farmerOfferId, stage, stakeholderData);
-    } else {
-      console.warn(`⚠️ No master transaction found for master transaction ID: ${masterTxId}`);
-    }
-  } catch (error) {
-    console.error(`❌ Error updating master transaction by master transaction ID ${masterTxId}:`, error);
-    throw error;
-  }
 }

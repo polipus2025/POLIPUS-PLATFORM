@@ -46,6 +46,8 @@ export default function RealMapBoundaryMapper({
   const [gpsWatchId, setGpsWatchId] = useState<number | null>(null);
   const [currentGPSPosition, setCurrentGPSPosition] = useState<{lat: number, lng: number} | null>(null);
   const [trackingAccuracy, setTrackingAccuracy] = useState<number | null>(null);
+  const [showBoundaryDetails, setShowBoundaryDetails] = useState(false);
+  const [selectedPointIndex, setSelectedPointIndex] = useState<number | null>(null);
 
   // Calculate precise tile bounds for coordinate alignment
   const calculateTileBounds = (lat: number, lng: number, zoom: number) => {
@@ -369,6 +371,12 @@ export default function RealMapBoundaryMapper({
       marker.style.top = `${y}px`;
       marker.textContent = String.fromCharCode(65 + index); // A, B, C, etc.
       
+      // Add click handler for point details
+      marker.addEventListener('click', () => {
+        setSelectedPointIndex(index);
+        setShowBoundaryDetails(true);
+      });
+      
       mapContainer.appendChild(marker);
     });
 
@@ -525,6 +533,68 @@ export default function RealMapBoundaryMapper({
     onBoundaryComplete(boundaryData);
   };
 
+  // Calculate distance between two GPS points
+  const calculateDistance = (point1: BoundaryPoint, point2: BoundaryPoint): number => {
+    const R = 6371e3; // Earth's radius in meters
+    const φ1 = point1.latitude * Math.PI / 180;
+    const φ2 = point2.latitude * Math.PI / 180;
+    const Δφ = (point2.latitude - point1.latitude) * Math.PI / 180;
+    const Δλ = (point2.longitude - point1.longitude) * Math.PI / 180;
+
+    const a = Math.sin(Δφ/2) * Math.sin(Δφ/2) +
+              Math.cos(φ1) * Math.cos(φ2) *
+              Math.sin(Δλ/2) * Math.sin(Δλ/2);
+    const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
+
+    return R * c; // Distance in meters
+  };
+
+  // Calculate total perimeter
+  const calculatePerimeter = (): number => {
+    if (points.length < 2) return 0;
+    
+    let totalDistance = 0;
+    for (let i = 0; i < points.length - 1; i++) {
+      totalDistance += calculateDistance(points[i], points[i + 1]);
+    }
+    
+    // Add distance from last point back to first point if we have 3+ points
+    if (points.length >= 3) {
+      totalDistance += calculateDistance(points[points.length - 1], points[0]);
+    }
+    
+    return totalDistance;
+  };
+
+  // Get current mapping statistics
+  const getMappingStats = () => {
+    if (points.length === 0) return null;
+    
+    // Calculate area if we have 3+ points
+    let area = 0;
+    if (points.length >= 3) {
+      const n = points.length;
+      for (let i = 0; i < n; i++) {
+        const j = (i + 1) % n;
+        area += points[i].latitude * points[j].longitude;
+        area -= points[j].latitude * points[i].longitude;
+      }
+      area = Math.abs(area) / 2.0;
+      area = area * 111000 * 111000 / 10000; // Convert to hectares
+    }
+    
+    const perimeter = calculatePerimeter();
+    
+    return {
+      pointCount: points.length,
+      area: area,
+      perimeter: perimeter,
+      isComplete: points.length >= 3
+    };
+  };
+
+  const stats = getMappingStats();
+
   return (
     <div className="space-y-4">
       <div className="text-center">
@@ -586,6 +656,103 @@ export default function RealMapBoundaryMapper({
       </div>
       
       <div ref={mapRef} className="w-full" />
+      
+      {/* Interactive Boundary Details */}
+      {points.length > 0 && (
+        <div className="bg-slate-50 p-4 rounded-lg space-y-3">
+          <div className="flex justify-between items-center">
+            <h3 className="font-semibold text-gray-800">🗺️ Boundary Mapping Progress</h3>
+            <Button
+              onClick={() => setShowBoundaryDetails(!showBoundaryDetails)}
+              variant="outline"
+              size="sm"
+            >
+              {showBoundaryDetails ? 'Hide Details' : 'Show Details'}
+            </Button>
+          </div>
+          
+          {/* Mapping Statistics */}
+          {stats && (
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+              <div className="bg-white p-3 rounded border">
+                <div className="text-sm text-gray-600">Points Mapped</div>
+                <div className="text-xl font-bold text-blue-600">{stats.pointCount}</div>
+              </div>
+              <div className="bg-white p-3 rounded border">
+                <div className="text-sm text-gray-600">Perimeter</div>
+                <div className="text-xl font-bold text-green-600">
+                  {stats.perimeter > 0 ? `${(stats.perimeter).toFixed(0)}m` : '-'}
+                </div>
+              </div>
+              <div className="bg-white p-3 rounded border">
+                <div className="text-sm text-gray-600">Area</div>
+                <div className="text-xl font-bold text-orange-600">
+                  {stats.area > 0 ? `${stats.area.toFixed(2)} ha` : '-'}
+                </div>
+              </div>
+              <div className="bg-white p-3 rounded border">
+                <div className="text-sm text-gray-600">Status</div>
+                <div className="text-sm font-bold">
+                  {stats.isComplete ? 
+                    <span className="text-green-600">✅ Complete</span> : 
+                    <span className="text-yellow-600">🔄 In Progress</span>
+                  }
+                </div>
+              </div>
+            </div>
+          )}
+          
+          {/* Point Details */}
+          {showBoundaryDetails && (
+            <div className="space-y-2">
+              <h4 className="font-medium text-gray-700">📍 Boundary Points</h4>
+              <div className="max-h-40 overflow-y-auto space-y-1">
+                {points.map((point, index) => (
+                  <div 
+                    key={point.id || index}
+                    className={`flex justify-between items-center p-2 rounded text-sm cursor-pointer transition-colors ${
+                      selectedPointIndex === index ? 'bg-blue-100 border border-blue-300' : 'bg-white hover:bg-gray-50'
+                    }`}
+                    onClick={() => setSelectedPointIndex(selectedPointIndex === index ? null : index)}
+                  >
+                    <div className="flex items-center gap-2">
+                      <span className={`w-6 h-6 rounded-full flex items-center justify-center text-xs font-bold text-white ${
+                        index === 0 ? 'bg-green-500' : 
+                        index === points.length - 1 && points.length > 1 ? 'bg-red-500' : 'bg-blue-500'
+                      }`}>
+                        {String.fromCharCode(65 + index)}
+                      </span>
+                      <span className="font-mono text-xs">
+                        {point.latitude.toFixed(6)}, {point.longitude.toFixed(6)}
+                      </span>
+                    </div>
+                    <div className="text-xs text-gray-500">
+                      {point.accuracy ? `±${point.accuracy.toFixed(1)}m` : 'GPS'}
+                    </div>
+                  </div>
+                ))}
+              </div>
+              
+              {/* Selected Point Details */}
+              {selectedPointIndex !== null && points[selectedPointIndex] && (
+                <div className="bg-blue-50 p-3 rounded border">
+                  <h5 className="font-medium text-blue-800">
+                    Point {String.fromCharCode(65 + selectedPointIndex)} Details
+                  </h5>
+                  <div className="mt-2 space-y-1 text-sm">
+                    <div><strong>Coordinates:</strong> {points[selectedPointIndex].latitude.toFixed(8)}, {points[selectedPointIndex].longitude.toFixed(8)}</div>
+                    <div><strong>Accuracy:</strong> ±{points[selectedPointIndex].accuracy?.toFixed(1) || '1.0'}m</div>
+                    <div><strong>Timestamp:</strong> {points[selectedPointIndex].timestamp?.toLocaleString() || 'N/A'}</div>
+                    {selectedPointIndex > 0 && (
+                      <div><strong>Distance from previous:</strong> {calculateDistance(points[selectedPointIndex - 1], points[selectedPointIndex]).toFixed(1)}m</div>
+                    )}
+                  </div>
+                </div>
+              )}
+            </div>
+          )}
+        </div>
+      )}
       
       <div className="flex justify-between items-center">
         <div className="text-sm text-gray-600">

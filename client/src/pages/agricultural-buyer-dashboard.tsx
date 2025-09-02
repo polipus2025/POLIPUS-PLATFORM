@@ -578,7 +578,7 @@ export default function AgriculturalBuyerDashboard() {
     }
   };
 
-  // 🎯 REQUEST PAYMENT TO EXPORTER FUNCTION
+  // 🎯 ENHANCED PAYMENT WORKFLOW FUNCTIONS
   const handleRequestPayment = async (custodyId: string) => {
     try {
       await apiRequest('/api/buyer/request-payment-to-exporter', {
@@ -592,7 +592,7 @@ export default function AgriculturalBuyerDashboard() {
 
       toast({
         title: "Payment Request Sent",
-        description: "Payment request has been sent to the exporter. They can now confirm payment.",
+        description: "Payment request has been sent to the exporter. Waiting for their confirmation.",
       });
 
       // Refresh both custody lots and exporter data
@@ -607,6 +607,57 @@ export default function AgriculturalBuyerDashboard() {
         variant: "destructive",
       });
     }
+  };
+
+  const handleValidatePayment = async (custodyId: string) => {
+    try {
+      await apiRequest('/api/buyer/validate-payment', {
+        method: 'POST',
+        body: JSON.stringify({
+          custodyId,
+          buyerId,
+          validatedAt: new Date().toISOString()
+        })
+      });
+
+      toast({
+        title: "Payment Validated",
+        description: "Transaction completed successfully! Payment has been validated.",
+      });
+
+      // Refresh custody lots
+      queryClient.invalidateQueries({ queryKey: ['/api/buyer/custody-lots', buyerId] });
+      refetchCustodyLots();
+      
+    } catch (error) {
+      console.error('Error validating payment:', error);
+      toast({
+        title: "Error",
+        description: "Failed to validate payment. Please try again.",
+        variant: "destructive",
+      });
+    }
+  };
+
+  // 🎯 GET PAYMENT WORKFLOW STATUS
+  const getPaymentWorkflowStatus = (custodyId: string) => {
+    // Find the lot with this custody ID to get payment workflow status
+    const lot = custodyLotsData?.data?.find((l: any) => l.custodyId === custodyId);
+    const paymentWorkflow = lot?.paymentWorkflow;
+    
+    if (!paymentWorkflow) {
+      return {
+        requested: false,
+        confirmed: false,
+        validated: false
+      };
+    }
+    
+    return {
+      requested: paymentWorkflow.requested || false,
+      confirmed: paymentWorkflow.confirmed || false,
+      validated: paymentWorkflow.validated || false
+    };
   };
 
   // Manual payment confirmation functions
@@ -1657,23 +1708,82 @@ export default function AgriculturalBuyerDashboard() {
                                     </p>
                                   )}
 
-                                  {/* 🎯 REQUEST PAYMENT TO EXPORTER BUTTON */}
+                                  {/* 🎯 ENHANCED PAYMENT WORKFLOW - Request → Validate → Complete */}
                                   {lot.inspection_status === 'PASSED' && lot.custody_status?.includes('PASSED') && (
                                     <div className="mt-3 p-3 bg-green-50 border border-green-200 rounded-lg">
                                       <div className="flex items-center justify-between">
                                         <div>
                                           <p className="text-sm font-medium text-green-800">✅ Inspection Completed</p>
-                                          <p className="text-xs text-green-600">Ready to request payment from exporter</p>
+                                          {(() => {
+                                            const paymentStatus = getPaymentWorkflowStatus(lot.custodyId);
+                                            if (!paymentStatus.requested) {
+                                              return <p className="text-xs text-green-600">Ready to request payment from exporter</p>;
+                                            } else if (paymentStatus.requested && !paymentStatus.confirmed) {
+                                              return <p className="text-xs text-orange-600">⏳ Waiting for exporter payment confirmation</p>;
+                                            } else if (paymentStatus.confirmed && !paymentStatus.validated) {
+                                              return <p className="text-xs text-blue-600">💳 Payment confirmed - Ready to validate</p>;
+                                            } else {
+                                              return <p className="text-xs text-green-600">✅ Transaction completed successfully</p>;
+                                            }
+                                          })()}
                                         </div>
-                                        <Button
-                                          size="sm"
-                                          onClick={() => handleRequestPayment(lot.custodyId)}
-                                          className="bg-green-600 hover:bg-green-700 text-white"
-                                          data-testid={`button-request-payment-${lot.custodyId}`}
-                                        >
-                                          <DollarSign className="w-4 h-4 mr-1" />
-                                          Request Payment
-                                        </Button>
+                                        {(() => {
+                                          const paymentStatus = getPaymentWorkflowStatus(lot.custodyId);
+                                          
+                                          if (!paymentStatus.requested) {
+                                            // Initial state: Request Payment
+                                            return (
+                                              <Button
+                                                size="sm"
+                                                onClick={() => handleRequestPayment(lot.custodyId)}
+                                                className="bg-green-600 hover:bg-green-700 text-white"
+                                                data-testid={`button-request-payment-${lot.custodyId}`}
+                                              >
+                                                <DollarSign className="w-4 h-4 mr-1" />
+                                                Request Payment
+                                              </Button>
+                                            );
+                                          } else if (paymentStatus.requested && !paymentStatus.confirmed) {
+                                            // Waiting for exporter confirmation
+                                            return (
+                                              <Button
+                                                size="sm"
+                                                disabled
+                                                className="bg-orange-400 text-white cursor-not-allowed"
+                                                data-testid={`button-waiting-confirmation-${lot.custodyId}`}
+                                              >
+                                                <DollarSign className="w-4 h-4 mr-1" />
+                                                Validate Payment
+                                              </Button>
+                                            );
+                                          } else if (paymentStatus.confirmed && !paymentStatus.validated) {
+                                            // Exporter confirmed - buyer can validate
+                                            return (
+                                              <Button
+                                                size="sm"
+                                                onClick={() => handleValidatePayment(lot.custodyId)}
+                                                className="bg-blue-600 hover:bg-blue-700 text-white"
+                                                data-testid={`button-validate-payment-${lot.custodyId}`}
+                                              >
+                                                <CheckCircle className="w-4 h-4 mr-1" />
+                                                Validate Payment
+                                              </Button>
+                                            );
+                                          } else {
+                                            // Transaction completed
+                                            return (
+                                              <Button
+                                                size="sm"
+                                                disabled
+                                                className="bg-green-600 text-white cursor-default"
+                                                data-testid={`button-completed-${lot.custodyId}`}
+                                              >
+                                                <CheckCircle className="w-4 h-4 mr-1" />
+                                                ✅ Completed
+                                              </Button>
+                                            );
+                                          }
+                                        })()}
                                       </div>
                                     </div>
                                   )}

@@ -818,11 +818,11 @@ export default function RealMapBoundaryMapper({
         setCurrentGPSPosition({lat, lng});
         setTrackingAccuracy(accuracy);
         
-        // Controllo accuratezza GPS minima 2.5m
-        if (accuracy > MIN_GPS_ACCURACY) {
-          setStatus(`⚠️ GPS accuracy too low: ${accuracy.toFixed(1)}m (need ≤${MIN_GPS_ACCURACY}m) - Move to open area`);
+        // Indicatore accuratezza GPS - verde quando ≤2.5m
+        if (accuracy <= MIN_GPS_ACCURACY) {
+          setStatus(`🟢 GPS HIGH PRECISION: ${accuracy.toFixed(1)}m - Ready to map - Points: ${points.length}/${maxPoints}`);
         } else {
-          setStatus(`✅ GPS tracking active - Accuracy: ${accuracy.toFixed(1)}m - Points: ${points.length}/${maxPoints}`);
+          setStatus(`🟡 GPS tracking active - Accuracy: ${accuracy.toFixed(1)}m - Points: ${points.length}/${maxPoints}`);
         }
         
         // Update map center to follow user
@@ -860,11 +860,8 @@ export default function RealMapBoundaryMapper({
       return;
     }
 
-    // Controllo accuratezza GPS minima 2.5m
-    if (trackingAccuracy && trackingAccuracy > MIN_GPS_ACCURACY) {
-      setStatus(`❌ Cannot add point - GPS accuracy too low: ${trackingAccuracy.toFixed(1)}m (need ≤${MIN_GPS_ACCURACY}m)`);
-      return;
-    }
+    // Nota accuratezza GPS per il punto
+    const gpsQuality = trackingAccuracy && trackingAccuracy <= MIN_GPS_ACCURACY ? 'HIGH' : 'MEDIUM';
 
     const newPoint: BoundaryPoint = {
       latitude: currentGPSPosition.lat,
@@ -875,7 +872,12 @@ export default function RealMapBoundaryMapper({
     };
 
     setPoints(prev => [...prev, newPoint]);
-    setStatus(`✅ Point ${points.length + 1} added - GPS accuracy: ${trackingAccuracy?.toFixed(1)}m`);
+    
+    if (gpsQuality === 'HIGH') {
+      setStatus(`🟢 Point ${points.length + 1} added - HIGH PRECISION GPS: ${trackingAccuracy?.toFixed(1)}m`);
+    } else {
+      setStatus(`🟡 Point ${points.length + 1} added - GPS accuracy: ${trackingAccuracy?.toFixed(1)}m`);
+    }
     
     // Trigger EUDR analysis if we have enough points
     if (points.length + 1 >= 3) {
@@ -1418,16 +1420,16 @@ export default function RealMapBoundaryMapper({
             </Button>
             <Button
               onClick={addCurrentGPSPoint}
-              disabled={!isTrackingGPS || !currentGPSPosition || points.length >= maxPoints || (trackingAccuracy && trackingAccuracy > MIN_GPS_ACCURACY)}
+              disabled={!isTrackingGPS || !currentGPSPosition || points.length >= maxPoints}
               size="sm"
-              variant={trackingAccuracy && trackingAccuracy > MIN_GPS_ACCURACY ? "destructive" : "default"}
+              variant={trackingAccuracy && trackingAccuracy <= MIN_GPS_ACCURACY ? "default" : "secondary"}
               className="flex-1 sm:flex-none"
             >
               <span className="hidden sm:inline">
-                {trackingAccuracy && trackingAccuracy > MIN_GPS_ACCURACY ? '⚠️ GPS Too Inaccurate' : `Add GPS Point (${points.length}/${maxPoints})`}
+                {trackingAccuracy && trackingAccuracy <= MIN_GPS_ACCURACY ? `🟢 Add GPS Point (${points.length}/${maxPoints})` : `Add GPS Point (${points.length}/${maxPoints})`}
               </span>
               <span className="sm:hidden">
-                {trackingAccuracy && trackingAccuracy > MIN_GPS_ACCURACY ? '⚠️ GPS' : `Add Point (${points.length}/${maxPoints})`}
+                {trackingAccuracy && trackingAccuracy <= MIN_GPS_ACCURACY ? `🟢 Add Point (${points.length}/${maxPoints})` : `Add Point (${points.length}/${maxPoints})`}
               </span>
             </Button>
           </div>

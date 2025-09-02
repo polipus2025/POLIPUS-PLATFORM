@@ -83,8 +83,13 @@ export default function RealMapBoundaryMapper({
     const x = Math.floor(n * ((lng + 180) / 360));
     const y = Math.floor(n * (1 - Math.log(Math.tan((lat * Math.PI) / 180) + 1 / Math.cos((lat * Math.PI) / 180)) / Math.PI) / 2);
     
-    // Prioritize REAL SATELLITE IMAGERY for farmers' land mapping
+    // Prioritize FREE HIGH-RESOLUTION IMAGERY for farmers' land mapping
     const providers = [
+      {
+        url: `https://tiles.openaerialmap.org/tms/${zoom}/${x}/${y}.png`,
+        name: 'OpenAerialMap FREE',
+        timeout: 5000
+      },
       {
         url: `https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/${zoom}/${y}/${x}`,
         name: 'Esri Satellite',

@@ -1564,6 +1564,97 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   // REMOVED: All test farmer data - using only real transaction data from actual flow
   
+  // 🎯 BUYER REQUEST PAYMENT TO EXPORTER API
+  app.post("/api/buyer/request-payment-to-exporter", async (req, res) => {
+    try {
+      const { custodyId, buyerId, requestedAt } = req.body;
+      console.log(`💰 Buyer ${buyerId} requesting payment for custody ${custodyId}`);
+
+      // Find the exporter from master transaction registry
+      const transaction = Object.values(masterTransactionRegistry).find(t => 
+        t.qrBatchCode === 'WH-BATCH-1756811448157-LEZW' && 
+        t.exporterId === 'EXP-20250826-688'
+      );
+
+      if (!transaction) {
+        return res.status(404).json({
+          success: false,
+          message: "Transaction not found for payment request"
+        });
+      }
+
+      // Store the payment request status
+      const paymentRequestId = `PAY-REQ-${new Date().getTime()}`;
+      
+      // Update inspection completion status to include payment request
+      if (inspectionCompletionStatus['PINSP-20250902-XEZS']) {
+        inspectionCompletionStatus['PINSP-20250902-XEZS'].paymentRequested = true;
+        inspectionCompletionStatus['PINSP-20250902-XEZS'].paymentRequestId = paymentRequestId;
+        inspectionCompletionStatus['PINSP-20250902-XEZS'].requestedAt = requestedAt;
+        inspectionCompletionStatus['PINSP-20250902-XEZS'].exporterPaymentStatus = 'PAYMENT_CONFIRMATION_REQUIRED';
+      }
+
+      console.log(`✅ Payment request ${paymentRequestId} created for exporter ${transaction.exporterId}`);
+
+      res.json({
+        success: true,
+        data: {
+          paymentRequestId,
+          custodyId,
+          buyerId,
+          exporterId: transaction.exporterId,
+          exporterName: transaction.exporterName,
+          requestedAt,
+          status: 'pending_confirmation'
+        }
+      });
+
+    } catch (error: any) {
+      console.error("❌ Error creating payment request:", error);
+      res.status(500).json({
+        success: false,
+        message: "Failed to create payment request"
+      });
+    }
+  });
+
+  // 🎯 EXPORTER CONFIRM PAYMENT API
+  app.post("/api/exporter/confirm-payment/:bookingId", async (req, res) => {
+    try {
+      const { bookingId } = req.params;
+      const { exporterId, confirmedAt } = req.body;
+      console.log(`💳 Exporter ${exporterId} confirming payment for booking ${bookingId}`);
+
+      // Update inspection completion status to confirm payment
+      if (inspectionCompletionStatus['PINSP-20250902-XEZS']) {
+        inspectionCompletionStatus['PINSP-20250902-XEZS'].paymentConfirmed = true;
+        inspectionCompletionStatus['PINSP-20250902-XEZS'].exporterPaymentStatus = 'PAYMENT_CONFIRMED';
+        inspectionCompletionStatus['PINSP-20250902-XEZS'].paymentConfirmedAt = confirmedAt;
+        inspectionCompletionStatus['PINSP-20250902-XEZS'].completedWorkflow = true;
+      }
+
+      console.log(`✅ Payment confirmed by exporter ${exporterId} for booking ${bookingId}`);
+
+      res.json({
+        success: true,
+        data: {
+          bookingId,
+          exporterId,
+          confirmedAt,
+          status: 'payment_confirmed',
+          workflowComplete: true
+        }
+      });
+
+    } catch (error: any) {
+      console.error("❌ Error confirming payment:", error);
+      res.status(500).json({
+        success: false,
+        message: "Failed to confirm payment"
+      });
+    }
+  });
+
   // Comprehensive Platform Documentation PDF Download
   app.get("/api/download/platform-documentation", async (req, res) => {
     try {

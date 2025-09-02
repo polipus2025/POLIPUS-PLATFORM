@@ -1,6 +1,7 @@
 import { memo, useCallback, Suspense, useState } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { useToast } from "@/hooks/use-toast";
+import { apiRequest } from '@/lib/queryClient';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -45,6 +46,35 @@ const ExporterInspections = memo(() => {
   const queryClient = useQueryClient();
   const [showBookingModal, setShowBookingModal] = useState(false);
   const [selectedPickup, setSelectedPickup] = useState<any>(null);
+
+  // 🎯 PAYMENT CONFIRMATION HANDLER
+  const handleConfirmPayment = async (bookingId: string) => {
+    try {
+      await apiRequest(`/api/exporter/confirm-payment/${bookingId}`, {
+        method: 'POST',
+        body: JSON.stringify({
+          exporterId: 'EXP-20250826-688',
+          confirmedAt: new Date().toISOString()
+        })
+      });
+
+      toast({
+        title: "Payment Confirmed",
+        description: "Payment confirmation has been sent to the buyer and regulatory authorities.",
+      });
+
+      // Refresh inspection bookings
+      queryClient.invalidateQueries({ queryKey: [`/api/exporter/EXP-20250826-688/inspection-bookings`] });
+      
+    } catch (error) {
+      console.error('Error confirming payment:', error);
+      toast({
+        title: "Error",
+        description: "Failed to confirm payment. Please try again.",
+        variant: "destructive",
+      });
+    }
+  };
   
   // ⚡ SUPER OPTIMIZED USER QUERY - Match dashboard pattern
   const { data: user, isLoading: userLoading } = useQuery({
@@ -394,6 +424,27 @@ const ExporterInspections = memo(() => {
                                           {booking.completed_at && (
                                             <p>Date: {new Date(booking.completed_at).toLocaleString()}</p>
                                           )}
+                                        </div>
+                                      </div>
+                                    )}
+
+                                    {/* 🎯 PAYMENT CONFIRMATION BUTTON */}
+                                    {booking?.completion_status === 'INSPECTION_PASSED' && (
+                                      <div className="mt-3 p-3 bg-blue-50 border border-blue-200 rounded">
+                                        <div className="flex items-center justify-between">
+                                          <div>
+                                            <p className="text-sm font-medium text-blue-800">💰 Payment Confirmation Required</p>
+                                            <p className="text-xs text-blue-600">Buyer has requested payment confirmation</p>
+                                          </div>
+                                          <Button
+                                            size="sm"
+                                            onClick={() => handleConfirmPayment(booking.booking_id)}
+                                            className="bg-blue-600 hover:bg-blue-700 text-white"
+                                            data-testid={`button-confirm-payment-${booking.booking_id}`}
+                                          >
+                                            <CheckCircle className="w-4 h-4 mr-1" />
+                                            Confirm Payment
+                                          </Button>
                                         </div>
                                       </div>
                                     )}

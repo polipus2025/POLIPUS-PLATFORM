@@ -18817,11 +18817,12 @@ VERIFY: ${qrCodeData.verificationUrl}`;
 
       // Create buyer notification for offer acceptance
       try {
-        const [offerDetails] = await db.execute(sql`
+        const result = await db.execute(sql`
           SELECT buyer_id, buyer_company, commodity, quantity_available, total_value
           FROM buyer_exporter_offers 
           WHERE offer_id = ${offerId}
         `);
+        const offerDetails = result.rows[0];
         
         if (offerDetails) {
           const notificationId = `BEN-${timestamp}-${Math.floor(Math.random() * 1000).toString().padStart(3, '0')}`;
@@ -18853,13 +18854,14 @@ VERIFY: ${qrCodeData.verificationUrl}`;
       // 🎯 AUTOMATIC MASTER TRANSACTION UPDATE - Exporter Acceptance Stage
       try {
         // Get offer details to find the farmer offer ID
-        const [offerDetails] = await db.execute(sql`
+        const result = await db.execute(sql`
           SELECT beo.custody_id, wc.buyer_id 
           FROM buyer_exporter_offers beo
           LEFT JOIN warehouse_custody wc ON beo.custody_id = wc.custody_id
           WHERE beo.offer_id = ${offerId}
           LIMIT 1
         `);
+        const offerDetails = result.rows[0];
         
         if (offerDetails && offerDetails.buyer_id) {
           await updateMasterTransactionByBuyerId(offerDetails.buyer_id, 'exporter_acceptance', {

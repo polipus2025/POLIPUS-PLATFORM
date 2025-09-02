@@ -62,6 +62,7 @@ export default function RealMapBoundaryMapper({
   const [gpsWatchId, setGpsWatchId] = useState<number | null>(null);
   const [currentGPSPosition, setCurrentGPSPosition] = useState<{lat: number, lng: number} | null>(null);
   const [trackingAccuracy, setTrackingAccuracy] = useState<number | null>(null);
+  const MIN_GPS_ACCURACY = 2.5; // Minimo 2.5 metri di precisione GPS
   const [eudrReport, setEudrReport] = useState<EUDRComplianceReport | null>(null);
   const [deforestationReport, setDeforestationReport] = useState<DeforestationReport | null>(null);
   const [isAnalyzing, setIsAnalyzing] = useState(false);
@@ -816,7 +817,13 @@ export default function RealMapBoundaryMapper({
         
         setCurrentGPSPosition({lat, lng});
         setTrackingAccuracy(accuracy);
-        setStatus(`GPS tracking active - Accuracy: ${accuracy.toFixed(1)}m - Points: ${points.length}/${maxPoints}`);
+        
+        // Controllo accuratezza GPS minima 2.5m
+        if (accuracy > MIN_GPS_ACCURACY) {
+          setStatus(`⚠️ GPS accuracy too low: ${accuracy.toFixed(1)}m (need ≤${MIN_GPS_ACCURACY}m) - Move to open area`);
+        } else {
+          setStatus(`✅ GPS tracking active - Accuracy: ${accuracy.toFixed(1)}m - Points: ${points.length}/${maxPoints}`);
+        }
         
         // Update map center to follow user
         setMapCenter({lat, lng});
@@ -853,13 +860,22 @@ export default function RealMapBoundaryMapper({
       return;
     }
 
+    // Controllo accuratezza GPS minima 2.5m
+    if (trackingAccuracy && trackingAccuracy > MIN_GPS_ACCURACY) {
+      setStatus(`❌ Cannot add point - GPS accuracy too low: ${trackingAccuracy.toFixed(1)}m (need ≤${MIN_GPS_ACCURACY}m)`);
+      return;
+    }
+
     const newPoint: BoundaryPoint = {
       latitude: currentGPSPosition.lat,
-      longitude: currentGPSPosition.lng
+      longitude: currentGPSPosition.lng,
+      id: `point-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
+      timestamp: new Date(),
+      accuracy: trackingAccuracy || 2.0
     };
 
     setPoints(prev => [...prev, newPoint]);
-    setStatus(`Point ${points.length + 1} added - GPS accuracy: ${trackingAccuracy?.toFixed(1)}m`);
+    setStatus(`✅ Point ${points.length + 1} added - GPS accuracy: ${trackingAccuracy?.toFixed(1)}m`);
     
     // Trigger EUDR analysis if we have enough points
     if (points.length + 1 >= 3) {
@@ -1402,13 +1418,17 @@ export default function RealMapBoundaryMapper({
             </Button>
             <Button
               onClick={addCurrentGPSPoint}
-              disabled={!isTrackingGPS || !currentGPSPosition || points.length >= maxPoints}
+              disabled={!isTrackingGPS || !currentGPSPosition || points.length >= maxPoints || (trackingAccuracy && trackingAccuracy > MIN_GPS_ACCURACY)}
               size="sm"
-              variant="default"
+              variant={trackingAccuracy && trackingAccuracy > MIN_GPS_ACCURACY ? "destructive" : "default"}
               className="flex-1 sm:flex-none"
             >
-              <span className="hidden sm:inline">Add GPS Point ({points.length}/{maxPoints})</span>
-              <span className="sm:hidden">Add Point ({points.length}/{maxPoints})</span>
+              <span className="hidden sm:inline">
+                {trackingAccuracy && trackingAccuracy > MIN_GPS_ACCURACY ? '⚠️ GPS Too Inaccurate' : `Add GPS Point (${points.length}/${maxPoints})`}
+              </span>
+              <span className="sm:hidden">
+                {trackingAccuracy && trackingAccuracy > MIN_GPS_ACCURACY ? '⚠️ GPS' : `Add Point (${points.length}/${maxPoints})`}
+              </span>
             </Button>
           </div>
         </div>
@@ -1419,7 +1439,7 @@ export default function RealMapBoundaryMapper({
         <div className="flex items-center justify-between">
           <span className="text-sm text-blue-800">{status}</span>
           <div className="text-xs text-blue-600">
-            Points: {points.length}/{minPoints}+ {area > 0 && `• Area: ${area.toFixed(2)} hectares`}
+            Points: {points.length}/{minPoints}+ {area > 0 && `• Area: ${area.toFixed(2)} hectares`} {trackingAccuracy && `• GPS: ${trackingAccuracy.toFixed(1)}m`}
           </div>
         </div>
       </div>

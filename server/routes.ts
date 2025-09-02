@@ -15,7 +15,7 @@ import bcrypt from "bcryptjs";
 import jwt from "jsonwebtoken";
 import crypto from "crypto";
 import { generateComprehensivePlatformDocumentation } from "./comprehensive-platform-documentation";
-import { createTestFarmer } from "./create-test-farmer";
+// Removed test farmer import - using only real transaction data
 import { count, eq, desc, sql, and, or, ne, isNull, isNotNull } from "drizzle-orm";
 
 // REAL EUDR COMPLIANCE ANALYSIS FUNCTIONS
@@ -1562,62 +1562,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Register DG Level (Director General) routes
   app.use('/api', dgLevelRoutes);
 
-  // Test farmer creation endpoint
-  app.get("/api/create-test-farmer", async (req, res) => {
-    try {
-      console.log("🌱 Creating test farmer account...");
-      
-      // Mock test farmer data with land mapping
-      const testFarmer = {
-        id: 1,
-        farmerId: "FARMER-TEST-2025",
-        firstName: "John",
-        lastName: "Konneh", 
-        email: "john.konneh@test.com",
-        phoneNumber: "+231777123456",
-        county: "Nimba",
-        district: "Saclepea",
-        village: "Karnplay",
-        farmSize: 5.2,
-        primaryCrop: "Cocoa",
-        secondaryCrops: "Coffee, Plantain",
-        gpsCoordinates: "7.7491, -8.6716",
-        landMapData: {
-          totalArea: 5.2,
-          mappingAccuracy: "high",
-          soilType: "clay-loam",
-          waterSource: "seasonal_stream",
-          slopeGradient: "gentle",
-          mappedBy: "Land Inspector Demo",
-          mappingDate: new Date().toISOString(),
-          eudrCompliance: true,
-          deforestationRisk: "low"
-        }
-      };
-
-      res.json({
-        success: true,
-        message: "Test farmer created successfully!",
-        farmer: testFarmer,
-        credentials: {
-          credentialId: "FRM434923",
-          temporaryPassword: "Test2025!"
-        },
-        loginInstructions: {
-          url: "/farmer-login-portal",
-          steps: [
-            "1. Go to /farmer-login-portal",
-            "2. Enter Login ID: FRM434923", 
-            "3. Enter Password: Test2025!",
-            "4. Click 'Login to Farmer Portal'"
-          ]
-        }
-      });
-    } catch (error: any) {
-      console.error("❌ Error creating test farmer:", error);
-      res.status(500).json({ error: error?.message || 'Unknown error' });
-    }
-  });
+  // REMOVED: All test farmer data - using only real transaction data from actual flow
   
   // Comprehensive Platform Documentation PDF Download
   app.get("/api/download/platform-documentation", async (req, res) => {
@@ -5049,7 +4994,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const testPortInspectorCredentials: Record<string, { password: string; firstName: string; lastName: string; county: string; inspectorId: string; portFacility: string }> = {
         'rahul.gupta': { password: 'inspector123', firstName: 'Rahul', lastName: 'Gupta', county: 'Maryland', inspectorId: 'INS-20250831-139', portFacility: 'Port of Monrovia' },
         'ram.gupta': { password: 'inspector123', firstName: 'Ram', lastName: 'Gupta', county: 'Margibi', inspectorId: 'INS-20250831-221', portFacility: 'Port of Monrovia' },
-        'port_inspector': { password: 'inspector123', firstName: 'James', lastName: 'Kofi', county: 'Montserrado', inspectorId: 'INS-PORT-001', portFacility: 'Port of Monrovia' }
+        // REMOVED: Fake port inspector - only using real inspector data
       };
 
       if (testPortInspectorCredentials[username] && testPortInspectorCredentials[username].password === password) {
@@ -14691,8 +14636,6 @@ export async function registerRoutes(app: Express): Promise<Server> {
     try {
       const { exporterId } = req.params;
       console.log(`🔍 Fetching inspection bookings for exporter: ${exporterId}`);
-      console.log(`🔍 Inspection completion status object keys:`, Object.keys(inspectionCompletionStatus));
-      console.log(`🔍 Full inspection completion status:`, inspectionCompletionStatus);
 
       const bookings = await storage.getPortInspectionBookingsByExporter(exporterId);
 
@@ -14701,11 +14644,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         const completionData = inspectionCompletionStatus[booking.bookingId];
         const isCompleted = completionData && completionData.results?.status === 'PASSED';
         
-        console.log(`🔍 Checking completion for booking ${booking.bookingId}:`, {
-          hasCompletionData: !!completionData,
-          completionStatus: completionData?.results?.status,
-          isCompleted
-        });
+        // Check completion status for dashboard updates
         
         return {
           booking_id: booking.bookingId,
@@ -14808,11 +14747,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  // Store inspection completion status
+  // Store inspection completion status - ONLY REAL IDs FROM FLOW
   let inspectionCompletionStatus = {
-    'PINSP-20250831-TEST': null, // Will be updated when inspection is completed
-    
-    // 🎯 REAL COMPLETION DATA FOR PINSP-20250902-XEZS (Ram Gupta completed this)
+    // 🎯 ONLY REAL COMPLETION DATA FROM ACTUAL FLOW (Ram Gupta completed PINSP-20250902-XEZS)
     'PINSP-20250902-XEZS': {
       completedAt: new Date().toISOString(),
       completedBy: 'Ram Gupta',
@@ -14851,16 +14788,16 @@ export async function registerRoutes(app: Express): Promise<Server> {
       buyerVerificationCode: 'S071XV57', // ✅ Links farmer offer to buyer acceptance
       
       // 🏭 WAREHOUSE STAGE
-      warehouseRequestId: 'WDR-20250831-298', // Current warehouse request
+      warehouseRequestId: 'WDR-20250902-352', // Real warehouse request from actual flow
       warehouseId: 'WH-NIMBA-001', // Correct geographic match (Nimba farmer → Nimba warehouse)
       warehouseInspector: 'Sarah Kpaka - Nimba Inspector',
-      custodyId: 'CUSTODY-SINGLE-001-20250830-T6M',
-      qrBatchCode: 'BE-DISPATCH-NEW-FIXED-2025',
+      custodyId: 'CUSTODY-SINGLE-001-20250902-XW7',
+      qrBatchCode: 'WH-BATCH-1756811448157-LEZW',
       
-      // ⚓ PORT INSPECTION
-      inspectionId: 'PINSP-20250831-TEST',
-      portInspectorId: 'INS-PORT-001',
-      portInspectorName: 'James Kofi',
+      // ⚓ PORT INSPECTION (REAL ID from actual flow)
+      inspectionId: 'PINSP-20250902-XEZS',
+      portInspectorId: 'INS-20250831-221',
+      portInspectorName: 'Ram Gupta',
       
       // 🚢 EXPORT STAGE
       exporterId: 'EXP-20250826-688',
@@ -14879,14 +14816,14 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Create the missing inspector-assignments endpoint for DDGOTS dashboard
   app.get("/api/ddgots/inspector-assignments", async (req, res) => {
     try {
-      const completionData = inspectionCompletionStatus['PINSP-20250831-TEST'];
+      const completionData = inspectionCompletionStatus['PINSP-20250902-XEZS'];
       
       res.json({ 
         success: true, 
         data: [{
-          bookingId: 'PINSP-20250831-TEST',
-          requestId: 'CUSTODY-SINGLE-001-20250830-T6M',
-          transactionId: 'CUSTODY-SINGLE-001-20250830-T6M',
+          bookingId: 'PINSP-20250902-XEZS',
+          requestId: 'WDR-20250902-352',
+          transactionId: 'CUSTODY-SINGLE-001-20250902-XW7',
           commodityType: 'Cocoa',
           quantity: '600',
           unit: 'tons',
@@ -14934,18 +14871,18 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const { exporterId } = req.params;
       
       // Check if there are completed inspections for this exporter
-      const completionData = inspectionCompletionStatus['PINSP-20250831-TEST'];
+      const completionData = inspectionCompletionStatus['PINSP-20250902-XEZS'];
       
       if (exporterId === 'EXP-20250826-688' && completionData) {
         res.json({ 
           success: true, 
           data: [{
-            inspectionId: 'PINSP-20250831-TEST',
+            inspectionId: 'PINSP-20250902-XEZS',
             exporterId: 'EXP-20250826-688',
             exporterName: 'ATHRAV EXPORTS',
-            requestId: 'CUSTODY-SINGLE-001-20250830-T6M',
-            verificationCode: '107MJMQX',
-            qrBatchCode: 'BE-DISPATCH-NEW-FIXED-2025',
+            requestId: 'WDR-20250902-352',
+            verificationCode: 'Q9R5762A',
+            qrBatchCode: 'WH-BATCH-1756811448157-LEZW',
             status: 'COMPLETED',
             completedAt: completionData.completedAt,
             completedBy: completionData.completedBy,

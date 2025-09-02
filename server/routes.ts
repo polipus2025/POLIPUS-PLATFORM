@@ -14563,94 +14563,79 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.post("/api/exporter/book-inspection", async (req, res) => {
     try {
       const { 
-        requestId, 
-        transactionId, 
-        commodityType, 
-        quantity, 
-        unit, 
-        totalValue, 
-        dispatchDate,
-        buyerName, 
-        buyerCompany, 
-        verificationCode, 
-        county, 
-        farmLocation,
+        requestId,
         exporterId,
         exporterName,
         exporterCompany,
-        warehouseFacility,
         urgencyLevel 
       } = req.body;
+
+      // AUTOMATICALLY GET ALL DATA FROM WAREHOUSE DISPATCH REQUEST FLOW
+      const dispatchResult = await db.execute(sql`
+        SELECT 
+          wdr.request_id,
+          wdr.transaction_id,
+          wdr.verification_code,
+          wdr.buyer_name,
+          wdr.buyer_company,
+          wdr.commodity_type,
+          wdr.quantity,
+          wdr.unit,
+          wdr.total_value,
+          wdr.county,
+          wdr.farm_location,
+          wdr.dispatch_date
+        FROM warehouse_dispatch_requests wdr
+        WHERE wdr.request_id = ${requestId}
+        LIMIT 1
+      `);
+
+      if (!dispatchResult.rows[0]) {
+        return res.status(404).json({ error: "Warehouse dispatch request not found" });
+      }
+
+      const dispatchData = dispatchResult.rows[0];
 
       // Generate unique booking ID
       const bookingId = `PINSP-${new Date().getFullYear()}${(new Date().getMonth() + 1).toString().padStart(2, '0')}${new Date().getDate().toString().padStart(2, '0')}-${Math.random().toString(36).substr(2, 4).toUpperCase()}`;
       
-      // Calculate next working day for dispatch
-      const dispatchDateObj = new Date(dispatchDate);
-      const nextWorkingDay = new Date(dispatchDateObj);
-      nextWorkingDay.setDate(nextWorkingDay.getDate() + 1);
+      // Calculate NEXT WORKING DAY after dispatch for inspection (automatic timing)  
+      const dispatchDateObj = new Date(dispatchData.dispatch_date);
       
-      // If it falls on weekend, move to Monday
-      const dayOfWeek = nextWorkingDay.getDay();
-      if (dayOfWeek === 6) nextWorkingDay.setDate(nextWorkingDay.getDate() + 2);
-      else if (dayOfWeek === 0) nextWorkingDay.setDate(nextWorkingDay.getDate() + 1);
-
-      // Calculate inspection schedule date (2 days after dispatch for preparation)
-      const inspectionScheduleDate = new Date(nextWorkingDay);
-      inspectionScheduleDate.setDate(inspectionScheduleDate.getDate() + 2);
+      const inspectionDate = new Date(dispatchDateObj.getTime()); // Use getTime() for safer copying
+      inspectionDate.setDate(inspectionDate.getDate() + 1); // NEXT WORKING DAY
       
-      // ENSURE inspection is on WORKING DAY (Mon-Fri)
-      const inspectionDay = inspectionScheduleDate.getDay();
-      if (inspectionDay === 6) { // Saturday -> Monday
-        inspectionScheduleDate.setDate(inspectionScheduleDate.getDate() + 2);
-      } else if (inspectionDay === 0) { // Sunday -> Monday  
-        inspectionScheduleDate.setDate(inspectionScheduleDate.getDate() + 1);
-      }
-      // Now guaranteed to be Monday-Friday working day
+      // If inspection falls on weekend, move to Monday
+      const dayOfWeek = inspectionDate.getDay();
+      if (dayOfWeek === 6) inspectionDate.setDate(inspectionDate.getDate() + 2); // Saturday -> Monday
+      else if (dayOfWeek === 0) inspectionDate.setDate(inspectionDate.getDate() + 1); // Sunday -> Monday
 
-      // Get proper verification code from buyer-exporter flow via custody
-      let actualVerificationCode = 'Q9R5762A'; // Default for WDR-20250902-352
-      try {
-        const offerResult = await db.execute(sql`
-          SELECT beo.verification_code 
-          FROM buyer_exporter_offers beo
-          WHERE beo.custody_id = ${transactionId}
-          LIMIT 1
-        `);
-        if (offerResult.rows[0]) {
-          actualVerificationCode = offerResult.rows[0].verification_code;
-        }
-      } catch (e) {
-        console.log('Using default verification code');
-      }
-
+      // USE AUTOMATIC DATA FROM DISPATCH REQUEST FLOW - MAINTAIN CUSTODY IDENTIFIER  
       const bookingData = {
         bookingId,
-        requestId,
-        transactionId,
-        commodityType,
-        quantity,
-        unit,
-        totalValue,
-        dispatchDate: nextWorkingDay,
-        scheduledDate: inspectionScheduleDate, // Add scheduled inspection date
-        buyerName,
-        buyerCompany,
-        verificationCode, // This is the batch code (BE-DISPATCH-NEW-FIXED-2025)
-        actualVerificationCode, // This is the real verification code (107MJMQX)
-        county,
-        farmLocation,
+        requestId: dispatchData.request_id,
+        transactionId: dispatchData.transaction_id, // MAINTAIN CUSTODY IDENTIFIER
+        commodityType: dispatchData.commodity_type,
+        quantity: dispatchData.quantity.toString(),
+        unit: dispatchData.unit || 'MT',
+        totalValue: dispatchData.total_value.toString(),
+        dispatchDate: dispatchDateObj,
+        scheduledDate: inspectionDate, // AUTOMATIC NEXT WORKING DAY
+        buyerName: dispatchData.buyer_name,
+        buyerCompany: dispatchData.buyer_company,
+        verificationCode: dispatchData.verification_code, // FROM FLOW
+        county: dispatchData.county, // FROM FLOW
+        farmLocation: dispatchData.farm_location, // FROM FLOW
         confirmedBy: 'exporter-system',
         confirmedAt: new Date(),
-        exporterId: exporterId || 'EXP-SYS',
-        exporterName: exporterName || 'Exporter',
-        exporterCompany: exporterCompany || 'Export Company',
-        portFacility: warehouseFacility || 'Exporter Warehouse',
+        exporterId: exporterId,
+        exporterName: exporterName,
+        exporterCompany: exporterCompany,
+        portFacility: `${dispatchData.county} Port Facility`,
         inspectionType: 'quality_compliance',
         urgencyLevel: urgencyLevel || 'normal',
         assignmentStatus: 'pending_assignment',
-        bookedBy: 'exporter-system',
-        bookedAt: new Date()
+        bookedBy: 'exporter-system'
       };
 
       const newBooking = await storage.createPortInspectionBooking(bookingData);

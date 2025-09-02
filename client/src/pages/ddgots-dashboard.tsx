@@ -106,8 +106,8 @@ export default function DDGOTSDashboard() {
 
   // Port inspection booking data - Now calls the real API with completion status
   const { data: pendingAssignments, isLoading: pendingAssignmentsLoading } = useQuery({
-    queryKey: ['/api/ddgots/inspector-assignments'],
-    queryFn: () => apiRequest('/api/ddgots/inspector-assignments'),
+    queryKey: ['/api/ddgots/pending-inspector-assignments'],
+    queryFn: () => apiRequest('/api/ddgots/pending-inspector-assignments'),
     refetchInterval: 30000 // Refresh every 30 seconds to show completion updates
   });
 

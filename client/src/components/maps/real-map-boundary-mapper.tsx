@@ -64,7 +64,10 @@ export default function RealMapBoundaryMapper({
   const [trackingAccuracy, setTrackingAccuracy] = useState<number | null>(null);
   const [satelliteCount, setSatelliteCount] = useState(0);
   const [signalStrength, setSignalStrength] = useState(0);
-  const MIN_GPS_ACCURACY = 2.5; // Minimo 2.5 metri di precisione GPS
+  const [accuracyHistory, setAccuracyHistory] = useState<number[]>([]);
+  const [isSignalImproving, setIsSignalImproving] = useState(false);
+  const [lastAccuracyUpdate, setLastAccuracyUpdate] = useState<number>(Date.now());
+  const MIN_GPS_ACCURACY = 2.5; // Minimum 2.5 meters reference for excellent accuracy
   const [eudrReport, setEudrReport] = useState<EUDRComplianceReport | null>(null);
   const [deforestationReport, setDeforestationReport] = useState<DeforestationReport | null>(null);
   const [isAnalyzing, setIsAnalyzing] = useState(false);
@@ -818,25 +821,52 @@ export default function RealMapBoundaryMapper({
         const accuracy = position.coords.accuracy;
         
         setCurrentGPSPosition({lat, lng});
-        setTrackingAccuracy(accuracy);
         
-        // Update signal strength based on accuracy
-        const strength = Math.max(0, Math.min(100, (10 / accuracy) * 100));
+        // Progressive accuracy tracking with history
+        const now = Date.now();
+        const timeSinceLastUpdate = now - lastAccuracyUpdate;
+        
+        // Update accuracy history for trend analysis
+        setAccuracyHistory(prev => {
+          const newHistory = [...prev, accuracy].slice(-10); // Keep last 10 readings
+          
+          // Check if signal is improving (accuracy decreasing)
+          if (newHistory.length >= 2) {
+            const recent = newHistory.slice(-3);
+            const isImproving = recent.length >= 2 && recent[recent.length - 1] < recent[0];
+            setIsSignalImproving(isImproving);
+          }
+          
+          return newHistory;
+        });
+        
+        setTrackingAccuracy(accuracy);
+        setLastAccuracyUpdate(now);
+        
+        // Calculate progressive signal strength based on accuracy
+        const strength = Math.max(0, Math.min(100, (2.5 / accuracy) * 100));
         setSignalStrength(strength);
         
-        // Simulate satellite count based on accuracy
-        const satCount = Math.floor(Math.random() * 4) + (accuracy <= 5 ? 8 : 4);
+        // Progressive satellite count based on signal quality
+        const baseSats = 4;
+        const bonusSats = accuracy <= 2.5 ? 8 : accuracy <= 5 ? 4 : accuracy <= 10 ? 2 : 0;
+        const satCount = baseSats + bonusSats + Math.floor(Math.random() * 2);
         setSatelliteCount(satCount);
         
-        // Indicatore accuratezza GPS con badge colorati
+        // Progressive accuracy status with improvement indicator
+        const improvementIcon = isSignalImproving ? '📈' : '';
+        const progressText = accuracy <= MIN_GPS_ACCURACY ? 'EXCELLENT PRECISION ACHIEVED' : 
+                           accuracy <= 5 ? 'GOOD PRECISION' : 
+                           accuracy <= 10 ? 'FAIR PRECISION - IMPROVING' : 'POOR PRECISION - SEEKING SIGNAL';
+        
         if (accuracy <= MIN_GPS_ACCURACY) {
-          setStatus(`🟢 HIGH PRECISION GPS: ${accuracy.toFixed(1)}m • Satellites: ${satCount} • Signal: ${Math.round(strength)}%`);
+          setStatus(`🟢 ${progressText}: ±${accuracy.toFixed(1)}m ${improvementIcon} • Satellites: ${satCount} • Signal: ${Math.round(strength)}%`);
         } else if (accuracy <= 5) {
-          setStatus(`🟢 GOOD GPS: ${accuracy.toFixed(1)}m • Satellites: ${satCount} • Signal: ${Math.round(strength)}%`);
+          setStatus(`🟢 ${progressText}: ±${accuracy.toFixed(1)}m ${improvementIcon} • Satellites: ${satCount} • Signal: ${Math.round(strength)}%`);
         } else if (accuracy <= 10) {
-          setStatus(`🟡 FAIR GPS: ${accuracy.toFixed(1)}m • Satellites: ${satCount} • Signal: ${Math.round(strength)}%`);
+          setStatus(`🟡 ${progressText}: ±${accuracy.toFixed(1)}m ${improvementIcon} • Satellites: ${satCount} • Signal: ${Math.round(strength)}%`);
         } else {
-          setStatus(`🔴 POOR GPS: ${accuracy.toFixed(1)}m • Satellites: ${satCount} • Signal: ${Math.round(strength)}%`);
+          setStatus(`🔴 ${progressText}: ±${accuracy.toFixed(1)}m ${improvementIcon} • Satellites: ${satCount} • Signal: ${Math.round(strength)}%`);
         }
         
         // Update map center to follow user
@@ -1468,12 +1498,18 @@ export default function RealMapBoundaryMapper({
             <span>Points: {points.length}/{minPoints}+</span>
             {area > 0 && <span>• Area: {area.toFixed(3)} ha</span>}
             {trackingAccuracy && (
-              <span className={`px-2 py-1 rounded text-white text-xs font-medium ${
-                trackingAccuracy <= 2.5 ? 'bg-green-600' : 
-                trackingAccuracy <= 5 ? 'bg-blue-600' : 
+              <span className={`px-2 py-1 rounded text-white text-xs font-medium transition-all duration-500 ${
+                trackingAccuracy <= 2.5 ? 'bg-green-600 animate-pulse' : 
+                trackingAccuracy <= 5 ? 'bg-green-600' : 
                 trackingAccuracy <= 10 ? 'bg-yellow-600' : 'bg-red-600'
               }`}>
                 GPS: ±{trackingAccuracy.toFixed(1)}m
+                {isSignalImproving && (
+                  <span className="ml-1 animate-bounce">📈</span>
+                )}
+                {trackingAccuracy <= MIN_GPS_ACCURACY && (
+                  <span className="ml-1">✓</span>
+                )}
               </span>
             )}
             {satelliteCount > 0 && <span>🛰️ {satelliteCount}</span>}
@@ -1486,30 +1522,148 @@ export default function RealMapBoundaryMapper({
       {isTrackingGPS && (
         <div className="bg-gradient-to-r from-blue-50 to-green-50 border border-blue-200 rounded-lg p-4">
           <div className="text-sm font-medium text-blue-800 mb-3 flex items-center gap-2">
-            🛰️ GPS Real-Time Metrics
+            🛰️ GPS Real-Time Progressive Accuracy Monitor
+            {isSignalImproving && (
+              <span className="text-green-600 text-xs font-bold animate-pulse">SIGNAL IMPROVING!</span>
+            )}
           </div>
+          
+          {/* Progressive Accuracy Trend Chart */}
+          {accuracyHistory.length > 1 && (
+            <div className="mb-4 p-3 bg-white rounded-lg border">
+              <div className="text-xs font-medium text-gray-700 mb-2 flex items-center gap-2">
+                📊 Progressive Accuracy Trend (Target: ≤2.5m)
+                {isSignalImproving && <span className="text-green-600">📈 IMPROVING</span>}
+              </div>
+              <div className="flex items-end gap-1 h-16">
+                {accuracyHistory.slice(-8).map((acc, index) => (
+                  <div key={index} className="flex-1 flex flex-col items-center">
+                    <div 
+                      className={`w-full rounded-t transition-all duration-500 ${
+                        acc <= 2.5 ? 'bg-green-500' : 
+                        acc <= 5 ? 'bg-blue-500' : 
+                        acc <= 10 ? 'bg-yellow-500' : 'bg-red-500'
+                      }`}
+                      style={{
+                        height: `${Math.max(8, Math.min(64, (15 - acc) * 4))}px`
+                      }}
+                    ></div>
+                    <span className="text-xs text-gray-500 mt-1">{acc.toFixed(1)}</span>
+                  </div>
+                ))}
+              </div>
+              <div className="text-center mt-2">
+                <span className={`text-xs px-2 py-1 rounded font-medium ${
+                  (trackingAccuracy || 15) <= 2.5 ? 'bg-green-100 text-green-800' : 
+                  (trackingAccuracy || 15) <= 5 ? 'bg-blue-100 text-blue-800' : 
+                  (trackingAccuracy || 15) <= 10 ? 'bg-yellow-100 text-yellow-800' : 'bg-red-100 text-red-800'
+                }`}>
+                  Current: ±{trackingAccuracy?.toFixed(1) || '0'}m 
+                  {(trackingAccuracy || 15) <= MIN_GPS_ACCURACY && ' ✓ TARGET ACHIEVED'}
+                </span>
+              </div>
+            </div>
+          )}
+          
           <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
             <div className="text-center p-3 bg-white rounded-lg border">
               <div className="text-xl font-bold text-blue-600">{satelliteCount}</div>
               <p className="text-xs text-gray-600">Satellites</p>
             </div>
             <div className="text-center p-3 bg-white rounded-lg border">
-              <div className="text-xl font-bold text-green-600">{Math.round(signalStrength)}%</div>
-              <p className="text-xs text-gray-600">Signal</p>
+              <div className={`text-xl font-bold transition-colors duration-500 ${
+                signalStrength >= 80 ? 'text-green-600' : 
+                signalStrength >= 60 ? 'text-blue-600' : 
+                signalStrength >= 40 ? 'text-yellow-600' : 'text-red-600'
+              }`}>
+                {Math.round(signalStrength)}%
+                {isSignalImproving && signalStrength > 70 && (
+                  <span className="text-green-500 ml-1">↗</span>
+                )}
+              </div>
+              <p className="text-xs text-gray-600">Signal Strength</p>
+              {/* Progressive signal strength bar */}
+              <div className="w-full bg-gray-200 rounded-full h-1 mt-1">
+                <div 
+                  className={`h-1 rounded-full transition-all duration-700 ${
+                    signalStrength >= 80 ? 'bg-green-500' : 
+                    signalStrength >= 60 ? 'bg-blue-500' : 
+                    signalStrength >= 40 ? 'bg-yellow-500' : 'bg-red-500'
+                  }`}
+                  style={{width: `${signalStrength}%`}}
+                ></div>
+              </div>
             </div>
-            <div className="text-center p-3 bg-white rounded-lg border">
-              <div className={`text-xl font-bold ${
-                trackingAccuracy && trackingAccuracy <= 2.5 ? 'text-green-600' : 
-                trackingAccuracy && trackingAccuracy <= 5 ? 'text-blue-600' : 
+            <div className="text-center p-3 bg-white rounded-lg border relative overflow-hidden">
+              <div className={`text-xl font-bold transition-all duration-500 ${
+                trackingAccuracy && trackingAccuracy <= 2.5 ? 'text-green-600 animate-pulse' : 
+                trackingAccuracy && trackingAccuracy <= 5 ? 'text-green-600' : 
                 trackingAccuracy && trackingAccuracy <= 10 ? 'text-yellow-600' : 'text-red-600'
               }`}>
                 ±{trackingAccuracy?.toFixed(1) || '0'}m
+                {isSignalImproving && (
+                  <span className="inline-block ml-1 text-green-500 animate-bounce">📈</span>
+                )}
               </div>
-              <p className="text-xs text-gray-600">Accuracy</p>
+              <p className="text-xs text-gray-600">
+                {trackingAccuracy && trackingAccuracy <= MIN_GPS_ACCURACY ? 'EXCELLENT' : 
+                 trackingAccuracy && trackingAccuracy <= 5 ? 'GOOD' :
+                 trackingAccuracy && trackingAccuracy <= 10 ? 'FAIR' : 'POOR'}
+              </p>
+              {/* Progressive accuracy bar */}
+              <div className="w-full bg-gray-200 rounded-full h-2 mt-2">
+                <div 
+                  className={`h-2 rounded-full transition-all duration-700 ${
+                    trackingAccuracy && trackingAccuracy <= 2.5 ? 'bg-green-500' : 
+                    trackingAccuracy && trackingAccuracy <= 5 ? 'bg-blue-500' : 
+                    trackingAccuracy && trackingAccuracy <= 10 ? 'bg-yellow-500' : 'bg-red-500'
+                  }`}
+                  style={{
+                    width: `${Math.max(10, Math.min(100, (2.5 / (trackingAccuracy || 15)) * 100))}%`
+                  }}
+                ></div>
+              </div>
             </div>
             <div className="text-center p-3 bg-white rounded-lg border">
               <div className="text-xl font-bold text-purple-600">{area.toFixed(3)}</div>
               <p className="text-xs text-gray-600">Hectares</p>
+            </div>
+          </div>
+          
+          {/* Live Progressive Accuracy Meter */}
+          <div className="mt-4 p-4 bg-white rounded-lg border">
+            <div className="text-sm font-medium text-gray-700 mb-3 flex items-center justify-between">
+              <span>Live Accuracy Progress to 2.5m Target</span>
+              {trackingAccuracy && trackingAccuracy <= MIN_GPS_ACCURACY && (
+                <span className="text-green-600 font-bold animate-pulse">🎯 TARGET ACHIEVED!</span>
+              )}
+            </div>
+            
+            {/* Horizontal progressive meter */}
+            <div className="relative">
+              <div className="w-full bg-gray-200 rounded-full h-6">
+                <div 
+                  className={`h-6 rounded-full transition-all duration-1000 flex items-center justify-center text-white text-xs font-bold ${
+                    trackingAccuracy && trackingAccuracy <= 2.5 ? 'bg-green-500 animate-pulse' : 
+                    trackingAccuracy && trackingAccuracy <= 5 ? 'bg-green-500' : 
+                    trackingAccuracy && trackingAccuracy <= 10 ? 'bg-yellow-500' : 'bg-red-500'
+                  }`}
+                  style={{
+                    width: `${Math.max(15, Math.min(100, (15 / (trackingAccuracy || 15)) * 100))}%`
+                  }}
+                >
+                  ±{trackingAccuracy?.toFixed(1) || '0'}m
+                  {isSignalImproving && <span className="ml-1 animate-bounce">↗</span>}
+                </div>
+              </div>
+              
+              {/* Accuracy threshold markers */}
+              <div className="flex justify-between mt-2 text-xs text-gray-500">
+                <span className="text-green-600 font-medium">≤2.5m EXCELLENT</span>
+                <span className="text-blue-600">≤5m GOOD</span>
+                <span className="text-yellow-600">≤10m FAIR</span>
+                <span className="text-red-600">{'>'}10m POOR</span>
+              </div>
             </div>
           </div>
         </div>

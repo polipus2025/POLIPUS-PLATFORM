@@ -532,11 +532,11 @@ export default function FarmerDashboard() {
                               <div className="text-sm">
                                 <div className="bg-gray-50 p-3 rounded border">
                                   <strong>Boundary Points:</strong>
-                                  {plot.farm_boundaries.map((point: any, pointIndex: number) => (
+                                  {plot.farm_boundaries?.points?.map((point: any, pointIndex: number) => (
                                     <div key={pointIndex} className="mt-1 font-mono text-xs">
-                                      Point {point.point}: {point.lat}, {point.lng}
+                                      Point {pointIndex + 1}: {point.latitude}, {point.longitude}
                                     </div>
-                                  ))}
+                                  )) || <span className="text-gray-500">No boundary points available</span>}
                                 </div>
                               </div>
                             )}

@@ -61,7 +61,7 @@ export default function FrontPage() {
       icon: Truck,
       color: 'bg-blue-500',
       route: '/live-trace',
-      isActive: true,
+      isActive: false,
       description: 'Livestock movement monitoring and control system'
     },
     {
@@ -70,7 +70,7 @@ export default function FrontPage() {
       icon: MapPin,
       color: 'bg-purple-500',
       route: '/landmap360-portal',
-      isActive: true,
+      isActive: false,
       description: 'Land mapping and dispute prevention services'
     },
     {
@@ -79,7 +79,7 @@ export default function FrontPage() {
       icon: Shield,
       color: 'bg-orange-500',
       route: '/mine-watch',
-      isActive: true,
+      isActive: false,
       description: 'Mineral resource protection and community safeguarding'
     },
     {
@@ -88,7 +88,7 @@ export default function FrontPage() {
       icon: TreePine,
       color: 'bg-teal-500',
       route: '/forest-guard',
-      isActive: true,
+      isActive: false,
       description: 'Forest protection and carbon credit management'
     },
     {
@@ -97,7 +97,7 @@ export default function FrontPage() {
       icon: Waves,
       color: 'bg-indigo-500',
       route: '/aqua-trace',
-      isActive: true,
+      isActive: false,
       description: 'Ocean & river monitoring with fishing rights protection'
     },
     {
@@ -106,7 +106,7 @@ export default function FrontPage() {
       icon: DollarSign,
       color: 'bg-cyan-500',
       route: '/blue-carbon360',
-      isActive: true,
+      isActive: false,
       description: 'Conservation economics and real economic benefits'
     },
     {
@@ -115,7 +115,7 @@ export default function FrontPage() {
       icon: Globe,
       color: 'bg-emerald-500',
       route: '/carbon-trace',
-      isActive: true,
+      isActive: false,
       description: 'Environmental monitoring and carbon credit certification'
     }
   ];
@@ -182,14 +182,9 @@ export default function FrontPage() {
           <div className="relative">
             <h2 className="text-xl sm:text-2xl md:text-3xl font-bold text-slate-900 text-center">General Environmental Intelligence Platform</h2>
             
-            {/* Monitoring Portal Button - Positioned to the right */}
-            <div className="absolute right-0 top-0 flex flex-col gap-2">
-              <Link href="/monitoring-login">
-                <Button className="bg-gradient-to-r from-slate-600 to-slate-700 hover:from-slate-700 hover:to-slate-800 text-white text-sm px-3 py-2 flex items-center gap-1.5">
-                  <Users className="h-3 w-3" />
-                  Monitoring
-                </Button>
-              </Link>
+            {/* Monitoring Portal Button - DISABLED */}
+            <div className="absolute right-0 top-0 flex flex-col gap-2" style={{display: 'none'}}>
+              {/* Monitoring disabled per user request */}
             </div>
 
 
@@ -203,8 +198,8 @@ export default function FrontPage() {
               <CheckCircle className="h-4 w-4 sm:h-6 sm:w-6 text-white" />
             </div>
             <p className="text-slate-600 text-xs sm:text-sm mb-1">Active Modules</p>
-            <p className="text-xl sm:text-3xl font-bold text-slate-900 mb-1 sm:mb-2">8/8</p>
-            <p className="text-slate-600 text-xs sm:text-sm">Operational</p>
+            <p className="text-xl sm:text-3xl font-bold text-slate-900 mb-1 sm:mb-2">1/8</p>
+            <p className="text-slate-600 text-xs sm:text-sm">AgriTrace Only</p>
           </div>
           
           <div className="bg-white shadow-xl border-slate-200 rounded-lg p-6 text-center">
@@ -294,41 +289,46 @@ export default function FrontPage() {
         </div>
 
 
-        {/* Cross-Module Integration Dashboard */}
-        <div className="bg-white shadow-xl border-slate-200 rounded-lg p-6 mt-8 sm:mt-12 bg-gradient-to-r from-slate-50 to-slate-100 border-slate-300">
+        {/* Cross-Module Integration Dashboard - DISABLED */}
+        <div className="bg-white shadow-xl border-slate-200 rounded-lg p-6 mt-8 sm:mt-12 bg-gradient-to-r from-slate-50 to-slate-100 border-slate-300" style={{display: 'none'}}>
+          {/* Integrated dashboard disabled - only AgriTrace360 active */}
+        </div>
+        
+        {/* AgriTrace360 Focus Message */}
+        <div className="bg-white shadow-xl border-slate-200 rounded-lg p-6 mt-8 sm:mt-12 bg-gradient-to-r from-green-50 to-blue-50 border-green-300">
           <div className="text-center">
-            <div className="w-16 h-16 sm:w-20 sm:h-20 rounded-2xl bg-gradient-to-r from-blue-500 to-green-500 flex items-center justify-center mx-auto mb-4 sm:mb-6">
-              <Zap className="h-8 w-8 sm:h-10 sm:w-10 text-white" />
+            <div className="w-16 h-16 sm:w-20 sm:h-20 rounded-2xl bg-gradient-to-r from-green-500 to-green-600 flex items-center justify-center mx-auto mb-4 sm:mb-6">
+              <Wheat className="h-8 w-8 sm:h-10 sm:w-10 text-white" />
             </div>
             <h3 className="text-xl sm:text-2xl font-bold text-slate-900 mb-2 sm:mb-3">
-              Integrated Cross-Module Dashboard  
+              AgriTrace360™ - Agricultural Intelligence Active
             </h3>
             <p className="text-sm sm:text-base text-slate-600 mb-4 sm:mb-6 max-w-2xl mx-auto">
-              Access the comprehensive integrated dashboard showing real-time connectivity and data exchange 
-              between all 8 modules. Monitor cross-module integration status and system-wide performance.
+              Complete agricultural supply chain traceability system with EUDR compliance, 
+              stakeholder management, and end-to-end transaction workflows.
             </p>
-            <Link href="/integrated-dashboard">
-              <Button className="bg-gradient-to-r from-blue-600 to-green-600 hover:from-blue-700 hover:to-green-700 text-white flex items-center gap-2 mx-auto">
-                <Zap className="h-4 w-4" />
-                View Integrated Dashboard
+            <Link href="/portals">
+              <Button className="bg-gradient-to-r from-green-600 to-green-700 hover:from-green-700 hover:to-green-800 text-white flex items-center gap-2 mx-auto">
+                <Wheat className="h-4 w-4" />
+                Access AgriTrace360
               </Button>
             </Link>
             <div className="mt-4 grid grid-cols-2 sm:grid-cols-4 gap-3 text-xs sm:text-sm text-slate-600">
               <div className="flex items-center justify-center gap-1">
                 <CheckCircle className="h-3 w-3 text-green-500" />
-                <span>8 Modules Connected</span>
+                <span>EUDR Compliant</span>
               </div>
               <div className="flex items-center justify-center gap-1">
                 <CheckCircle className="h-3 w-3 text-green-500" />
-                <span>Real-time Data Exchange</span>
+                <span>Live Transaction System</span>
               </div>
               <div className="flex items-center justify-center gap-1">
                 <CheckCircle className="h-3 w-3 text-green-500" />
-                <span>Cross-Module Search</span>
+                <span>Nimba County Ready</span>
               </div>
               <div className="flex items-center justify-center gap-1">
                 <CheckCircle className="h-3 w-3 text-green-500" />
-                <span>System Health Monitoring</span>
+                <span>All Stakeholders Active</span>
               </div>
             </div>
           </div>
@@ -344,7 +344,7 @@ export default function FrontPage() {
               Download Polipus Mobile App
             </h3>
             <p className="text-sm sm:text-base text-slate-600 mb-4 sm:mb-6 max-w-2xl mx-auto">
-              Install our Progressive Web App for the complete mobile experience. Access all 8 modules offline, 
+              Install our Progressive Web App for the complete agricultural experience. Access AgriTrace360™ offline, 
               get push notifications, and enjoy native app-like performance on your mobile device.
             </p>
             <div className="flex flex-col sm:flex-row items-center justify-center gap-3 sm:gap-4">

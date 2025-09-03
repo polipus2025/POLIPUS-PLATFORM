@@ -1611,6 +1611,117 @@ export const farmers = pgTable("farmers", {
   createdAt: timestamp("created_at").defaultNow(),
 });
 
+// Land Ownership Confirmation Documents
+export const landOwnershipDocuments = pgTable("land_ownership_documents", {
+  id: serial("id").primaryKey(),
+  documentId: text("document_id").notNull().unique(),
+  farmerId: integer("farmer_id").references(() => farmers.id).notNull(),
+  // Land Parcel Information
+  villageTown: text("village_town").notNull(),
+  district: text("district").notNull(),
+  county: text("county").notNull(),
+  boundaryDescription: text("boundary_description").notNull(),
+  gpsCoordinates: jsonb("gps_coordinates").notNull(), // Array of GPS points
+  landArea: decimal("land_area", { precision: 10, scale: 4 }), // Calculated from GPS points
+  // Claimant Information  
+  claimantFullName: text("claimant_full_name").notNull(),
+  claimantDateOfBirth: timestamp("claimant_date_of_birth"),
+  claimantResidence: text("claimant_residence").notNull(),
+  relationshipToLand: text("relationship_to_land").notNull(), // Owner, family representative, etc.
+  // Ownership Confirmation
+  ownershipYears: integer("ownership_years"), // Years of ownership/use
+  ownershipType: text("ownership_type").notNull(), // Customary, freehold, leasehold, etc.
+  communityConsensus: boolean("community_consensus").default(false),
+  // Document Status
+  status: text("status").notNull().default("draft"), // draft, pending_signatures, completed, archived
+  createdBy: text("created_by").notNull(), // Inspector who created the document
+  submittedToGovernment: boolean("submitted_to_government").default(false),
+  governmentAcknowledgmentDate: timestamp("government_acknowledgment_date"),
+  governmentOfficialName: text("government_official_name"),
+  governmentOfficialTitle: text("government_official_title"),
+  // Metadata
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+  completedAt: timestamp("completed_at"),
+});
+
+// Digital Signatures for Land Ownership Documents
+export const landOwnershipSignatures = pgTable("land_ownership_signatures", {
+  id: serial("id").primaryKey(),
+  signatureId: text("signature_id").notNull().unique(),
+  documentId: integer("document_id").references(() => landOwnershipDocuments.id).notNull(),
+  // Signatory Information
+  signatoryName: text("signatory_name").notNull(),
+  signatoryRole: text("signatory_role").notNull(), // Town Chief, Elder/Witness, Claimant, Inspector
+  signatoryPosition: text("signatory_position"), // Official title if applicable
+  // Signature Data
+  signatureType: text("signature_type").notNull(), // digital, thumbprint, witness
+  signatureData: text("signature_data"), // Base64 encoded signature image
+  signedAt: timestamp("signed_at").notNull(),
+  signedLocation: text("signed_location"), // GPS coordinates where signed
+  deviceInfo: text("device_info"), // Device/browser info for verification
+  ipAddress: text("ip_address"), // For audit trail
+  // Verification
+  isVerified: boolean("is_verified").default(false),
+  verificationMethod: text("verification_method"), // In-person, video call, etc.
+  witnessName: text("witness_name"), // If signature was witnessed
+  witnessSignature: text("witness_signature"), // Witness signature data
+  createdAt: timestamp("created_at").defaultNow(),
+});
+
+// Photos for Land Ownership Documentation
+export const landOwnershipPhotos = pgTable("land_ownership_photos", {
+  id: serial("id").primaryKey(),
+  photoId: text("photo_id").notNull().unique(),
+  documentId: integer("document_id").references(() => landOwnershipDocuments.id).notNull(),
+  farmerId: integer("farmer_id").references(() => farmers.id).notNull(),
+  // Photo Information
+  photoType: text("photo_type").notNull(), // farmer_id, land_boundary, land_overview, land_sketch, verification_document
+  photoTitle: text("photo_title").notNull(),
+  photoDescription: text("photo_description"),
+  // Storage Information
+  photoUrl: text("photo_url").notNull(), // URL to stored image
+  thumbnailUrl: text("thumbnail_url"), // Thumbnail version
+  originalFileName: text("original_file_name"),
+  fileSize: integer("file_size"), // Size in bytes
+  fileFormat: text("file_format"), // jpg, png, etc.
+  // Metadata
+  capturedAt: timestamp("captured_at").defaultNow(),
+  capturedBy: text("captured_by").notNull(), // Inspector who took the photo
+  gpsCoordinates: text("gps_coordinates"), // Where photo was taken
+  deviceInfo: text("device_info"), // Camera/device information
+  // Organization
+  sortOrder: integer("sort_order").default(0), // For organizing multiple photos
+  isRequired: boolean("is_required").default(false), // Is this photo mandatory?
+  isVerified: boolean("is_verified").default(false), // Has photo been verified?
+  verificationNotes: text("verification_notes"),
+  createdAt: timestamp("created_at").defaultNow(),
+});
+
+// Witness Registry for Land Ownership
+export const landOwnershipWitnesses = pgTable("land_ownership_witnesses", {
+  id: serial("id").primaryKey(),
+  witnessId: text("witness_id").notNull().unique(),
+  documentId: integer("document_id").references(() => landOwnershipDocuments.id).notNull(),
+  // Witness Information
+  witnessName: text("witness_name").notNull(),
+  witnessRole: text("witness_role").notNull(), // Town Chief, Elder, Community Leader, etc.
+  witnessContact: text("witness_contact"), // Phone number
+  witnessIdNumber: text("witness_id_number"), // National ID if available
+  witnessAddress: text("witness_address"),
+  // Verification Status
+  isPresent: boolean("is_present").default(false), // Was physically present during documentation
+  hasSignature: boolean("has_signature").default(false), // Has provided signature
+  signatureId: integer("signature_id").references(() => landOwnershipSignatures.id), // Link to signature
+  witnessedAt: timestamp("witnessed_at"),
+  witnessStatement: text("witness_statement"), // Statement confirming ownership
+  // Verification
+  verificationStatus: text("verification_status").default("pending"), // pending, verified, rejected
+  verificationNotes: text("verification_notes"),
+  createdBy: text("created_by").notNull(), // Inspector who recorded witness
+  createdAt: timestamp("created_at").defaultNow(),
+});
+
 // Farmer Login Credentials Table
 export const farmerCredentials = pgTable("farmer_credentials", {
   id: serial("id").primaryKey(),
@@ -1730,6 +1841,45 @@ export const insertFarmerSchema = createInsertSchema(farmers).omit({
   farmSize: z.string().optional(),
   farmingExperience: z.string().optional(),
 });
+
+// Land Ownership Schema Exports
+export const insertLandOwnershipDocumentSchema = createInsertSchema(landOwnershipDocuments).omit({
+  id: true,
+  createdAt: true,
+  updatedAt: true,
+}).extend({
+  landArea: z.string().optional(),
+  ownershipYears: z.string().optional(),
+});
+
+export const insertLandOwnershipSignatureSchema = createInsertSchema(landOwnershipSignatures).omit({
+  id: true,
+  createdAt: true,
+});
+
+export const insertLandOwnershipPhotoSchema = createInsertSchema(landOwnershipPhotos).omit({
+  id: true,
+  createdAt: true,
+  capturedAt: true,
+}).extend({
+  fileSize: z.string().optional(),
+  sortOrder: z.string().optional(),
+});
+
+export const insertLandOwnershipWitnessSchema = createInsertSchema(landOwnershipWitnesses).omit({
+  id: true,
+  createdAt: true,
+});
+
+// Type exports for Land Ownership
+export type LandOwnershipDocument = typeof landOwnershipDocuments.$inferSelect;
+export type InsertLandOwnershipDocument = typeof landOwnershipDocuments.$inferInsert;
+export type LandOwnershipSignature = typeof landOwnershipSignatures.$inferSelect;
+export type InsertLandOwnershipSignature = typeof landOwnershipSignatures.$inferInsert;
+export type LandOwnershipPhoto = typeof landOwnershipPhotos.$inferSelect;
+export type InsertLandOwnershipPhoto = typeof landOwnershipPhotos.$inferInsert;
+export type LandOwnershipWitness = typeof landOwnershipWitnesses.$inferSelect;
+export type InsertLandOwnershipWitness = typeof landOwnershipWitnesses.$inferInsert;
 
 export const insertFarmerCredentialSchema = createInsertSchema(farmerCredentials).omit({
   id: true,

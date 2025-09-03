@@ -12445,6 +12445,95 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // ============================================================================
+  // LAND OWNERSHIP DOCUMENTATION API - Legal documentation endpoints
+  // ============================================================================
+
+  // Create land ownership document with all related data
+  app.post("/api/land-ownership-documents", async (req, res) => {
+    try {
+      const { documentData, photos, witnesses, signatures, farmerId } = req.body;
+      
+      // For now, store as JSON in a temporary structure until database is updated
+      const document = {
+        id: Date.now(),
+        documentId: `DOC-${Date.now()}`,
+        farmerId,
+        ...documentData,
+        photos,
+        witnesses,
+        signatures,
+        status: 'completed',
+        createdAt: new Date().toISOString(),
+      };
+      
+      console.log('Land ownership document created:', document);
+      
+      res.json({ 
+        message: "Land ownership document created successfully", 
+        document 
+      });
+    } catch (error) {
+      console.error("Error creating land ownership document:", error);
+      res.status(500).json({ error: "Failed to create land ownership document" });
+    }
+  });
+
+  // Get land ownership documents for a farmer
+  app.get("/api/farmers/:farmerId/land-ownership-documents", async (req, res) => {
+    try {
+      const { farmerId } = req.params;
+      
+      // For now, return mock data until database is updated
+      const documents = [
+        {
+          id: 1,
+          documentId: `DOC-${farmerId}-001`,
+          farmerId,
+          status: 'completed',
+          createdAt: new Date().toISOString(),
+          villageTown: 'Sample Village',
+          county: 'Sample County',
+          claimantFullName: 'Sample Farmer',
+        }
+      ];
+      
+      res.json(documents);
+    } catch (error) {
+      console.error("Error fetching land ownership documents:", error);
+      res.status(500).json({ error: "Failed to fetch land ownership documents" });
+    }
+  });
+
+  // Upload photo for land ownership documentation
+  app.post("/api/land-ownership-documents/:documentId/photos", async (req, res) => {
+    try {
+      const { documentId } = req.params;
+      const { photoData, photoType, photoTitle } = req.body;
+      
+      // For now, simulate photo upload
+      const photo = {
+        id: Date.now(),
+        photoId: `PHOTO-${Date.now()}`,
+        documentId,
+        photoType,
+        photoTitle,
+        photoUrl: `/api/photos/${Date.now()}`, // Simulated URL
+        createdAt: new Date().toISOString(),
+      };
+      
+      console.log('Photo uploaded for land ownership document:', photo);
+      
+      res.json({ 
+        message: "Photo uploaded successfully", 
+        photo 
+      });
+    } catch (error) {
+      console.error("Error uploading photo:", error);
+      res.status(500).json({ error: "Failed to upload photo" });
+    }
+  });
+
   // Step 4: Commodity Registration
   app.post('/api/agritrace/commodity-registration', async (req, res) => {
     try {

@@ -9,11 +9,12 @@ import { Badge } from "@/components/ui/badge";
 import { useToast } from "@/hooks/use-toast";
 import { useMutation } from "@tanstack/react-query";
 import { apiRequest } from "@/lib/queryClient";
-import { ArrowLeft, MapPin, Target, Globe, TreePine, Upload, User, Users, Key, Copy, Eye, EyeOff } from "lucide-react";
+import { ArrowLeft, MapPin, Target, Globe, TreePine, Upload, User, Users, Key, Copy, Eye, EyeOff, FileText, CheckCircle } from "lucide-react";
 import { Link, useLocation } from "wouter";
 // Lazy load the boundary mapper for better performance
 import { lazy, Suspense } from 'react';
 const RealMapBoundaryMapper = lazy(() => import('@/components/maps/real-map-boundary-mapper'));
+const LandOwnershipDocumentation = lazy(() => import('@/components/LandOwnershipDocumentation'));
 
 const LIBERIAN_COUNTIES = [
   "Bomi", "Bong", "Gbarpolu", "Grand Bassa", "Grand Cape Mount", "Grand Gedeh",
@@ -113,9 +114,11 @@ export default function OnboardFarmer() {
     temporaryPassword: ""
   });
 
-  // States for the two-step process
+  // States for the multi-step process
   const [savedFarmer, setSavedFarmer] = useState<any>(null);
   const [isFormComplete, setIsFormComplete] = useState(false);
+  const [showLandOwnershipForm, setShowLandOwnershipForm] = useState(false);
+  const [landOwnershipCompleted, setLandOwnershipCompleted] = useState(false);
 
   // Step 1: Save farmer data (called during boundary completion)
   const saveFarmerData = useMutation({
@@ -705,18 +708,57 @@ export default function OnboardFarmer() {
           {/* Submit Button - Mobile Optimized */}
           <div className="mt-6 sm:mt-8 flex flex-col sm:flex-row sm:justify-end gap-3 sm:gap-0">
             {isFormComplete && savedFarmer ? (
-              <div className="flex flex-col sm:flex-row sm:items-center space-y-3 sm:space-y-0 sm:space-x-4">
-                <div className="text-green-600 font-medium text-center sm:text-left text-sm sm:text-base">
+              <div className="space-y-4">
+                <div className="text-green-600 font-medium text-center text-sm sm:text-base">
                   ✓ Farm data saved successfully
                 </div>
-                <Button 
-                  type="submit" 
-                  size="lg" 
-                  disabled={completeOnboarding.isPending}
-                  className="w-full sm:min-w-48 bg-green-600 hover:bg-green-700 py-3 text-sm sm:text-base"
-                >
-                  {completeOnboarding.isPending ? "Generating Credentials..." : "Complete Farmer Onboarding"}
-                </Button>
+                
+                {/* Land Ownership Documentation Option */}
+                <Card className="bg-blue-50 border-blue-200">
+                  <CardContent className="p-4">
+                    <div className="flex items-start space-x-3">
+                      <div className="flex-shrink-0">
+                        <FileText className="w-6 h-6 text-blue-600 mt-0.5" />
+                      </div>
+                      <div className="flex-1">
+                        <h4 className="font-medium text-blue-900 mb-2">Optional: Land Ownership Documentation</h4>
+                        <p className="text-sm text-blue-800 mb-3">
+                          Complete official land ownership confirmation document with photos, witness statements, and digital signatures. 
+                          This provides legal documentation of land ownership and enhances farmer protection.
+                        </p>
+                        <div className="flex flex-col sm:flex-row gap-2">
+                          <Button 
+                            onClick={() => setShowLandOwnershipForm(true)}
+                            variant="outline"
+                            className="border-blue-300 text-blue-700 hover:bg-blue-100"
+                            data-testid="button-add-land-ownership"
+                          >
+                            <FileText className="w-4 h-4 mr-2" />
+                            Add Land Ownership Documentation
+                          </Button>
+                          {landOwnershipCompleted && (
+                            <Badge className="bg-green-100 text-green-800 self-start">
+                              <CheckCircle className="w-3 h-3 mr-1" />
+                              Documentation Complete
+                            </Badge>
+                          )}
+                        </div>
+                      </div>
+                    </div>
+                  </CardContent>
+                </Card>
+                
+                <div className="flex flex-col sm:flex-row sm:justify-end">
+                  <Button 
+                    type="submit" 
+                    size="lg" 
+                    disabled={completeOnboarding.isPending}
+                    className="w-full sm:min-w-48 bg-green-600 hover:bg-green-700 py-3 text-sm sm:text-base"
+                    data-testid="button-complete-onboarding"
+                  >
+                    {completeOnboarding.isPending ? "Generating Credentials..." : "Complete Farmer Onboarding"}
+                  </Button>
+                </div>
               </div>
             ) : (
               <Button 
@@ -724,6 +766,7 @@ export default function OnboardFarmer() {
                 size="lg" 
                 disabled={saveFarmerData.isPending || !farmerData.boundaryData}
                 className="w-full sm:min-w-48 py-3 text-sm sm:text-base"
+                data-testid="button-save-farm-data"
               >
                 {saveFarmerData.isPending ? "Saving Farm Data..." : "Save Farm Data & Continue"}
               </Button>
@@ -815,6 +858,40 @@ export default function OnboardFarmer() {
               </Button>
             </CardContent>
           </Card>
+        </div>
+      )}
+
+      {/* Land Ownership Documentation Modal */}
+      {showLandOwnershipForm && savedFarmer && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+          <div className="w-full h-full max-w-6xl">
+            <Suspense fallback={
+              <Card className="w-full h-full flex items-center justify-center">
+                <div className="text-center">
+                  <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-gray-600 mx-auto mb-4"></div>
+                  <p>Loading Land Ownership Documentation...</p>
+                </div>
+              </Card>
+            }>
+              <LandOwnershipDocumentation
+                farmerId={savedFarmer.farmerId}
+                farmerName={`${savedFarmer.firstName} ${savedFarmer.lastName}`}
+                onComplete={(documentData) => {
+                  console.log('Land ownership documentation completed:', documentData);
+                  setLandOwnershipCompleted(true);
+                  setShowLandOwnershipForm(false);
+                  toast({
+                    title: "Land Ownership Documentation Complete!",
+                    description: "Official land ownership confirmation has been successfully recorded.",
+                    duration: 5000,
+                  });
+                }}
+                onCancel={() => {
+                  setShowLandOwnershipForm(false);
+                }}
+              />
+            </Suspense>
+          </div>
         </div>
       )}
     </div>

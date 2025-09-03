@@ -138,14 +138,14 @@ function App() {
             {/* Agricultural Traceability Portal */}
             <Route path="/portals" component={Landing} />
             
-            {/* POLIPUS MODULE PORTALS - All 7 modules */}
-            <Route path="/live-trace" component={createLazyRoute(LiveTracePortal)} />
-            <Route path="/landmap360-portal" component={createLazyRoute(LandMap360Portal)} />
-            <Route path="/mine-watch" component={createLazyRoute(MineWatchPortal)} />
-            <Route path="/forest-guard" component={createLazyRoute(ForestGuardPortal)} />
-            <Route path="/aqua-trace" component={createLazyRoute(AquaTracePortal)} />
-            <Route path="/blue-carbon360" component={createLazyRoute(BlueCarbon360Portal)} />
-            <Route path="/carbon-trace" component={createLazyRoute(CarbonTracePortal)} />
+            {/* POLIPUS MODULE PORTALS - BLOCKED - Redirect to homepage */}
+            <Route path="/live-trace" component={() => { window.location.href = '/'; return null; }} />
+            <Route path="/landmap360-portal" component={() => { window.location.href = '/'; return null; }} />
+            <Route path="/mine-watch" component={() => { window.location.href = '/'; return null; }} />
+            <Route path="/forest-guard" component={() => { window.location.href = '/'; return null; }} />
+            <Route path="/aqua-trace" component={() => { window.location.href = '/'; return null; }} />
+            <Route path="/blue-carbon360" component={() => { window.location.href = '/'; return null; }} />
+            <Route path="/carbon-trace" component={() => { window.location.href = '/'; return null; }} />
             
             {/* CERTIFICATE TESTING DASHBOARD - HIGH PRIORITY */}
             <Route path="/certificate-testing-dashboard" component={CertificateTestingDashboard} />
@@ -165,11 +165,11 @@ function App() {
             <Route path="/regulatory-classic-login" component={RegulatoryClassicLogin} />
             <Route path="/system-admin-login" component={SystemAdminLogin} />
             <Route path="/agritrace-admin-login" component={AgriTraceAdminLogin} />
-            <Route path="/monitoring-login" component={MonitoringLogin} />
+            <Route path="/monitoring-login" component={() => { window.location.href = '/'; return null; }} />
             
-            {/* SYSTEM MONITORING */}
-            <Route path="/system-monitoring" component={createLazyRoute(SystemMonitoring)} />
-            <Route path="/monitoring-dashboard" component={createLazyRoute(MonitoringDashboard)} />
+            {/* SYSTEM MONITORING - BLOCKED */}
+            <Route path="/system-monitoring" component={() => { window.location.href = '/'; return null; }} />
+            <Route path="/monitoring-dashboard" component={() => { window.location.href = '/'; return null; }} />
             
             {/* AGRICULTURAL DASHBOARD ROUTES */}
             <Route path="/farmer-dashboard" component={createLazyRoute(FarmerDashboard)} />

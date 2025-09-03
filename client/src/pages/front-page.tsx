@@ -182,10 +182,6 @@ export default function FrontPage() {
           <div className="relative">
             <h2 className="text-xl sm:text-2xl md:text-3xl font-bold text-slate-900 text-center">General Environmental Intelligence Platform</h2>
             
-            {/* Monitoring Portal Button - DISABLED */}
-            <div className="absolute right-0 top-0 flex flex-col gap-2" style={{display: 'none'}}>
-              {/* Monitoring disabled per user request */}
-            </div>
 
 
           </div>
@@ -251,37 +247,58 @@ export default function FrontPage() {
                   key={module.id} 
                   className="bg-white shadow-xl border-slate-200 rounded-lg transition-all duration-300 h-64 sm:h-80 flex flex-col hover:shadow-2xl hover:scale-105 cursor-pointer border-2 hover:border-slate-300"
                 >
-                  <Link href={module.route} className="h-full flex flex-col relative block group">
-                    <div className="flex flex-col items-center text-center h-full p-3 sm:p-4">
-                      <div className={`w-12 h-12 sm:w-16 sm:h-16 rounded-2xl ${module.isAgriTrace ? 'bg-gradient-to-br from-green-500 to-green-600' : module.color} flex items-center justify-center group-hover:scale-110 transition-transform mb-3`}>
-                        <IconComponent className="h-6 w-6 sm:h-8 sm:w-8 text-white" />
-                      </div>
-                      <div className="flex-1 flex flex-col justify-between">
-                        <div>
-                          <h3 className="text-sm sm:text-lg font-bold text-slate-900 mb-1 sm:mb-2">{module.title}</h3>
-                          {module.description && (
-                            <p className="text-xs text-slate-600 mb-2 sm:mb-3 leading-relaxed">
-                              {module.description}
-                            </p>
-                          )}
-                          <Badge className={(module.isAgriTrace || module.isActive) ? "bg-green-100 text-green-800 border-green-200" : "bg-orange-100 text-orange-800 border-orange-200"}>
-                            {(module.isAgriTrace || module.isActive) ? (
-                              <>
-                                <CheckCircle className="w-3 h-3 mr-1" />
-                                Active
-                              </>
-                            ) : (
-                              "Coming Soon"
-                            )}
-                          </Badge>
+                  {module.isAgriTrace ? (
+                    <Link href={module.route} className="h-full flex flex-col relative block group">
+                      <div className="flex flex-col items-center text-center h-full p-3 sm:p-4">
+                        <div className={`w-12 h-12 sm:w-16 sm:h-16 rounded-2xl bg-gradient-to-br from-green-500 to-green-600 flex items-center justify-center group-hover:scale-110 transition-transform mb-3`}>
+                          <IconComponent className="h-6 w-6 sm:h-8 sm:w-8 text-white" />
                         </div>
-                        <Button className="w-full text-xs sm:text-sm bg-gradient-to-r from-slate-400 to-slate-500 hover:from-slate-500 hover:to-slate-600 text-white mt-4">
-                          <ArrowRight className="h-3 w-3 sm:h-4 sm:w-4 mr-1 sm:mr-2" />
-                          Enter Platform
-                        </Button>
+                        <div className="flex-1 flex flex-col justify-between">
+                          <div>
+                            <h3 className="text-sm sm:text-lg font-bold text-slate-900 mb-1 sm:mb-2">{module.title}</h3>
+                            {module.description && (
+                              <p className="text-xs text-slate-600 mb-2 sm:mb-3 leading-relaxed">
+                                {module.description}
+                              </p>
+                            )}
+                            <Badge className="bg-green-100 text-green-800 border-green-200">
+                              <CheckCircle className="w-3 h-3 mr-1" />
+                              Active
+                            </Badge>
+                          </div>
+                          <Button className="w-full text-xs sm:text-sm bg-gradient-to-r from-slate-400 to-slate-500 hover:from-slate-500 hover:to-slate-600 text-white mt-4">
+                            <ArrowRight className="h-3 w-3 sm:h-4 sm:w-4 mr-1 sm:mr-2" />
+                            Enter Platform
+                          </Button>
+                        </div>
+                      </div>
+                    </Link>
+                  ) : (
+                    <div className="h-full flex flex-col relative group">
+                      <div className="flex flex-col items-center text-center h-full p-3 sm:p-4">
+                        <div className={`w-12 h-12 sm:w-16 sm:h-16 rounded-2xl ${module.color} flex items-center justify-center group-hover:scale-110 transition-transform mb-3`}>
+                          <IconComponent className="h-6 w-6 sm:h-8 sm:w-8 text-white" />
+                        </div>
+                        <div className="flex-1 flex flex-col justify-between">
+                          <div>
+                            <h3 className="text-sm sm:text-lg font-bold text-slate-900 mb-1 sm:mb-2">{module.title}</h3>
+                            {module.description && (
+                              <p className="text-xs text-slate-600 mb-2 sm:mb-3 leading-relaxed">
+                                {module.description}
+                              </p>
+                            )}
+                            <Badge className="bg-orange-100 text-orange-800 border-orange-200">
+                              Coming Soon
+                            </Badge>
+                          </div>
+                          <div className="w-full text-xs sm:text-sm bg-gradient-to-r from-slate-400 to-slate-500 text-white mt-4 py-2 px-4 rounded-md flex items-center justify-center cursor-not-allowed opacity-60">
+                            <ArrowRight className="h-3 w-3 sm:h-4 sm:w-4 mr-1 sm:mr-2" />
+                            Enter Platform
+                          </div>
+                        </div>
                       </div>
                     </div>
-                  </Link>
+                  )}
                 </div>
               );
             })}

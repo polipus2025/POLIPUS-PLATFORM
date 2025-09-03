@@ -1,4 +1,4 @@
-import React, { useState, useRef } from 'react';
+import { useState, useRef, type MouseEvent, type TouchEvent } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -115,6 +115,26 @@ export default function LandOwnershipDocumentation({
   const handlePhotoCapture = (photoId: string, event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
     if (file) {
+      // Check file size (max 10MB)
+      if (file.size > 10 * 1024 * 1024) {
+        toast({
+          title: "File Too Large",
+          description: "Please select a photo smaller than 10MB.",
+          variant: "destructive",
+        });
+        return;
+      }
+
+      // Check file type
+      if (!file.type.startsWith('image/')) {
+        toast({
+          title: "Invalid File Type",
+          description: "Please select an image file (JPG, PNG, etc.).",
+          variant: "destructive",
+        });
+        return;
+      }
+
       const reader = new FileReader();
       reader.onload = (e) => {
         setPhotos(prev => prev.map(photo => 
@@ -122,6 +142,13 @@ export default function LandOwnershipDocumentation({
             ? { ...photo, file, previewUrl: e.target?.result as string }
             : photo
         ));
+      };
+      reader.onerror = () => {
+        toast({
+          title: "Error Reading File",
+          description: "Failed to read the selected image file.",
+          variant: "destructive",
+        });
       };
       reader.readAsDataURL(file);
       
@@ -141,7 +168,7 @@ export default function LandOwnershipDocumentation({
   };
 
   // Signature handling
-  const startDrawing = (e: React.MouseEvent<HTMLCanvasElement>) => {
+  const startDrawing = (e: MouseEvent<HTMLCanvasElement> | TouchEvent<HTMLCanvasElement>) => {
     setIsDrawing(true);
     const canvas = canvasRef.current;
     if (!canvas) return;
@@ -150,11 +177,18 @@ export default function LandOwnershipDocumentation({
     const ctx = canvas.getContext('2d');
     if (!ctx) return;
     
+    ctx.strokeStyle = '#000000';
+    ctx.lineWidth = 2;
+    ctx.lineCap = 'round';
+    
+    const clientX = 'touches' in e ? e.touches[0].clientX : e.clientX;
+    const clientY = 'touches' in e ? e.touches[0].clientY : e.clientY;
+    
     ctx.beginPath();
-    ctx.moveTo(e.clientX - rect.left, e.clientY - rect.top);
+    ctx.moveTo(clientX - rect.left, clientY - rect.top);
   };
 
-  const draw = (e: React.MouseEvent<HTMLCanvasElement>) => {
+  const draw = (e: MouseEvent<HTMLCanvasElement> | TouchEvent<HTMLCanvasElement>) => {
     if (!isDrawing) return;
     
     const canvas = canvasRef.current;
@@ -164,7 +198,10 @@ export default function LandOwnershipDocumentation({
     const ctx = canvas.getContext('2d');
     if (!ctx) return;
     
-    ctx.lineTo(e.clientX - rect.left, e.clientY - rect.top);
+    const clientX = 'touches' in e ? e.touches[0].clientX : e.clientX;
+    const clientY = 'touches' in e ? e.touches[0].clientY : e.clientY;
+    
+    ctx.lineTo(clientX - rect.left, clientY - rect.top);
     ctx.stroke();
   };
 
@@ -783,11 +820,14 @@ export default function LandOwnershipDocumentation({
                 ref={canvasRef}
                 width={600}
                 height={200}
-                className="border border-gray-300 rounded-md cursor-crosshair w-full"
+                className="border border-gray-300 rounded-md cursor-crosshair w-full touch-none"
                 onMouseDown={startDrawing}
                 onMouseMove={draw}
                 onMouseUp={stopDrawing}
                 onMouseLeave={stopDrawing}
+                onTouchStart={startDrawing}
+                onTouchMove={draw}
+                onTouchEnd={stopDrawing}
                 data-testid="canvas-signature"
               />
               

@@ -190,36 +190,8 @@ export default function OnboardFarmer() {
         description: `Credentials generated: ${credentials.credentialId}${notificationStatus.length > 0 ? ' | ' + notificationStatus.join(' | ') : ''}`,
       });
       
-      // Reset form
-      setFarmerData({
-        firstName: "",
-        lastName: "",
-        email: "",
-        phone: "",
-        county: "",
-        district: "",
-        community: "",
-        idNumber: "",
-        gpsCoordinates: "",
-        farmSize: "",
-        primaryCrop: "",
-        secondaryCrops: "",
-        farmingExperience: "",
-        certifications: "",
-        cooperativeMembership: "",
-        landOwnership: "",
-        irrigationAccess: "",
-        boundaryData: null,
-        farmerPhoto: null,
-        spouseName: "",
-        numberOfChildren: "",
-        dependents: "",
-        emergencyContact: "",
-        emergencyPhone: "",
-        familyMembers: ""
-      });
-      setSavedFarmer(null);
-      setIsFormComplete(false);
+      // Don't reset form data yet - keep it so land ownership documentation remains available
+      // Form will be reset only when user chooses to go to farmer management dashboard
     },
     onError: (error: any) => {
       toast({
@@ -839,23 +811,74 @@ export default function OnboardFarmer() {
                 </p>
               </div>
 
-              <Button
-                className="w-full"
-                onClick={() => {
-                  setShowCredentialsModal({ show: false, farmerName: "", credentialId: "", temporaryPassword: "" });
-                  // Navigate to Farmer Management Dashboard
-                  toast({
-                    title: "Redirecting to Farmer Management Dashboard",
-                    description: "Taking you to the farmer management dashboard...",
-                  });
-                  setTimeout(() => {
-                    setLocation('/inspector-farmer-land-management');
-                  }, 1000);
-                }}
-                data-testid="close-credentials-modal"
-              >
-                Close & Go to Farmer Management
-              </Button>
+              <div className="flex flex-col gap-2">
+                <Button
+                  variant="outline"
+                  className="w-full"
+                  onClick={() => {
+                    setShowCredentialsModal({ show: false, farmerName: "", credentialId: "", temporaryPassword: "" });
+                    // Stay on page to allow land ownership documentation
+                    toast({
+                      title: "Credentials Saved",
+                      description: "You can now add optional land ownership documentation or proceed to farmer management.",
+                    });
+                  }}
+                  data-testid="close-credentials-stay"
+                >
+                  Continue (Add Land Ownership Documentation)
+                </Button>
+                
+                <Button
+                  className="w-full"
+                  onClick={() => {
+                    setShowCredentialsModal({ show: false, farmerName: "", credentialId: "", temporaryPassword: "" });
+                    
+                    // Reset form data before leaving
+                    setFarmerData({
+                      firstName: "",
+                      lastName: "",
+                      email: "",
+                      phone: "",
+                      county: "",
+                      district: "",
+                      community: "",
+                      idNumber: "",
+                      gpsCoordinates: "",
+                      farmSize: "",
+                      primaryCrop: "",
+                      secondaryCrops: "",
+                      farmingExperience: "",
+                      certifications: "",
+                      cooperativeMembership: "",
+                      landOwnership: "",
+                      irrigationAccess: "",
+                      boundaryData: null,
+                      farmerPhoto: null,
+                      spouseName: "",
+                      numberOfChildren: "",
+                      dependents: "",
+                      emergencyContact: "",
+                      emergencyPhone: "",
+                      familyMembers: ""
+                    });
+                    setSavedFarmer(null);
+                    setIsFormComplete(false);
+                    setLandOwnershipCompleted(false);
+                    
+                    // Navigate to Farmer Management Dashboard
+                    toast({
+                      title: "Redirecting to Farmer Management Dashboard",
+                      description: "Taking you to the farmer management dashboard...",
+                    });
+                    setTimeout(() => {
+                      setLocation('/inspector-farmer-land-management');
+                    }, 1000);
+                  }}
+                  data-testid="close-credentials-modal"
+                >
+                  Complete & Go to Farmer Management
+                </Button>
+              </div>
             </CardContent>
           </Card>
         </div>

@@ -7319,6 +7319,51 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Farmer Status Management - Activate/Deactivate farmers
+  app.put("/api/farmers/:farmerId/status", async (req, res) => {
+    try {
+      const { farmerId } = req.params;
+      const { status } = req.body;
+      
+      console.log(`🔄 Updating farmer ${farmerId} status to: ${status}`);
+      
+      // Validate status
+      if (!['active', 'inactive', 'suspended'].includes(status)) {
+        return res.status(400).json({ error: "Invalid status. Must be: active, inactive, or suspended" });
+      }
+      
+      // Update farmer status in database
+      const [updatedFarmer] = await db.update(farmers)
+        .set({ 
+          status: status,
+          updatedAt: new Date()
+        })
+        .where(eq(farmers.farmerId, farmerId))
+        .returning();
+        
+      if (!updatedFarmer) {
+        return res.status(404).json({ error: "Farmer not found" });
+      }
+      
+      console.log(`✅ Successfully updated farmer ${farmerId} status to ${status}`);
+      
+      res.json({
+        success: true,
+        message: `Farmer status updated to ${status}`,
+        farmer: {
+          farmerId: updatedFarmer.farmerId,
+          name: `${updatedFarmer.firstName} ${updatedFarmer.lastName}`,
+          status: updatedFarmer.status,
+          county: updatedFarmer.county
+        }
+      });
+      
+    } catch (error: any) {
+      console.error("Error updating farmer status:", error);
+      res.status(500).json({ error: "Failed to update farmer status" });
+    }
+  });
+
   app.post("/api/farmers", async (req, res) => {
     try {
       console.log("Received request body:", JSON.stringify(req.body, null, 2));

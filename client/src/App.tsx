@@ -165,11 +165,11 @@ function App() {
             <Route path="/regulatory-classic-login" component={RegulatoryClassicLogin} />
             <Route path="/system-admin-login" component={SystemAdminLogin} />
             <Route path="/agritrace-admin-login" component={AgriTraceAdminLogin} />
-            <Route path="/monitoring-login" component={() => { window.location.href = '/'; return null; }} />
+            <Route path="/monitoring-login" component={MonitoringLogin} />
             
-            {/* SYSTEM MONITORING - BLOCKED */}
+            {/* OVERSIGHT MONITORING - ENABLED FOR DONORS/NGOS/AUDITORS */}
             <Route path="/system-monitoring" component={() => { window.location.href = '/'; return null; }} />
-            <Route path="/monitoring-dashboard" component={() => { window.location.href = '/'; return null; }} />
+            <Route path="/monitoring-dashboard" component={createLazyRoute(MonitoringDashboard)} />
             
             {/* AGRICULTURAL DASHBOARD ROUTES */}
             <Route path="/farmer-dashboard" component={createLazyRoute(FarmerDashboard)} />

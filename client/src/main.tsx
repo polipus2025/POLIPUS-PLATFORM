@@ -7,7 +7,7 @@ import "./index.css";
 const startTime = performance.now();
 
 // Register service worker for aggressive caching
-if ('serviceWorker' in navigator && import.meta.env.PROD) {
+if ('serviceWorker' in navigator && import.meta.env.MODE === 'production') {
   window.addEventListener('load', () => {
     navigator.serviceWorker.register('/sw.js')
       .then(() => {})

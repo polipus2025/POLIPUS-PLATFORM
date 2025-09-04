@@ -311,41 +311,55 @@ export default function FrontPage() {
           {/* Integrated dashboard disabled - only AgriTrace360 active */}
         </div>
         
-        {/* AgriTrace360 Focus Message */}
-        <div className="bg-white shadow-xl border-slate-200 rounded-lg p-6 mt-8 sm:mt-12 bg-gradient-to-r from-green-50 to-blue-50 border-green-300">
+        {/* Oversight Portal - For Donors, NGOs, and Government Auditors */}
+        <div className="bg-white shadow-xl border-slate-200 rounded-lg p-6 mt-8 sm:mt-12 bg-gradient-to-r from-blue-50 to-indigo-50 border-blue-300">
           <div className="text-center">
-            <div className="w-16 h-16 sm:w-20 sm:h-20 rounded-2xl bg-gradient-to-r from-green-500 to-green-600 flex items-center justify-center mx-auto mb-4 sm:mb-6">
-              <Wheat className="h-8 w-8 sm:h-10 sm:w-10 text-white" />
+            <div className="w-16 h-16 sm:w-20 sm:h-20 rounded-2xl bg-gradient-to-r from-blue-600 to-indigo-600 flex items-center justify-center mx-auto mb-4 sm:mb-6">
+              <Shield className="h-8 w-8 sm:h-10 sm:w-10 text-white" />
             </div>
             <h3 className="text-xl sm:text-2xl font-bold text-slate-900 mb-2 sm:mb-3">
-              AgriTrace360™ - Agricultural Intelligence Active
+              Oversight Portal - Complete Transparency
             </h3>
             <p className="text-sm sm:text-base text-slate-600 mb-4 sm:mb-6 max-w-2xl mx-auto">
-              Complete agricultural supply chain traceability system with EUDR compliance, 
-              stakeholder management, and end-to-end transaction workflows.
+              Comprehensive agricultural supply chain oversight for international donors, NGO organizations, 
+              and government auditing entities with complete operational transparency and compliance reporting.
             </p>
-            <Link href="/portals">
-              <Button className="bg-gradient-to-r from-green-600 to-green-700 hover:from-green-700 hover:to-green-800 text-white flex items-center gap-2 mx-auto">
-                <Wheat className="h-4 w-4" />
-                Access AgriTrace360
+            <Link href="/monitoring-login">
+              <Button className="bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white flex items-center gap-2 mx-auto">
+                <Shield className="h-4 w-4" />
+                Access Oversight Portal
               </Button>
             </Link>
             <div className="mt-4 grid grid-cols-2 sm:grid-cols-4 gap-3 text-xs sm:text-sm text-slate-600">
               <div className="flex items-center justify-center gap-1">
-                <CheckCircle className="h-3 w-3 text-green-500" />
-                <span>EUDR Compliant</span>
+                <CheckCircle className="h-3 w-3 text-blue-500" />
+                <span>Complete Transparency</span>
               </div>
               <div className="flex items-center justify-center gap-1">
-                <CheckCircle className="h-3 w-3 text-green-500" />
-                <span>Live Transaction System</span>
+                <CheckCircle className="h-3 w-3 text-blue-500" />
+                <span>PDF Reports</span>
               </div>
               <div className="flex items-center justify-center gap-1">
-                <CheckCircle className="h-3 w-3 text-green-500" />
-                <span>Nimba County Ready</span>
+                <CheckCircle className="h-3 w-3 text-blue-500" />
+                <span>Real-Time Monitoring</span>
               </div>
               <div className="flex items-center justify-center gap-1">
-                <CheckCircle className="h-3 w-3 text-green-500" />
-                <span>All Stakeholders Active</span>
+                <CheckCircle className="h-3 w-3 text-blue-500" />
+                <span>Compliance Tracking</span>
+              </div>
+            </div>
+            <div className="mt-6 flex flex-wrap items-center justify-center gap-4 text-xs sm:text-sm text-slate-500">
+              <div className="flex items-center gap-2">
+                <Globe className="h-4 w-4 text-blue-600" />
+                <span>International Donors</span>
+              </div>
+              <div className="flex items-center gap-2">
+                <Users className="h-4 w-4 text-blue-600" />
+                <span>NGO Organizations</span>
+              </div>
+              <div className="flex items-center gap-2">
+                <FileText className="h-4 w-4 text-blue-600" />
+                <span>Government Auditors</span>
               </div>
             </div>
           </div>

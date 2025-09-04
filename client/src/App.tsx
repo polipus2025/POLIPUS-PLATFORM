@@ -102,28 +102,10 @@ const LandPlotsList = lazy(() => import("@/pages/land-plots-list"));
 const LandPlotDetails = lazy(() => import("@/pages/land-plot-details"));
 
 function App() {
-  // COMPREHENSIVE REDIRECT PROTECTION - Always redirect to main Polipus page
+  // COMPREHENSIVE REDIRECT PROTECTION - Allow monitoring login access
   React.useEffect(() => {
-    const currentPath = window.location.pathname;
-    
-    // Block only monitoring login redirects while preserving legitimate inspector access
-    if (currentPath.includes("monitoring-login") || 
-        localStorage.getItem("userType") === "monitoring") {
-      // Clear problematic authentication storage
-      localStorage.removeItem("authToken");
-      localStorage.removeItem("userType");
-      localStorage.removeItem("userRole");
-      localStorage.removeItem("userId");
-      localStorage.removeItem("username");
-      localStorage.removeItem("inspectorData");
-      localStorage.removeItem("warehouseInspectorData");
-      localStorage.removeItem("portInspectorData");
-      localStorage.removeItem("landInspectorData");
-      
-      // Always redirect to main Polipus page
-      window.location.replace("/");
-      return;
-    }
+    // Remove the blocking code - allow access to monitoring-login
+    // This ensures oversight portal access for donors, NGOs, and auditors
   }, []);
 
   return (

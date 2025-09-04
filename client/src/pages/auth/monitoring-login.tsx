@@ -5,7 +5,8 @@ import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Label } from "@/components/ui/label";
 import { Alert, AlertDescription } from "@/components/ui/alert";
-import { Shield, Activity, BarChart3, Users, Database, ArrowLeft, Globe, FileText, Eye, EyeOff } from "lucide-react";
+import { Badge } from "@/components/ui/badge";
+import { Shield, Activity, BarChart3, Users, Database, ArrowLeft, Globe, FileText, Eye, EyeOff, ArrowRight } from "lucide-react";
 import { Link } from "wouter";
 import { useToast } from "@/hooks/use-toast";
 
@@ -103,222 +104,260 @@ export default function MonitoringLogin() {
           </CardHeader>
           
           <CardContent className="space-y-6">
-          {/* Three Login Boxes */}
-          <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+          {/* Three Access Cards */}
+          <div className="grid md:grid-cols-3 gap-6">
             
-            {/* International Donors Login */}
-            <div className="bg-gradient-to-br from-blue-50 to-blue-100 rounded-lg p-4 border border-blue-200">
-              <div className="text-center mb-4">
-                <div className="w-12 h-12 bg-gradient-to-r from-blue-500 to-blue-600 rounded-full flex items-center justify-center mx-auto mb-2">
-                  <Globe className="w-6 h-6 text-white" />
+            {/* International Donors Card */}
+            <Card className="bg-white shadow-xl border-slate-200 hover:shadow-2xl transition-all cursor-pointer group">
+              <CardHeader className="text-center">
+                <div className="mx-auto w-16 h-16 bg-gradient-to-br from-blue-500 to-blue-600 rounded-full flex items-center justify-center mb-4 group-hover:scale-110 transition-transform">
+                  <Globe className="w-8 h-8 text-white" />
                 </div>
-                <h3 className="font-bold text-blue-900">International Donors</h3>
-                <p className="text-xs text-blue-700 mt-1">Global funding oversight</p>
-              </div>
-              
-              {errors.donor && (
-                <Alert className="border-red-200 bg-red-50 mb-3">
-                  <AlertDescription className="text-red-700 text-xs">{errors.donor}</AlertDescription>
-                </Alert>
-              )}
-              
-              <form onSubmit={(e) => { e.preventDefault(); handleSubmit('donor', donorForm); }} className="space-y-3">
-                <div>
-                  <Input
-                    type="text"
-                    placeholder="Organization username"
-                    value={donorForm.username}
-                    onChange={(e) => handleInputChange('donor', 'username', e.target.value)}
-                    required
-                    className="h-10 text-sm"
-                  />
-                </div>
-                <div className="relative">
-                  <Input
-                    type={showPasswords.donor ? "text" : "password"}
-                    placeholder="Access code"
-                    value={donorForm.password}
-                    onChange={(e) => handleInputChange('donor', 'password', e.target.value)}
-                    required
-                    className="h-10 text-sm pr-10"
-                  />
-                  <button
-                    type="button"
-                    onClick={() => setShowPasswords(prev => ({ ...prev, donor: !prev.donor }))}
-                    className="absolute right-3 top-1/2 transform -translate-y-1/2 text-slate-400"
+                <CardTitle className="text-xl text-slate-900 flex items-center justify-center gap-2">
+                  <Globe className="w-5 h-5" />
+                  International Donors
+                </CardTitle>
+                <CardDescription className="text-slate-600">
+                  Global Funding Oversight
+                </CardDescription>
+              </CardHeader>
+              <CardContent className="space-y-4">
+                <Badge variant="outline" className="w-full justify-center border-blue-500 text-blue-600 bg-blue-50">
+                  Global Access Level
+                </Badge>
+                {errors.donor && (
+                  <Alert className="border-red-200 bg-red-50">
+                    <AlertDescription className="text-red-700 text-xs">{errors.donor}</AlertDescription>
+                  </Alert>
+                )}
+                <form onSubmit={(e) => { e.preventDefault(); handleSubmit('donor', donorForm); }} className="space-y-3">
+                  <div>
+                    <Input
+                      type="text"
+                      placeholder="Organization username"
+                      value={donorForm.username}
+                      onChange={(e) => handleInputChange('donor', 'username', e.target.value)}
+                      required
+                      className="h-11"
+                    />
+                  </div>
+                  <div className="relative">
+                    <Input
+                      type={showPasswords.donor ? "text" : "password"}
+                      placeholder="Access code"
+                      value={donorForm.password}
+                      onChange={(e) => handleInputChange('donor', 'password', e.target.value)}
+                      required
+                      className="h-11 pr-10"
+                    />
+                    <button
+                      type="button"
+                      onClick={() => setShowPasswords(prev => ({ ...prev, donor: !prev.donor }))}
+                      className="absolute right-3 top-1/2 transform -translate-y-1/2 text-slate-400"
+                    >
+                      {showPasswords.donor ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+                    </button>
+                  </div>
+                  <Button 
+                    type="submit" 
+                    className="w-full bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 text-white group"
+                    disabled={isLoading.donor}
                   >
-                    {showPasswords.donor ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
-                  </button>
-                </div>
-                <Button 
-                  type="submit" 
-                  className="w-full h-10 bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700 text-white text-sm font-medium"
-                  disabled={isLoading.donor}
-                >
-                  {isLoading.donor ? (
-                    <div className="flex items-center gap-2">
-                      <div className="animate-spin rounded-full h-3 w-3 border-2 border-white border-t-transparent"></div>
-                      <span className="text-xs">Authenticating...</span>
-                    </div>
-                  ) : (
-                    "Login as Donor"
-                  )}
-                </Button>
-                <div className="text-center">
+                    {isLoading.donor ? (
+                      <div className="flex items-center gap-2">
+                        <div className="animate-spin rounded-full h-4 w-4 border-2 border-white border-t-transparent"></div>
+                        Authenticating...
+                      </div>
+                    ) : (
+                      <>
+                        Access Donor Portal
+                        <ArrowRight className="w-4 h-4 ml-2 group-hover:translate-x-1 transition-transform" />
+                      </>
+                    )}
+                  </Button>
+                </form>
+                <div className="text-center pt-2 border-t border-slate-100">
+                  <p className="text-xs text-slate-500">Test Credentials:</p>
                   <p className="text-xs text-blue-600 font-mono">donor.test / DONOR2025</p>
                 </div>
-              </form>
-            </div>
+              </CardContent>
+            </Card>
 
-            {/* NGO Organizations Login */}
-            <div className="bg-gradient-to-br from-green-50 to-green-100 rounded-lg p-4 border border-green-200">
-              <div className="text-center mb-4">
-                <div className="w-12 h-12 bg-gradient-to-r from-green-500 to-green-600 rounded-full flex items-center justify-center mx-auto mb-2">
-                  <Users className="w-6 h-6 text-white" />
+            {/* NGO Organizations Card */}
+            <Card className="bg-white shadow-xl border-slate-200 hover:shadow-2xl transition-all cursor-pointer group">
+              <CardHeader className="text-center">
+                <div className="mx-auto w-16 h-16 bg-gradient-to-br from-emerald-500 to-emerald-600 rounded-full flex items-center justify-center mb-4 group-hover:scale-110 transition-transform">
+                  <Users className="w-8 h-8 text-white" />
                 </div>
-                <h3 className="font-bold text-green-900">NGO Organizations</h3>
-                <p className="text-xs text-green-700 mt-1">Civil society monitoring</p>
-              </div>
-              
-              {errors.ngo && (
-                <Alert className="border-red-200 bg-red-50 mb-3">
-                  <AlertDescription className="text-red-700 text-xs">{errors.ngo}</AlertDescription>
-                </Alert>
-              )}
-              
-              <form onSubmit={(e) => { e.preventDefault(); handleSubmit('ngo', ngoForm); }} className="space-y-3">
-                <div>
-                  <Input
-                    type="text"
-                    placeholder="Organization username"
-                    value={ngoForm.username}
-                    onChange={(e) => handleInputChange('ngo', 'username', e.target.value)}
-                    required
-                    className="h-10 text-sm"
-                  />
-                </div>
-                <div className="relative">
-                  <Input
-                    type={showPasswords.ngo ? "text" : "password"}
-                    placeholder="Access code"
-                    value={ngoForm.password}
-                    onChange={(e) => handleInputChange('ngo', 'password', e.target.value)}
-                    required
-                    className="h-10 text-sm pr-10"
-                  />
-                  <button
-                    type="button"
-                    onClick={() => setShowPasswords(prev => ({ ...prev, ngo: !prev.ngo }))}
-                    className="absolute right-3 top-1/2 transform -translate-y-1/2 text-slate-400"
+                <CardTitle className="text-xl text-slate-900 flex items-center justify-center gap-2">
+                  <Users className="w-5 h-5" />
+                  NGO Organizations
+                </CardTitle>
+                <CardDescription className="text-slate-600">
+                  Civil Society Monitoring
+                </CardDescription>
+              </CardHeader>
+              <CardContent className="space-y-4">
+                <Badge variant="outline" className="w-full justify-center border-emerald-500 text-emerald-600 bg-emerald-50">
+                  NGO Access Level
+                </Badge>
+                {errors.ngo && (
+                  <Alert className="border-red-200 bg-red-50">
+                    <AlertDescription className="text-red-700 text-xs">{errors.ngo}</AlertDescription>
+                  </Alert>
+                )}
+                <form onSubmit={(e) => { e.preventDefault(); handleSubmit('ngo', ngoForm); }} className="space-y-3">
+                  <div>
+                    <Input
+                      type="text"
+                      placeholder="Organization username"
+                      value={ngoForm.username}
+                      onChange={(e) => handleInputChange('ngo', 'username', e.target.value)}
+                      required
+                      className="h-11"
+                    />
+                  </div>
+                  <div className="relative">
+                    <Input
+                      type={showPasswords.ngo ? "text" : "password"}
+                      placeholder="Access code"
+                      value={ngoForm.password}
+                      onChange={(e) => handleInputChange('ngo', 'password', e.target.value)}
+                      required
+                      className="h-11 pr-10"
+                    />
+                    <button
+                      type="button"
+                      onClick={() => setShowPasswords(prev => ({ ...prev, ngo: !prev.ngo }))}
+                      className="absolute right-3 top-1/2 transform -translate-y-1/2 text-slate-400"
+                    >
+                      {showPasswords.ngo ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+                    </button>
+                  </div>
+                  <Button 
+                    type="submit" 
+                    className="w-full bg-gradient-to-r from-emerald-600 to-emerald-700 hover:from-emerald-700 hover:to-emerald-800 text-white group"
+                    disabled={isLoading.ngo}
                   >
-                    {showPasswords.ngo ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
-                  </button>
+                    {isLoading.ngo ? (
+                      <div className="flex items-center gap-2">
+                        <div className="animate-spin rounded-full h-4 w-4 border-2 border-white border-t-transparent"></div>
+                        Authenticating...
+                      </div>
+                    ) : (
+                      <>
+                        Access NGO Portal
+                        <ArrowRight className="w-4 h-4 ml-2 group-hover:translate-x-1 transition-transform" />
+                      </>
+                    )}
+                  </Button>
+                </form>
+                <div className="text-center pt-2 border-t border-slate-100">
+                  <p className="text-xs text-slate-500">Test Credentials:</p>
+                  <p className="text-xs text-emerald-600 font-mono">ngo.test / NGO2025</p>
                 </div>
-                <Button 
-                  type="submit" 
-                  className="w-full h-10 bg-gradient-to-r from-green-500 to-green-600 hover:from-green-600 hover:to-green-700 text-white text-sm font-medium"
-                  disabled={isLoading.ngo}
-                >
-                  {isLoading.ngo ? (
-                    <div className="flex items-center gap-2">
-                      <div className="animate-spin rounded-full h-3 w-3 border-2 border-white border-t-transparent"></div>
-                      <span className="text-xs">Authenticating...</span>
-                    </div>
-                  ) : (
-                    "Login as NGO"
-                  )}
-                </Button>
-                <div className="text-center">
-                  <p className="text-xs text-green-600 font-mono">ngo.test / NGO2025</p>
-                </div>
-              </form>
-            </div>
+              </CardContent>
+            </Card>
 
-            {/* Government Auditors Login */}
-            <div className="bg-gradient-to-br from-purple-50 to-purple-100 rounded-lg p-4 border border-purple-200">
-              <div className="text-center mb-4">
-                <div className="w-12 h-12 bg-gradient-to-r from-purple-500 to-purple-600 rounded-full flex items-center justify-center mx-auto mb-2">
-                  <FileText className="w-6 h-6 text-white" />
+            {/* Government Auditors Card */}
+            <Card className="bg-white shadow-xl border-slate-200 hover:shadow-2xl transition-all cursor-pointer group">
+              <CardHeader className="text-center">
+                <div className="mx-auto w-16 h-16 bg-gradient-to-br from-amber-500 to-amber-600 rounded-full flex items-center justify-center mb-4 group-hover:scale-110 transition-transform">
+                  <FileText className="w-8 h-8 text-white" />
                 </div>
-                <h3 className="font-bold text-purple-900">Government Auditors</h3>
-                <p className="text-xs text-purple-700 mt-1">Official compliance review</p>
-              </div>
-              
-              {errors.auditor && (
-                <Alert className="border-red-200 bg-red-50 mb-3">
-                  <AlertDescription className="text-red-700 text-xs">{errors.auditor}</AlertDescription>
-                </Alert>
-              )}
-              
-              <form onSubmit={(e) => { e.preventDefault(); handleSubmit('auditor', auditorForm); }} className="space-y-3">
-                <div>
-                  <Input
-                    type="text"
-                    placeholder="Organization username"
-                    value={auditorForm.username}
-                    onChange={(e) => handleInputChange('auditor', 'username', e.target.value)}
-                    required
-                    className="h-10 text-sm"
-                  />
-                </div>
-                <div className="relative">
-                  <Input
-                    type={showPasswords.auditor ? "text" : "password"}
-                    placeholder="Access code"
-                    value={auditorForm.password}
-                    onChange={(e) => handleInputChange('auditor', 'password', e.target.value)}
-                    required
-                    className="h-10 text-sm pr-10"
-                  />
-                  <button
-                    type="button"
-                    onClick={() => setShowPasswords(prev => ({ ...prev, auditor: !prev.auditor }))}
-                    className="absolute right-3 top-1/2 transform -translate-y-1/2 text-slate-400"
+                <CardTitle className="text-xl text-slate-900 flex items-center justify-center gap-2">
+                  <FileText className="w-5 h-5" />
+                  Government Auditors
+                </CardTitle>
+                <CardDescription className="text-slate-600">
+                  Official Compliance Review
+                </CardDescription>
+              </CardHeader>
+              <CardContent className="space-y-4">
+                <Badge variant="outline" className="w-full justify-center border-amber-500 text-amber-600 bg-amber-50">
+                  Audit Access Level
+                </Badge>
+                {errors.auditor && (
+                  <Alert className="border-red-200 bg-red-50">
+                    <AlertDescription className="text-red-700 text-xs">{errors.auditor}</AlertDescription>
+                  </Alert>
+                )}
+                <form onSubmit={(e) => { e.preventDefault(); handleSubmit('auditor', auditorForm); }} className="space-y-3">
+                  <div>
+                    <Input
+                      type="text"
+                      placeholder="Organization username"
+                      value={auditorForm.username}
+                      onChange={(e) => handleInputChange('auditor', 'username', e.target.value)}
+                      required
+                      className="h-11"
+                    />
+                  </div>
+                  <div className="relative">
+                    <Input
+                      type={showPasswords.auditor ? "text" : "password"}
+                      placeholder="Access code"
+                      value={auditorForm.password}
+                      onChange={(e) => handleInputChange('auditor', 'password', e.target.value)}
+                      required
+                      className="h-11 pr-10"
+                    />
+                    <button
+                      type="button"
+                      onClick={() => setShowPasswords(prev => ({ ...prev, auditor: !prev.auditor }))}
+                      className="absolute right-3 top-1/2 transform -translate-y-1/2 text-slate-400"
+                    >
+                      {showPasswords.auditor ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+                    </button>
+                  </div>
+                  <Button 
+                    type="submit" 
+                    className="w-full bg-gradient-to-r from-amber-600 to-amber-700 hover:from-amber-700 hover:to-amber-800 text-white group"
+                    disabled={isLoading.auditor}
                   >
-                    {showPasswords.auditor ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
-                  </button>
+                    {isLoading.auditor ? (
+                      <div className="flex items-center gap-2">
+                        <div className="animate-spin rounded-full h-4 w-4 border-2 border-white border-t-transparent"></div>
+                        Authenticating...
+                      </div>
+                    ) : (
+                      <>
+                        Access Auditor Portal
+                        <ArrowRight className="w-4 h-4 ml-2 group-hover:translate-x-1 transition-transform" />
+                      </>
+                    )}
+                  </Button>
+                </form>
+                <div className="text-center pt-2 border-t border-slate-100">
+                  <p className="text-xs text-slate-500">Test Credentials:</p>
+                  <p className="text-xs text-amber-600 font-mono">audit.test / AUDIT2025</p>
                 </div>
-                <Button 
-                  type="submit" 
-                  className="w-full h-10 bg-gradient-to-r from-purple-500 to-purple-600 hover:from-purple-600 hover:to-purple-700 text-white text-sm font-medium"
-                  disabled={isLoading.auditor}
-                >
-                  {isLoading.auditor ? (
-                    <div className="flex items-center gap-2">
-                      <div className="animate-spin rounded-full h-3 w-3 border-2 border-white border-t-transparent"></div>
-                      <span className="text-xs">Authenticating...</span>
-                    </div>
-                  ) : (
-                    "Login as Auditor"
-                  )}
-                </Button>
-                <div className="text-center">
-                  <p className="text-xs text-purple-600 font-mono">audit.test / AUDIT2025</p>
-                </div>
-              </form>
-            </div>
+              </CardContent>
+            </Card>
           </div>
 
           {/* Features Information */}
-          <div className="bg-gray-50 rounded-lg p-4 space-y-3 mt-6">
-            <h3 className="font-semibold text-gray-900 text-sm flex items-center gap-2">
-              <BarChart3 className="h-4 w-4" />
-              Oversight Dashboard Features
-            </h3>
-            <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 text-xs text-gray-600">
-              <div className="flex items-center gap-2">
+          <div className="bg-white shadow-lg border border-slate-200 rounded-lg p-6 text-center mt-8">
+            <Shield className="w-8 h-8 text-slate-600 mx-auto mb-4" />
+            <h3 className="text-lg font-semibold text-slate-900 mb-2">Complete Transparency Portal</h3>
+            <p className="text-slate-600 text-sm mb-4">
+              Comprehensive agricultural supply chain oversight for international stakeholders with complete 
+              operational transparency and compliance monitoring capabilities.
+            </p>
+            <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 text-xs text-slate-500">
+              <div className="flex items-center justify-center gap-1">
                 <Users className="h-3 w-3" />
                 <span>Supply Chain Visibility</span>
               </div>
-              <div className="flex items-center gap-2">
+              <div className="flex items-center justify-center gap-1">
                 <Database className="h-3 w-3" />
                 <span>PDF Reports</span>
               </div>
-              <div className="flex items-center gap-2">
+              <div className="flex items-center justify-center gap-1">
                 <Shield className="h-3 w-3" />
                 <span>Audit Trail</span>
               </div>
-              <div className="flex items-center gap-2">
+              <div className="flex items-center justify-center gap-1">
                 <Activity className="h-3 w-3" />
                 <span>Real-time Monitoring</span>
               </div>

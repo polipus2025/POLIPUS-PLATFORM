@@ -465,15 +465,72 @@ export default function RealMapBoundaryMapper({
         mapContainer.appendChild(marker);
       });
 
-      // Draw connecting lines if we have multiple points
+      // Draw connecting lines if we have multiple points - ENHANCED POLYGON CREATION
       if (currentPoints.length >= 2) {
-        const svg = mapContainer.querySelector('svg');
-        if (svg) {
-          // Clear existing lines
-          svg.innerHTML = '';
+        let svg = mapContainer.querySelector('svg');
+        if (!svg) {
+          // Create SVG overlay if it doesn't exist
+          svg = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
+          svg.style.position = 'absolute';
+          svg.style.top = '0';
+          svg.style.left = '0';
+          svg.style.width = '100%';
+          svg.style.height = '100%';
+          svg.style.pointerEvents = 'none';
+          svg.style.zIndex = '15';
+          mapContainer.appendChild(svg);
+        }
+        
+        // Clear existing lines
+        svg.innerHTML = '';
 
-          // Create path for boundary lines
-          const pathData = currentPoints.map((point, index) => {
+        // Create path for boundary lines with enhanced visibility
+        const pathData = currentPoints.map((point, index) => {
+          const rect = mapContainer.getBoundingClientRect();
+          const latRange = 0.002;
+          const lngRange = 0.002;
+          
+          const x = ((point.longitude - (centerLng - lngRange / 2)) / lngRange) * rect.width;
+          const y = ((centerLat + latRange / 2 - point.latitude) / latRange) * rect.height;
+          
+          return `${index === 0 ? 'M' : 'L'} ${x} ${y}`;
+        }).join(' ');
+
+        const path = document.createElementNS('http://www.w3.org/2000/svg', 'path');
+        path.setAttribute('d', pathData);
+        path.setAttribute('stroke', '#2563eb');
+        path.setAttribute('stroke-width', '4');
+        path.setAttribute('fill', 'none');
+        path.setAttribute('stroke-dasharray', '10,5');
+        path.setAttribute('style', 'filter: drop-shadow(0 3px 6px rgba(0,0,0,0.4));');
+        svg.appendChild(path);
+
+        // Auto-close polygon if we have 3+ points - AUTOMATIC POLYGON COMPLETION
+        if (currentPoints.length >= 3) {
+          const firstPoint = currentPoints[0];
+          const lastPoint = currentPoints[currentPoints.length - 1];
+          
+          const rect = mapContainer.getBoundingClientRect();
+          const latRange = 0.002;
+          const lngRange = 0.002;
+          
+          const x1 = ((lastPoint.longitude - (centerLng - lngRange / 2)) / lngRange) * rect.width;
+          const y1 = ((centerLat + latRange / 2 - lastPoint.latitude) / latRange) * rect.height;
+          const x2 = ((firstPoint.longitude - (centerLng - lngRange / 2)) / lngRange) * rect.width;
+          const y2 = ((centerLat + latRange / 2 - firstPoint.latitude) / latRange) * rect.height;
+
+          // Closing line
+          const closingLine = document.createElementNS('http://www.w3.org/2000/svg', 'path');
+          closingLine.setAttribute('d', `M ${x1} ${y1} L ${x2} ${y2}`);
+          closingLine.setAttribute('stroke', '#16a34a');
+          closingLine.setAttribute('stroke-width', '4');
+          closingLine.setAttribute('fill', 'none');
+          closingLine.setAttribute('stroke-dasharray', '6,3');
+          closingLine.setAttribute('style', 'filter: drop-shadow(0 3px 6px rgba(0,0,0,0.4));');
+          svg.appendChild(closingLine);
+          
+          // Add polygon fill for better visualization
+          const polygonPath = currentPoints.map((point, index) => {
             const rect = mapContainer.getBoundingClientRect();
             const latRange = 0.002;
             const lngRange = 0.002;
@@ -482,39 +539,13 @@ export default function RealMapBoundaryMapper({
             const y = ((centerLat + latRange / 2 - point.latitude) / latRange) * rect.height;
             
             return `${index === 0 ? 'M' : 'L'} ${x} ${y}`;
-          }).join(' ');
-
-          const path = document.createElementNS('http://www.w3.org/2000/svg', 'path');
-          path.setAttribute('d', pathData);
-          path.setAttribute('stroke', '#3b82f6');
-          path.setAttribute('stroke-width', '3');
-          path.setAttribute('fill', 'none');
-          path.setAttribute('stroke-dasharray', '8,4');
-          path.setAttribute('style', 'filter: drop-shadow(0 2px 4px rgba(0,0,0,0.3));');
-          svg.appendChild(path);
-
-          // Close polygon if we have enough points
-          if (currentPoints.length >= 3) {
-            const firstPoint = currentPoints[0];
-            const lastPoint = currentPoints[currentPoints.length - 1];
-            
-            const rect = mapContainer.getBoundingClientRect();
-            const latRange = 0.002;
-            const lngRange = 0.002;
-            
-            const x1 = ((lastPoint.longitude - (centerLng - lngRange / 2)) / lngRange) * rect.width;
-            const y1 = ((centerLat + latRange / 2 - lastPoint.latitude) / latRange) * rect.height;
-            const x2 = ((firstPoint.longitude - (centerLng - lngRange / 2)) / lngRange) * rect.width;
-            const y2 = ((centerLat + latRange / 2 - firstPoint.latitude) / latRange) * rect.height;
-
-            const closingLine = document.createElementNS('http://www.w3.org/2000/svg', 'path');
-            closingLine.setAttribute('d', `M ${x1} ${y1} L ${x2} ${y2}`);
-            closingLine.setAttribute('stroke', '#22c55e');
-            closingLine.setAttribute('stroke-width', '3');
-            closingLine.setAttribute('fill', 'none');
-            closingLine.setAttribute('stroke-dasharray', '4,2');
-            svg.appendChild(closingLine);
-          }
+          }).join(' ') + ' Z'; // Close the path
+          
+          const polygonFill = document.createElementNS('http://www.w3.org/2000/svg', 'path');
+          polygonFill.setAttribute('d', polygonPath);
+          polygonFill.setAttribute('fill', 'rgba(34, 197, 94, 0.2)');
+          polygonFill.setAttribute('stroke', 'none');
+          svg.insertBefore(polygonFill, svg.firstChild); // Add behind the lines
         }
       }
     };
@@ -858,12 +889,21 @@ export default function RealMapBoundaryMapper({
       longitude: currentGPSPosition.lng
     };
 
-    setPoints(prev => [...prev, newPoint]);
-    setStatus(`Point ${points.length + 1} added - GPS accuracy: ${trackingAccuracy?.toFixed(1)}m`);
+    const updatedPoints = [...points, newPoint];
+    setPoints(updatedPoints);
+    setStatus(`Point ${updatedPoints.length} added - GPS accuracy: ${trackingAccuracy?.toFixed(1)}m - ${updatedPoints.length >= 3 ? 'Polygon created!' : 'Keep walking to next boundary point'}`);
     
     // Trigger EUDR analysis if we have enough points
-    if (points.length + 1 >= 3) {
-      setTimeout(() => analyzeEUDRCompliance([...points, newPoint]), 500);
+    if (updatedPoints.length >= 3) {
+      setTimeout(() => analyzeEUDRCompliance(updatedPoints), 500);
+    }
+    
+    // Auto-complete boundary when minimum points reached
+    if (updatedPoints.length >= minPoints) {
+      setTimeout(() => {
+        const area = calculateArea(updatedPoints);
+        setStatus(`Boundary mapped! Area: ${area.toFixed(2)} hectares - ${updatedPoints.length} GPS points recorded`);
+      }, 1000);
     }
   };
 
@@ -1402,21 +1442,21 @@ export default function RealMapBoundaryMapper({
             </Button>
             <Button
               onClick={addCurrentGPSPoint}
-              disabled={!isTrackingGPS || !currentGPSPosition || points.length >= maxPoints || (trackingAccuracy && trackingAccuracy > 2.5)}
+              disabled={!isTrackingGPS || !currentGPSPosition || points.length >= maxPoints || (trackingAccuracy && trackingAccuracy > 15)}
               size="sm"
               variant="default"
               className={`flex-1 sm:flex-none ${
-                trackingAccuracy && trackingAccuracy <= 2.5 
+                trackingAccuracy && trackingAccuracy <= 15 
                   ? 'bg-green-600 hover:bg-green-700' 
                   : 'bg-gray-400 cursor-not-allowed'
               }`}
-              title={trackingAccuracy && trackingAccuracy > 2.5 ? 'GPS accuracy must be ≤2.5m to add points (currently ' + trackingAccuracy.toFixed(1) + 'm)' : 'High-precision GPS ready'}
+              title={trackingAccuracy && trackingAccuracy > 15 ? 'GPS accuracy must be ≤15m to add points (currently ' + trackingAccuracy.toFixed(1) + 'm)' : 'GPS ready for field mapping'}
             >
               <span className="hidden sm:inline">
                 Add GPS Point ({points.length}/{maxPoints})
                 {trackingAccuracy && (
-                  <span className={`ml-1 text-xs ${trackingAccuracy <= 2.5 ? 'text-green-200' : 'text-red-200'}`}>
-                    {trackingAccuracy <= 2.5 ? '✅' : '⚠️'}
+                  <span className={`ml-1 text-xs ${trackingAccuracy <= 15 ? 'text-green-200' : 'text-red-200'}`}>
+                    {trackingAccuracy <= 15 ? '✅' : '⚠️'}
                   </span>
                 )}
               </span>

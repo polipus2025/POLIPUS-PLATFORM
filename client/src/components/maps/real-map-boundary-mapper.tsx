@@ -104,13 +104,16 @@ export default function RealMapBoundaryMapper({
         setCurrentGPSPosition({ lat: latitude, lng: longitude });
         setTrackingAccuracy(accuracy);
         
-        // Add to GPS history for trail visualization
-        setGpsHistory(prev => [...prev, {
-          lat: latitude,
-          lng: longitude,
-          timestamp: new Date(),
-          accuracy
-        }]);
+        // Add to GPS history for trail visualization (cap at 1000 points for memory)
+        setGpsHistory(prev => {
+          const newHistory = [...prev, {
+            lat: latitude,
+            lng: longitude,
+            timestamp: new Date(),
+            accuracy
+          }];
+          return newHistory.slice(-1000); // Keep last 1000 GPS positions
+        });
         
         // Add to real-time trail (last 50 positions for smooth trail)
         setRealTimeTrail(prev => {
@@ -149,7 +152,7 @@ export default function RealMapBoundaryMapper({
     setStatus('🚶‍♂️ Walking mode stopped');
   };
 
-  const addCurrentGPSPoint = async () => {
+  const addCurrentGPSPoint = async (forceAdd = false) => {
     if (!currentGPSPosition) {
       setStatus('❌ No GPS position available');
       return;
@@ -157,6 +160,13 @@ export default function RealMapBoundaryMapper({
 
     if (points.length >= maxPoints) {
       setStatus(`❌ Maximum ${maxPoints} points reached`);
+      return;
+    }
+
+    // Check GPS accuracy threshold (require <10m accuracy unless forced)
+    const accuracyThreshold = 10; // meters
+    if (!forceAdd && trackingAccuracy && trackingAccuracy > accuracyThreshold) {
+      setStatus(`⚠️ GPS accuracy too low (${trackingAccuracy.toFixed(1)}m). Need <${accuracyThreshold}m. Use 'Force Add' if needed.`);
       return;
     }
 
@@ -507,6 +517,7 @@ export default function RealMapBoundaryMapper({
           }
         </style>
         <div class="real-map" id="real-map">
+          <div id="satellite-tiles" style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; z-index: 1;"></div>
           <div class="map-overlay"></div>
           <svg class="map-polygon" style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; pointer-events: none;">
           </svg>
@@ -2074,14 +2085,22 @@ export default function RealMapBoundaryMapper({
   // Clean up GPS tracking and event listeners on unmount
   useEffect(() => {
     return () => {
-      // Stop GPS tracking
+      // Stop GPS tracking - always clear any active watch
       if (gpsWatchId !== null) {
         navigator.geolocation.clearWatch(gpsWatchId);
+        setGpsWatchId(null);
+      }
+      
+      // Stop walking mode if active
+      if (isWalkingMode) {
+        setIsWalkingMode(false);
+        setIsTrackingGPS(false);
       }
       
       // Clear any pending animations
       if (walkingAnimationRef.current) {
         cancelAnimationFrame(walkingAnimationRef.current);
+        walkingAnimationRef.current = null;
       }
       
       // Clear DOM event listeners safely
@@ -2094,7 +2113,7 @@ export default function RealMapBoundaryMapper({
         }
       }
     };
-  }, [gpsWatchId]);
+  }, []);
 
   // Tab interface content after completion
   const renderTabContent = () => {
@@ -2313,14 +2332,28 @@ export default function RealMapBoundaryMapper({
               ) : (
                 <>
                   <Button
-                    onClick={addCurrentGPSPoint}
-                    disabled={!currentGPSPosition}
+                    onClick={() => addCurrentGPSPoint(false)}
+                    disabled={!currentGPSPosition || (trackingAccuracy && trackingAccuracy > 10)}
                     size="lg"
-                    className="flex-1 bg-green-600 hover:bg-green-700 text-white font-medium py-3"
+                    className="flex-1 bg-green-600 hover:bg-green-700 text-white font-medium py-3 disabled:bg-gray-400"
+                    data-testid="button-add-point"
                   >
                     <MapPin className="h-5 w-5 mr-2" />
                     Add Point {nextPointLabel} ({points.length}/{maxPoints})
+                    {trackingAccuracy && trackingAccuracy > 10 && ' (Low Accuracy)'}
                   </Button>
+                  {trackingAccuracy && trackingAccuracy > 10 && (
+                    <Button
+                      onClick={() => addCurrentGPSPoint(true)}
+                      disabled={!currentGPSPosition}
+                      size="lg"
+                      variant="outline"
+                      className="flex-1 border-yellow-500 text-yellow-700 hover:bg-yellow-50 font-medium py-3"
+                      data-testid="button-force-add-point"
+                    >
+                      ⚠️ Force Add ({trackingAccuracy.toFixed(1)}m)
+                    </Button>
+                  )}
                   <Button
                     onClick={stopWalkingMode}
                     size="lg"

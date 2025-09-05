@@ -249,11 +249,9 @@ export default function RealMapBoundaryMapper({
         complianceScore: Math.round(85 + Math.random() * 12),
         deforestationRisk: area > 3 ? Math.round(15 + Math.random() * 20) : Math.round(5 + Math.random() * 10),
         lastForestDate: '2019-12-31',
-        certificationsRequired: area > 2 ? ['FSC', 'RTRS', 'EUDR'] : ['EUDR'],
-        monitoringLevel: area > 3 ? 'enhanced' : 'standard',
-        geoLocation: `${centerLat.toFixed(6)}, ${boundaryPoints.reduce((sum, p) => sum + p.longitude, 0) / boundaryPoints.length}`,
-        landUseHistory: 'Agricultural land (no recent deforestation)',
-        riskFactors: area > 3 ? ['Large area requires enhanced monitoring'] : ['Low risk - small scale farming'],
+        // certificationsRequired: area > 2 ? ['FSC', 'RTRS', 'EUDR'] : ['EUDR'],
+        coordinates: `${centerLat.toFixed(6)}, ${boundaryPoints.reduce((sum, p) => sum + p.longitude, 0) / boundaryPoints.length}`,
+        documentationRequired: area > 2 ? ['FSC', 'RTRS', 'EUDR'] : ['EUDR'],
         recommendations: [
           'Maintain GPS boundary records',
           'Implement sustainable farming practices', 
@@ -2534,7 +2532,6 @@ export default function RealMapBoundaryMapper({
           )}
         </div>
       )}
-      </div>
 
       {/* EUDR Compliance & Deforestation Analysis */}
       {(eudrReport || deforestationReport || isAnalyzing) && (

@@ -892,8 +892,8 @@ export default function RealMapBoundaryMapper({
         if (mapContainer && mapContainer.querySelectorAll) {
           mapContainer.querySelectorAll('.persistent-marker').forEach(marker => {
             try {
-              if (marker && marker.parentNode && marker.parentNode.contains && marker.parentNode.contains(marker)) {
-                marker.parentNode.removeChild(marker);
+              if (marker && marker.parentNode && marker.parentNode.contains(marker)) {
+                marker.remove();
               }
             } catch (e) {
               // Element already removed or orphaned - ignore silently
@@ -973,13 +973,7 @@ export default function RealMapBoundaryMapper({
         
         // CRITICAL FIX: Safe SVG line clearing
         try {
-          while (svg.firstChild) {
-            if (svg.firstChild.parentNode === svg) {
-              svg.removeChild(svg.firstChild);
-            } else {
-              break;
-            }
-          }
+          svg.replaceChildren();
         } catch (e) {
           try {
             svg.innerHTML = '';
@@ -1159,8 +1153,8 @@ export default function RealMapBoundaryMapper({
         const elements = mapElement.querySelectorAll(selector);
         elements.forEach(el => {
           try {
-            if (el && el.parentNode && el.parentNode.contains && el.parentNode.contains(el)) {
-              el.parentNode.removeChild(el);
+            if (el && el.parentNode && el.parentNode.contains(el)) {
+              el.remove();
             }
           } catch (e) {
             // Element already removed or orphaned - ignore silently
@@ -1189,13 +1183,7 @@ export default function RealMapBoundaryMapper({
     // CRITICAL FIX: Safe SVG clearing to prevent removeChild errors
     try {
       // Clear SVG contents safely
-      while (svg.firstChild) {
-        if (svg.firstChild.parentNode === svg) {
-          svg.removeChild(svg.firstChild);
-        } else {
-          break;
-        }
-      }
+      svg.replaceChildren();
     } catch (e) {
       // Fallback to innerHTML if removeChild fails
       try {
@@ -1213,13 +1201,7 @@ export default function RealMapBoundaryMapper({
       // CRITICAL FIX: Safe defs clearing to prevent removeChild errors
       if (defs.hasChildNodes()) {
         try {
-          while (defs.firstChild) {
-            if (defs.firstChild.parentNode === defs) {
-              defs.removeChild(defs.firstChild);
-            } else {
-              break;
-            }
-          }
+          defs.replaceChildren();
         } catch (e) {
           // Fallback to innerHTML if needed
           try {

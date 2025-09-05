@@ -1115,14 +1115,14 @@ export default function RealMapBoundaryMapper({
       console.log(`✅ Real forest data retrieved: Loss detected: ${realForestAnalysis.forestLossDetected}, Cover change: ${realForestAnalysis.forestCoverChange}%`);
       
       const forestLossDetected = realForestAnalysis.forestLossDetected;
-      const forestCoverChange = realForestAnalysis.forestCoverChange;
+      const forestCoverChange = parseFloat(realForestAnalysis.forestCoverChange);
     
       const deforestationAnalysis: DeforestationReport = {
         forestLossDetected,
         forestLossDate: realForestAnalysis.latestLossDate,
         forestCoverChange,
-        biodiversityImpact: forestLossDetected ? 'significant' : 'minimal',
-        carbonStockLoss: realForestAnalysis.carbonStockLoss,
+        biodiversityImpact: forestLossDetected ? 'significant' as const : 'minimal' as const,
+        carbonStockLoss: parseFloat(realForestAnalysis.carbonStockLoss),
         mitigationRequired: forestLossDetected,
         recommendations: forestLossDetected 
           ? ['Immediate reforestation required', 'Biodiversity restoration plan', 'Carbon offset implementation', 'Sustainable farming practices', 'EUDR compliance assessment']
@@ -1249,6 +1249,7 @@ export default function RealMapBoundaryMapper({
         clayContent: clayContent.toFixed(0),
         waterRetention: clayContent > 30 ? 'High' : clayContent > 20 ? 'Moderate' : 'Low',
         drainage: clayContent > 40 ? 'Poor' : clayContent > 25 ? 'Good' : 'Excellent',
+        irrigation: clayContent > 30 ? 'Recommended due to high clay content' : 'Moderate requirement',
         phosphorus: null, // Requires separate analysis
         potassium: null   // Requires separate analysis
       };

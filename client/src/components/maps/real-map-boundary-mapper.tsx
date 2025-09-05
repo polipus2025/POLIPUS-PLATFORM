@@ -755,7 +755,13 @@ export default function RealMapBoundaryMapper({
       if (!mapContainer) return;
 
       // Remove existing markers
-      mapContainer.querySelectorAll('.persistent-marker').forEach(marker => marker.remove());
+      mapContainer.querySelectorAll('.persistent-marker').forEach(marker => {
+        try {
+          marker.remove();
+        } catch (e) {
+          // Element already removed or not attached
+        }
+      });
 
       // Add persistent markers for all points
       currentPoints.forEach((point, index) => {
@@ -874,11 +880,12 @@ export default function RealMapBoundaryMapper({
           polygonFill.setAttribute('d', polygonPath);
           polygonFill.setAttribute('fill', 'rgba(34, 197, 94, 0.2)');
           polygonFill.setAttribute('stroke', 'none');
-          // Safely add polygon fill behind existing content
-          const existingContent = svg.innerHTML;
-          svg.innerHTML = '';
-          svg.appendChild(polygonFill);
-          svg.innerHTML += existingContent;
+          // Safely add polygon fill behind existing content for proper z-ordering
+          if (svg.firstChild) {
+            svg.insertBefore(polygonFill, svg.firstChild);
+          } else {
+            svg.appendChild(polygonFill);
+          }
         }
       }
     };
@@ -907,23 +914,31 @@ export default function RealMapBoundaryMapper({
       }
     });
     
-    // Clear SVG content safely
-    if (svg) {
-      svg.innerHTML = '';
-    }
-    
     // Force immediate persistent display for all points
     console.log(`Rendering persistent boundary display for ${points.length} points`);
     
-    // The persistent boundary display logic is handled in the main render loop below
-    
-    // Clear SVG content but preserve defs for patterns
+    // FIXED: Proper defs preservation to prevent pattern fill failures
     const existingDefs = svg.querySelector('defs');
-    svg.innerHTML = '';
+    let preservedDefs = null;
     
-    // Re-add or create crosshatch patterns
-    const defs = existingDefs || document.createElementNS('http://www.w3.org/2000/svg', 'defs');
-    if (!existingDefs) {
+    // Clone existing defs if they exist to preserve patterns
+    if (existingDefs) {
+      preservedDefs = existingDefs.cloneNode(true) as Element;
+    }
+    
+    // Safe SVG clearing using replaceChildren (modern approach)
+    svg.replaceChildren();
+    
+    // Re-add or create crosshatch patterns with proper defs handling
+    const defs = preservedDefs || document.createElementNS('http://www.w3.org/2000/svg', 'defs');
+    
+    // Always ensure patterns exist (create if not preserved)
+    if (!preservedDefs || !defs.querySelector('pattern')) {
+      // Clear any incomplete patterns and rebuild
+      if (defs.hasChildNodes()) {
+        defs.replaceChildren();
+      }
+      
       const patterns = ['red', 'yellow', 'green'];
       const colors = ['#dc2626', '#f59e0b', '#22c55e'];
       
@@ -941,15 +956,23 @@ export default function RealMapBoundaryMapper({
         patternEl.appendChild(path);
         defs.appendChild(patternEl);
       });
-      svg.appendChild(defs);
     }
+    
+    // Ensure defs are always first child for proper z-order
+    svg.appendChild(defs);
 
     // GPS MARKERS: All GPS points stay visible on real satellite imagery
     console.log(`Rendering ${points.length} GPS markers on satellite imagery`);
     
     // Safely remove existing GPS markers to prevent duplicates
     const existingGPSMarkers = mapElement.querySelectorAll('.gps-point-marker');
-    existingGPSMarkers.forEach(marker => marker.remove());
+    existingGPSMarkers.forEach(marker => {
+      try {
+        marker.remove();
+      } catch (e) {
+        // Element already removed or not attached
+      }
+    });
     
     points.forEach((point, index) => {
       // Get map container dimensions for proper scaling

@@ -352,7 +352,14 @@ export default function BatchCodeGenerator() {
     link.download = `batch-label-${batchCode}.html`;
     document.body.appendChild(link);
     link.click();
-    document.body.removeChild(link);
+    // CRITICAL FIX: Safe DOM removal
+    try {
+      if (link && link.parentNode && link.parentNode.contains(link)) {
+        link.parentNode.removeChild(link);
+      }
+    } catch (e) {
+      // Element already removed - ignore
+    }
     URL.revokeObjectURL(url);
     
     toast({

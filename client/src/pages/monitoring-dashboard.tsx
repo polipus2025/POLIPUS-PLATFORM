@@ -148,7 +148,14 @@ export default function MonitoringDashboard() {
       link.download = `agricultural-supply-chain-report-${new Date().toISOString().split('T')[0]}.pdf`;
       document.body.appendChild(link);
       link.click();
-      document.body.removeChild(link);
+      // CRITICAL FIX: Safe DOM removal
+      try {
+        if (link && link.parentNode && link.parentNode.contains(link)) {
+          link.parentNode.removeChild(link);
+        }
+      } catch (e) {
+        // Element already removed - ignore
+      }
       window.URL.revokeObjectURL(url);
 
       toast({

@@ -219,7 +219,14 @@ export default function Verification() {
     a.download = `verification-report-${verificationResult.record.trackingNumber}.json`;
     document.body.appendChild(a);
     a.click();
-    document.body.removeChild(a);
+    // CRITICAL FIX: Safe DOM removal
+    try {
+      if (a && a.parentNode && a.parentNode.contains(a)) {
+        a.parentNode.removeChild(a);
+      }
+    } catch (e) {
+      // Element already removed - ignore
+    }
     URL.revokeObjectURL(url);
     
     toast({

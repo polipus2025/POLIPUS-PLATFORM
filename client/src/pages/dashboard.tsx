@@ -131,7 +131,14 @@ export default function Dashboard() {
       link.download = `LACRA_Certificate_${exporter.name.replace(/\s+/g, '_')}_${new Date().toISOString().split('T')[0]}.json`;
       document.body.appendChild(link);
       link.click();
-      document.body.removeChild(link);
+      // CRITICAL FIX: Safe DOM removal
+      try {
+        if (link && link.parentNode && link.parentNode.contains(link)) {
+          link.parentNode.removeChild(link);
+        }
+      } catch (e) {
+        // Element already removed - ignore
+      }
       URL.revokeObjectURL(url);
 
       toast({
@@ -303,7 +310,14 @@ export default function Dashboard() {
       a.download = `EUDR_Compliance_Report_${new Date().toISOString().split('T')[0]}.json`;
       document.body.appendChild(a);
       a.click();
-      document.body.removeChild(a);
+      // CRITICAL FIX: Safe DOM removal
+      try {
+        if (a && a.parentNode && a.parentNode.contains(a)) {
+          a.parentNode.removeChild(a);
+        }
+      } catch (e) {
+        // Element already removed - ignore
+      }
       URL.revokeObjectURL(url);
       
       toast({
@@ -344,7 +358,14 @@ export default function Dashboard() {
       a.download = `Deforestation_Certificates_${new Date().toISOString().split('T')[0]}.json`;
       document.body.appendChild(a);
       a.click();
-      document.body.removeChild(a);
+      // CRITICAL FIX: Safe DOM removal
+      try {
+        if (a && a.parentNode && a.parentNode.contains(a)) {
+          a.parentNode.removeChild(a);
+        }
+      } catch (e) {
+        // Element already removed - ignore
+      }
       URL.revokeObjectURL(url);
       
       toast({

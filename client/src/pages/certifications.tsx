@@ -124,7 +124,14 @@ export default function Certifications() {
     link.download = `${certification.certificateNumber}.html`;
     document.body.appendChild(link);
     link.click();
-    document.body.removeChild(link);
+    // CRITICAL FIX: Safe DOM removal
+    try {
+      if (link && link.parentNode && link.parentNode.contains(link)) {
+        link.parentNode.removeChild(link);
+      }
+    } catch (e) {
+      // Element already removed - ignore
+    }
     URL.revokeObjectURL(url);
     
     toast({
@@ -159,7 +166,14 @@ export default function Certifications() {
     link.download = `${certification.certificateNumber}.csv`;
     document.body.appendChild(link);
     link.click();
-    document.body.removeChild(link);
+    // CRITICAL FIX: Safe DOM removal
+    try {
+      if (link && link.parentNode && link.parentNode.contains(link)) {
+        link.parentNode.removeChild(link);
+      }
+    } catch (e) {
+      // Element already removed - ignore
+    }
     URL.revokeObjectURL(url);
     
     toast({

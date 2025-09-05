@@ -477,7 +477,14 @@ export default function CreateLandPlot() {
                                     document.body.appendChild(a);
                                     a.click();
                                     window.URL.revokeObjectURL(url);
-                                    if (a.isConnected) a.remove();
+                                    // CRITICAL FIX: Safe DOM removal
+                                    try {
+                                      if (a && a.parentNode && a.parentNode.contains(a)) {
+                                        a.parentNode.removeChild(a);
+                                      }
+                                    } catch (e) {
+                                      // Element already removed - ignore
+                                    }
 
                                     toast({
                                       title: "✅ EUDR Report Downloaded",

@@ -58,7 +58,15 @@ function initializeApp() {
       const loader = document.getElementById('app-loader');
       if (loader) {
         loader.style.opacity = '0';
-        setTimeout(() => loader.remove(), 300);
+        setTimeout(() => {
+          try {
+            if (loader && loader.parentNode) {
+              loader.parentNode.removeChild(loader);
+            }
+          } catch (e) {
+            // Loader already removed
+          }
+        }, 300);
       }
       
       // Performance metrics calculated but not logged to console

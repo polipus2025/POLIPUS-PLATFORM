@@ -893,14 +893,48 @@ export default function RealMapBoundaryMapper({
     // Map initialization handled by initMapWithCoordinates function
   }, []);
 
-  // Update visual markers when points change - IMMEDIATE PERSISTENT DISPLAY WITH SW Maps STYLE
+  // CRITICAL FIX: Create centralized coordinate conversion functions with consistent bounds
+  const mapBoundsRef = useRef<{
+    latRange: number;
+    lngRange: number;
+    centerLat: number;
+    centerLng: number;
+  }>({ latRange: 0.002, lngRange: 0.002, centerLat: mapCenter.lat, centerLng: mapCenter.lng });
+
+  // Update bounds when map center changes
   useEffect(() => {
+    mapBoundsRef.current = {
+      latRange: 0.002,
+      lngRange: 0.002,
+      centerLat: mapCenter.lat,
+      centerLng: mapCenter.lng
+    };
+  }, [mapCenter]);
+
+  // Centralized coordinate conversion function
+  const convertGPSToPixel = (lat: number, lng: number, mapElement: HTMLElement) => {
+    const rect = mapElement.getBoundingClientRect();
+    const bounds = mapBoundsRef.current;
+    
+    const x = ((lng - (bounds.centerLng - bounds.lngRange / 2)) / bounds.lngRange) * rect.width;
+    const y = ((bounds.centerLat + bounds.latRange / 2 - lat) / bounds.latRange) * rect.height;
+    
+    return {
+      x: Math.max(15, Math.min(rect.width - 15, x)),
+      y: Math.max(15, Math.min(rect.height - 15, y))
+    };
+  };
+
+  // CRITICAL FIX: Dedicated renderOverlay function for state-driven updates
+  const renderOverlay = () => {
     if (!mapRef.current || !mapReady) return;
 
     const mapElement = mapRef.current.querySelector('#real-map, #fallback-map') as HTMLElement;
     const svg = mapRef.current.querySelector('svg') as SVGElement;
     
     if (!mapElement || !svg) return;
+
+    console.log(`[RENDER] Updating overlay - Points: ${points.length}, GPS: ${currentGPSPosition ? 'active' : 'inactive'}, Trail: ${realTimeTrail.length}`);
 
     // Safe element removal using Element.remove() - proper DOM cleanup
     const existingMarkers = mapElement.querySelectorAll('.map-marker, .area-label, .risk-label, .walking-trail');
@@ -913,9 +947,6 @@ export default function RealMapBoundaryMapper({
         console.log('Element already removed');
       }
     });
-    
-    // Force immediate persistent display for all points
-    console.log(`Rendering persistent boundary display for ${points.length} points`);
     
     // FIXED: Proper defs preservation to prevent pattern fill failures
     const existingDefs = svg.querySelector('defs');
@@ -975,23 +1006,10 @@ export default function RealMapBoundaryMapper({
     });
     
     points.forEach((point, index) => {
-      // Get map container dimensions for proper scaling
-      const rect = mapElement.getBoundingClientRect();
+      // Use centralized coordinate conversion for consistent positioning
+      const pixel = convertGPSToPixel(point.latitude, point.longitude, mapElement);
       
-      // FIXED COORDINATE CONVERSION: GPS coordinates to pixel position
-      let x, y;
-      const latRange = 0.002; // 200m range for precise field mapping
-      const lngRange = 0.002;
-      
-      // Convert GPS to pixels using proper coordinate system
-      x = ((point.longitude - (mapCenter.lng - lngRange / 2)) / lngRange) * rect.width;
-      y = ((mapCenter.lat + latRange / 2 - point.latitude) / latRange) * rect.height;
-      
-      // Ensure markers stay within map bounds
-      x = Math.max(15, Math.min(rect.width - 15, x));
-      y = Math.max(15, Math.min(rect.height - 15, y));
-      
-      console.log(`GPS Point ${String.fromCharCode(65 + index)}: ${point.latitude.toFixed(6)}, ${point.longitude.toFixed(6)} → pixel ${x.toFixed(0)}, ${y.toFixed(0)}`);
+      console.log(`GPS Point ${String.fromCharCode(65 + index)}: ${point.latitude.toFixed(6)}, ${point.longitude.toFixed(6)} → pixel ${pixel.x.toFixed(0)}, ${pixel.y.toFixed(0)}`);
       
       // Calculate EUDR risk for each point
       const pointRisk = calculatePointRisk(point.latitude, point.longitude);
@@ -1002,8 +1020,8 @@ export default function RealMapBoundaryMapper({
       marker.id = `gps-marker-${index}`;
       marker.style.cssText = `
         position: absolute;
-        left: ${x}px;
-        top: ${y}px;
+        left: ${pixel.x}px;
+        top: ${pixel.y}px;
         width: 28px;
         height: 28px;
         border-radius: 50%;
@@ -1032,57 +1050,87 @@ export default function RealMapBoundaryMapper({
       console.log(`✓ Persistent marker ${String.fromCharCode(65 + index)} added and will remain visible`);
     });
 
-    // SW MAPS STYLE: Real-time walking trail visualization
-    if (realTimeTrail.length >= 2) {
-      console.log(`Drawing walking trail with ${realTimeTrail.length} positions`);
+    // FIXED: Current GPS position marker (live tracking marker)
+    if (currentGPSPosition && isTrackingGPS) {
+      const gpsPixel = convertGPSToPixel(currentGPSPosition.lat, currentGPSPosition.lng, mapElement);
       
-      // Create purple walking trail line
+      const liveGPSMarker = document.createElement('div');
+      liveGPSMarker.className = 'map-marker live-gps-marker';
+      liveGPSMarker.style.cssText = `
+        position: absolute;
+        left: ${gpsPixel.x}px;
+        top: ${gpsPixel.y}px;
+        width: 20px;
+        height: 20px;
+        border-radius: 50%;
+        background-color: #3b82f6;
+        border: 3px solid white;
+        box-shadow: 0 0 0 4px rgba(59, 130, 246, 0.3), 0 4px 12px rgba(0,0,0,0.4);
+        z-index: 35;
+        transform: translate(-50%, -50%);
+        animation: gps-pulse 2s infinite;
+      `;
+      
+      // Add pulsing animation style if not exists
+      if (!document.querySelector('#gps-pulse-style')) {
+        const style = document.createElement('style');
+        style.id = 'gps-pulse-style';
+        style.textContent = `
+          @keyframes gps-pulse {
+            0%, 100% { transform: translate(-50%, -50%) scale(1); }
+            50% { transform: translate(-50%, -50%) scale(1.2); }
+          }
+        `;
+        document.head.appendChild(style);
+      }
+      
+      mapElement.appendChild(liveGPSMarker);
+      console.log(`✓ Live GPS marker rendered at ${currentGPSPosition.lat.toFixed(6)}, ${currentGPSPosition.lng.toFixed(6)}`);
+    }
+
+    // FIXED: Real-time walking trail visualization using centralized coordinate conversion
+    if (realTimeTrail.length >= 2) {
+      console.log(`[RENDER] Drawing walking trail with ${realTimeTrail.length} positions`);
+      
+      // Create purple walking trail line using consistent coordinate conversion
       const trailPath = realTimeTrail.map((pos, index) => {
-        const rect = mapElement.getBoundingClientRect();
-        const latRange = 0.002;
-        const lngRange = 0.002;
-        
-        const x = ((pos.lng - (mapCenter.lng - lngRange / 2)) / lngRange) * rect.width;
-        const y = ((mapCenter.lat + latRange / 2 - pos.lat) / latRange) * rect.height;
-        
-        return `${index === 0 ? 'M' : 'L'} ${x} ${y}`;
+        const pixel = convertGPSToPixel(pos.lat, pos.lng, mapElement);
+        return `${index === 0 ? 'M' : 'L'} ${pixel.x} ${pixel.y}`;
       }).join(' ');
       
       const trailLine = document.createElementNS('http://www.w3.org/2000/svg', 'path');
       trailLine.setAttribute('d', trailPath);
       trailLine.setAttribute('stroke', '#8b5cf6');
-      trailLine.setAttribute('stroke-width', '3');
-      trailLine.setAttribute('stroke-dasharray', '5,5');
+      trailLine.setAttribute('stroke-width', '4');
+      trailLine.setAttribute('stroke-dasharray', '8,4');
       trailLine.setAttribute('fill', 'none');
-      trailLine.setAttribute('opacity', '0.8');
+      trailLine.setAttribute('opacity', '0.9');
+      trailLine.setAttribute('stroke-linecap', 'round');
+      trailLine.setAttribute('style', 'filter: drop-shadow(0 2px 4px rgba(0,0,0,0.3));');
       svg.appendChild(trailLine);
+      
+      console.log(`✓ Walking trail rendered with ${realTimeTrail.length} positions`);
     }
 
     // ENHANCED BOUNDARY CONNECTIONS: Draw connecting lines immediately when 2+ points exist
     if (points.length >= 2) {
       console.log(`Drawing SW Maps-style boundary connections for ${points.length} points`);
       
-      // Draw connecting lines between consecutive points (SW Maps style)
+      // Draw connecting lines between consecutive points using centralized coordinate conversion
       for (let i = 0; i < points.length - 1; i++) {
         const currentPoint = points[i];
         const nextPoint = points[i + 1];
         
-        // Calculate pixel coordinates for both points using proper conversion
-        const rect = mapElement.getBoundingClientRect();
-        const latRange = 0.002;
-        const lngRange = 0.002;
-        
-        const x1 = ((currentPoint.longitude - (mapCenter.lng - lngRange / 2)) / lngRange) * rect.width;
-        const y1 = ((mapCenter.lat + latRange / 2 - currentPoint.latitude) / latRange) * rect.height;
-        const x2 = ((nextPoint.longitude - (mapCenter.lng - lngRange / 2)) / lngRange) * rect.width;
-        const y2 = ((mapCenter.lat + latRange / 2 - nextPoint.latitude) / latRange) * rect.height;
+        // Use centralized coordinate conversion for consistency
+        const pixel1 = convertGPSToPixel(currentPoint.latitude, currentPoint.longitude, mapElement);
+        const pixel2 = convertGPSToPixel(nextPoint.latitude, nextPoint.longitude, mapElement);
         
         // Create solid connecting line (SW Maps style - bright green)
         const line = document.createElementNS('http://www.w3.org/2000/svg', 'line');
-        line.setAttribute('x1', x1.toString());
-        line.setAttribute('y1', y1.toString());
-        line.setAttribute('x2', x2.toString());
-        line.setAttribute('y2', y2.toString());
+        line.setAttribute('x1', pixel1.x.toString());
+        line.setAttribute('y1', pixel1.y.toString());
+        line.setAttribute('x2', pixel2.x.toString());
+        line.setAttribute('y2', pixel2.y.toString());
         line.setAttribute('stroke', '#22c55e'); // SW Maps style - bright green boundary
         line.setAttribute('stroke-width', '4');
         line.setAttribute('stroke-linecap', 'round');
@@ -1100,17 +1148,16 @@ export default function RealMapBoundaryMapper({
         const firstPoint = points[0];
         const lastPoint = points[points.length - 1];
         
-        const x1 = Math.max(12, Math.min(388, (lastPoint.longitude + 9.4295) * 5000 + 200));
-        const y1 = Math.max(12, Math.min(388, 200 - (lastPoint.latitude - 6.4281) * 5000));
-        const x2 = Math.max(12, Math.min(388, (firstPoint.longitude + 9.4295) * 5000 + 200));
-        const y2 = Math.max(12, Math.min(388, 200 - (firstPoint.latitude - 6.4281) * 5000));
+        // Use centralized coordinate conversion for closing line
+        const lastPixel = convertGPSToPixel(lastPoint.latitude, lastPoint.longitude, mapElement);
+        const firstPixel = convertGPSToPixel(firstPoint.latitude, firstPoint.longitude, mapElement);
         
         // Closing line to complete the polygon (green color for completion)
         const closingLine = document.createElementNS('http://www.w3.org/2000/svg', 'line');
-        closingLine.setAttribute('x1', x1.toString());
-        closingLine.setAttribute('y1', y1.toString());
-        closingLine.setAttribute('x2', x2.toString());
-        closingLine.setAttribute('y2', y2.toString());
+        closingLine.setAttribute('x1', lastPixel.x.toString());
+        closingLine.setAttribute('y1', lastPixel.y.toString());
+        closingLine.setAttribute('x2', firstPixel.x.toString());
+        closingLine.setAttribute('y2', firstPixel.y.toString());
         closingLine.setAttribute('stroke', '#22c55e'); // Green for completed polygon
         closingLine.setAttribute('stroke-width', '4');
         closingLine.setAttribute('stroke-dasharray', '8,4'); // Dashed to show it's the closing line
@@ -1126,18 +1173,10 @@ export default function RealMapBoundaryMapper({
     if (points.length >= 3) {
       console.log(`Creating polygon boundary with ${points.length} points and risk overlay`);
       
+      // Use centralized coordinate conversion for polygon points
       const pointsStr = points.map(point => {
-        let x, y;
-        if (mapElement.id === 'real-map') {
-          x = (point.longitude - mapCenter.lng) * 5000 + 200;
-          y = 200 - (point.latitude - mapCenter.lat) * 5000;
-        } else {
-          x = (point.longitude + 9.4295) * 5000 + 200;
-          y = 200 - (point.latitude - 6.4281) * 5000;
-        }
-        x = Math.max(12, Math.min(388, x));
-        y = Math.max(12, Math.min(388, y));
-        return `${x},${y}`;
+        const pixel = convertGPSToPixel(point.latitude, point.longitude, mapElement);
+        return `${pixel.x},${pixel.y}`;
       }).join(' ');
       
       // Calculate overall area risk for coloring
@@ -1173,9 +1212,10 @@ export default function RealMapBoundaryMapper({
       
       console.log(`✓ Risk overlay now visible on map with ${areaRisk.level} risk styling`);
       
-      // Add area measurement and risk label
-      const centerX = points.reduce((sum, p) => sum + (p.longitude + 9.4295) * 5000 + 200, 0) / points.length;
-      const centerY = points.reduce((sum, p) => sum + (200 - (p.latitude - 6.4281) * 5000), 0) / points.length;
+      // Calculate center using centralized coordinate conversion
+      const centerPixels = points.map(p => convertGPSToPixel(p.latitude, p.longitude, mapElement));
+      const centerX = centerPixels.reduce((sum, p) => sum + p.x, 0) / centerPixels.length;
+      const centerY = centerPixels.reduce((sum, p) => sum + p.y, 0) / centerPixels.length;
       const area = calculateArea(points);
       
       // Area measurement label
@@ -1225,7 +1265,19 @@ export default function RealMapBoundaryMapper({
       mapElement.appendChild(areaLabel);
       mapElement.appendChild(riskLabel);
     }
-  }, [points, mapReady]);
+  };
+
+  // CRITICAL FIX: State-driven updates - trigger renderOverlay when any visualization state changes
+  useEffect(() => {
+    renderOverlay();
+  }, [points, currentGPSPosition, realTimeTrail, mapReady, mapCenter]);
+
+  // Additional effect for immediate GPS marker updates during walking mode
+  useEffect(() => {
+    if (isWalkingMode || isTrackingGPS) {
+      renderOverlay();
+    }
+  }, [isWalkingMode, isTrackingGPS, trackingAccuracy]);
 
   // Real-time GPS tracking functions
   const startGPSTracking = () => {
@@ -2096,9 +2148,10 @@ export default function RealMapBoundaryMapper({
     }
   };
 
-  // Add state for completed view and tabs
+  // Add state for completed view and tabs  
   const [isCompleted, setIsCompleted] = useState(false);
   const [activeTab, setActiveTab] = useState('interactive-map');
+  const [showTabContent, setShowTabContent] = useState(false);
 
   const handleComplete = async () => {
     if (points.length >= minPoints) {
@@ -2209,67 +2262,12 @@ export default function RealMapBoundaryMapper({
     };
   }, []); // Only run on unmount
 
-  // Tab interface content after completion
+  // Tab interface content after completion - UNIFIED MAP SYSTEM
   const renderTabContent = () => {
     switch (activeTab) {
       case 'interactive-map':
         return (
           <div className="space-y-4">
-            <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
-              <h3 className="font-medium text-blue-900 mb-3 flex items-center gap-2">
-                🗺️ Interactive Boundary Map
-              </h3>
-              <div className="bg-white border rounded-lg p-4 min-h-[400px]">
-                <div 
-                  ref={mapRef} 
-                  className="w-full h-[400px] rounded border bg-gradient-to-br from-green-100 to-blue-100 relative overflow-hidden"
-                  style={{ position: 'relative' }}
-                >
-                  {/* Boundary Points Display */}
-                  {points.map((point, index) => (
-                    <div
-                      key={index}
-                      className="absolute w-4 h-4 bg-red-500 border-2 border-white rounded-full flex items-center justify-center text-xs text-white font-bold shadow-lg z-10"
-                      style={{
-                        left: `${((point.longitude + 180) / 360) * 100}%`,
-                        top: `${((90 - point.latitude) / 180) * 100}%`,
-                        transform: 'translate(-50%, -50%)'
-                      }}
-                      title={`Point ${index + 1}: ${point.latitude.toFixed(6)}, ${point.longitude.toFixed(6)}`}
-                    >
-                      {index + 1}
-                    </div>
-                  ))}
-                  
-                  {/* Boundary Lines */}
-                  <svg 
-                    className="absolute inset-0 w-full h-full pointer-events-none"
-                    style={{ zIndex: 5 }}
-                  >
-                    {points.length > 1 && (
-                      <polygon
-                        points={points.map(p => 
-                          `${((p.longitude + 180) / 360) * 100}%,${((90 - p.latitude) / 180) * 100}%`
-                        ).join(' ')}
-                        fill="rgba(34, 197, 94, 0.2)"
-                        stroke="rgb(34, 197, 94)"
-                        strokeWidth="2"
-                        strokeDasharray="5,5"
-                      />
-                    )}
-                  </svg>
-                  
-                  {/* Area Display */}
-                  <div className="absolute bottom-2 left-2 bg-white/90 px-3 py-1 rounded text-sm font-medium">
-                    📐 Area: {area.toFixed(2)} hectares
-                  </div>
-                  <div className="absolute bottom-2 right-2 bg-white/90 px-3 py-1 rounded text-sm font-medium">
-                    📍 {points.length} GPS Points
-                  </div>
-                </div>
-              </div>
-            </div>
-            
             {/* Interactive Controls */}
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
               <Button 
@@ -2985,20 +2983,42 @@ export default function RealMapBoundaryMapper({
         </div>
       </div>
 
-      {/* Map Container */}
-      <div 
-        ref={mapRef} 
-        className="w-full h-[500px] bg-gray-100 border-2 border-gray-300 rounded-lg relative overflow-hidden"
-        style={{ minHeight: '500px', position: 'relative' }}
-      >
-        {!mapReady && (
-          <div className="absolute inset-0 flex items-center justify-center bg-gradient-to-br from-green-100 to-blue-100">
-            <div className="text-center">
-              <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-green-600 mx-auto mb-2"></div>
-              <p className="text-sm text-gray-600">Loading satellite imagery...</p>
-            </div>
+      {/* UNIFIED Map Container - Real Satellite Imagery with GPS Markers */}
+      <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
+        <h3 className="font-medium text-blue-900 mb-3 flex items-center gap-2">
+          🗺️ Interactive GPS Boundary Map ({points.length}/{minPoints}+ points)
+        </h3>
+        <div className="bg-white border rounded-lg p-4">
+          <div 
+            ref={mapRef} 
+            className="w-full h-[500px] bg-gray-100 border-2 border-gray-300 rounded-lg relative overflow-hidden"
+            style={{ minHeight: '500px', position: 'relative' }}
+          >
+            {!mapReady && (
+              <div className="absolute inset-0 flex items-center justify-center bg-gradient-to-br from-green-100 to-blue-100">
+                <div className="text-center">
+                  <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-green-600 mx-auto mb-2"></div>
+                  <p className="text-sm text-gray-600">Loading satellite imagery...</p>
+                </div>
+              </div>
+            )}
+            
+            {/* Real-time GPS Info Overlay */}
+            {points.length > 0 && (
+              <>
+                <div className="absolute bottom-2 left-2 bg-white/90 px-3 py-1 rounded text-sm font-medium shadow-lg">
+                  📐 Area: {area.toFixed(2)} hectares
+                </div>
+                <div className="absolute bottom-2 right-2 bg-white/90 px-3 py-1 rounded text-sm font-medium shadow-lg">
+                  📍 {points.length} GPS Points
+                </div>
+                <div className="absolute top-2 right-2 bg-white/90 px-3 py-1 rounded text-xs font-medium shadow-lg">
+                  🛰️ Real Satellite Imagery
+                </div>
+              </>
+            )}
           </div>
-        )}
+        </div>
       </div>
     </div>
   );

@@ -1141,7 +1141,7 @@ export default function RealMapBoundaryMapper({
         forestLossDetected,
         forestLossDate: forestLossDetected ? '2021-03-15' : null,
         forestCoverChange,
-        biodiversityImpact: forestLossDetected ? 'significant' : 'minimal',
+        biodiversityImpact: (forestLossDetected ? 'significant' : 'minimal') as 'minimal' | 'moderate' | 'significant',
         carbonStockLoss: forestLossDetected ? 45.2 : 5.1,
         mitigationRequired: forestLossDetected,
         recommendations: forestLossDetected 
@@ -1780,6 +1780,10 @@ export default function RealMapBoundaryMapper({
     }
   };
 
+  // Add state for completed view and tabs
+  const [isCompleted, setIsCompleted] = useState(false);
+  const [activeTab, setActiveTab] = useState('interactive-map');
+
   const handleComplete = async () => {
     if (points.length >= minPoints) {
       const area = calculateArea(points);
@@ -1793,6 +1797,10 @@ export default function RealMapBoundaryMapper({
         eudrCompliance: eudrReport,
         deforestationReport: deforestationReport
       };
+      
+      // Show tab interface instead of immediately calling onBoundaryComplete
+      setIsCompleted(true);
+      setStatus('✅ Boundary mapping complete! View results in tabs below.');
       
       onBoundaryComplete({ 
         points, 
@@ -1817,24 +1825,163 @@ export default function RealMapBoundaryMapper({
     };
   }, [gpsWatchId]);
 
+  // Tab interface content after completion
+  const renderTabContent = () => {
+    switch (activeTab) {
+      case 'interactive-map':
+        return (
+          <div className="space-y-4">
+            <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
+              <h3 className="font-medium text-blue-900 mb-3 flex items-center gap-2">
+                🗺️ Interactive Boundary Map
+              </h3>
+              <div className="bg-white border rounded-lg p-4 min-h-[400px]">
+                <div 
+                  ref={mapRef} 
+                  className="w-full h-[400px] rounded border bg-gradient-to-br from-green-100 to-blue-100 relative overflow-hidden"
+                  style={{ position: 'relative' }}
+                >
+                  {/* Boundary Points Display */}
+                  {points.map((point, index) => (
+                    <div
+                      key={index}
+                      className="absolute w-4 h-4 bg-red-500 border-2 border-white rounded-full flex items-center justify-center text-xs text-white font-bold shadow-lg z-10"
+                      style={{
+                        left: `${((point.longitude + 180) / 360) * 100}%`,
+                        top: `${((90 - point.latitude) / 180) * 100}%`,
+                        transform: 'translate(-50%, -50%)'
+                      }}
+                      title={`Point ${index + 1}: ${point.latitude.toFixed(6)}, ${point.longitude.toFixed(6)}`}
+                    >
+                      {index + 1}
+                    </div>
+                  ))}
+                  
+                  {/* Boundary Lines */}
+                  <svg 
+                    className="absolute inset-0 w-full h-full pointer-events-none"
+                    style={{ zIndex: 5 }}
+                  >
+                    {points.length > 1 && (
+                      <polygon
+                        points={points.map(p => 
+                          `${((p.longitude + 180) / 360) * 100}%,${((90 - p.latitude) / 180) * 100}%`
+                        ).join(' ')}
+                        fill="rgba(34, 197, 94, 0.2)"
+                        stroke="rgb(34, 197, 94)"
+                        strokeWidth="2"
+                        strokeDasharray="5,5"
+                      />
+                    )}
+                  </svg>
+                  
+                  {/* Area Display */}
+                  <div className="absolute bottom-2 left-2 bg-white/90 px-3 py-1 rounded text-sm font-medium">
+                    📐 Area: {area.toFixed(2)} hectares
+                  </div>
+                  <div className="absolute bottom-2 right-2 bg-white/90 px-3 py-1 rounded text-sm font-medium">
+                    📍 {points.length} GPS Points
+                  </div>
+                </div>
+              </div>
+            </div>
+            
+            {/* Interactive Controls */}
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+              <Button 
+                onClick={() => setActiveTab('analysis')}
+                variant="outline"
+                className="flex items-center gap-2"
+              >
+                📊 View Analysis
+              </Button>
+              <Button 
+                onClick={() => setActiveTab('compliance')}
+                variant="outline"
+                className="flex items-center gap-2"
+              >
+                🇪🇺 EUDR Compliance
+              </Button>
+              <Button 
+                onClick={() => setIsCompleted(false)}
+                variant="outline"
+                className="flex items-center gap-2"
+              >
+                📝 Edit Boundary
+              </Button>
+            </div>
+          </div>
+        );
+        
+      case 'analysis':
+        return (
+          <div className="space-y-4">
+            {agriculturalData && (
+              <div className="bg-green-50 border border-green-200 rounded-lg p-4">
+                <h3 className="font-medium text-green-900 mb-3">🌱 Real Agricultural Analysis</h3>
+                <div className="grid grid-cols-2 gap-3 text-sm">
+                  <div><span className="font-medium">Soil Type:</span> {agriculturalData.soilType}</div>
+                  <div><span className="font-medium">pH Level:</span> {agriculturalData.pH}</div>
+                  <div><span className="font-medium">Optimal Crop:</span> {agriculturalData.optimalCrop}</div>
+                  <div><span className="font-medium">Expected Yield:</span> {agriculturalData.expectedYield}</div>
+                  <div><span className="font-medium">Market Value:</span> {agriculturalData.marketValue}</div>
+                  <div><span className="font-medium">Climate Zone:</span> {agriculturalData.climateZone}</div>
+                </div>
+              </div>
+            )}
+          </div>
+        );
+        
+      case 'compliance':
+        return (
+          <div className="space-y-4">
+            {eudrReport && (
+              <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
+                <h3 className="font-medium text-blue-900 mb-3">🇪🇺 EUDR Compliance Report</h3>
+                <div className="grid grid-cols-2 gap-3 text-sm">
+                  <div><span className="font-medium">Risk Level:</span> 
+                    <span className={`ml-2 px-2 py-1 rounded text-xs ${
+                      eudrReport.riskLevel === 'low' ? 'bg-green-100 text-green-800' : 
+                      eudrReport.riskLevel === 'standard' ? 'bg-yellow-100 text-yellow-800' : 
+                      'bg-red-100 text-red-800'
+                    }`}>
+                      {eudrReport.riskLevel.toUpperCase()}
+                    </span>
+                  </div>
+                  <div><span className="font-medium">Compliance Score:</span> {eudrReport.complianceScore}%</div>
+                  <div><span className="font-medium">Deforestation Risk:</span> {eudrReport.deforestationRisk}%</div>
+                  <div><span className="font-medium">Forest Baseline:</span> {eudrReport.lastForestDate}</div>
+                </div>
+              </div>
+            )}
+          </div>
+        );
+        
+      default:
+        return null;
+    }
+  };
+
   return (
     <div className="space-y-4">
-      {/* Instructions */}
-      <div className="bg-green-50 border border-green-200 rounded-lg p-4">
-        <div className="flex items-center gap-2 mb-2">
-          <Satellite className="h-5 w-5 text-green-600" />
-          <h4 className="font-medium text-green-900">Real-Time GPS Field Boundary Mapping</h4>
-        </div>
-        <p className="text-sm text-green-800 mb-2">
-          Walk around your field and add GPS points in real-time to create accurate boundaries. 
-          Supports {minPoints}-{maxPoints} points for precise mapping.
-        </p>
-        {enableRealTimeGPS && (
-          <div className="text-xs text-green-700 bg-green-100 p-2 rounded">
-            💡 Walk to each corner/boundary point and press "Add GPS Point" for GNSS RTK enhanced mapping (Min 6 points for EUDR compliance)
+      {!isCompleted ? (
+        <>
+          {/* Instructions */}
+          <div className="bg-green-50 border border-green-200 rounded-lg p-4">
+            <div className="flex items-center gap-2 mb-2">
+              <Satellite className="h-5 w-5 text-green-600" />
+              <h4 className="font-medium text-green-900">Real-Time GPS Field Boundary Mapping</h4>
+            </div>
+            <p className="text-sm text-green-800 mb-2">
+              Walk around your field and add GPS points in real-time to create accurate boundaries. 
+              Supports {minPoints}-{maxPoints} points for precise mapping.
+            </p>
+            {enableRealTimeGPS && (
+              <div className="text-xs text-green-700 bg-green-100 p-2 rounded">
+                💡 Walk to each corner/boundary point and press "Add GPS Point" for GNSS RTK enhanced mapping (Min 6 points for EUDR compliance)
+              </div>
+            )}
           </div>
-        )}
-      </div>
 
       {/* GPS Tracking Status */}
       {enableRealTimeGPS && (
@@ -2233,6 +2380,49 @@ export default function RealMapBoundaryMapper({
               </div>
             </div>
           )}
+        </div>
+      </>
+      ) : (
+        // Tab interface after completion
+        <div className="space-y-4">
+          {/* Tab Navigation */}
+          <div className="bg-white border border-gray-200 rounded-lg p-1">
+            <div className="flex space-x-1">
+              <button
+                onClick={() => setActiveTab('interactive-map')}
+                className={`flex-1 px-4 py-2 rounded-md text-sm font-medium transition-colors ${
+                  activeTab === 'interactive-map'
+                    ? 'bg-blue-100 text-blue-700'
+                    : 'text-gray-500 hover:text-gray-700'
+                }`}
+              >
+                🗺️ Interactive Map
+              </button>
+              <button
+                onClick={() => setActiveTab('analysis')}
+                className={`flex-1 px-4 py-2 rounded-md text-sm font-medium transition-colors ${
+                  activeTab === 'analysis'
+                    ? 'bg-green-100 text-green-700'
+                    : 'text-gray-500 hover:text-gray-700'
+                }`}
+              >
+                📊 Analysis
+              </button>
+              <button
+                onClick={() => setActiveTab('compliance')}
+                className={`flex-1 px-4 py-2 rounded-md text-sm font-medium transition-colors ${
+                  activeTab === 'compliance'
+                    ? 'bg-blue-100 text-blue-700'
+                    : 'text-gray-500 hover:text-gray-700'
+                }`}
+              >
+                🇪🇺 EUDR Compliance
+              </button>
+            </div>
+          </div>
+          
+          {/* Tab Content */}
+          {renderTabContent()}
         </div>
       )}
 

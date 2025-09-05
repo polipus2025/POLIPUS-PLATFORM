@@ -2367,7 +2367,7 @@ export default function RealMapBoundaryMapper({
           )}
         </div>
       )}
-
+      
       {/* Status */}
       <div className="bg-blue-50 border border-blue-200 rounded-lg p-3">
         <div className="flex items-center justify-between">

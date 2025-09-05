@@ -489,7 +489,25 @@ export default function RealMapBoundaryMapper({
       const tilesContainer = mapElement.querySelector('#satellite-tiles') as HTMLElement;
       if (!tilesContainer) return;
       
-      tilesContainer.innerHTML = ''; // Clear existing tiles
+      // CRITICAL FIX: Safe tiles container clearing to prevent removeChild errors
+      try {
+        if (tilesContainer) {
+          while (tilesContainer.firstChild) {
+            if (tilesContainer.firstChild.parentNode === tilesContainer) {
+              tilesContainer.removeChild(tilesContainer.firstChild);
+            } else {
+              break;
+            }
+          }
+        }
+      } catch (e) {
+        // Fallback to innerHTML only if safe removal fails
+        try {
+          tilesContainer.innerHTML = '';
+        } catch (innerE) {
+          console.log('Tiles container clearing failed, continuing...');
+        }
+      }
       
       const zoom = 18;
       const tileSize = 256;
@@ -561,7 +579,24 @@ export default function RealMapBoundaryMapper({
     };
 
     const createMapWithTile = (tileInfo: any, centerLat: number, centerLng: number) => {
-      mapRef.current!.innerHTML = `
+      // CRITICAL FIX: Safe map container initialization to prevent removeChild errors
+      if (!mapRef.current) return;
+      
+      try {
+        // Clear existing content safely before adding new content
+        while (mapRef.current.firstChild) {
+          if (mapRef.current.firstChild.parentNode === mapRef.current) {
+            mapRef.current.removeChild(mapRef.current.firstChild);
+          } else {
+            break;
+          }
+        }
+      } catch (e) {
+        console.log('Map container clearing failed, using innerHTML fallback');
+      }
+      
+      try {
+        mapRef.current.innerHTML = `
         <style>
           .real-map { 
             height: 500px; 
@@ -624,6 +659,10 @@ export default function RealMapBoundaryMapper({
           </svg>
         </div>
       `;
+      } catch (e) {
+        console.log('Map container innerHTML failed, continuing...');
+        return;
+      }
 
       const mapElement = mapRef.current!.querySelector('#real-map') as HTMLElement;
       if (!mapElement) return;
@@ -660,15 +699,32 @@ export default function RealMapBoundaryMapper({
         mapElement.addEventListener('click', handleMapClick, { signal: abortController.current.signal });
       }
 
-      // Load high-resolution satellite tile grid
-      loadSatelliteTilesGrid(centerLat, centerLng, tileInfo.coordinates.zoom);
+      // Load high-resolution satellite tile grid  
+      loadSatelliteTileGrid(tileInfo, centerLat, centerLng, mapElement);
       
       setStatus(`${tileInfo.name} loaded for ${centerLat.toFixed(4)}, ${centerLng.toFixed(4)} - Real satellite imagery active`);
       setMapReady(true);
     };
 
     const loadFallbackMap = () => {
-      mapRef.current!.innerHTML = `
+      // CRITICAL FIX: Safe fallback map initialization to prevent removeChild errors
+      if (!mapRef.current) return;
+      
+      try {
+        // Clear existing content safely before adding fallback
+        while (mapRef.current.firstChild) {
+          if (mapRef.current.firstChild.parentNode === mapRef.current) {
+            mapRef.current.removeChild(mapRef.current.firstChild);
+          } else {
+            break;
+          }
+        }
+      } catch (e) {
+        console.log('Fallback map clearing failed, using innerHTML');
+      }
+      
+      try {
+        mapRef.current.innerHTML = `
         <style>
           .fallback-map { 
             height: 500px; 
@@ -745,6 +801,10 @@ export default function RealMapBoundaryMapper({
           </svg>
         </div>
       `;
+      } catch (e) {
+        console.log('Fallback map innerHTML failed, continuing...');
+        return;
+      }
 
       const mapElement = mapRef.current!.querySelector('#fallback-map') as HTMLElement;
       if (!mapElement) return;

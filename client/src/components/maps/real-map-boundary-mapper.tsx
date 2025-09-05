@@ -56,6 +56,7 @@ export default function RealMapBoundaryMapper({
 }: RealMapBoundaryMapperProps) {
   const mapRef = useRef<HTMLDivElement>(null);
   const walkingAnimationRef = useRef<number | null>(null);
+  const abortController = useRef<AbortController | null>(null);
   const [points, setPoints] = useState<BoundaryPoint[]>([]);
   const [status, setStatus] = useState('Loading satellite imagery...');
   const [mapReady, setMapReady] = useState(false);
@@ -85,6 +86,12 @@ export default function RealMapBoundaryMapper({
   const startWalkingMode = () => {
     if (!navigator.geolocation) {
       setStatus('❌ GPS not available on this device');
+      return;
+    }
+
+    // Prevent multiple GPS watches
+    if (isWalkingMode || gpsWatchId !== null) {
+      setStatus('⚠️ Walking mode already active');
       return;
     }
 
@@ -152,12 +159,8 @@ export default function RealMapBoundaryMapper({
     setStatus('🚶‍♂️ Walking mode stopped');
   };
 
-  const addCurrentGPSPoint = async (forceAdd = false) => {
-    if (!currentGPSPosition) {
-      setStatus('❌ No GPS position available');
-      return;
-    }
-
+  // Unified point addition function with validation
+  const addPoint = async (latitude: number, longitude: number, accuracy: number = 1.5, source: 'gps' | 'click' = 'gps', forceAdd = false) => {
     if (points.length >= maxPoints) {
       setStatus(`❌ Maximum ${maxPoints} points reached`);
       return;
@@ -165,15 +168,18 @@ export default function RealMapBoundaryMapper({
 
     // Check GPS accuracy threshold (require <10m accuracy unless forced)
     const accuracyThreshold = 10; // meters
-    if (!forceAdd && trackingAccuracy && trackingAccuracy > accuracyThreshold) {
-      setStatus(`⚠️ GPS accuracy too low (${trackingAccuracy.toFixed(1)}m). Need <${accuracyThreshold}m. Use 'Force Add' if needed.`);
+    if (source === 'gps' && !forceAdd && accuracy > accuracyThreshold) {
+      setStatus(`⚠️ GPS accuracy too low (${accuracy.toFixed(1)}m). Need <${accuracyThreshold}m. Use 'Force Add' if needed.`);
       return;
     }
 
-    const { lat, lng } = currentGPSPosition;
-    
-    // Process with GNSS RTK for enhanced accuracy
-    const processedPosition = await processGNSSRTK(lat, lng, trackingAccuracy || 5);
+    // Process with GNSS RTK for enhanced accuracy (GPS points only)
+    let processedPosition;
+    if (source === 'gps') {
+      processedPosition = await processGNSSRTK(latitude, longitude, accuracy);
+    } else {
+      processedPosition = { lat: latitude, lng: longitude, accuracy };
+    }
     
     const newPoint: BoundaryPoint = {
       latitude: processedPosition.lat,
@@ -185,7 +191,7 @@ export default function RealMapBoundaryMapper({
 
     setPoints(prev => {
       const updated = [...prev, newPoint];
-      console.log(`✅ Added GPS Point ${String.fromCharCode(65 + prev.length)}: ${newPoint.latitude.toFixed(6)}, ${newPoint.longitude.toFixed(6)}`);
+      console.log(`✅ Added ${source.toUpperCase()} Point ${String.fromCharCode(65 + prev.length)}: ${newPoint.latitude.toFixed(6)}, ${newPoint.longitude.toFixed(6)}`);
       return updated;
     });
 
@@ -205,6 +211,16 @@ export default function RealMapBoundaryMapper({
     if (points.length + 1 >= minPoints) {
       setTimeout(() => generateAgriculturalData(points), 1000);
     }
+  };
+
+  const addCurrentGPSPoint = async (forceAdd = false) => {
+    if (!currentGPSPosition) {
+      setStatus('❌ No GPS position available');
+      return;
+    }
+
+    const { lat, lng } = currentGPSPosition;
+    await addPoint(lat, lng, trackingAccuracy || 5, 'gps', forceAdd);
   };
 
   // SW Maps-style Automatic Agricultural Data Generation
@@ -527,11 +543,15 @@ export default function RealMapBoundaryMapper({
       const mapElement = mapRef.current!.querySelector('#real-map') as HTMLElement;
       if (!mapElement) return;
 
+      // Setup AbortController for cleanup
+      abortController.current = new AbortController();
+      
       // Enhanced click handler for persistent boundary points with storage
-      mapElement.addEventListener('click', (e) => {
+      const handleMapClick = async (e: Event) => {
+        const mouseEvent = e as MouseEvent;
         const rect = mapElement.getBoundingClientRect();
-        const x = e.clientX - rect.left;
-        const y = e.clientY - rect.top;
+        const x = mouseEvent.clientX - rect.left;
+        const y = mouseEvent.clientY - rect.top;
         
         console.log(`Enhanced map clicked at pixel: ${x}, ${y}`);
         
@@ -544,22 +564,11 @@ export default function RealMapBoundaryMapper({
         
         console.log(`Precise GPS conversion: ${lat.toFixed(6)}, ${lng.toFixed(6)}`);
         
-        const newPoint: BoundaryPoint = { 
-          latitude: lat, 
-          longitude: lng,
-          id: `point-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
-          timestamp: new Date(),
-          accuracy: 1.5
-        };
-        
-        setPoints(prev => {
-          const updated = [...prev, newPoint];
-          console.log(`✓ Persistent points total: ${updated.length} - Point will remain visible on map`);
-          
-          // Points will be rendered persistently by the useEffect hook
-          return updated;
-        });
-      });
+        // Use unified point addition function
+        await addPoint(lat, lng, 1.5, 'click');
+      };
+      
+      mapElement.addEventListener('click', handleMapClick, { signal: abortController.current.signal });
 
       // Load high-resolution satellite tile grid
       loadSatelliteTilesGrid(centerLat, centerLng, tileInfo.coordinates.zoom);
@@ -650,11 +659,15 @@ export default function RealMapBoundaryMapper({
       const mapElement = mapRef.current!.querySelector('#fallback-map') as HTMLElement;
       if (!mapElement) return;
 
+      // Setup AbortController for cleanup
+      abortController.current = new AbortController();
+      
       // Add click handler with debugging for fallback map
-      mapElement.addEventListener('click', (e) => {
+      const handleFallbackClick = async (e: Event) => {
+        const mouseEvent = e as MouseEvent;
         const rect = mapElement.getBoundingClientRect();
-        const x = e.clientX - rect.left;
-        const y = e.clientY - rect.top;
+        const x = mouseEvent.clientX - rect.left;
+        const y = mouseEvent.clientY - rect.top;
         
         console.log(`Fallback map clicked at pixel: ${x}, ${y}`);
         
@@ -663,15 +676,11 @@ export default function RealMapBoundaryMapper({
         
         console.log(`Fallback converted to GPS: ${lat}, ${lng}`);
         
-        const newPoint: BoundaryPoint = { latitude: lat, longitude: lng };
-        console.log(`Adding fallback point:`, newPoint);
-        
-        setPoints(prev => {
-          const updated = [...prev, newPoint];
-          console.log(`Fallback total points: ${updated.length}`);
-          return updated;
-        });
-      });
+        // Use unified point addition function
+        await addPoint(lat, lng, 5.0, 'click');
+      };
+      
+      mapElement.addEventListener('click', handleFallbackClick, { signal: abortController.current.signal });
 
       setStatus('Terrain map ready - Click to mark farm boundaries');
       setMapReady(true);
@@ -2103,14 +2112,10 @@ export default function RealMapBoundaryMapper({
         walkingAnimationRef.current = null;
       }
       
-      // Clear DOM event listeners safely
-      if (mapRef.current) {
-        const mapElement = mapRef.current.querySelector('#real-map, #fallback-map');
-        if (mapElement) {
-          // Remove click event listeners from map
-          const newMapElement = mapElement.cloneNode(true);
-          mapElement.parentNode?.replaceChild(newMapElement, mapElement);
-        }
+      // Clear DOM event listeners safely using AbortController
+      if (abortController.current) {
+        abortController.current.abort();
+        abortController.current = null;
       }
     };
   }, []);

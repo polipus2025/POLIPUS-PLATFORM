@@ -2798,7 +2798,20 @@ export default function RealMapBoundaryMapper({
       </div>
 
       {/* Map Container */}
-      <div ref={mapRef} />
+      <div 
+        ref={mapRef} 
+        className="w-full h-[500px] bg-gray-100 border-2 border-gray-300 rounded-lg relative overflow-hidden"
+        style={{ minHeight: '500px', position: 'relative' }}
+      >
+        {!mapReady && (
+          <div className="absolute inset-0 flex items-center justify-center bg-gradient-to-br from-green-100 to-blue-100">
+            <div className="text-center">
+              <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-green-600 mx-auto mb-2"></div>
+              <p className="text-sm text-gray-600">Loading satellite imagery...</p>
+            </div>
+          </div>
+        )}
+      </div>
     </div>
   );
 }

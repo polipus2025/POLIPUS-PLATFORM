@@ -894,17 +894,24 @@ export default function RealMapBoundaryMapper({
 
   // Real-time GPS tracking functions
   const startGPSTracking = () => {
+    // Enhanced GPS detection with better error handling
     if (!navigator.geolocation) {
-      setStatus('GPS not available on this device');
+      setStatus('❌ GPS not supported by this browser. Try Chrome, Firefox, or Safari.');
+      return;
+    }
+
+    // Check if we're on HTTPS (required for geolocation in modern browsers)
+    if (window.location.protocol !== 'https:' && window.location.hostname !== 'localhost') {
+      setStatus('❌ GPS requires HTTPS connection. Please use a secure connection.');
       return;
     }
 
     setIsTrackingGPS(true);
-    setStatus('Starting GPS tracking for field boundary mapping...');
+    setStatus('🔍 Requesting GPS permission... Please allow location access when prompted.');
 
     const options = {
       enableHighAccuracy: true,
-      timeout: 10000,
+      timeout: 15000, // Increased timeout
       maximumAge: 1000
     };
 
@@ -938,8 +945,30 @@ export default function RealMapBoundaryMapper({
       },
       (error) => {
         console.error('GPS Error:', error);
-        setStatus(`GPS Error: ${error.message}`);
         setIsTrackingGPS(false);
+        
+        // Improved error messages for different GPS error types
+        let errorMessage = '';
+        switch (error.code) {
+          case error.PERMISSION_DENIED:
+            errorMessage = '❌ GPS permission denied. Please allow location access in your browser settings and try again.';
+            break;
+          case error.POSITION_UNAVAILABLE:
+            errorMessage = '❌ GPS position unavailable. Please ensure GPS is enabled on your device and try moving to an open area.';
+            break;
+          case error.TIMEOUT:
+            errorMessage = '⏰ GPS timeout. Please try again - this may take a few moments to acquire satellite signal.';
+            break;
+          default:
+            errorMessage = `❌ GPS error: ${error.message}. Please check your device settings and try again.`;
+        }
+        
+        setStatus(errorMessage);
+        
+        // Suggest fallback options after 3 seconds
+        setTimeout(() => {
+          setStatus('💡 Having GPS issues? Try: 1) Allow location permission 2) Move to open area 3) Refresh page 4) Use manual coordinates');
+        }, 3000);
       },
       options
     );
@@ -1965,7 +1994,7 @@ export default function RealMapBoundaryMapper({
   return (
     <div className="space-y-4">
       {!isCompleted ? (
-        <>
+        <div>
           {/* Instructions */}
           <div className="bg-green-50 border border-green-200 rounded-lg p-4">
             <div className="flex items-center gap-2 mb-2">
@@ -2045,6 +2074,59 @@ export default function RealMapBoundaryMapper({
               <span className="sm:hidden">Add Point ({points.length}/{maxPoints})</span>
             </Button>
           </div>
+          
+          {/* Manual Coordinate Input (GPS Fallback) */}
+          {!isTrackingGPS && !currentGPSPosition && (
+            <div className="mt-3 p-3 bg-yellow-50 border border-yellow-200 rounded">
+              <h5 className="text-sm font-medium text-yellow-800 mb-2">📍 Manual Coordinates (GPS Backup)</h5>
+              <p className="text-xs text-yellow-700 mb-3">
+                If GPS is not working, you can enter coordinates manually. Use apps like Google Maps to find coordinates.
+              </p>
+              <div className="grid grid-cols-2 gap-2">
+                <input
+                  type="number"
+                  step="any"
+                  placeholder="Latitude (e.g., 6.4238)"
+                  className="px-2 py-1 text-xs border border-yellow-300 rounded"
+                  id="manual-lat"
+                />
+                <input
+                  type="number"
+                  step="any"
+                  placeholder="Longitude (e.g., -9.4295)"
+                  className="px-2 py-1 text-xs border border-yellow-300 rounded"
+                  id="manual-lng"
+                />
+              </div>
+              <Button
+                onClick={() => {
+                  const latInput = document.getElementById('manual-lat') as HTMLInputElement;
+                  const lngInput = document.getElementById('manual-lng') as HTMLInputElement;
+                  const lat = parseFloat(latInput.value);
+                  const lng = parseFloat(lngInput.value);
+                  
+                  if (!isNaN(lat) && !isNaN(lng)) {
+                    if (lat >= -90 && lat <= 90 && lng >= -180 && lng <= 180) {
+                      setCurrentGPSPosition({lat, lng});
+                      setTrackingAccuracy(50); // Manual coordinates assumed ~50m accuracy
+                      setStatus(`📍 Manual coordinates set: ${lat.toFixed(6)}, ${lng.toFixed(6)} - Ready to add point`);
+                      latInput.value = '';
+                      lngInput.value = '';
+                    } else {
+                      setStatus('❌ Invalid coordinates. Latitude: -90 to 90, Longitude: -180 to 180');
+                    }
+                  } else {
+                    setStatus('❌ Please enter valid decimal coordinates');
+                  }
+                }}
+                size="sm"
+                className="mt-2 w-full text-xs"
+                variant="outline"
+              >
+                📌 Use Manual Coordinates
+              </Button>
+            </div>
+          )}
         </div>
       )}
 
@@ -2381,7 +2463,6 @@ export default function RealMapBoundaryMapper({
             </div>
           )}
         </div>
-      </>
       ) : (
         // Tab interface after completion
         <div className="space-y-4">

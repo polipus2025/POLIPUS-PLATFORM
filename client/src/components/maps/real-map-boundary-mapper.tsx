@@ -817,7 +817,7 @@ export default function RealMapBoundaryMapper({
         }
         
         // Clear existing lines
-        svg.innerHTML = '';
+        svg.replaceChildren();
 
         // Create path for boundary lines with enhanced visibility
         const pathData = currentPoints.map((point, index) => {
@@ -2175,6 +2175,39 @@ export default function RealMapBoundaryMapper({
       }
     };
   }, [gpsWatchId, isWalkingMode]);
+
+  // Component cleanup on unmount - prevent removeChild errors
+  useEffect(() => {
+    return () => {
+      // Cleanup GPS watch
+      if (gpsWatchId !== null) {
+        try {
+          navigator.geolocation.clearWatch(gpsWatchId);
+        } catch (e) {
+          console.log('GPS watch already cleared');
+        }
+      }
+      
+      // Cleanup AbortController
+      if (abortController.current) {
+        try {
+          abortController.current.abort();
+        } catch (e) {
+          // Ignore abort errors
+        }
+        abortController.current = null;
+      }
+      
+      // Cancel any pending animations
+      if (walkingAnimationRef.current) {
+        try {
+          cancelAnimationFrame(walkingAnimationRef.current);
+        } catch (e) {
+          // Ignore cancel errors
+        }
+      }
+    };
+  }, []); // Only run on unmount
 
   // Tab interface content after completion
   const renderTabContent = () => {

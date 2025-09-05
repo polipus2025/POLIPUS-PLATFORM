@@ -490,7 +490,7 @@ function EUDRReportsSection() {
       document.body.appendChild(a);
       a.click();
       window.URL.revokeObjectURL(url);
-      document.body.removeChild(a);
+      if (a.isConnected) a.remove();
 
       toast({
         title: "✅ EUDR Report Downloaded",

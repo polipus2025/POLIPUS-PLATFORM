@@ -874,7 +874,11 @@ export default function RealMapBoundaryMapper({
           polygonFill.setAttribute('d', polygonPath);
           polygonFill.setAttribute('fill', 'rgba(34, 197, 94, 0.2)');
           polygonFill.setAttribute('stroke', 'none');
-          svg.insertBefore(polygonFill, svg.firstChild); // Add behind the lines
+          // Safely add polygon fill behind existing content
+          const existingContent = svg.innerHTML;
+          svg.innerHTML = '';
+          svg.appendChild(polygonFill);
+          svg.innerHTML += existingContent;
         }
       }
     };
@@ -1064,11 +1068,6 @@ export default function RealMapBoundaryMapper({
         svg.appendChild(line);
         
         console.log(`✓ SW Maps boundary line: ${String.fromCharCode(65 + i)} to ${String.fromCharCode(65 + i + 1)}`);
-        line.setAttribute('stroke-width', '4');
-        line.setAttribute('stroke-linecap', 'round');
-        line.setAttribute('opacity', '0.9');
-        line.setAttribute('style', 'filter: drop-shadow(0 2px 4px rgba(0,0,0,0.3));');
-        svg.appendChild(line);
         
         console.log(`✓ Connected point ${String.fromCharCode(65 + i)} to ${String.fromCharCode(65 + i + 1)}`);
       }

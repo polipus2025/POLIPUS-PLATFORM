@@ -859,9 +859,14 @@ export default function RealMapBoundaryMapper({
     
     if (!mapElement || !svg) return;
 
-    // Clear existing markers and connections
-    mapElement.querySelectorAll('.map-marker, .area-label, .risk-label, .walking-trail').forEach(el => el.remove());
-    svg.innerHTML = '';
+    // Safe element removal using Element.remove() - proper DOM cleanup
+    const existingMarkers = mapElement.querySelectorAll('.map-marker, .area-label, .risk-label, .walking-trail');
+    existingMarkers.forEach(el => el.remove());
+    
+    // Clear SVG content safely
+    if (svg) {
+      svg.innerHTML = '';
+    }
     
     // Force immediate persistent display for all points
     console.log(`Rendering persistent boundary display for ${points.length} points`);
@@ -898,8 +903,9 @@ export default function RealMapBoundaryMapper({
     // GPS MARKERS: All GPS points stay visible on real satellite imagery
     console.log(`Rendering ${points.length} GPS markers on satellite imagery`);
     
-    // Remove existing markers first to prevent duplicates
-    mapElement.querySelectorAll('.gps-point-marker').forEach(marker => marker.remove());
+    // Safely remove existing GPS markers to prevent duplicates
+    const existingGPSMarkers = mapElement.querySelectorAll('.gps-point-marker');
+    existingGPSMarkers.forEach(marker => marker.remove());
     
     points.forEach((point, index) => {
       // Get map container dimensions for proper scaling
@@ -2064,11 +2070,27 @@ export default function RealMapBoundaryMapper({
   const canComplete = points.length >= minPoints;
   const area = calculateArea(points);
 
-  // Clean up GPS tracking on unmount
+  // Clean up GPS tracking and event listeners on unmount
   useEffect(() => {
     return () => {
+      // Stop GPS tracking
       if (gpsWatchId !== null) {
         navigator.geolocation.clearWatch(gpsWatchId);
+      }
+      
+      // Clear any pending animations
+      if (walkingAnimationRef.current) {
+        cancelAnimationFrame(walkingAnimationRef.current);
+      }
+      
+      // Clear DOM event listeners safely
+      if (mapRef.current) {
+        const mapElement = mapRef.current.querySelector('#real-map, #fallback-map');
+        if (mapElement) {
+          // Remove click event listeners from map
+          const newMapElement = mapElement.cloneNode(true);
+          mapElement.parentNode?.replaceChild(newMapElement, mapElement);
+        }
       }
     };
   }, [gpsWatchId]);

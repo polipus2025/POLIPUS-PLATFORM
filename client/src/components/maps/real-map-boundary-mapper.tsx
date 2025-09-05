@@ -452,7 +452,7 @@ export default function RealMapBoundaryMapper({
       mapRef.current!.innerHTML = `
         <style>
           .real-map { 
-            height: 400px; 
+            height: 500px; 
             width: 100%;
             border: 2px solid #e5e7eb;
             border-radius: 8px;
@@ -560,7 +560,7 @@ export default function RealMapBoundaryMapper({
       mapRef.current!.innerHTML = `
         <style>
           .fallback-map { 
-            height: 400px; 
+            height: 500px; 
             width: 100%;
             border: 2px solid #e5e7eb;
             border-radius: 8px;
@@ -850,7 +850,7 @@ export default function RealMapBoundaryMapper({
     // Map initialization handled by initMapWithCoordinates function
   }, []);
 
-  // Update visual markers when points change - IMMEDIATE PERSISTENT DISPLAY
+  // Update visual markers when points change - IMMEDIATE PERSISTENT DISPLAY WITH SW Maps STYLE
   useEffect(() => {
     if (!mapRef.current || !mapReady) return;
 
@@ -859,8 +859,9 @@ export default function RealMapBoundaryMapper({
     
     if (!mapElement || !svg) return;
 
-    // Clear existing markers but preserve points
-    mapElement.querySelectorAll('.map-marker, .area-label, .risk-label').forEach(el => el.remove());
+    // Clear existing markers and connections
+    mapElement.querySelectorAll('.map-marker, .area-label, .risk-label, .walking-trail').forEach(el => el.remove());
+    svg.innerHTML = '';
     
     // Force immediate persistent display for all points
     console.log(`Rendering persistent boundary display for ${points.length} points`);
@@ -958,28 +959,65 @@ export default function RealMapBoundaryMapper({
       console.log(`✓ Persistent marker ${String.fromCharCode(65 + index)} added and will remain visible`);
     });
 
+    // SW MAPS STYLE: Real-time walking trail visualization
+    if (realTimeTrail.length >= 2) {
+      console.log(`Drawing walking trail with ${realTimeTrail.length} positions`);
+      
+      // Create purple walking trail line
+      const trailPath = realTimeTrail.map((pos, index) => {
+        const rect = mapElement.getBoundingClientRect();
+        const latRange = 0.002;
+        const lngRange = 0.002;
+        
+        const x = ((pos.lng - (mapCenter.lng - lngRange / 2)) / lngRange) * rect.width;
+        const y = ((mapCenter.lat + latRange / 2 - pos.lat) / latRange) * rect.height;
+        
+        return `${index === 0 ? 'M' : 'L'} ${x} ${y}`;
+      }).join(' ');
+      
+      const trailLine = document.createElementNS('http://www.w3.org/2000/svg', 'path');
+      trailLine.setAttribute('d', trailPath);
+      trailLine.setAttribute('stroke', '#8b5cf6');
+      trailLine.setAttribute('stroke-width', '3');
+      trailLine.setAttribute('stroke-dasharray', '5,5');
+      trailLine.setAttribute('fill', 'none');
+      trailLine.setAttribute('opacity', '0.8');
+      svg.appendChild(trailLine);
+    }
+
     // ENHANCED BOUNDARY CONNECTIONS: Draw connecting lines immediately when 2+ points exist
     if (points.length >= 2) {
-      console.log(`Drawing boundary connections for ${points.length} points`);
+      console.log(`Drawing SW Maps-style boundary connections for ${points.length} points`);
       
-      // Draw connecting lines between consecutive points (like in the image you showed)
+      // Draw connecting lines between consecutive points (SW Maps style)
       for (let i = 0; i < points.length - 1; i++) {
         const currentPoint = points[i];
         const nextPoint = points[i + 1];
         
-        // Calculate pixel coordinates for both points
-        const x1 = Math.max(12, Math.min(388, (currentPoint.longitude + 9.4295) * 5000 + 200));
-        const y1 = Math.max(12, Math.min(388, 200 - (currentPoint.latitude - 6.4281) * 5000));
-        const x2 = Math.max(12, Math.min(388, (nextPoint.longitude + 9.4295) * 5000 + 200));
-        const y2 = Math.max(12, Math.min(388, 200 - (nextPoint.latitude - 6.4281) * 5000));
+        // Calculate pixel coordinates for both points using proper conversion
+        const rect = mapElement.getBoundingClientRect();
+        const latRange = 0.002;
+        const lngRange = 0.002;
         
-        // Create solid connecting line (like the red/orange lines in your image)
+        const x1 = ((currentPoint.longitude - (mapCenter.lng - lngRange / 2)) / lngRange) * rect.width;
+        const y1 = ((mapCenter.lat + latRange / 2 - currentPoint.latitude) / latRange) * rect.height;
+        const x2 = ((nextPoint.longitude - (mapCenter.lng - lngRange / 2)) / lngRange) * rect.width;
+        const y2 = ((mapCenter.lat + latRange / 2 - nextPoint.latitude) / latRange) * rect.height;
+        
+        // Create solid connecting line (SW Maps style - bright green)
         const line = document.createElementNS('http://www.w3.org/2000/svg', 'line');
         line.setAttribute('x1', x1.toString());
         line.setAttribute('y1', y1.toString());
         line.setAttribute('x2', x2.toString());
         line.setAttribute('y2', y2.toString());
-        line.setAttribute('stroke', '#ef4444'); // Red color like in your image
+        line.setAttribute('stroke', '#22c55e'); // SW Maps style - bright green boundary
+        line.setAttribute('stroke-width', '4');
+        line.setAttribute('stroke-linecap', 'round');
+        line.setAttribute('opacity', '0.9');
+        line.setAttribute('style', 'filter: drop-shadow(0 2px 4px rgba(0,0,0,0.3));');
+        svg.appendChild(line);
+        
+        console.log(`✓ SW Maps boundary line: ${String.fromCharCode(65 + i)} to ${String.fromCharCode(65 + i + 1)}`);
         line.setAttribute('stroke-width', '4');
         line.setAttribute('stroke-linecap', 'round');
         line.setAttribute('opacity', '0.9');

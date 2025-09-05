@@ -55,6 +55,7 @@ export default function RealMapBoundaryMapper({
   enableGNSSRTK = true
 }: RealMapBoundaryMapperProps) {
   const mapRef = useRef<HTMLDivElement>(null);
+  const walkingAnimationRef = useRef<number | null>(null);
   const [points, setPoints] = useState<BoundaryPoint[]>([]);
   const [status, setStatus] = useState('Loading satellite imagery...');
   const [mapReady, setMapReady] = useState(false);

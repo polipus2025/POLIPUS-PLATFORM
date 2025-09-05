@@ -211,20 +211,30 @@ export default function CreateLandPlot() {
           </div>
         </div>
 
-        {/* Status Badges */}
-        <div className="flex space-x-4 mb-6">
-          <Badge className="bg-blue-100 text-blue-800">
-            <Users className="w-3 h-3 mr-1" />
-            Land Inspector Mode
-          </Badge>
-          <Badge className="bg-green-100 text-green-800">
-            <Globe className="w-3 h-3 mr-1" />
-            GPS Mapping Active
-          </Badge>
-          <Badge className="bg-purple-100 text-purple-800">
-            <TreePine className="w-3 h-3 mr-1" />
-            EUDR Compliance
-          </Badge>
+        {/* Status Badges and Quick Actions */}
+        <div className="flex flex-col sm:flex-row gap-4 mb-6">
+          <div className="flex space-x-4">
+            <Badge className="bg-blue-100 text-blue-800">
+              <Users className="w-3 h-3 mr-1" />
+              Land Inspector Mode
+            </Badge>
+            <Badge className="bg-green-100 text-green-800">
+              <Globe className="w-3 h-3 mr-1" />
+              GPS Mapping Active
+            </Badge>
+            <Badge className="bg-purple-100 text-purple-800">
+              <TreePine className="w-3 h-3 mr-1" />
+              EUDR Compliance
+            </Badge>
+          </div>
+          <Button 
+            onClick={() => document.getElementById('mapping-section')?.scrollIntoView({ behavior: 'smooth' })}
+            className="bg-green-600 hover:bg-green-700 px-6 py-2"
+            data-testid="button-jump-to-mapping"
+          >
+            <MapPin className="w-4 h-4 mr-2" />
+            🗺️ Jump to GPS Mapping
+          </Button>
         </div>
       </div>
 
@@ -668,15 +678,31 @@ export default function CreateLandPlot() {
                         )}
                       </div>
 
+                      {/* Prominent Mapping Section Header */}
+                      <div id="mapping-section" className="bg-gradient-to-r from-green-600 to-blue-600 text-white rounded-lg p-6 mb-4">
+                        <h3 className="text-xl font-bold mb-2 flex items-center">
+                          <Globe className="w-6 h-6 mr-3" />
+                          🗺️ SW Maps-Style GPS Field Boundary Mapping
+                        </h3>
+                        <p className="text-green-100 mb-3">
+                          Professional GPS mapping with real-time satellite imagery and walking mode functionality.
+                        </p>
+                        <div className="bg-white/20 border border-white/30 rounded-lg p-3">
+                          <p className="text-sm">
+                            📱 <strong>How to use:</strong> Click "Start Walking Mode" → Walk around your field → Add GPS points → Create accurate boundaries
+                          </p>
+                        </div>
+                      </div>
+
                       {/* Real-Time GPS Field Boundary Mapping Section */}
-                      <div className="bg-green-50 border border-green-200 rounded-lg p-4">
+                      <div className="bg-green-50 border border-green-200 rounded-lg p-4 mb-4">
                         <h4 className="font-medium text-green-800 mb-2 flex items-center">
                           <Globe className="w-4 h-4 mr-2" />
-                          Real-Time GPS Field Boundary Mapping
+                          Instructions & Status
                         </h4>
                         <div className="bg-blue-50 border-l-4 border-blue-400 p-3 mb-3">
                           <p className="text-sm text-blue-800">
-                            💡 <strong>High-precision mapping:</strong> Points can only be placed when GPS accuracy is ≤2.5 meters. Move to open areas for best GPS signal.
+                            💡 <strong>High-precision mapping:</strong> Points can only be placed when GPS accuracy is ≤10 meters. Move to open areas for best GPS signal.
                           </p>
                         </div>
                         <p className="text-sm text-green-700 mb-3">
@@ -685,28 +711,37 @@ export default function CreateLandPlot() {
                         <div className="text-center">
                           <Badge className="bg-gray-100 text-gray-700">
                             <Target className="w-3 h-3 mr-1" />
-                            📍 GPS Tracking Inactive
+                            📍 Ready for GPS Mapping
                           </Badge>
                         </div>
                       </div>
                     </div>
 
-                    <RealMapBoundaryMapper 
-                      onBoundaryComplete={(boundary) => {
-                        setLandPlotData(prev => ({
-                          ...prev,
-                          boundaryData: boundary,
-                          totalAreaHectares: boundary.area ? boundary.area.toFixed(2) : prev.totalAreaHectares,
-                          coordinates: boundary.points.length > 0 ? 
-                            `${boundary.points[0].latitude.toFixed(6)}, ${boundary.points[0].longitude.toFixed(6)}` : 
-                            prev.coordinates
-                        }));
-                        toast({
-                          title: "Land Boundary Mapped Successfully",
-                          description: `Land plot mapped with ${boundary.points.length} GPS points (${boundary.area?.toFixed(2)} hectares)`,
-                        });
-                      }}
-                    />
+                    {/* SW Maps GPS Mapping Component with Proper Container */}
+                    <div className="bg-white border border-gray-200 rounded-lg p-4 min-h-[600px]" data-testid="map-container">
+                      <div className="mb-4 text-center">
+                        <h4 className="text-lg font-semibold text-gray-900 mb-2">Interactive GPS Mapping Area</h4>
+                        <p className="text-sm text-gray-600">This area will show the mapping interface with satellite imagery</p>
+                      </div>
+                      <div className="relative w-full h-[520px] min-h-[400px] bg-slate-100 rounded-md border">
+                        <RealMapBoundaryMapper 
+                          onBoundaryComplete={(boundary) => {
+                            setLandPlotData(prev => ({
+                              ...prev,
+                              boundaryData: boundary,
+                              totalAreaHectares: boundary.area ? boundary.area.toFixed(2) : prev.totalAreaHectares,
+                              coordinates: boundary.points.length > 0 ? 
+                                `${boundary.points[0].latitude.toFixed(6)}, ${boundary.points[0].longitude.toFixed(6)}` : 
+                                prev.coordinates
+                            }));
+                            toast({
+                              title: "Land Boundary Mapped Successfully",
+                              description: `Land plot mapped with ${boundary.points.length} GPS points (${boundary.area?.toFixed(2)} hectares)`,
+                            });
+                          }}
+                        />
+                      </div>
+                    </div>
                   </div>
                 </CardContent>
               </Card>

@@ -57,6 +57,7 @@ export default function RealMapBoundaryMapper({
   const mapRef = useRef<HTMLDivElement>(null);
   const walkingAnimationRef = useRef<number | null>(null);
   const abortController = useRef<AbortController | null>(null);
+  const initializedRef = useRef<boolean>(false);
   const [points, setPoints] = useState<BoundaryPoint[]>([]);
   const [status, setStatus] = useState('Loading satellite imagery...');
   const [mapReady, setMapReady] = useState(false);
@@ -208,9 +209,15 @@ export default function RealMapBoundaryMapper({
     setStatus(`✅ Point ${String.fromCharCode(65 + points.length)} added! | Next: Point ${nextLabel} | ${points.length + 1}/${minPoints}+ needed`);
     
     // SW Maps-style: Auto-trigger agricultural analysis when enough points are collected
-    if (points.length + 1 >= minPoints) {
-      setTimeout(() => generateAgriculturalData(points), 1000);
-    }
+    // Use functional state update to avoid stale closure
+    setTimeout(() => {
+      setPoints(currentPoints => {
+        if (currentPoints.length >= minPoints && currentPoints.length === points.length + 1) {
+          generateAgriculturalData(currentPoints);
+        }
+        return currentPoints;
+      });
+    }, 1000);
   };
 
   const addCurrentGPSPoint = async (forceAdd = false) => {
@@ -427,7 +434,9 @@ export default function RealMapBoundaryMapper({
   };
 
   useEffect(() => {
-    if (!mapRef.current) return;
+    if (!mapRef.current || initializedRef.current) return;
+    
+    initializedRef.current = true;
 
     // Get user's GPS location or use default
     navigator.geolocation.getCurrentPosition(
@@ -568,7 +577,9 @@ export default function RealMapBoundaryMapper({
         await addPoint(lat, lng, 1.5, 'click');
       };
       
-      mapElement.addEventListener('click', handleMapClick, { signal: abortController.current.signal });
+      if (abortController.current) {
+        mapElement.addEventListener('click', handleMapClick, { signal: abortController.current.signal });
+      }
 
       // Load high-resolution satellite tile grid
       loadSatelliteTilesGrid(centerLat, centerLng, tileInfo.coordinates.zoom);
@@ -882,7 +893,15 @@ export default function RealMapBoundaryMapper({
 
     // Safe element removal using Element.remove() - proper DOM cleanup
     const existingMarkers = mapElement.querySelectorAll('.map-marker, .area-label, .risk-label, .walking-trail');
-    existingMarkers.forEach(el => el.remove());
+    existingMarkers.forEach(el => {
+      try {
+        if (el && el.parentNode) {
+          el.remove();
+        }
+      } catch (e) {
+        console.log('Element already removed');
+      }
+    });
     
     // Clear SVG content safely
     if (svg) {
@@ -2094,9 +2113,16 @@ export default function RealMapBoundaryMapper({
   // Clean up GPS tracking and event listeners on unmount
   useEffect(() => {
     return () => {
+      // Reset initialized flag
+      initializedRef.current = false;
+      
       // Stop GPS tracking - always clear any active watch
       if (gpsWatchId !== null) {
-        navigator.geolocation.clearWatch(gpsWatchId);
+        try {
+          navigator.geolocation.clearWatch(gpsWatchId);
+        } catch (e) {
+          console.log('GPS watch already cleared');
+        }
         setGpsWatchId(null);
       }
       
@@ -2108,17 +2134,25 @@ export default function RealMapBoundaryMapper({
       
       // Clear any pending animations
       if (walkingAnimationRef.current) {
-        cancelAnimationFrame(walkingAnimationRef.current);
+        try {
+          cancelAnimationFrame(walkingAnimationRef.current);
+        } catch (e) {
+          console.log('Animation frame already cleared');
+        }
         walkingAnimationRef.current = null;
       }
       
       // Clear DOM event listeners safely using AbortController
       if (abortController.current) {
-        abortController.current.abort();
+        try {
+          abortController.current.abort();
+        } catch (e) {
+          console.log('AbortController already aborted');
+        }
         abortController.current = null;
       }
     };
-  }, []);
+  }, [gpsWatchId, isWalkingMode]);
 
   // Tab interface content after completion
   const renderTabContent = () => {

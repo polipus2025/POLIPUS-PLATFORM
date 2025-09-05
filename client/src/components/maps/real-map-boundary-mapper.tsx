@@ -58,6 +58,7 @@ export default function RealMapBoundaryMapper({
   const walkingAnimationRef = useRef<number | null>(null);
   const abortController = useRef<AbortController | null>(null);
   const initializedRef = useRef<boolean>(false);
+  const timeoutRef = useRef<NodeJS.Timeout[]>([]);
   const [points, setPoints] = useState<BoundaryPoint[]>([]);
   const [status, setStatus] = useState('Loading satellite imagery...');
   const [mapReady, setMapReady] = useState(false);
@@ -1565,15 +1566,25 @@ export default function RealMapBoundaryMapper({
     }
   };
 
-  // CRITICAL FIX: State-driven updates - trigger renderOverlay when any visualization state changes
+  // CRITICAL FIX: Safe state-driven updates with error protection
   useEffect(() => {
-    renderOverlay();
+    try {
+      if (mapRef.current && mapReady) {
+        renderOverlay();
+      }
+    } catch (e) {
+      console.log('renderOverlay failed in state update effect:', e);
+    }
   }, [points, currentGPSPosition, realTimeTrail, mapReady, mapCenter]);
 
   // Additional effect for immediate GPS marker updates during walking mode
   useEffect(() => {
-    if (isWalkingMode || isTrackingGPS) {
-      renderOverlay();
+    try {
+      if ((isWalkingMode || isTrackingGPS) && mapRef.current && mapReady) {
+        renderOverlay();
+      }
+    } catch (e) {
+      console.log('renderOverlay failed in GPS tracking effect:', e);
     }
   }, [isWalkingMode, isTrackingGPS, trackingAccuracy]);
 
@@ -1650,10 +1661,17 @@ export default function RealMapBoundaryMapper({
         
         setStatus(errorMessage);
         
-        // Suggest fallback options after 3 seconds
-        setTimeout(() => {
-          setStatus('💡 Having GPS issues? Try: 1) Allow location permission 2) Move to open area 3) Refresh page 4) Use manual coordinates');
+        // CRITICAL FIX: Safe delayed status update to prevent DOM errors
+        const timeoutId = setTimeout(() => {
+          try {
+            setStatus('💡 Having GPS issues? Try: 1) Allow location permission 2) Move to open area 3) Refresh page 4) Use manual coordinates');
+          } catch (e) {
+            console.log('Status update failed, component may be unmounted');
+          }
         }, 3000);
+        
+        // Store timeout ID for cleanup to prevent memory leaks
+        timeoutRef.current.push(timeoutId);
       },
       options
     );
@@ -2514,6 +2532,18 @@ export default function RealMapBoundaryMapper({
         }
         walkingAnimationRef.current = null;
       }
+      
+      // CRITICAL FIX: Clear all timeouts to prevent delayed DOM errors after unmount
+      timeoutRef.current.forEach(timeoutId => {
+        if (timeoutId) {
+          try {
+            clearTimeout(timeoutId);
+          } catch (e) {
+            // Timeout may already be cleared
+          }
+        }
+      });
+      timeoutRef.current = [];
       
       // Clear DOM event listeners safely using AbortController
       if (abortController.current) {

@@ -918,14 +918,16 @@ export default function RealMapBoundaryMapper({
         
         // Provide user guidance based on GPS accuracy
         let statusMessage = '';
-        if (accuracy > 100) {
-          statusMessage = `GPS acquiring satellites... Accuracy: ${accuracy.toFixed(1)}m - Move to open area for better signal`;
+        if (accuracy > 500) {
+          statusMessage = `GPS acquiring satellites... Accuracy: ${accuracy.toFixed(1)}m - Move to open area, testing enabled`;
+        } else if (accuracy > 100) {
+          statusMessage = `GPS improving... Accuracy: ${accuracy.toFixed(1)}m - You can map but accuracy is poor`;
         } else if (accuracy > 50) {
-          statusMessage = `GPS improving... Accuracy: ${accuracy.toFixed(1)}m - Wait for better precision`;
+          statusMessage = `GPS stabilizing... Accuracy: ${accuracy.toFixed(1)}m - Good for testing, wait for precision`;
         } else if (accuracy > 15) {
-          statusMessage = `GPS stabilizing... Accuracy: ${accuracy.toFixed(1)}m - Almost ready for mapping`;
+          statusMessage = `GPS ready for mapping - Accuracy: ${accuracy.toFixed(1)}m - Good precision`;
         } else {
-          statusMessage = `GPS ready for mapping - Accuracy: ${accuracy.toFixed(1)}m - Points: ${points.length}/${maxPoints}`;
+          statusMessage = `GPS excellent - Accuracy: ${accuracy.toFixed(1)}m - Survey-grade precision - Points: ${points.length}/${maxPoints}`;
         }
         
         setStatus(statusMessage);
@@ -1646,23 +1648,23 @@ export default function RealMapBoundaryMapper({
             </Button>
             <Button
               onClick={addCurrentGPSPoint}
-              disabled={!isTrackingGPS || !currentGPSPosition || points.length >= maxPoints || (trackingAccuracy && trackingAccuracy > 50)}
+              disabled={!isTrackingGPS || !currentGPSPosition || points.length >= maxPoints}
               size="sm"
               variant="default"
               className={`flex-1 sm:flex-none ${
-                trackingAccuracy && trackingAccuracy <= 50 
-                  ? trackingAccuracy <= 15 
-                    ? 'bg-green-600 hover:bg-green-700' 
-                    : 'bg-yellow-600 hover:bg-yellow-700'
-                  : 'bg-gray-400 cursor-not-allowed'
+                trackingAccuracy && trackingAccuracy <= 15 
+                  ? 'bg-green-600 hover:bg-green-700' 
+                  : trackingAccuracy && trackingAccuracy <= 100
+                    ? 'bg-yellow-600 hover:bg-yellow-700'
+                    : 'bg-orange-600 hover:bg-orange-700'
               }`}
-              title={trackingAccuracy && trackingAccuracy > 50 ? 'GPS accuracy must be ≤50m to add points (currently ' + trackingAccuracy.toFixed(1) + 'm) - Move to open area' : trackingAccuracy && trackingAccuracy > 15 ? 'GPS accuracy improving (' + trackingAccuracy.toFixed(1) + 'm) - Wait for better precision' : 'GPS ready for field mapping'}
+              title={trackingAccuracy && trackingAccuracy > 100 ? 'Poor GPS accuracy (' + trackingAccuracy.toFixed(1) + 'm) - Testing mode enabled' : trackingAccuracy && trackingAccuracy > 15 ? 'GPS accuracy improving (' + trackingAccuracy.toFixed(1) + 'm) - Can map but wait for better precision' : 'GPS ready for precise field mapping'}
             >
               <span className="hidden sm:inline">
                 Add GPS Point ({points.length}/{maxPoints})
                 {trackingAccuracy && (
-                  <span className={`ml-1 text-xs ${trackingAccuracy <= 15 ? 'text-green-200' : trackingAccuracy <= 50 ? 'text-yellow-200' : 'text-red-200'}`}>
-                    {trackingAccuracy <= 15 ? '✅' : trackingAccuracy <= 50 ? '🔄' : '⚠️'}
+                  <span className={`ml-1 text-xs ${trackingAccuracy <= 15 ? 'text-green-200' : trackingAccuracy <= 100 ? 'text-yellow-200' : 'text-orange-200'}`}>
+                    {trackingAccuracy <= 15 ? '✅' : trackingAccuracy <= 100 ? '🔄' : '📍'}
                   </span>
                 )}
               </span>

@@ -829,9 +829,11 @@ export default function RealMapBoundaryMapper({
       // Remove existing markers
       mapContainer.querySelectorAll('.persistent-marker').forEach(marker => {
         try {
-          marker.remove();
+          if (marker && marker.parentNode && marker.parentNode.contains(marker)) {
+            marker.parentNode.removeChild(marker);
+          }
         } catch (e) {
-          // Element already removed or not attached
+          // Element already removed or orphaned - ignore silently
         }
       });
 
@@ -1008,17 +1010,25 @@ export default function RealMapBoundaryMapper({
 
     console.log(`[RENDER] Updating overlay - Points: ${points.length}, GPS: ${currentGPSPosition ? 'active' : 'inactive'}, Trail: ${realTimeTrail.length}`);
 
-    // Safe element removal using Element.remove() - proper DOM cleanup
-    const existingMarkers = mapElement.querySelectorAll('.map-marker, .area-label, .risk-label, .walking-trail');
-    existingMarkers.forEach(el => {
-      try {
-        if (el && el.parentNode) {
-          el.remove();
+    // CRITICAL FIX: Safe element removal to prevent removeChild errors
+    const safeRemoveElements = (selector: string) => {
+      const elements = mapElement.querySelectorAll(selector);
+      elements.forEach(el => {
+        try {
+          if (el && el.parentNode && el.parentNode.contains(el)) {
+            el.parentNode.removeChild(el);
+          }
+        } catch (e) {
+          // Element already removed or orphaned - ignore silently
         }
-      } catch (e) {
-        console.log('Element already removed');
-      }
-    });
+      });
+    };
+    
+    safeRemoveElements('.map-marker');
+    safeRemoveElements('.area-label');
+    safeRemoveElements('.risk-label');
+    safeRemoveElements('.walking-trail');
+    safeRemoveElements('.gps-point-marker');
     
     // FIXED: Proper defs preservation to prevent pattern fill failures
     const existingDefs = svg.querySelector('defs');
@@ -1029,17 +1039,48 @@ export default function RealMapBoundaryMapper({
       preservedDefs = existingDefs.cloneNode(true) as Element;
     }
     
-    // Safe SVG clearing using replaceChildren (modern approach)
-    svg.replaceChildren();
+    // CRITICAL FIX: Safe SVG clearing to prevent removeChild errors
+    try {
+      // Clear SVG contents safely
+      while (svg.firstChild) {
+        if (svg.firstChild.parentNode === svg) {
+          svg.removeChild(svg.firstChild);
+        } else {
+          break;
+        }
+      }
+    } catch (e) {
+      // Fallback to innerHTML if removeChild fails
+      try {
+        svg.innerHTML = '';
+      } catch (innerE) {
+        console.log('SVG clearing failed, continuing...');
+      }
+    }
     
     // Re-add or create crosshatch patterns with proper defs handling
     const defs = preservedDefs || document.createElementNS('http://www.w3.org/2000/svg', 'defs');
     
     // Always ensure patterns exist (create if not preserved)
     if (!preservedDefs || !defs.querySelector('pattern')) {
-      // Clear any incomplete patterns and rebuild
+      // CRITICAL FIX: Safe defs clearing to prevent removeChild errors
       if (defs.hasChildNodes()) {
-        defs.replaceChildren();
+        try {
+          while (defs.firstChild) {
+            if (defs.firstChild.parentNode === defs) {
+              defs.removeChild(defs.firstChild);
+            } else {
+              break;
+            }
+          }
+        } catch (e) {
+          // Fallback to innerHTML if needed
+          try {
+            defs.innerHTML = '';
+          } catch (innerE) {
+            console.log('Defs clearing failed, continuing...');
+          }
+        }
       }
       
       const patterns = ['red', 'yellow', 'green'];
@@ -1067,15 +1108,7 @@ export default function RealMapBoundaryMapper({
     // GPS MARKERS: All GPS points stay visible on real satellite imagery
     console.log(`Rendering ${points.length} GPS markers on satellite imagery`);
     
-    // Safely remove existing GPS markers to prevent duplicates
-    const existingGPSMarkers = mapElement.querySelectorAll('.gps-point-marker');
-    existingGPSMarkers.forEach(marker => {
-      try {
-        marker.remove();
-      } catch (e) {
-        // Element already removed or not attached
-      }
-    });
+    // GPS markers are now safely removed by the safeRemoveElements function above
     
     points.forEach((point, index) => {
       // Use centralized coordinate conversion for consistent positioning

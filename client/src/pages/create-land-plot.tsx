@@ -11,7 +11,7 @@ import { useMutation, useQuery } from "@tanstack/react-query";
 import { apiRequest } from "@/lib/queryClient";
 import { ArrowLeft, MapPin, Globe, TreePine, Target, Users, Crosshair, Satellite, Zap, RefreshCw, Download } from "lucide-react";
 import { Link } from "wouter";
-import RealMapBoundaryMapperSafe from '@/components/maps/real-map-boundary-mapper-safe';
+import RealMapBoundaryMapper from '@/components/maps/real-map-boundary-mapper';
 
 export default function CreateLandPlot() {
   const { toast } = useToast();
@@ -731,7 +731,7 @@ export default function CreateLandPlot() {
                         <p className="text-sm text-gray-600">This area will show the mapping interface with satellite imagery</p>
                       </div>
                       <div className="relative w-full h-[520px] min-h-[400px] bg-slate-100 rounded-md border">
-                        <RealMapBoundaryMapperSafe 
+                        <RealMapBoundaryMapper 
                           onBoundaryComplete={(boundary) => {
                             setLandPlotData(prev => ({
                               ...prev,

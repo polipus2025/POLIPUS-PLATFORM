@@ -59,6 +59,8 @@ export default function RealMapBoundaryMapper({
   const abortController = useRef<AbortController | null>(null);
   const initializedRef = useRef<boolean>(false);
   const timeoutRef = useRef<NodeJS.Timeout[]>([]);
+  const mapEngine = useRef<HTMLElement | null>(null);
+  const isCleaningUp = useRef<boolean>(false);
   const [points, setPoints] = useState<BoundaryPoint[]>([]);
   const [status, setStatus] = useState('Loading satellite imagery...');
   const [mapReady, setMapReady] = useState(false);
@@ -435,9 +437,10 @@ export default function RealMapBoundaryMapper({
   };
 
   useEffect(() => {
-    if (!mapRef.current || initializedRef.current) return;
+    if (!mapRef.current || initializedRef.current || isCleaningUp.current) return;
     
     initializedRef.current = true;
+    isCleaningUp.current = false;
 
     // Get user's GPS location or use default
     navigator.geolocation.getCurrentPosition(
@@ -490,15 +493,15 @@ export default function RealMapBoundaryMapper({
       const tilesContainer = mapElement.querySelector('#satellite-tiles') as HTMLElement;
       if (!tilesContainer) return;
       
-      // NUCLEAR FIX: Use innerHTML to completely avoid removeChild errors
+      // SAFE FIX: Use replaceChildren to avoid DOM conflicts with React
       try {
         if (tilesContainer) {
-          tilesContainer.innerHTML = '';
+          tilesContainer.replaceChildren();
         }
       } catch (e) {
-        // Fallback to innerHTML only if safe removal fails
+        // Fallback if replaceChildren fails
         try {
-          tilesContainer.innerHTML = '';
+          tilesContainer.replaceChildren();
         } catch (innerE) {
           console.log('Tiles container clearing failed, continuing...');
         }
@@ -574,20 +577,41 @@ export default function RealMapBoundaryMapper({
     };
 
     const createMapWithTile = (tileInfo: any, centerLat: number, centerLng: number) => {
-      // CRITICAL FIX: Safe map container initialization to prevent removeChild errors
-      if (!mapRef.current) return;
+      // CRITICAL FIX: Implement ownership boundary pattern
+      if (!mapRef.current || isCleaningUp.current) return;
       
-      try {
-        // NUCLEAR FIX: Use innerHTML to completely avoid removeChild errors
-        if (mapRef.current) {
-          mapRef.current.innerHTML = '';
+      // Create dedicated map engine container if not exists
+      if (!mapEngine.current) {
+        mapEngine.current = document.createElement('div');
+        mapEngine.current.className = 'map-engine-container';
+        mapEngine.current.style.cssText = 'width: 100%; height: 100%; position: relative;';
+        
+        // Safety check before appending
+        if (mapRef.current && mapRef.current.appendChild && !isCleaningUp.current) {
+          try {
+            mapRef.current.appendChild(mapEngine.current);
+          } catch (e) {
+            console.log('Failed to append map engine, continuing...');
+            return;
+          }
+        } else {
+          return;
         }
-      } catch (e) {
-        console.log('Map container clearing failed, using innerHTML fallback');
+      }
+      
+      // Clear map engine safely
+      if (mapEngine.current) {
+        try {
+          mapEngine.current.innerHTML = '';
+        } catch (e) {
+          console.log('Map engine clearing failed, continuing...');
+        }
+      } else {
+        return;
       }
       
       try {
-        mapRef.current.innerHTML = `
+        mapEngine.current.innerHTML = `
         <style>
           .real-map { 
             height: 500px; 
@@ -655,8 +679,8 @@ export default function RealMapBoundaryMapper({
         return;
       }
 
-      const mapElement = mapRef.current!.querySelector('#real-map') as HTMLElement;
-      if (!mapElement) return;
+      const mapElement = mapEngine.current?.querySelector('#real-map') as HTMLElement;
+      if (!mapElement || isCleaningUp.current) return;
       
       // Load proper satellite tile grid instead of single stretched tile
       loadSatelliteTileGrid(tileInfo, centerLat, centerLng, mapElement);
@@ -666,6 +690,8 @@ export default function RealMapBoundaryMapper({
       
       // Enhanced click handler for persistent boundary points with storage
       const handleMapClick = async (e: Event) => {
+        if (isCleaningUp.current) return;
+        
         const mouseEvent = e as MouseEvent;
         const rect = mapElement.getBoundingClientRect();
         const x = mouseEvent.clientX - rect.left;
@@ -686,7 +712,7 @@ export default function RealMapBoundaryMapper({
         await addPoint(lat, lng, 1.5, 'click');
       };
       
-      if (abortController.current) {
+      if (abortController.current && !isCleaningUp.current) {
         mapElement.addEventListener('click', handleMapClick, { signal: abortController.current.signal });
       }
 
@@ -702,9 +728,9 @@ export default function RealMapBoundaryMapper({
       if (!mapRef.current) return;
       
       try {
-        // NUCLEAR FIX: Use innerHTML to completely avoid removeChild errors
+        // SAFE FIX: Use replaceChildren to avoid DOM conflicts with React
         if (mapRef.current) {
-          mapRef.current.innerHTML = '';
+          mapRef.current.replaceChildren();
         }
       } catch (e) {
         console.log('Fallback map clearing failed, using innerHTML');
@@ -892,7 +918,7 @@ export default function RealMapBoundaryMapper({
         if (mapContainer && mapContainer.querySelectorAll) {
           mapContainer.querySelectorAll('.persistent-marker').forEach(marker => {
             try {
-              if (marker && marker.parentNode && marker.parentNode.contains(marker)) {
+              if (marker?.isConnected && marker.parentNode === mapContainer) {
                 marker.remove();
               }
             } catch (e) {
@@ -2608,7 +2634,35 @@ export default function RealMapBoundaryMapper({
         } catch (e) {
           // Ignore cancel errors
         }
+        walkingAnimationRef.current = null;
       }
+      
+      // Set cleanup flag immediately to prevent further DOM operations
+      isCleaningUp.current = true;
+      
+      // Clear all pending timeouts safely
+      timeoutRef.current.forEach(timeout => {
+        if (timeout) {
+          try {
+            clearTimeout(timeout);
+          } catch (e) {
+            console.log('Timeout already cleared');
+          }
+        }
+      });
+      timeoutRef.current = [];
+      
+      // Cleanup map engine reference (React will handle DOM cleanup)
+      if (mapEngine.current) {
+        try {
+          mapEngine.current = null;
+        } catch (e) {
+          // Ignore cleanup errors
+        }
+      }
+      
+      // Reset initialization flag
+      initializedRef.current = false;
     };
   }, []); // Only run on unmount
 

@@ -2191,6 +2191,7 @@ export default function RealMapBoundaryMapper({
             </div>
           )}
         </div>
+      </div>
 
       {/* SW Maps-style Professional GPS Interface */}
       {enableRealTimeGPS && swMapsUI && (
@@ -2310,8 +2311,6 @@ export default function RealMapBoundaryMapper({
               </div>
             )}
           </div>
-        </div>
-      )}
           
           {/* Manual Coordinate Input (GPS Fallback) */}
           {!isTrackingGPS && !currentGPSPosition && (

@@ -419,7 +419,7 @@ export default function RealMapBoundaryMapper({
         coordinates: { lat, lng, zoom }
       },
       {
-        url: `https://tiles.stadiamaps.com/tiles/alidade_satellite/{z}/{x}/{y}{r}.jpg`,
+        url: `https://tiles.stadiamaps.com/tiles/alidade_satellite/${zoom}/${x}/${y}.jpg`,
         name: 'Stadia Satellite',
         maxZoom: 20,
         coordinates: { lat, lng, zoom }
@@ -484,6 +484,75 @@ export default function RealMapBoundaryMapper({
       tryLoadTile(0);
     };
 
+    // CRITICAL FIX: Load proper satellite tile grid instead of single tile
+    const loadSatelliteTileGrid = (tileInfo: any, centerLat: number, centerLng: number, mapElement: HTMLElement) => {
+      const tilesContainer = mapElement.querySelector('#satellite-tiles') as HTMLElement;
+      if (!tilesContainer) return;
+      
+      tilesContainer.innerHTML = ''; // Clear existing tiles
+      
+      const zoom = 18;
+      const tileSize = 256;
+      const containerWidth = 500;
+      const containerHeight = 500;
+      
+      // Calculate center tile coordinates
+      const n = Math.pow(2, zoom);
+      const centerTileX = Math.floor(n * ((centerLng + 180) / 360));
+      const centerTileY = Math.floor(n * (1 - Math.log(Math.tan((centerLat * Math.PI) / 180) + 1 / Math.cos((centerLat * Math.PI) / 180)) / Math.PI) / 2);
+      
+      // Load a 3x3 grid of tiles for better coverage
+      const tileRadius = 1;
+      
+      for (let dx = -tileRadius; dx <= tileRadius; dx++) {
+        for (let dy = -tileRadius; dy <= tileRadius; dy++) {
+          const tileX = centerTileX + dx;
+          const tileY = centerTileY + dy;
+          
+          // Calculate tile position in container
+          const posX = (dx + tileRadius) * tileSize - tileSize/2;
+          const posY = (dy + tileRadius) * tileSize - tileSize/2;
+          
+          // Create tile image
+          const tileImg = document.createElement('img');
+          tileImg.style.cssText = `
+            position: absolute;
+            left: ${posX}px;
+            top: ${posY}px;
+            width: ${tileSize}px;
+            height: ${tileSize}px;
+            z-index: 1;
+          `;
+          
+          // Build tile URL based on provider
+          let tileUrl = '';
+          if (tileInfo.name.includes('Esri')) {
+            tileUrl = `https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/${zoom}/${tileY}/${tileX}`;
+          } else if (tileInfo.name.includes('Google')) {
+            tileUrl = `https://mt1.google.com/vt/lyrs=s&x=${tileX}&y=${tileY}&z=${zoom}`;
+          } else if (tileInfo.name.includes('Stadia')) {
+            tileUrl = `https://tiles.stadiamaps.com/tiles/alidade_satellite/${zoom}/${tileX}/${tileY}.jpg`;
+          } else {
+            tileUrl = `https://tile.openstreetmap.org/${zoom}/${tileX}/${tileY}.png`;
+          }
+          
+          tileImg.src = tileUrl;
+          tileImg.onerror = () => {
+            console.log(`Failed to load tile: ${tileUrl}`);
+            // Fallback to a transparent tile
+            tileImg.style.backgroundColor = '#e5e7eb';
+          };
+          
+          tilesContainer.appendChild(tileImg);
+        }
+      }
+      
+      setStatus(`✅ ${tileInfo.name} satellite imagery loaded successfully`);
+      setMapReady(true);
+      
+      console.log(`✅ SATELLITE TILE GRID LOADED: ${tileInfo.name} with 3x3 tiles at zoom ${zoom}`);
+    };
+
     const createMapWithTile = (tileInfo: any, centerLat: number, centerLng: number) => {
       mapRef.current!.innerHTML = `
         <style>
@@ -493,7 +562,7 @@ export default function RealMapBoundaryMapper({
             border: 2px solid #e5e7eb;
             border-radius: 8px;
             position: relative;
-            background: url('${tileInfo.url}') center/cover no-repeat;
+            background-color: #f3f4f6;
             cursor: crosshair;
             overflow: hidden;
           }
@@ -551,6 +620,9 @@ export default function RealMapBoundaryMapper({
 
       const mapElement = mapRef.current!.querySelector('#real-map') as HTMLElement;
       if (!mapElement) return;
+      
+      // Load proper satellite tile grid instead of single stretched tile
+      loadSatelliteTileGrid(tileInfo, centerLat, centerLng, mapElement);
 
       // Setup AbortController for cleanup
       abortController.current = new AbortController();

@@ -1993,7 +1993,7 @@ export default function RealMapBoundaryMapper({
 
   return (
     <div className="space-y-4">
-      {!isCompleted ? (
+      <>
         <div>
           {/* Instructions */}
           <div className="bg-green-50 border border-green-200 rounded-lg p-4">
@@ -2463,8 +2463,7 @@ export default function RealMapBoundaryMapper({
             </div>
           )}
         </div>
-      ) : (
-        // Tab interface after completion
+        
         <div className="space-y-4">
           {/* Tab Navigation */}
           <div className="bg-white border border-gray-200 rounded-lg p-1">
@@ -2505,7 +2504,6 @@ export default function RealMapBoundaryMapper({
           {/* Tab Content */}
           {renderTabContent()}
         </div>
-      )}
 
       {/* Map Download Feature */}
       {points.length >= 3 && (
@@ -2565,7 +2563,7 @@ export default function RealMapBoundaryMapper({
 
       {/* Map Container */}
       <div ref={mapRef} />
+      </>
     </div>
-    )}
   );
 }

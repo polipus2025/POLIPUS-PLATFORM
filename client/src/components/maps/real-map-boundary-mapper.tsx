@@ -543,7 +543,14 @@ export default function RealMapBoundaryMapper({
             tileImg.style.backgroundColor = '#e5e7eb';
           };
           
-          tilesContainer.appendChild(tileImg);
+          // CRITICAL FIX: Safe tile image append
+          try {
+            if (tilesContainer && tileImg) {
+              tilesContainer.appendChild(tileImg);
+            }
+          } catch (e) {
+            console.log('Failed to add tile image, continuing...');
+          }
         }
       }
       
@@ -816,7 +823,14 @@ export default function RealMapBoundaryMapper({
           
           console.log(`Loading enhanced satellite tile with CORS: ${zoom}/${tileY}/${tileX}`);
           
-          tilesContainer.appendChild(img);
+          // CRITICAL FIX: Safe fallback tile append
+          try {
+            if (tilesContainer && img) {
+              tilesContainer.appendChild(img);
+            }
+          } catch (e) {
+            console.log('Failed to add fallback tile, continuing...');
+          }
         }
       }
     };
@@ -871,7 +885,14 @@ export default function RealMapBoundaryMapper({
         `;
         
         marker.textContent = String.fromCharCode(65 + index); // A, B, C, etc.
-        mapContainer.appendChild(marker);
+        // CRITICAL FIX: Safe marker append
+        try {
+          if (mapContainer && marker) {
+            mapContainer.appendChild(marker);
+          }
+        } catch (e) {
+          console.log('Failed to add persistent marker, continuing...');
+        }
       });
 
       // Draw connecting lines if we have multiple points - ENHANCED POLYGON CREATION
@@ -887,11 +908,32 @@ export default function RealMapBoundaryMapper({
           svg.style.height = '100%';
           svg.style.pointerEvents = 'none';
           svg.style.zIndex = '15';
-          mapContainer.appendChild(svg);
+          // CRITICAL FIX: Safe SVG container append
+          try {
+            if (mapContainer && svg) {
+              mapContainer.appendChild(svg);
+            }
+          } catch (e) {
+            console.log('Failed to add SVG container, continuing...');
+          }
         }
         
-        // Clear existing lines
-        svg.replaceChildren();
+        // CRITICAL FIX: Safe SVG line clearing
+        try {
+          while (svg.firstChild) {
+            if (svg.firstChild.parentNode === svg) {
+              svg.removeChild(svg.firstChild);
+            } else {
+              break;
+            }
+          }
+        } catch (e) {
+          try {
+            svg.innerHTML = '';
+          } catch (innerE) {
+            console.log('SVG line clearing failed, continuing...');
+          }
+        }
 
         // Create path for boundary lines with enhanced visibility
         const pathData = currentPoints.map((point, index) => {
@@ -912,7 +954,14 @@ export default function RealMapBoundaryMapper({
         path.setAttribute('fill', 'none');
         path.setAttribute('stroke-dasharray', '10,5');
         path.setAttribute('style', 'filter: drop-shadow(0 3px 6px rgba(0,0,0,0.4));');
-        svg.appendChild(path);
+        // CRITICAL FIX: Safe SVG path append
+        try {
+          if (svg && path) {
+            svg.appendChild(path);
+          }
+        } catch (e) {
+          console.log('Failed to add boundary path, continuing...');
+        }
 
         // Auto-close polygon if we have 3+ points - AUTOMATIC POLYGON COMPLETION
         if (currentPoints.length >= 3) {
@@ -936,7 +985,14 @@ export default function RealMapBoundaryMapper({
           closingLine.setAttribute('fill', 'none');
           closingLine.setAttribute('stroke-dasharray', '6,3');
           closingLine.setAttribute('style', 'filter: drop-shadow(0 3px 6px rgba(0,0,0,0.4));');
-          svg.appendChild(closingLine);
+          // CRITICAL FIX: Safe closing line append
+          try {
+            if (svg && closingLine) {
+              svg.appendChild(closingLine);
+            }
+          } catch (e) {
+            console.log('Failed to add closing line, continuing...');
+          }
           
           // Add polygon fill for better visualization
           const polygonPath = currentPoints.map((point, index) => {
@@ -954,11 +1010,17 @@ export default function RealMapBoundaryMapper({
           polygonFill.setAttribute('d', polygonPath);
           polygonFill.setAttribute('fill', 'rgba(34, 197, 94, 0.2)');
           polygonFill.setAttribute('stroke', 'none');
-          // Safely add polygon fill behind existing content for proper z-ordering
-          if (svg.firstChild) {
-            svg.insertBefore(polygonFill, svg.firstChild);
-          } else {
-            svg.appendChild(polygonFill);
+          // CRITICAL FIX: Safe polygon fill insertion
+          try {
+            if (svg && polygonFill) {
+              if (svg.firstChild) {
+                svg.insertBefore(polygonFill, svg.firstChild);
+              } else {
+                svg.appendChild(polygonFill);
+              }
+            }
+          } catch (e) {
+            console.log('Failed to add polygon fill, continuing...');
           }
         }
       }
@@ -1102,8 +1164,14 @@ export default function RealMapBoundaryMapper({
       });
     }
     
-    // Ensure defs are always first child for proper z-order
-    svg.appendChild(defs);
+    // CRITICAL FIX: Safe defs append
+    try {
+      if (svg && defs) {
+        svg.appendChild(defs);
+      }
+    } catch (e) {
+      console.log('Failed to add defs, continuing...');
+    }
 
     // GPS MARKERS: All GPS points stay visible on real satellite imagery
     console.log(`Rendering ${points.length} GPS markers on satellite imagery`);
@@ -1151,7 +1219,14 @@ export default function RealMapBoundaryMapper({
       marker.textContent = String.fromCharCode(65 + index);
       marker.title = `Point ${String.fromCharCode(65 + index)} - EUDR Risk: ${pointRisk.level.toUpperCase()}\nCoordinates: ${point.latitude.toFixed(6)}, ${point.longitude.toFixed(6)}`;
       
-      mapElement.appendChild(marker);
+      // CRITICAL FIX: Safe GPS marker append
+      try {
+        if (mapElement && marker) {
+          mapElement.appendChild(marker);
+        }
+      } catch (e) {
+        console.log('Failed to add GPS marker, continuing...');
+      }
       console.log(`✓ Persistent marker ${String.fromCharCode(65 + index)} added and will remain visible`);
     });
 
@@ -1186,10 +1261,24 @@ export default function RealMapBoundaryMapper({
             50% { transform: translate(-50%, -50%) scale(1.2); }
           }
         `;
-        document.head.appendChild(style);
+        // CRITICAL FIX: Safe style head append
+        try {
+          if (document.head && style) {
+            document.head.appendChild(style);
+          }
+        } catch (e) {
+          console.log('Failed to add GPS marker styles, continuing...');
+        }
       }
       
-      mapElement.appendChild(liveGPSMarker);
+      // CRITICAL FIX: Safe live GPS marker append
+      try {
+        if (mapElement && liveGPSMarker) {
+          mapElement.appendChild(liveGPSMarker);
+        }
+      } catch (e) {
+        console.log('Failed to add live GPS marker, continuing...');
+      }
       console.log(`✓ Live GPS marker rendered at ${currentGPSPosition.lat.toFixed(6)}, ${currentGPSPosition.lng.toFixed(6)}`);
     }
 
@@ -1212,7 +1301,14 @@ export default function RealMapBoundaryMapper({
       trailLine.setAttribute('opacity', '0.9');
       trailLine.setAttribute('stroke-linecap', 'round');
       trailLine.setAttribute('style', 'filter: drop-shadow(0 2px 4px rgba(0,0,0,0.3));');
-      svg.appendChild(trailLine);
+      // CRITICAL FIX: Safe trail line append
+      try {
+        if (svg && trailLine) {
+          svg.appendChild(trailLine);
+        }
+      } catch (e) {
+        console.log('Failed to add trail line, continuing...');
+      }
       
       console.log(`✓ Walking trail rendered with ${realTimeTrail.length} positions`);
     }
@@ -1241,7 +1337,15 @@ export default function RealMapBoundaryMapper({
         line.setAttribute('stroke-linecap', 'round');
         line.setAttribute('opacity', '0.9');
         line.setAttribute('style', 'filter: drop-shadow(0 2px 4px rgba(0,0,0,0.3));');
-        svg.appendChild(line);
+        
+        // CRITICAL FIX: Safe boundary line append
+        try {
+          if (svg && line) {
+            svg.appendChild(line);
+          }
+        } catch (e) {
+          console.log('Failed to add boundary line, continuing...');
+        }
         
         console.log(`✓ SW Maps boundary line: ${String.fromCharCode(65 + i)} to ${String.fromCharCode(65 + i + 1)}`);
         
@@ -1268,7 +1372,15 @@ export default function RealMapBoundaryMapper({
         closingLine.setAttribute('stroke-dasharray', '8,4'); // Dashed to show it's the closing line
         closingLine.setAttribute('stroke-linecap', 'round');
         closingLine.setAttribute('opacity', '0.9');
-        svg.appendChild(closingLine);
+        
+        // CRITICAL FIX: Safe polygon closing line append  
+        try {
+          if (svg && closingLine) {
+            svg.appendChild(closingLine);
+          }
+        } catch (e) {
+          console.log('Failed to add polygon closing line, continuing...');
+        }
         
         console.log(`✓ Polygon completed - closing line from ${String.fromCharCode(65 + points.length - 1)} back to A`);
       }
@@ -1309,7 +1421,14 @@ export default function RealMapBoundaryMapper({
       
       console.log(`✓ EUDR Risk polygon created with ${areaRisk.level} risk level and crosshatch pattern overlay`);
       
-      svg.appendChild(polygon);
+      // CRITICAL FIX: Safe polygon append
+      try {
+        if (svg && polygon) {
+          svg.appendChild(polygon);
+        }
+      } catch (e) {
+        console.log('Failed to add polygon, continuing...');
+      }
       
       // Force immediate display of risk overlay
       polygon.style.display = 'block';
@@ -1367,8 +1486,22 @@ export default function RealMapBoundaryMapper({
         riskLabel.textContent = 'LOW RISK';
       }
       
-      mapElement.appendChild(areaLabel);
-      mapElement.appendChild(riskLabel);
+      // CRITICAL FIX: Safe label appends
+      try {
+        if (mapElement && areaLabel) {
+          mapElement.appendChild(areaLabel);
+        }
+      } catch (e) {
+        console.log('Failed to add area label, continuing...');
+      }
+      
+      try {
+        if (mapElement && riskLabel) {
+          mapElement.appendChild(riskLabel);
+        }
+      } catch (e) {
+        console.log('Failed to add risk label, continuing...');
+      }
     }
   };
 

@@ -141,11 +141,11 @@ export default function RealMapBoundaryMapper({
     const x = Math.floor(n * ((lng + 180) / 360));
     const y = Math.floor(n * (1 - Math.log(Math.tan((lat * Math.PI) / 180) + 1 / Math.cos((lat * Math.PI) / 180)) / Math.PI) / 2);
     
-    // Prioritized satellite providers with location-specific optimization
+    // Working satellite providers for real land visualization
     return [
       {
         url: `https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/${zoom}/${y}/${x}`,
-        name: 'Esri World Imagery (Ultra HD)',
+        name: 'Esri World Imagery (Real Satellite)',
         maxZoom: 19,
         coordinates: { lat, lng, zoom }
       },
@@ -156,15 +156,15 @@ export default function RealMapBoundaryMapper({
         coordinates: { lat, lng, zoom }
       },
       {
-        url: `https://api.mapbox.com/v4/mapbox.satellite/${zoom}/${x}/${y}@2x.jpg90`,
-        name: 'Mapbox Satellite HD',
-        maxZoom: 22,
+        url: `https://tiles.stadiamaps.com/tiles/alidade_satellite/{z}/{x}/{y}{r}.jpg`,
+        name: 'Stadia Satellite',
+        maxZoom: 20,
         coordinates: { lat, lng, zoom }
       },
       {
-        url: `https://tiles.maps.eox.at/wmts/1.0.0/s2cloudless-2020_3857/default/g/{z}/{y}/{x}.jpg`,
-        name: 'Sentinel-2 Cloudless',
-        maxZoom: 16,
+        url: `https://tile.openstreetmap.org/${zoom}/${x}/${y}.png`,
+        name: 'OpenStreetMap Fallback',
+        maxZoom: 18,
         coordinates: { lat, lng, zoom }
       }
     ];
@@ -228,7 +228,7 @@ export default function RealMapBoundaryMapper({
             border: 2px solid #e5e7eb;
             border-radius: 8px;
             position: relative;
-            background: url('${tileInfo.url}') center/cover;
+            background: url('${tileInfo.url}') center/cover no-repeat;
             cursor: crosshair;
             overflow: hidden;
           }
@@ -323,7 +323,7 @@ export default function RealMapBoundaryMapper({
       // Load high-resolution satellite tile grid
       loadSatelliteTilesGrid(centerLat, centerLng, tileInfo.coordinates.zoom);
       
-      setStatus(`${tileInfo.name} loaded for ${centerLat.toFixed(4)}, ${centerLng.toFixed(4)} - Click to create persistent boundaries`);
+      setStatus(`${tileInfo.name} loaded for ${centerLat.toFixed(4)}, ${centerLng.toFixed(4)} - Real satellite imagery active`);
       setMapReady(true);
     };
 
@@ -665,59 +665,60 @@ export default function RealMapBoundaryMapper({
       svg.appendChild(defs);
     }
 
-    // PERSISTENT MARKERS: All points stay visible as you walk and map
-    console.log(`Rendering ${points.length} persistent markers on map`);
+    // GPS MARKERS: All GPS points stay visible on real satellite imagery
+    console.log(`Rendering ${points.length} GPS markers on satellite imagery`);
+    
+    // Remove existing markers first to prevent duplicates
+    mapElement.querySelectorAll('.gps-point-marker').forEach(marker => marker.remove());
     
     points.forEach((point, index) => {
-      // Convert lat/lng to pixels with proper coordinate system
-      let x, y;
+      // Get map container dimensions for proper scaling
+      const rect = mapElement.getBoundingClientRect();
       
-      // Check if we're using satellite imagery or fallback
-      if (mapElement.id === 'real-map') {
-        // For satellite imagery - use map center coordinates
-        x = (point.longitude - mapCenter.lng) * 5000 + 200;
-        y = 200 - (point.latitude - mapCenter.lat) * 5000;
-      } else {
-        // For fallback terrain map
-        x = (point.longitude + 9.4295) * 5000 + 200;
-        y = 200 - (point.latitude - 6.4281) * 5000;
-      }
+      // FIXED COORDINATE CONVERSION: GPS coordinates to pixel position
+      let x, y;
+      const latRange = 0.002; // 200m range for precise field mapping
+      const lngRange = 0.002;
+      
+      // Convert GPS to pixels using proper coordinate system
+      x = ((point.longitude - (mapCenter.lng - lngRange / 2)) / lngRange) * rect.width;
+      y = ((mapCenter.lat + latRange / 2 - point.latitude) / latRange) * rect.height;
       
       // Ensure markers stay within map bounds
-      x = Math.max(15, Math.min(385, x));
-      y = Math.max(15, Math.min(385, y));
+      x = Math.max(15, Math.min(rect.width - 15, x));
+      y = Math.max(15, Math.min(rect.height - 15, y));
       
-      console.log(`Creating persistent marker ${String.fromCharCode(65 + index)} at pixel ${x}, ${y}`);
+      console.log(`GPS Point ${String.fromCharCode(65 + index)}: ${point.latitude.toFixed(6)}, ${point.longitude.toFixed(6)} → pixel ${x.toFixed(0)}, ${y.toFixed(0)}`);
       
       // Calculate EUDR risk for each point
       const pointRisk = calculatePointRisk(point.latitude, point.longitude);
       
-      // Create highly visible persistent marker that stays on map (like in your image)
+      // Create GPS marker that appears on satellite imagery
       const marker = document.createElement('div');
-      marker.className = `map-marker persistent-marker marker-${index}`;
-      marker.id = `marker-${index}`;
+      marker.className = `map-marker gps-point-marker marker-${index} risk-${pointRisk.level}`;
+      marker.id = `gps-marker-${index}`;
       marker.style.cssText = `
         position: absolute;
         left: ${x}px;
         top: ${y}px;
-        width: 32px;
-        height: 32px;
+        width: 28px;
+        height: 28px;
         border-radius: 50%;
         display: flex;
         align-items: center;
         justify-content: center;
-        font-size: 16px;
+        font-size: 14px;
         font-weight: bold;
         color: white;
-        text-shadow: 2px 2px 4px rgba(0,0,0,0.9);
+        text-shadow: 1px 1px 3px rgba(0,0,0,0.9);
         border: 3px solid white;
-        box-shadow: 0 6px 15px rgba(0,0,0,0.6);
-        z-index: 25;
+        box-shadow: 0 4px 12px rgba(0,0,0,0.7);
+        z-index: 30;
         transform: translate(-50%, -50%);
         cursor: pointer;
-        transition: all 0.2s ease;
-        background-color: ${index === 0 ? '#22c55e' : index === points.length - 1 && points.length >= 3 ? '#ef4444' : '#3b82f6'};
-        ${index === points.length - 1 && points.length >= 3 ? 'animation: pulse 2s infinite;' : ''}
+        transition: all 0.3s ease;
+        background-color: ${pointRisk.level === 'high' ? '#dc2626' : pointRisk.level === 'standard' ? '#f59e0b' : '#10b981'};
+        ${pointRisk.level === 'high' ? 'animation: pulse 2s infinite;' : ''}
       `;
       
       // Add alphabetical label (A, B, C, D, etc.)
@@ -984,10 +985,12 @@ export default function RealMapBoundaryMapper({
     const updatedPoints = [...points, newPoint];
     setPoints(updatedPoints);
     
+    console.log(`✅ GPS Point ${String.fromCharCode(65 + updatedPoints.length - 1)} added to map: ${newPoint.latitude.toFixed(6)}, ${newPoint.longitude.toFixed(6)} - Accuracy: ${enhancedGPS.accuracy.toFixed(1)}m`);
+    
     const modeText = rtkMode === 'full-rtk' ? 'RTK Enhanced' : 
                      rtkMode === 'enhanced-gnss' ? 'Enhanced GNSS' : 'Standard GPS';
     
-    setStatus(`Point ${updatedPoints.length} added - ${modeText}: ${enhancedGPS.accuracy.toFixed(1)}m - ${updatedPoints.length >= 6 ? 'EUDR Compliant Polygon!' : `Need ${6 - updatedPoints.length} more points for EUDR compliance`}`);
+    setStatus(`Point ${updatedPoints.length} added - ${modeText}: ${enhancedGPS.accuracy.toFixed(1)}m - ${updatedPoints.length >= 6 ? 'EUDR Compliant Polygon!' : `Need ${6 - updatedPoints.length} more points for EUDR compliance`} - Check map for markers`);
     
     // Trigger comprehensive analysis if we have minimum EUDR points
     if (updatedPoints.length >= 6) {

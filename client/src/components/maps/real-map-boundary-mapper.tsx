@@ -2463,6 +2463,7 @@ export default function RealMapBoundaryMapper({
             </div>
           )}
         </div>
+      </div>
       ) : (
         // Tab interface after completion
         <div className="space-y-4">

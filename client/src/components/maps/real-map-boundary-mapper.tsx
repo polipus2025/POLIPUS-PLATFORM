@@ -2016,9 +2016,9 @@ export default function RealMapBoundaryMapper({
                 </div>
               </div>
               <div className="grid grid-cols-2 gap-3 text-sm">
-                <div><span className="font-medium">Fertilizer:</span> {agriculturalData.fertilizer.recommended}</div>
-                <div><span className="font-medium">Application:</span> {agriculturalData.fertilizer.application}</div>
-                <div><span className="font-medium">Frequency:</span> {agriculturalData.fertilizer.frequency}</div>
+                <div><span className="font-medium">Climate Zone:</span> {agriculturalData.climateZone || 'Tropical'}</div>
+                <div><span className="font-medium">Water Retention:</span> {agriculturalData.waterRetention}</div>
+                <div><span className="font-medium">Risk Factors:</span> {agriculturalData.riskFactors?.join(', ') || 'Low risk'}</div>
                 <div><span className="font-medium">Drying Season:</span> {agriculturalData.seasonality.dryingSeason}</div>
               </div>
             </div>

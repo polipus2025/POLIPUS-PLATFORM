@@ -56,7 +56,7 @@ if (MAINTENANCE_MODE) {
       if (process.env.NODE_ENV !== 'production') {
         const isStaticAsset = req.url.match(/\.(js|css|png|jpg|jpeg|gif|ico|svg|woff|woff2|ttf|eot)$/);
         const isViteHMR = req.url.includes('/@vite/') || req.url.includes('/@fs/');
-        return isStaticAsset || isViteHMR;
+        return Boolean(isStaticAsset) || isViteHMR;
       }
       return false;
     }

@@ -2514,7 +2514,7 @@ export default function RealMapBoundaryMapper({
 
   // Add state for completed view and tabs  
   const [isCompleted, setIsCompleted] = useState(false);
-  const [activeTab, setActiveTab] = useState('interactive-map');
+  const [activeTab, setActiveTab] = useState('summary');
   const [showTabContent, setShowTabContent] = useState(false);
 
   const handleComplete = async () => {
@@ -2676,7 +2676,90 @@ export default function RealMapBoundaryMapper({
 
   // Tab interface content after completion - UNIFIED MAP SYSTEM
   const renderTabContent = () => {
+    const areaHectares = calculateArea(points);
+    const areaAcres = areaHectares * 2.47105; // Convert hectares to acres
+    const areaSqMeters = areaHectares * 10000; // Convert hectares to square meters
+    
     switch (activeTab) {
+      case 'summary':
+        return (
+          <div className="space-y-4">
+            {/* Land Area Summary */}
+            <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
+              <h3 className="font-medium text-blue-900 mb-3 flex items-center gap-2">
+                📐 Land Area Calculated
+              </h3>
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                <div className="text-center p-3 bg-white rounded border">
+                  <div className="text-2xl font-bold text-blue-600">{areaHectares.toFixed(2)}</div>
+                  <div className="text-sm text-gray-600">Hectares</div>
+                </div>
+                <div className="text-center p-3 bg-white rounded border">
+                  <div className="text-2xl font-bold text-green-600">{areaAcres.toFixed(2)}</div>
+                  <div className="text-sm text-gray-600">Acres</div>
+                </div>
+                <div className="text-center p-3 bg-white rounded border">
+                  <div className="text-2xl font-bold text-orange-600">{areaSqMeters.toFixed(0)}</div>
+                  <div className="text-sm text-gray-600">Square Meters</div>
+                </div>
+              </div>
+            </div>
+
+            {/* GPS Coordinates Summary */}
+            <div className="bg-green-50 border border-green-200 rounded-lg p-4">
+              <h3 className="font-medium text-green-900 mb-3 flex items-center gap-2">
+                📍 All GPS Coordinates Mapped ({points.length} points)
+              </h3>
+              <div className="max-h-60 overflow-y-auto">
+                <div className="grid gap-2">
+                  {points.map((point, index) => (
+                    <div key={index} className="flex items-center justify-between p-2 bg-white rounded border text-sm">
+                      <span className="font-medium text-gray-700">Point {String.fromCharCode(65 + index)}:</span>
+                      <span className="text-gray-600">
+                        Lat: {point.latitude.toFixed(6)}, Lng: {point.longitude.toFixed(6)}
+                      </span>
+                      <span className="text-xs text-gray-500">
+                        {point.timestamp ? new Date(point.timestamp).toLocaleTimeString() : 'No time'}
+                      </span>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            </div>
+
+            {/* Mapping Summary */}
+            <div className="bg-gray-50 border border-gray-200 rounded-lg p-4">
+              <h3 className="font-medium text-gray-900 mb-3 flex items-center gap-2">
+                ✅ Mapping Summary
+              </h3>
+              <div className="grid grid-cols-2 gap-3 text-sm">
+                <div><span className="font-medium">Total Points:</span> {points.length}</div>
+                <div><span className="font-medium">EUDR Compliance:</span> {points.length >= 6 ? '✅ Compliant' : '❌ Need 6+'}</div>
+                <div><span className="font-medium">Mapping Method:</span> {rtkMode === 'full-rtk' ? 'RTK Enhanced GPS' : 'Enhanced GNSS'}</div>
+                <div><span className="font-medium">Date Mapped:</span> {new Date().toLocaleDateString()}</div>
+              </div>
+            </div>
+
+            {/* Navigation to Other Tabs */}
+            <div className="grid grid-cols-2 gap-4">
+              <Button 
+                onClick={() => setActiveTab('analysis')}
+                variant="outline"
+                className="flex items-center gap-2"
+              >
+                📊 View Agricultural Analysis
+              </Button>
+              <Button 
+                onClick={() => setActiveTab('compliance')}
+                variant="outline"
+                className="flex items-center gap-2"
+              >
+                🇪🇺 EUDR Compliance Report
+              </Button>
+            </div>
+          </div>
+        );
+        
       case 'interactive-map':
         return (
           <div className="space-y-4">
@@ -3303,6 +3386,16 @@ export default function RealMapBoundaryMapper({
       {/* Tab Navigation */}
         <div className="bg-white border border-gray-200 rounded-lg p-1">
           <div className="flex space-x-1">
+            <button
+              onClick={() => setActiveTab('summary')}
+              className={`flex-1 px-4 py-2 rounded-md text-sm font-medium transition-colors ${
+                activeTab === 'summary'
+                  ? 'bg-blue-100 text-blue-700'
+                  : 'text-gray-500 hover:text-gray-700'
+              }`}
+            >
+              📐 Summary
+            </button>
             <button
               onClick={() => setActiveTab('interactive-map')}
               className={`flex-1 px-4 py-2 rounded-md text-sm font-medium transition-colors ${

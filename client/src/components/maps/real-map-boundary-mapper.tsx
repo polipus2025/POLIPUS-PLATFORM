@@ -3188,7 +3188,7 @@ export default function RealMapBoundaryMapper({
                 </div>
                 <div>
                   <span className="font-medium">Mapping Accuracy:</span>
-                  <span className="ml-2">{rtkMode === 'full-rtk' ? '±1.2m (RTK)' : '±4.5m (Enhanced)'}</span>
+                  <span className="ml-2">{rtkMode === 'full-rtk' ? `±1.2m (RTK Enhanced from ${(currentGPSPosition?.accuracy || 0).toFixed(1)}m)` : `±4.5m (Enhanced from ${(currentGPSPosition?.accuracy || 0).toFixed(1)}m)`}</span>
                 </div>
               </div>
               <div className="text-xs text-gray-600 mb-2">

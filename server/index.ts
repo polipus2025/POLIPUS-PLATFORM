@@ -1,6 +1,7 @@
 import express from "express";
 import { registerRoutes } from "./routes";
 import { registerEudrRoutes } from "./eudr-compliance";
+import { randomBytes } from "crypto";
 import { log } from "./vite";
 
 const app = express();
@@ -30,7 +31,11 @@ if (MAINTENANCE_MODE) {
   // SECURITY ENHANCEMENTS - Added comprehensive protection
   const cookieParser = (await import('cookie-parser')).default;
   const helmet = (await import('helmet')).default;
+  const cors = (await import('cors')).default;
   const rateLimit = (await import('express-rate-limit')).default;
+  
+  // Configure trust proxy for rate limiting security
+  app.set('trust proxy', 1); // Trust first proxy for accurate IP detection
   
   // Security headers
   app.use(helmet({
@@ -38,26 +43,30 @@ if (MAINTENANCE_MODE) {
     crossOriginEmbedderPolicy: false // Allow cross-origin requests
   }));
   
-  // Rate limiting for security
+  // Rate limiting for security (now with proper proxy configuration)
   app.use(rateLimit({
     windowMs: 15 * 60 * 1000, // 15 minutes
     max: 100, // Limit each IP to 100 requests per windowMs
     message: 'Too many requests from this IP, please try again later.',
     standardHeaders: true,
-    legacyHeaders: false
+    legacyHeaders: false,
+    trustProxy: true // Use trusted proxy for IP detection
   }));
   
   // Cookie parsing for secure token storage
   app.use(cookieParser());
 
-  // Secure CORS headers
-  app.use((req, res, next) => {
-    res.header('Access-Control-Allow-Origin', '*');
-    res.header('Access-Control-Allow-Methods', 'GET,PUT,POST,DELETE,OPTIONS,PATCH');
-    res.header('Access-Control-Allow-Headers', 'Origin, X-Requested-With, Content-Type, Accept, Authorization');
-    res.header('Access-Control-Allow-Credentials', 'true');
-    next();
-  });
+  // Secure CORS configuration
+  const corsOptions = {
+    origin: process.env.NODE_ENV === 'production' 
+      ? process.env.ALLOWED_ORIGINS?.split(',') || false
+      : ['http://localhost:5000', 'http://localhost:3000', 'http://127.0.0.1:5000'],
+    credentials: true,
+    methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS', 'PATCH'],
+    allowedHeaders: ['Origin', 'X-Requested-With', 'Content-Type', 'Accept', 'Authorization', 'X-CSRF-Token'],
+    optionsSuccessStatus: 200
+  };
+  app.use(cors(corsOptions));
 
   // Optimized body parsing middleware
   app.use(express.json({ limit: '5mb' }));
@@ -68,6 +77,37 @@ if (MAINTENANCE_MODE) {
       // Minimal GPS test route for performance
       app.get('/gps-test-direct', (req, res) => {
         res.send(`<!DOCTYPE html><html><head><title>GPS Test</title></head><body><h1>GPS Test</h1><button onclick="navigator.geolocation?.getCurrentPosition(p=>alert('GPS: '+p.coords.latitude+','+p.coords.longitude))">Test GPS</button></body></html>`);
+      });
+
+      // CSRF protection setup  
+      const { doubleCsrf } = await import('csrf-csrf');
+      const { 
+        invalidCsrfTokenError,
+        generateToken,
+        validateRequest,
+        doubleCsrfProtection,
+      } = doubleCsrf({
+        getSecret: () => process.env.CSRF_SECRET || randomBytes(32).toString('hex'),
+        cookieName: 'x-csrf-token',
+        cookieOptions: {
+          httpOnly: true,
+          sameSite: 'strict',
+          secure: process.env.NODE_ENV === 'production',
+          maxAge: 24 * 60 * 60 * 1000 // 24 hours
+        },
+        size: 64,
+        ignoredMethods: ['GET', 'HEAD', 'OPTIONS'],
+        getTokenFromRequest: (req) => req.headers['x-csrf-token'] as string,
+      });
+
+      // Apply CSRF protection to all routes except GET/HEAD/OPTIONS
+      app.use(doubleCsrfProtection);
+
+      // CSRF token endpoint for frontend to get token
+      app.get('/api/csrf-token', (req, res) => {
+        res.json({
+          token: generateToken(req, res)
+        });
       });
 
       // SECURE AUTHENTICATION ENDPOINTS

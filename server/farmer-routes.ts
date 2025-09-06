@@ -5,6 +5,14 @@ import { storage } from "./storage";
 import { buyerAlertService } from "./buyer-alert-system";
 import { notificationService } from "./notification-service";
 import { generateAccessToken, generateRefreshToken, setSecureTokenCookies } from "./auth-middleware";
+import { 
+  loginSchema, 
+  farmerCreationSchema, 
+  harvestScheduleSchema, 
+  marketplaceListingSchema,
+  transactionProposalSchema,
+  validateRequest 
+} from "./validation-schemas";
 
 // SECURE CREDENTIAL GENERATION - For new users only (existing test accounts preserved)
 function generateFarmerCredentialId(): string {
@@ -30,7 +38,16 @@ export function registerFarmerRoutes(app: Express) {
   // Create farmer data only (no credentials yet)
   app.post("/api/farmers", async (req, res) => {
     try {
-      const farmerData = req.body;
+      // SECURITY: Validate input data to prevent injection attacks
+      const validation = validateRequest(farmerCreationSchema, req.body);
+      if (!validation.success) {
+        return res.status(400).json({
+          error: 'Invalid farmer data',
+          details: validation.errors
+        });
+      }
+      
+      const farmerData = validation.data;
       
       // Generate unique farmer ID using secure random generation
       const farmerId = `FARMER-${Date.now()}-${randomBytes(2).toString('hex').toUpperCase()}`;
@@ -120,7 +137,16 @@ export function registerFarmerRoutes(app: Express) {
   // Farmer authentication (with test account fallback)
   app.post("/api/farmers/login", async (req, res) => {
     try {
-      const { credentialId, password } = req.body;
+      // SECURITY: Validate login credentials to prevent injection attacks
+      const validation = validateRequest(loginSchema, req.body);
+      if (!validation.success) {
+        return res.status(400).json({
+          error: 'Invalid login data',
+          details: validation.errors
+        });
+      }
+      
+      const { credentialId, password } = validation.data;
       // Login attempt logged without exposing credential details
 
       // EXISTING TEST ACCOUNTS PRESERVED - Secure JWT tokens for your testing

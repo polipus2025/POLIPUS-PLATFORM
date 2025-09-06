@@ -2,10 +2,22 @@ import { Request, Response, NextFunction } from 'express';
 import jwt from 'jsonwebtoken';
 import { randomBytes } from 'crypto';
 
-// Secure JWT configuration
+// Secure JWT configuration with production validation
+if (process.env.NODE_ENV === 'production' && !process.env.JWT_SECRET) {
+  console.error('❌ FATAL: JWT_SECRET environment variable is required in production');
+  process.exit(1);
+}
+
 const JWT_SECRET = process.env.JWT_SECRET || randomBytes(64).toString('hex');
 const JWT_EXPIRES_IN = '2h'; // Short expiry for security
 const REFRESH_TOKEN_EXPIRES = '7d'; // Longer expiry for refresh tokens
+
+// Log JWT configuration status (without exposing the secret)
+if (process.env.NODE_ENV === 'production') {
+  console.log('🔐 Production JWT: Using environment JWT_SECRET');
+} else {
+  console.log('🔧 Development JWT: Using generated secret');
+}
 
 export interface AuthRequest extends Request {
   user?: {
@@ -89,8 +101,11 @@ export function clearAuthCookies(res: Response) {
   res.clearCookie('refreshToken');
 }
 
-// Token refresh endpoint
+// Token refresh endpoint with security headers
 export function refreshTokens(req: Request, res: Response) {
+  // Set security headers
+  res.setHeader('Cache-Control', 'no-store, no-cache, must-revalidate, private');
+  res.setHeader('Pragma', 'no-cache');
   const refreshToken = req.cookies.refreshToken;
   
   if (!refreshToken) {

@@ -58,9 +58,17 @@ if (MAINTENANCE_MODE) {
 
   // Secure CORS configuration
   const corsOptions = {
-    origin: process.env.NODE_ENV === 'production' 
-      ? process.env.ALLOWED_ORIGINS?.split(',') || false
-      : ['http://localhost:5000', 'http://localhost:3000', 'http://127.0.0.1:5000'],
+    origin: (origin, callback) => {
+      if (process.env.NODE_ENV === 'production') {
+        const allowedOrigins = process.env.ALLOWED_ORIGINS?.split(',') || [];
+        callback(null, allowedOrigins.includes(origin));
+      } else {
+        // Development: Allow localhost and Replit URLs
+        const isLocalhost = ['http://localhost:5000', 'http://localhost:3000', 'http://127.0.0.1:5000'].includes(origin);
+        const isReplit = origin && origin.includes('.replit.dev');
+        callback(null, isLocalhost || isReplit);
+      }
+    },
     credentials: true,
     methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS', 'PATCH'],
     allowedHeaders: ['Origin', 'X-Requested-With', 'Content-Type', 'Accept', 'Authorization', 'X-CSRF-Token'],
@@ -87,7 +95,15 @@ if (MAINTENANCE_MODE) {
             ? (process.env.ALLOWED_ORIGINS?.split(',') || [])
             : ['http://localhost:5000', 'http://127.0.0.1:5000'];
           
-          if (origin && !allowedOrigins.some(allowed => origin.startsWith(allowed))) {
+          // In development, allow Replit dev URLs (.replit.dev domains)
+          const isReplit = origin && origin.includes('.replit.dev');
+          const isAllowed = origin && (
+            allowedOrigins.some(allowed => origin.startsWith(allowed)) || 
+            (process.env.NODE_ENV !== 'production' && isReplit)
+          );
+          
+          if (!isAllowed) {
+            console.log(`🔒 CSRF blocked origin: ${origin} (NODE_ENV: ${process.env.NODE_ENV})`);
             return res.status(403).json({ error: 'CSRF protection: Invalid origin' });
           }
         }

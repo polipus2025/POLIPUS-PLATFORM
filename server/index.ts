@@ -79,35 +79,19 @@ if (MAINTENANCE_MODE) {
         res.send(`<!DOCTYPE html><html><head><title>GPS Test</title></head><body><h1>GPS Test</h1><button onclick="navigator.geolocation?.getCurrentPosition(p=>alert('GPS: '+p.coords.latitude+','+p.coords.longitude))">Test GPS</button></body></html>`);
       });
 
-      // CSRF protection setup  
-      const { doubleCsrf } = await import('csrf-csrf');
-      const { 
-        invalidCsrfTokenError,
-        generateToken,
-        validateRequest,
-        doubleCsrfProtection,
-      } = doubleCsrf({
-        getSecret: () => process.env.CSRF_SECRET || randomBytes(32).toString('hex'),
-        cookieName: 'x-csrf-token',
-        cookieOptions: {
-          httpOnly: true,
-          sameSite: 'strict',
-          secure: process.env.NODE_ENV === 'production',
-          maxAge: 24 * 60 * 60 * 1000 // 24 hours
-        },
-        size: 64,
-        ignoredMethods: ['GET', 'HEAD', 'OPTIONS'],
-        getTokenFromRequest: (req) => req.headers['x-csrf-token'] as string,
-      });
-
-      // Apply CSRF protection to all routes except GET/HEAD/OPTIONS
-      app.use(doubleCsrfProtection);
-
-      // CSRF token endpoint for frontend to get token
-      app.get('/api/csrf-token', (req, res) => {
-        res.json({
-          token: generateToken(req, res)
-        });
+      // Origin-based CSRF protection for now (simpler and more reliable)
+      app.use((req, res, next) => {
+        if (['POST', 'PUT', 'DELETE', 'PATCH'].includes(req.method)) {
+          const origin = req.get('Origin') || req.get('Referer');
+          const allowedOrigins = process.env.NODE_ENV === 'production' 
+            ? (process.env.ALLOWED_ORIGINS?.split(',') || [])
+            : ['http://localhost:5000', 'http://127.0.0.1:5000'];
+          
+          if (origin && !allowedOrigins.some(allowed => origin.startsWith(allowed))) {
+            return res.status(403).json({ error: 'CSRF protection: Invalid origin' });
+          }
+        }
+        next();
       });
 
       // SECURE AUTHENTICATION ENDPOINTS

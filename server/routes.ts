@@ -632,6 +632,154 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // ========================================
 
   // Analyze land plot using satellite data for automatic detection
+  // ===== MAP ANALYSIS AND EUDR COMPLIANCE API ENDPOINTS =====
+  
+  // Land Analysis API - provides detailed land analysis data
+  app.get("/api/land-analysis", async (req, res) => {
+    try {
+      const { lat, lng, county, plotSize } = req.query;
+      
+      if (!lat || !lng) {
+        return res.status(400).json({ error: "Latitude and longitude are required" });
+      }
+      
+      const latitude = parseFloat(lat as string);
+      const longitude = parseFloat(lng as string);
+      const plotArea = parseFloat(plotSize as string) || 100;
+      const farmerCounty = county as string || "Unknown County";
+      
+      const analysisData = {
+        location: {
+          latitude,
+          longitude,
+          county: farmerCounty
+        },
+        forestAnalysis: analyzeLiberiaNimbaForestCover(latitude, longitude),
+        deforestationRisk: calculateLiberiaNimbaDeforestationRisk(latitude, longitude, farmerCounty),
+        plotSize: plotArea,
+        timestamp: new Date().toISOString(),
+        analysisId: `ANALYSIS-${Date.now()}`
+      };
+      
+      res.json(analysisData);
+    } catch (error) {
+      console.error("Land analysis error:", error);
+      res.status(500).json({ error: "Failed to generate land analysis" });
+    }
+  });
+  
+  // Map Analysis API - provides interactive map analysis
+  app.get("/api/map/analysis", async (req, res) => {
+    try {
+      const { coordinates, plotId } = req.query;
+      
+      if (!coordinates) {
+        return res.status(400).json({ error: "GPS coordinates are required" });
+      }
+      
+      const coordsArray = (coordinates as string).split(',').map(coord => parseFloat(coord.trim()));
+      if (coordsArray.length < 4) {
+        return res.status(400).json({ error: "At least 2 coordinate pairs (4 values) are required" });
+      }
+      
+      // Calculate center point
+      const lats = coordsArray.filter((_, i) => i % 2 === 0);
+      const lngs = coordsArray.filter((_, i) => i % 2 === 1);
+      const centerLat = lats.reduce((sum, lat) => sum + lat, 0) / lats.length;
+      const centerLng = lngs.reduce((sum, lng) => sum + lng, 0) / lngs.length;
+      
+      // Calculate area using shoelace formula
+      function calculatePolygonArea(latitudes: number[], longitudes: number[]): number {
+        let area = 0;
+        const n = latitudes.length;
+        for (let i = 0; i < n; i++) {
+          const j = (i + 1) % n;
+          area += latitudes[i] * longitudes[j];
+          area -= latitudes[j] * longitudes[i];
+        }
+        return Math.abs(area) / 2 * 111320 * 111320; // Convert to square meters
+      }
+      
+      const mapAnalysis = {
+        plotId: plotId || `PLOT-${Date.now()}`,
+        center: { lat: centerLat, lng: centerLng },
+        coordinates: coordsArray,
+        area: calculatePolygonArea(lats, lngs),
+        satelliteImagery: {
+          provider: "Sentinel-2",
+          resolution: "10m",
+          lastUpdated: new Date().toISOString()
+        },
+        analysis: analyzeLiberiaNimbaForestCover(centerLat, centerLng),
+        timestamp: new Date().toISOString()
+      };
+      
+      res.json(mapAnalysis);
+    } catch (error) {
+      console.error("Map analysis error:", error);
+      res.status(500).json({ error: "Failed to generate map analysis" });
+    }
+  });
+  
+  // EUDR Compliance API - provides compliance assessment
+  app.get("/api/eudr/compliance", async (req, res) => {
+    try {
+      const { lat, lng, county, plotSize, farmerId } = req.query;
+      
+      if (!lat || !lng) {
+        return res.status(400).json({ error: "Latitude and longitude are required" });
+      }
+      
+      const latitude = parseFloat(lat as string);
+      const longitude = parseFloat(lng as string);
+      const plotArea = parseFloat(plotSize as string) || 100;
+      const farmerCounty = county as string || "Unknown County";
+      
+      const complianceScore = generateEudrComplianceScore(latitude, longitude, plotArea, farmerCounty);
+      const deforestationRisk = calculateLiberiaNimbaDeforestationRisk(latitude, longitude, farmerCounty);
+      
+      function generateComplianceRecommendations(score: number, risk: number): string[] {
+        const recommendations = [];
+        if (score < 85) {
+          recommendations.push("Complete GPS boundary verification");
+          recommendations.push("Provide additional documentation");
+        }
+        if (risk > 8) {
+          recommendations.push("Implement forest protection measures");
+          recommendations.push("Obtain satellite monitoring reports");
+        }
+        if (score < 70) {
+          recommendations.push("Conduct full compliance audit");
+          recommendations.push("Engage with local authorities");
+        }
+        return recommendations;
+      }
+      
+      const complianceData = {
+        farmerId: farmerId || null,
+        location: {
+          latitude,
+          longitude,
+          county: farmerCounty
+        },
+        complianceScore,
+        riskLevel: deforestationRisk < 5 ? 'low' : deforestationRisk < 10 ? 'medium' : 'high',
+        deforestationRisk: deforestationRisk,
+        forestAnalysis: analyzeLiberiaNimbaForestCover(latitude, longitude),
+        eudrStatus: complianceScore >= 85 ? 'compliant' : complianceScore >= 70 ? 'conditional' : 'non_compliant',
+        assessmentDate: new Date().toISOString(),
+        validUntil: new Date(Date.now() + 365 * 24 * 60 * 60 * 1000).toISOString(), // 1 year
+        documentationRequired: complianceScore < 85,
+        recommendations: generateComplianceRecommendations(complianceScore, deforestationRisk)
+      };
+      
+      res.json(complianceData);
+    } catch (error) {
+      console.error("EUDR compliance error:", error);
+      res.status(500).json({ error: "Failed to generate EUDR compliance assessment" });
+    }
+  });
+
   app.post("/api/satellite/analyze-plot", async (req, res) => {
     try {
       const { boundaries } = req.body;

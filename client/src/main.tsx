@@ -6,12 +6,19 @@ import "./index.css";
 // Performance monitoring
 const startTime = performance.now();
 
-// Register service worker for aggressive caching
+// Register service worker only in production - disabled in development for Replit preview
 if ('serviceWorker' in navigator && import.meta.env.MODE === 'production') {
   window.addEventListener('load', () => {
     navigator.serviceWorker.register('/sw.js')
       .then(() => {})
       .catch(() => {});
+  });
+} else if ('serviceWorker' in navigator && import.meta.env.DEV) {
+  // Clear any existing service worker in development for clean Replit preview
+  navigator.serviceWorker.getRegistrations().then(function(registrations) {
+    for(let registration of registrations) {
+      registration.unregister();
+    }
   });
 }
 

@@ -1741,14 +1741,30 @@ export default function RealMapBoundaryMapper({
   const calculateArea = (points: BoundaryPoint[]): number => {
     if (points.length < 3) return 0;
     
+    // Convert GPS coordinates to accurate area calculation using geodesic methods
+    // This accounts for Earth's curvature and provides precise measurements
+    
     let area = 0;
+    const earthRadius = 6371000; // Earth radius in meters
+    
+    // Use spherical excess formula for accurate GPS coordinate area calculation
     for (let i = 0; i < points.length; i++) {
       const j = (i + 1) % points.length;
-      area += points[i].latitude * points[j].longitude;
-      area -= points[j].latitude * points[i].longitude;
+      
+      // Convert degrees to radians
+      const lat1 = points[i].latitude * Math.PI / 180;
+      const lng1 = points[i].longitude * Math.PI / 180;
+      const lat2 = points[j].latitude * Math.PI / 180;
+      const lng2 = points[j].longitude * Math.PI / 180;
+      
+      // Calculate using geodesic area formula (accounts for Earth's curvature)
+      const deltaLng = lng2 - lng1;
+      area += deltaLng * (2 + Math.sin(lat1) + Math.sin(lat2));
     }
-    area = Math.abs(area) / 2;
-    return area * 12100; // Convert to hectares
+    
+    // Convert to square meters, then to hectares
+    area = Math.abs(area) * earthRadius * earthRadius / 2;
+    return area / 10000; // Convert square meters to hectares (1 hectare = 10,000 m²)
   };
 
   // Comprehensive Agricultural Intelligence Analysis

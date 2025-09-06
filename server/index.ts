@@ -50,7 +50,6 @@ if (MAINTENANCE_MODE) {
     message: 'Too many requests from this IP, please try again later.',
     standardHeaders: true,
     legacyHeaders: false,
-    trustProxy: true, // Use trusted proxy for IP detection
     // Skip rate limiting for static assets in development
     skip: (req) => {
       if (process.env.NODE_ENV !== 'production') {

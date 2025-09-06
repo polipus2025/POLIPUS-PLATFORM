@@ -1,22 +1,26 @@
 import type { Express } from "express";
 import bcrypt from "bcryptjs";
+import { randomUUID, randomBytes } from "crypto";
 import { storage } from "./storage";
 import { buyerAlertService } from "./buyer-alert-system";
 import { notificationService } from "./notification-service";
 
-// Farmer credential generation utility
+// SECURE CREDENTIAL GENERATION - For new users only (existing test accounts preserved)
 function generateFarmerCredentialId(): string {
   const prefix = "FRM";
-  const timestamp = Date.now().toString().slice(-6);
-  const random = Math.floor(Math.random() * 100).toString().padStart(2, '0');
-  return `${prefix}${timestamp}${random}`;
+  // Use cryptographically secure random bytes for new credentials
+  const secureRandom = randomBytes(4).toString('hex').toUpperCase();
+  const timestamp = Date.now().toString().slice(-4); // Shorter for readability
+  return `${prefix}${timestamp}${secureRandom}`;
 }
 
 function generateTemporaryPassword(): string {
+  // Cryptographically secure password generation for new users
   const chars = "ABCDEFGHJKLMNPQRSTUVWXYZ23456789";
+  const randomValues = randomBytes(8);
   let password = "";
   for (let i = 0; i < 8; i++) {
-    password += chars.charAt(Math.floor(Math.random() * chars.length));
+    password += chars.charAt(randomValues[i] % chars.length);
   }
   return password;
 }
@@ -27,8 +31,8 @@ export function registerFarmerRoutes(app: Express) {
     try {
       const farmerData = req.body;
       
-      // Generate unique farmer ID
-      const farmerId = `FARMER-${Date.now()}-${Math.floor(Math.random() * 1000)}`;
+      // Generate unique farmer ID using secure random generation
+      const farmerId = `FARMER-${Date.now()}-${randomBytes(2).toString('hex').toUpperCase()}`;
       
       // Create farmer record
       const farmer = await storage.createFarmer({
@@ -56,19 +60,14 @@ export function registerFarmerRoutes(app: Express) {
   app.post("/api/farmers/:farmerId/complete-onboarding", async (req, res) => {
     try {
       const farmerIdParam = req.params.farmerId;
-      console.log(`🔍 Completing onboarding for farmer parameter: ${farmerIdParam}`);
-      
       // Handle both numeric ID and farmerId string formats
       const farmer = isNaN(parseInt(farmerIdParam)) 
         ? await storage.getFarmerByFarmerId(farmerIdParam)  // Use farmerId string like "FARMER-1755883520291-288"
         : await storage.getFarmer(parseInt(farmerIdParam));  // Use numeric ID
       
       if (!farmer) {
-        console.log(`❌ Farmer not found for parameter: ${farmerIdParam}`);
         return res.status(404).json({ error: "Farmer not found" });
       }
-      
-      console.log(`✅ Found farmer: ${farmer.firstName} ${farmer.lastName} (DB ID: ${farmer.id}, Farmer ID: ${farmer.farmerId})`);
 
       // Generate login credentials
       const credentialId = generateFarmerCredentialId();
@@ -96,8 +95,8 @@ export function registerFarmerRoutes(app: Express) {
         temporaryPassword
       );
 
+      // Log notification status without exposing sensitive data
       console.log(`📧 Email sent: ${notifications.emailSent ? '✅' : '❌'} | 📱 SMS sent: ${notifications.smsSent ? '✅' : '❌'} for ${farmerFullName}`);
-      console.log(`🎯 CREDENTIAL GENERATED: ${credentialId} for farmer ${farmer.farmerId} (${farmerFullName})`);
 
       res.json({
         farmer,
@@ -121,7 +120,7 @@ export function registerFarmerRoutes(app: Express) {
   app.post("/api/farmers/login", async (req, res) => {
     try {
       const { credentialId, password } = req.body;
-      console.log(`🔐 Login attempt for credential ID: ${credentialId}`);
+      // Login attempt logged without exposing credential details
 
       // Test account fallback (Paolo Jr account)
       if (credentialId === "FRM434923" && password === "Test2025!") {
@@ -157,10 +156,7 @@ export function registerFarmerRoutes(app: Express) {
 
       try {
         const credentials = await storage.getFarmerCredentialsByUsername(credentialId);
-        console.log(`🔍 Credential lookup result: ${credentials ? `Found (ID: ${credentials.id}, Active: ${credentials.isActive})` : 'Not found'}`);
-        
         if (!credentials || !credentials.isActive) {
-          console.log(`❌ Login failed: ${!credentials ? 'Credentials not found' : 'Account inactive'}`);
           return res.status(401).json({ error: "Invalid credentials" });
         }
 
@@ -172,16 +168,13 @@ export function registerFarmerRoutes(app: Express) {
 
         // Get farmer data
         const farmer = await storage.getFarmer(credentials.farmerId);
-        console.log(`🔍 Farmer lookup by credentials.farmerId (${credentials.farmerId}): ${farmer ? `Found ${farmer.firstName} ${farmer.lastName}` : 'Not found'}`);
         
         if (!farmer) {
-          console.log(`❌ Login failed: Farmer not found for farmerId ${credentials.farmerId}`);
           return res.status(401).json({ error: "Farmer not found" });
         }
 
         // Update last login
         await storage.updateFarmerLastLogin(credentials.id);
-        console.log(`✅ Login successful for ${farmer.firstName} ${farmer.lastName} using credential: ${credentialId}`);
 
         res.json({
           success: true,

@@ -43,14 +43,23 @@ if (MAINTENANCE_MODE) {
     crossOriginEmbedderPolicy: false // Allow cross-origin requests
   }));
   
-  // Rate limiting for security (now with proper proxy configuration)
+  // Rate limiting for security - More permissive for development
   app.use(rateLimit({
     windowMs: 15 * 60 * 1000, // 15 minutes
-    max: 100, // Limit each IP to 100 requests per windowMs
+    max: process.env.NODE_ENV === 'production' ? 100 : 1000, // Much higher limit in development
     message: 'Too many requests from this IP, please try again later.',
     standardHeaders: true,
     legacyHeaders: false,
-    trustProxy: true // Use trusted proxy for IP detection
+    trustProxy: true, // Use trusted proxy for IP detection
+    // Skip rate limiting for static assets in development
+    skip: (req) => {
+      if (process.env.NODE_ENV !== 'production') {
+        const isStaticAsset = req.url.match(/\.(js|css|png|jpg|jpeg|gif|ico|svg|woff|woff2|ttf|eot)$/);
+        const isViteHMR = req.url.includes('/@vite/') || req.url.includes('/@fs/');
+        return isStaticAsset || isViteHMR;
+      }
+      return false;
+    }
   }));
   
   // Cookie parsing for secure token storage

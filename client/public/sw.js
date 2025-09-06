@@ -12,12 +12,22 @@ const CRITICAL_FILES = [
   '/src/index.css'
 ];
 
-// API endpoints to cache aggressively
+// API endpoints to cache (EXCLUDING sensitive authentication endpoints)
 const API_CACHE_PATTERNS = [
+  /\/api\/dashboard\/public/,   // Only public dashboard data
+  /\/api\/commodities\//,       // Public commodity data
+  /\/api\/statistics\/public/,  // Only public statistics
+];
+
+// SECURITY: Authentication endpoints that should NEVER be cached
+const AUTH_EXCLUDE_PATTERNS = [
   /\/api\/auth\//,
-  /\/api\/farmer\//,
-  /\/api\/buyer\//,
-  /\/api\/dashboard\//
+  /\/api\/farmer.*\/login/,
+  /\/api\/buyer.*\/login/,
+  /\/api\/exporter.*\/login/,
+  /\/api\/inspector.*\/login/,
+  /\/api\/.*\/credentials/,
+  /\/api\/.*\/token/,
 ];
 
 // Install event - cache critical files immediately
@@ -54,7 +64,7 @@ self.addEventListener('activate', (event) => {
   );
 });
 
-// Fetch event - aggressive caching strategy
+// Fetch event - secure caching strategy
 self.addEventListener('fetch', (event) => {
   const { request } = event;
   const url = new URL(request.url);
@@ -62,6 +72,12 @@ self.addEventListener('fetch', (event) => {
   // Skip non-GET requests
   if (request.method !== 'GET') {
     return;
+  }
+  
+  // SECURITY: Never cache authentication endpoints
+  if (AUTH_EXCLUDE_PATTERNS.some(pattern => pattern.test(url.pathname))) {
+    console.log('⚡ Service Worker: Skipping auth endpoint caching:', url.pathname);
+    return; // Let the request go through normally without caching
   }
   
   // Handle different resource types with optimal strategies

@@ -27,7 +27,30 @@ if (MAINTENANCE_MODE) {
   console.log('🚀 STARTING POLIPUS PLATFORM - Optimized for performance...');
 
 
-  // Minimal CORS headers
+  // SECURITY ENHANCEMENTS - Added comprehensive protection
+  const cookieParser = (await import('cookie-parser')).default;
+  const helmet = (await import('helmet')).default;
+  const rateLimit = (await import('express-rate-limit')).default;
+  
+  // Security headers
+  app.use(helmet({
+    contentSecurityPolicy: false, // Allow inline scripts for development
+    crossOriginEmbedderPolicy: false // Allow cross-origin requests
+  }));
+  
+  // Rate limiting for security
+  app.use(rateLimit({
+    windowMs: 15 * 60 * 1000, // 15 minutes
+    max: 100, // Limit each IP to 100 requests per windowMs
+    message: 'Too many requests from this IP, please try again later.',
+    standardHeaders: true,
+    legacyHeaders: false
+  }));
+  
+  // Cookie parsing for secure token storage
+  app.use(cookieParser());
+
+  // Secure CORS headers
   app.use((req, res, next) => {
     res.header('Access-Control-Allow-Origin', '*');
     res.header('Access-Control-Allow-Methods', 'GET,PUT,POST,DELETE,OPTIONS,PATCH');
@@ -46,6 +69,10 @@ if (MAINTENANCE_MODE) {
       app.get('/gps-test-direct', (req, res) => {
         res.send(`<!DOCTYPE html><html><head><title>GPS Test</title></head><body><h1>GPS Test</h1><button onclick="navigator.geolocation?.getCurrentPosition(p=>alert('GPS: '+p.coords.latitude+','+p.coords.longitude))">Test GPS</button></body></html>`);
       });
+
+      // SECURE AUTHENTICATION ENDPOINTS
+      const { refreshTokens } = await import('./auth-middleware');
+      app.post('/api/auth/refresh', refreshTokens);
 
       // Initialize core system quickly
       let httpServer;

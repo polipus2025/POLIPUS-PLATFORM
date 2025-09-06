@@ -4,6 +4,7 @@ import { randomUUID, randomBytes } from "crypto";
 import { storage } from "./storage";
 import { buyerAlertService } from "./buyer-alert-system";
 import { notificationService } from "./notification-service";
+import { generateAccessToken, generateRefreshToken, setSecureTokenCookies } from "./auth-middleware";
 
 // SECURE CREDENTIAL GENERATION - For new users only (existing test accounts preserved)
 function generateFarmerCredentialId(): string {
@@ -122,9 +123,21 @@ export function registerFarmerRoutes(app: Express) {
       const { credentialId, password } = req.body;
       // Login attempt logged without exposing credential details
 
-      // Test account fallback (Paolo Jr account)
+      // EXISTING TEST ACCOUNTS PRESERVED - Secure JWT tokens for your testing
       if (credentialId === "FRM434923" && password === "Test2025!") {
         console.log("✅ Test farmer login successful");
+        
+        const tokenPayload = {
+          id: 1,
+          farmerId: "FARMER-1755883520291-288",
+          role: "farmer",
+          username: credentialId
+        };
+        
+        const accessToken = generateAccessToken(tokenPayload);
+        const refreshToken = generateRefreshToken(tokenPayload);
+        setSecureTokenCookies(res, accessToken, refreshToken);
+        
         return res.json({
           success: true,
           farmer: {
@@ -134,13 +147,26 @@ export function registerFarmerRoutes(app: Express) {
             lastName: "Jr",
             mustChangePassword: false
           },
-          token: `farmer_test_${Date.now()}`
+          // Still provide token for backward compatibility but use secure JWT
+          token: accessToken
         });
       }
 
-      // Active farmer account
+      // EXISTING TEST ACCOUNT PRESERVED - Secure JWT tokens
       if (credentialId === "FARM-1755271600707-BQA7R4QFP" && password === "farmer123") {
         console.log("✅ Active farmer login successful");
+        
+        const tokenPayload = {
+          id: 2,
+          farmerId: "FARM-1755271600707-BQA7R4QFP",
+          role: "farmer",
+          username: credentialId
+        };
+        
+        const accessToken = generateAccessToken(tokenPayload);
+        const refreshToken = generateRefreshToken(tokenPayload);
+        setSecureTokenCookies(res, accessToken, refreshToken);
+        
         return res.json({
           success: true,
           farmer: {
@@ -150,7 +176,8 @@ export function registerFarmerRoutes(app: Express) {
             lastName: "Konneh",
             mustChangePassword: false
           },
-          token: `farmer_active_${Date.now()}`
+          // Still provide token for backward compatibility but use secure JWT
+          token: accessToken
         });
       }
 
@@ -176,6 +203,18 @@ export function registerFarmerRoutes(app: Express) {
         // Update last login
         await storage.updateFarmerLastLogin(credentials.id);
 
+        // Generate secure JWT tokens for real farmers
+        const tokenPayload = {
+          id: farmer.id,
+          farmerId: farmer.farmerId,
+          role: "farmer",
+          username: credentials.credentialId
+        };
+        
+        const accessToken = generateAccessToken(tokenPayload);
+        const refreshToken = generateRefreshToken(tokenPayload);
+        setSecureTokenCookies(res, accessToken, refreshToken);
+
         res.json({
           success: true,
           farmer: {
@@ -185,7 +224,8 @@ export function registerFarmerRoutes(app: Express) {
             lastName: farmer.lastName,
             mustChangePassword: credentials.mustChangePassword
           },
-          token: `farmer_${credentials.credentialId}_${Date.now()}`
+          // Provide secure JWT token instead of weak timestamp-based token
+          token: accessToken
         });
       } catch (dbError) {
         console.log("Database not ready, using test account fallback");

@@ -1655,7 +1655,7 @@ export default function RealMapBoundaryMapper({
 
     const options = {
       enableHighAccuracy: true,
-      timeout: 15000, // Increased timeout
+      timeout: 5000, // Quick timeout for instant response
       maximumAge: 1000
     };
 

@@ -3045,12 +3045,12 @@ export default function RealMapBoundaryMapper({
               🌾 Harvest Potential & Productivity
             </h4>
             <div className="grid grid-cols-2 gap-3 text-sm">
-              <div><span className="font-medium">Total Potential:</span> {agriculturalData.harvestPotential.toFixed(1)} tons/year</div>
-              <div><span className="font-medium">Expected Yield:</span> {agriculturalData.expectedYield}</div>
-              <div><span className="font-medium">Optimal Crop:</span> {agriculturalData.optimalCrop}</div>
-              <div><span className="font-medium">Market Value:</span> {agriculturalData.marketValue}</div>
-              <div><span className="font-medium">Planting Season:</span> {agriculturalData.seasonality.plantingSeason}</div>
-              <div><span className="font-medium">Harvest Season:</span> {agriculturalData.seasonality.harvestSeason}</div>
+              <div><span className="font-medium">Total Potential:</span> {agriculturalData?.harvestPotential?.toFixed(1) || '0.0'} tons/year</div>
+              <div><span className="font-medium">Expected Yield:</span> {agriculturalData?.expectedYield || 'Calculating...'}</div>
+              <div><span className="font-medium">Optimal Crop:</span> {agriculturalData?.optimalCrop || 'Analyzing...'}</div>
+              <div><span className="font-medium">Market Value:</span> {agriculturalData?.marketValue || 'Calculating...'}</div>
+              <div><span className="font-medium">Planting Season:</span> {agriculturalData?.seasonality?.plantingSeason || 'Year-round'}</div>
+              <div><span className="font-medium">Harvest Season:</span> {agriculturalData?.seasonality?.harvestSeason || 'Year-round'}</div>
               <div><span className="font-medium">Irrigation:</span> {agriculturalData.irrigation}</div>
               <div><span className="font-medium">Drainage:</span> {agriculturalData.drainage}</div>
             </div>

@@ -2531,9 +2531,17 @@ export default function RealMapBoundaryMapper({
         deforestationReport: deforestationReport
       };
       
+      // Stop GPS tracking now that mapping is complete
+      if (gpsWatchId !== null) {
+        navigator.geolocation.clearWatch(gpsWatchId);
+        setGpsWatchId(null);
+      }
+      setIsTrackingGPS(false);
+      setIsWalkingMode(false);
+      
       // Show tab interface instead of immediately calling onBoundaryComplete
       setIsCompleted(true);
-      setStatus('✅ Boundary mapping complete! View results in tabs below.');
+      setStatus('✅ Boundary mapping complete! GPS tracking stopped.');
       
       onBoundaryComplete({ 
         points, 

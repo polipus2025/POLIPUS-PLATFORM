@@ -149,8 +149,8 @@ export function registerFarmerRoutes(app: Express) {
       const { credentialId, password } = validation.data;
       // Login attempt logged without exposing credential details
 
-      // EXISTING TEST ACCOUNTS PRESERVED - Secure JWT tokens for your testing
-      if (credentialId === "FRM434923" && password === "Test2025!") {
+      // EXISTING TEST ACCOUNTS PRESERVED - Only available in development
+      if (process.env.NODE_ENV !== 'production' && credentialId === "FRM434923" && password === "Test2025!") {
         console.log("✅ Test farmer login successful");
         
         const tokenPayload = {
@@ -178,8 +178,8 @@ export function registerFarmerRoutes(app: Express) {
         });
       }
 
-      // EXISTING TEST ACCOUNT PRESERVED - Secure JWT tokens
-      if (credentialId === "FARM-1755271600707-BQA7R4QFP" && password === "farmer123") {
+      // EXISTING TEST ACCOUNT PRESERVED - Only available in development
+      if (process.env.NODE_ENV !== 'production' && credentialId === "FARM-1755271600707-BQA7R4QFP" && password === "farmer123") {
         console.log("✅ Active farmer login successful");
         
         const tokenPayload = {
@@ -673,13 +673,22 @@ export function registerFarmerRoutes(app: Express) {
   // Create harvest schedule
   app.post("/api/farmers/:farmerId/harvest-schedules", async (req, res) => {
     try {
+      // SECURITY: Validate input data to prevent injection attacks
+      const validation = validateRequest(harvestScheduleSchema, req.body);
+      if (!validation.success) {
+        return res.status(400).json({
+          error: 'Invalid harvest schedule data',
+          details: validation.errors
+        });
+      }
+      
       const farmer = await storage.getFarmerByFarmerId(req.params.farmerId);
       if (!farmer) {
         return res.status(404).json({ error: "Farmer not found" });
       }
 
       const scheduleData = {
-        ...req.body,
+        ...validation.data,
         farmerId: farmer.id,
         scheduleId: `SCH-${Date.now()}-${Math.floor(Math.random() * 1000)}`,
         createdBy: `Farmer ${farmer.firstName} ${farmer.lastName}`,
@@ -697,13 +706,22 @@ export function registerFarmerRoutes(app: Express) {
   // Create marketplace listing
   app.post("/api/farmers/:farmerId/marketplace-listings", async (req, res) => {
     try {
+      // SECURITY: Validate input data to prevent injection attacks
+      const validation = validateRequest(marketplaceListingSchema, req.body);
+      if (!validation.success) {
+        return res.status(400).json({
+          error: 'Invalid marketplace listing data',
+          details: validation.errors
+        });
+      }
+      
       const farmer = await storage.getFarmerByFarmerId(req.params.farmerId);
       if (!farmer) {
         return res.status(404).json({ error: "Farmer not found" });
       }
 
       const listingData = {
-        ...req.body,
+        ...validation.data,
         farmerId: farmer.id,
         listingId: `LST-${Date.now()}-${Math.floor(Math.random() * 1000)}`,
         status: "active",
@@ -951,8 +969,17 @@ export function registerFarmerRoutes(app: Express) {
   // Create transaction proposal
   app.post("/api/farmers/:farmerId/transaction-proposals", async (req, res) => {
     try {
+      // SECURITY: Validate input data to prevent injection attacks
+      const validation = validateRequest(transactionProposalSchema, req.body);
+      if (!validation.success) {
+        return res.status(400).json({
+          error: 'Invalid transaction proposal data',
+          details: validation.errors
+        });
+      }
+      
       const { farmerId } = req.params;
-      const proposalData = req.body;
+      const proposalData = validation.data;
 
       // Create proposal using buyer alert service
       const proposal = await buyerAlertService.createTransactionProposal({

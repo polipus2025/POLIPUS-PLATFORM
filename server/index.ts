@@ -65,9 +65,15 @@ if (MAINTENANCE_MODE) {
   // Cookie parsing for secure token storage
   app.use(cookieParser());
 
-  // Secure CORS configuration
+  // Secure CORS configuration - Fixed for Replit external access
   const corsOptions = {
     origin: (origin, callback) => {
+      // Always allow requests without origin (direct server access, mobile apps, etc.)
+      if (!origin) {
+        callback(null, true);
+        return;
+      }
+      
       if (process.env.NODE_ENV === 'production') {
         const allowedOrigins = process.env.ALLOWED_ORIGINS?.split(',') || [];
         callback(null, allowedOrigins.includes(origin));
@@ -75,7 +81,8 @@ if (MAINTENANCE_MODE) {
         // Development: Allow localhost and Replit URLs
         const isLocalhost = ['http://localhost:5000', 'http://localhost:3000', 'http://127.0.0.1:5000'].includes(origin);
         const isReplit = origin && origin.includes('.replit.dev');
-        callback(null, isLocalhost || isReplit);
+        const isHttpsReplit = origin && origin.startsWith('https://') && origin.includes('.replit.dev');
+        callback(null, isLocalhost || isReplit || isHttpsReplit);
       }
     },
     credentials: true,
@@ -100,15 +107,21 @@ if (MAINTENANCE_MODE) {
       app.use((req, res, next) => {
         if (['POST', 'PUT', 'DELETE', 'PATCH'].includes(req.method)) {
           const origin = req.get('Origin') || req.get('Referer');
+          // Allow requests without origin (direct access)
+          if (!origin) {
+            return next();
+          }
+          
           const allowedOrigins = process.env.NODE_ENV === 'production' 
             ? (process.env.ALLOWED_ORIGINS?.split(',') || [])
             : ['http://localhost:5000', 'http://127.0.0.1:5000'];
           
           // In development, allow Replit dev URLs (.replit.dev domains)
-          const isReplit = origin && origin.includes('.replit.dev');
-          const isAllowed = origin && (
+          const isReplit = origin.includes('.replit.dev');
+          const isHttpsReplit = origin.startsWith('https://') && origin.includes('.replit.dev');
+          const isAllowed = (
             allowedOrigins.some(allowed => origin.startsWith(allowed)) || 
-            (process.env.NODE_ENV !== 'production' && isReplit)
+            (process.env.NODE_ENV !== 'production' && (isReplit || isHttpsReplit))
           );
           
           if (!isAllowed) {

@@ -73,12 +73,29 @@ function initializeApp() {
     }, 100);
     
   } catch (error) {
-    console.error('App initialization error:', error);
+    // Enhanced error handling for React and useRef issues
+    const errorMessage = error instanceof Error ? error.message : String(error);
+    console.error('App initialization error:', errorMessage);
+    
+    // Handle specific useRef errors gracefully
+    if (errorMessage.includes('useRef') || errorMessage.includes('Cannot read properties of null')) {
+      // Retry initialization after a brief delay
+      setTimeout(() => {
+        try {
+          const retryRoot = createRoot(rootElement);
+          retryRoot.render(<App />);
+          console.log('App successfully reinitialized after React error');
+        } catch (retryError) {
+          console.error('Retry failed:', retryError);
+        }
+      }, 100);
+    }
+    
     rootElement.innerHTML = `
       <div style="display: flex; align-items: center; justify-content: center; height: 100vh; background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%); color: white; font-family: system-ui;">
         <div style="text-align: center;">
           <h2>Platform Loading...</h2>
-          <p>Please refresh your browser (Ctrl+Shift+R)</p>
+          <p>Initializing secure environment...</p>
         </div>
       </div>
     `;

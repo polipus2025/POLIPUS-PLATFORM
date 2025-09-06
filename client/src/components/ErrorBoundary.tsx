@@ -21,7 +21,16 @@ export class ErrorBoundary extends React.Component<ErrorBoundaryProps, ErrorBoun
   }
 
   componentDidCatch(error: Error, errorInfo: React.ErrorInfo) {
-    console.error('Error caught by ErrorBoundary:', error, errorInfo);
+    // Enhanced error logging for useRef and React hook issues
+    if (error.message.includes('useRef') || error.message.includes('Cannot read properties of null')) {
+      console.error('React hook error caught:', {
+        message: error.message,
+        stack: error.stack,
+        componentStack: errorInfo.componentStack
+      });
+    } else {
+      console.error('Error caught by ErrorBoundary:', error, errorInfo);
+    }
   }
 
   render() {

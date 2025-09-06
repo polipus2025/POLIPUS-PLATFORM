@@ -3065,7 +3065,7 @@ export default function RealMapBoundaryMapper({
               <div>
                 <span className="font-medium text-sm">Recommended Crops:</span>
                 <div className="flex flex-wrap gap-2 mt-1">
-                  {agriculturalData.suitableCrops.map((crop: string, index: number) => (
+                  {(agriculturalData?.suitableCrops || []).map((crop: string, index: number) => (
                     <span key={index} className="px-2 py-1 bg-purple-100 text-purple-800 rounded text-xs">
                       {crop}
                     </span>

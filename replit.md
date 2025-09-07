@@ -13,6 +13,7 @@ PDF Report Design Preference: User confirmed satisfaction with enhanced professi
 Land Mapping Restriction: Farmers cannot map new plots - this functionality is exclusively restricted to Land Inspectors through the official land mapping system.
 Crop Scheduling Focus: Farmers should focus on crop scheduling, harvest management, and buyer connections rather than land mapping activities.
 Automatic Batch Code Generation: When farmers mark crops as harvested, the system automatically generates batch codes and notifies all stakeholders (Land Inspector, Warehouse Inspector, three-tier regulatory panels). Farmers do NOT manually generate batch codes - this is completely automated upon harvest completion.
+**MAPPING SYSTEM LOCK**: The mapping system is currently locked and should NOT be modified under any circumstances. This includes all mapping-related files and components such as real-map-boundary-mapper.tsx, GPS mapping components, satellite services, and land mapping functionality. Even when adding new features, ensure they do not affect the mapping system's current implementation.
 
 ## System Architecture
 The application employs a modern full-stack architecture with a clear separation of concerns.

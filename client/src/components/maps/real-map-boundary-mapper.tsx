@@ -464,6 +464,7 @@ export default function RealMapBoundaryMapper({
         testImg.onload = () => {
           console.log(`✅ Satellite imagery loaded: ${tileInfo.name}`);
           setStatus(`✅ Satellite imagery loaded from ${tileInfo.name}`);
+          setMapReady(true); // Clear loading state immediately
           createMapWithTile(tileInfo, lat, lng);
         };
         

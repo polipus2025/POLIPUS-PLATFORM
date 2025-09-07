@@ -243,16 +243,20 @@ export default function FarmerDashboard() {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-50 to-slate-100">
-      <div className="space-y-3 sm:space-y-4 p-2 sm:p-4 max-w-7xl mx-auto">
+      <div className="space-y-2 sm:space-y-4 p-3 sm:p-4 max-w-7xl mx-auto">
 
-      {/* Mobile-Responsive Header */}
-      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
-        <div>
-          <h1 className="text-2xl sm:text-3xl font-bold text-slate-900">
-            Welcome back, {farmerName}!
+      {/* Mobile-First Header - App-Like Design */}
+      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3 bg-white/90 backdrop-blur-sm rounded-xl p-4 shadow-lg">
+        <div className="flex-1">
+          <h1 className="text-xl sm:text-3xl font-bold text-slate-900 leading-tight">
+            Hello, {farmerName}! 👋
           </h1>
-          <p className="text-sm sm:text-base text-slate-700 mt-1">
-            Farmer ID: {farmerId} | Your farm management dashboard
+          <p className="text-xs sm:text-base text-slate-600 mt-1 flex items-center gap-2">
+            <span className="bg-green-100 text-green-700 px-2 py-1 rounded-full text-xs font-medium">
+              {farmerId}
+            </span>
+            <span className="hidden sm:inline">|</span>
+            <span className="text-xs">Farm Dashboard</span>
           </p>
         </div>
         <ProfileDropdown
@@ -267,87 +271,98 @@ export default function FarmerDashboard() {
         />
       </div>
 
-      {/* Simplified Tabbed Navigation Interface */}
+      {/* Mobile-First Navigation - App-Style Bottom Tabs */}
       <Tabs defaultValue="overview" className="w-full">
-        <TabsList className="grid w-full grid-cols-3 lg:grid-cols-6 bg-white/95 backdrop-blur-sm shadow-lg h-12">
-          <TabsTrigger value="overview" className="flex items-center justify-center gap-1 text-xs lg:text-sm p-2 lg:p-3">
-            <Home className="h-3 w-3 lg:h-4 lg:w-4" />
-            <span className="hidden sm:inline">Overview</span>
+        <TabsList className="grid w-full grid-cols-3 lg:grid-cols-6 bg-white/95 backdrop-blur-sm shadow-xl rounded-xl h-14 sm:h-12 p-1">
+          <TabsTrigger value="overview" className="flex flex-col sm:flex-row items-center justify-center gap-1 text-xs lg:text-sm p-2 lg:p-3 rounded-lg data-[state=active]:bg-green-100 data-[state=active]:text-green-700">
+            <Home className="h-4 w-4 lg:h-4 lg:w-4" />
+            <span className="text-xs sm:inline">Home</span>
           </TabsTrigger>
-          <TabsTrigger value="land-mappings" className="flex items-center justify-center gap-1 text-xs lg:text-sm p-2 lg:p-3">
-            <MapPin className="h-3 w-3 lg:h-4 lg:w-4" />
-            <span className="hidden sm:inline">Land Info</span>
+          <TabsTrigger value="land-mappings" className="flex flex-col sm:flex-row items-center justify-center gap-1 text-xs lg:text-sm p-2 lg:p-3 rounded-lg data-[state=active]:bg-blue-100 data-[state=active]:text-blue-700">
+            <MapPin className="h-4 w-4 lg:h-4 lg:w-4" />
+            <span className="text-xs sm:inline">Land</span>
           </TabsTrigger>
-          <TabsTrigger value="marketplace" className="flex items-center justify-center gap-1 text-xs lg:text-sm p-2 lg:p-3">
-            <ShoppingCart className="h-3 w-3 lg:h-4 lg:w-4" />
-            <span className="hidden sm:inline">Marketplace</span>
+          <TabsTrigger value="marketplace" className="flex flex-col sm:flex-row items-center justify-center gap-1 text-xs lg:text-sm p-2 lg:p-3 rounded-lg data-[state=active]:bg-purple-100 data-[state=active]:text-purple-700">
+            <ShoppingCart className="h-4 w-4 lg:h-4 lg:w-4" />
+            <span className="text-xs sm:inline">Market</span>
           </TabsTrigger>
-          <TabsTrigger value="pending-offers" className="flex items-center justify-center gap-1 text-xs lg:text-sm p-2 lg:p-3">
-            <Clock className="h-3 w-3 lg:h-4 lg:w-4" />
-            <span className="hidden sm:inline">Pending Offers</span>
+          <TabsTrigger value="pending-offers" className="flex flex-col sm:flex-row items-center justify-center gap-1 text-xs lg:text-sm p-2 lg:p-3 rounded-lg data-[state=active]:bg-orange-100 data-[state=active]:text-orange-700">
+            <Clock className="h-4 w-4 lg:h-4 lg:w-4" />
+            <span className="text-xs sm:inline hidden lg:inline">Pending</span>
+            <span className="text-xs sm:hidden">Wait</span>
           </TabsTrigger>
-          <TabsTrigger value="verification-codes" className="flex items-center justify-center gap-1 text-xs lg:text-sm p-2 lg:p-3 bg-green-50 text-green-600">
-            <Handshake className="h-3 w-3 lg:h-4 lg:w-4" />
-            <span className="hidden sm:inline">Accepted Offers</span>
+          <TabsTrigger value="verification-codes" className="flex flex-col sm:flex-row items-center justify-center gap-1 text-xs lg:text-sm p-2 lg:p-3 rounded-lg bg-green-50 text-green-600 data-[state=active]:bg-green-100 data-[state=active]:text-green-700">
+            <Handshake className="h-4 w-4 lg:h-4 lg:w-4" />
+            <span className="text-xs sm:inline hidden lg:inline">Accepted</span>
+            <span className="text-xs sm:hidden">Deal</span>
           </TabsTrigger>
-          <TabsTrigger value="confirmed-transactions" className="flex items-center justify-center gap-1 text-xs lg:text-sm p-2 lg:p-3">
-            <FileText className="h-3 w-3 lg:h-4 lg:w-4" />
-            <span className="hidden sm:inline">Confirmed Transactions</span>
+          <TabsTrigger value="confirmed-transactions" className="flex flex-col sm:flex-row items-center justify-center gap-1 text-xs lg:text-sm p-2 lg:p-3 rounded-lg data-[state=active]:bg-emerald-100 data-[state=active]:text-emerald-700">
+            <FileText className="h-4 w-4 lg:h-4 lg:w-4" />
+            <span className="text-xs sm:inline hidden lg:inline">Complete</span>
+            <span className="text-xs sm:hidden">Done</span>
           </TabsTrigger>
         </TabsList>
 
         {/* OVERVIEW TAB */}
         <TabsContent value="overview" className="space-y-3 mt-3">
-          {/* Compact Statistics Cards */}
-          <div className="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-4 gap-3">
-            <Card className="bg-white/95 backdrop-blur-sm shadow-xl hover:shadow-2xl transition-all duration-300 bg-gradient-to-r from-green-50 to-emerald-50 border-green-200">
+          {/* Mobile-Optimized Statistics Cards */}
+          <div className="grid grid-cols-2 lg:grid-cols-4 gap-2 sm:gap-3">
+            <Card className="bg-white/95 backdrop-blur-sm shadow-lg hover:shadow-xl transition-all duration-300 bg-gradient-to-br from-green-50 to-emerald-100 border-green-200 rounded-xl">
               <CardContent className="p-3 sm:p-4">
                 <div className="flex items-center justify-between">
                   <div className="flex-1">
-                    <p className="text-xs font-medium text-green-600">Farm Plots</p>
-                    <p className="text-lg sm:text-xl font-bold text-green-900">{totalPlots}</p>
+                    <p className="text-xs font-semibold text-green-600">Farm Plots</p>
+                    <p className="text-xl sm:text-2xl font-bold text-green-900 leading-tight">{totalPlots}</p>
                     <p className="text-xs text-green-600">Registered</p>
                   </div>
-                  <MapPin className="h-6 w-6 text-green-600" />
+                  <div className="bg-green-100 rounded-full p-2">
+                    <MapPin className="h-5 w-5 text-green-600" />
+                  </div>
                 </div>
               </CardContent>
             </Card>
 
-            <Card className="bg-white/95 backdrop-blur-sm shadow-xl hover:shadow-2xl transition-all duration-300 bg-gradient-to-r from-blue-50 to-cyan-50 border-blue-200">
+            <Card className="bg-white/95 backdrop-blur-sm shadow-lg hover:shadow-xl transition-all duration-300 bg-gradient-to-br from-blue-50 to-cyan-100 border-blue-200 rounded-xl">
               <CardContent className="p-3 sm:p-4">
                 <div className="flex items-center justify-between">
                   <div className="flex-1">
-                    <p className="text-xs font-medium text-blue-600">Crop Plans</p>
-                    <p className="text-lg sm:text-xl font-bold text-blue-900">{activeCropPlans}</p>
+                    <p className="text-xs font-semibold text-blue-600">Crop Plans</p>
+                    <p className="text-xl sm:text-2xl font-bold text-blue-900 leading-tight">{activeCropPlans}</p>
                     <p className="text-xs text-blue-600">Active</p>
                   </div>
-                  <Calendar className="h-6 w-6 text-blue-600" />
+                  <div className="bg-blue-100 rounded-full p-2">
+                    <Calendar className="h-5 w-5 text-blue-600" />
+                  </div>
                 </div>
               </CardContent>
             </Card>
 
-            <Card className="bg-white/95 backdrop-blur-sm shadow-xl hover:shadow-2xl transition-all duration-300 bg-gradient-to-r from-orange-50 to-yellow-50 border-orange-200">
+            <Card className="bg-white/95 backdrop-blur-sm shadow-lg hover:shadow-xl transition-all duration-300 bg-gradient-to-br from-orange-50 to-yellow-100 border-orange-200 rounded-xl">
               <CardContent className="p-3 sm:p-4">
                 <div className="flex items-center justify-between">
                   <div className="flex-1">
-                    <p className="text-xs font-medium text-orange-600">Harvested</p>
-                    <p className="text-lg sm:text-xl font-bold text-orange-900">{totalHarvested.toFixed(1)}</p>
+                    <p className="text-xs font-semibold text-orange-600">Harvested</p>
+                    <p className="text-xl sm:text-2xl font-bold text-orange-900 leading-tight">{totalHarvested.toFixed(1)}</p>
                     <p className="text-xs text-orange-600">Tons</p>
                   </div>
-                  <Package className="h-6 w-6 text-orange-600" />
+                  <div className="bg-orange-100 rounded-full p-2">
+                    <Package className="h-5 w-5 text-orange-600" />
+                  </div>
                 </div>
               </CardContent>
             </Card>
 
-            <Card className="bg-white/95 backdrop-blur-sm shadow-xl hover:shadow-2xl transition-all duration-300 bg-gradient-to-r from-purple-50 to-pink-50 border-purple-200">
+            <Card className="bg-white/95 backdrop-blur-sm shadow-lg hover:shadow-xl transition-all duration-300 bg-gradient-to-br from-purple-50 to-pink-100 border-purple-200 rounded-xl">
               <CardContent className="p-3 sm:p-4">
                 <div className="flex items-center justify-between">
                   <div className="flex-1">
-                    <p className="text-xs font-medium text-purple-600">Pending</p>
-                    <p className="text-lg sm:text-xl font-bold text-purple-900">{pendingInspections}</p>
+                    <p className="text-xs font-semibold text-purple-600">Pending</p>
+                    <p className="text-xl sm:text-2xl font-bold text-purple-900 leading-tight">{pendingInspections}</p>
                     <p className="text-xs text-purple-600">Reviews</p>
                   </div>
-                  <Clock className="h-6 w-6 text-purple-600" />
+                  <div className="bg-purple-100 rounded-full p-2">
+                    <Clock className="h-5 w-5 text-purple-600" />
+                  </div>
                 </div>
               </CardContent>
             </Card>

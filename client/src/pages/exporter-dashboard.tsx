@@ -166,32 +166,34 @@ const ExporterDashboard = memo(() => {
           <meta name="description" content="High-performance export management dashboard for licensed agricultural commodity exporters" />
         </Helmet>
         
-        {/* ⚡ OPTIMIZED USER PROFILE SECTION */}
+        {/* 🚢 Mobile-First Header - App-Like Design */}
         <div className="bg-white/90 backdrop-blur-sm border-b border-slate-200 shadow-lg">
-          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
-            <div className="flex items-center justify-between">
-              <div className="flex items-center space-x-4">
-                <div className="w-16 h-16 bg-gradient-to-br from-blue-500 to-blue-600 rounded-full flex items-center justify-center shadow-lg">
-                  <span className="text-white text-xl font-bold">
+          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4 sm:py-6">
+            <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+              <div className="flex items-center space-x-3 sm:space-x-4 w-full sm:w-auto">
+                <div className="w-12 h-12 sm:w-16 sm:h-16 bg-gradient-to-br from-blue-500 to-blue-600 rounded-full flex items-center justify-center shadow-lg">
+                  <span className="text-white text-sm sm:text-xl font-bold">
                     {(user as any)?.exporterId?.slice(-3) || 'EXP'}
                   </span>
                 </div>
-                <div>
-                  <h1 className="text-3xl font-bold text-slate-900">
-                    Welcome, {(user as any)?.companyName || 'Licensed Exporter'}
+                <div className="flex-1">
+                  <h1 className="text-lg sm:text-3xl font-bold text-slate-900 leading-tight">
+                    Welcome, {(user as any)?.companyName || 'Licensed Exporter'} 🚢
                   </h1>
-                  <div className="flex items-center space-x-4 text-sm text-slate-600">
-                    <span>Exporter ID: {(user as any)?.exporterId || 'EXP-DEMO-001'}</span>
-                    <span>•</span>
-                    <span>License Status: Active</span>
-                    <span>•</span>
-                    <span>Last Login: {new Date().toLocaleDateString()}</span>
+                  <div className="flex flex-col sm:flex-row sm:items-center gap-1 sm:gap-4 text-xs sm:text-sm text-slate-600">
+                    <span className="bg-blue-100 text-blue-700 px-2 py-1 rounded-full text-xs font-medium">
+                      {(user as any)?.exporterId || 'EXP-DEMO-001'}
+                    </span>
+                    <span className="hidden sm:inline">•</span>
+                    <span className="text-xs">License: Active</span>
+                    <span className="hidden sm:inline">•</span>
+                    <span className="text-xs hidden sm:inline">Last Login: {new Date().toLocaleDateString()}</span>
                   </div>
                 </div>
               </div>
-              <div className="text-right">
-                <Badge variant="outline" className="border-blue-500 text-blue-600 bg-blue-50 shadow-sm">
-                  <Shield className="w-4 h-4 mr-1" />
+              <div className="text-left sm:text-right w-full sm:w-auto">
+                <Badge variant="outline" className="border-blue-500 text-blue-600 bg-blue-50 shadow-sm text-xs">
+                  <Shield className="w-3 h-3 sm:w-4 sm:h-4 mr-1" />
                   Verified Exporter
                 </Badge>
               </div>
@@ -200,20 +202,20 @@ const ExporterDashboard = memo(() => {
         </div>
 
         <div className="min-h-screen bg-gradient-to-br from-slate-50 to-slate-100">
-          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-          {/* ⚡ PERFORMANCE METRICS GRID */}
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+          <div className="max-w-7xl mx-auto px-3 sm:px-6 lg:px-8 py-4 sm:py-8">
+          {/* 🚢 Mobile-Optimized Performance Metrics */}
+          <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-6 mb-6 sm:mb-8">
             {metricsData.map((metric, index) => (
-              <Card key={index} className="bg-white shadow-xl border-slate-200 hover:shadow-2xl transition-all group">
-                <CardContent className="p-6">
-                  <div className="flex items-center justify-between">
-                    <div>
-                      <p className="text-sm font-medium text-slate-600">{metric.title}</p>
-                      <p className="text-2xl font-bold text-slate-900">{metric.value}</p>
-                      <p className={`text-sm text-${metric.color}-600`}>{metric.change} from last month</p>
+              <Card key={index} className="bg-white/95 backdrop-blur-sm shadow-lg hover:shadow-xl transition-all duration-300 border-slate-200 rounded-xl group">
+                <CardContent className="p-3 sm:p-6">
+                  <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-2 sm:gap-0">
+                    <div className="flex-1">
+                      <p className="text-xs sm:text-sm font-semibold text-slate-600 mb-1">{metric.title}</p>
+                      <p className="text-lg sm:text-2xl font-bold text-slate-900 leading-tight">{metric.value}</p>
+                      <p className={`text-xs sm:text-sm text-${metric.color}-600 leading-tight`}>{metric.change}</p>
                     </div>
-                    <div className={`bg-gradient-to-br from-${metric.color}-500 to-${metric.color}-600 p-3 rounded-full shadow-lg group-hover:scale-110 transition-transform`}>
-                      <metric.icon className="h-6 w-6 text-white" />
+                    <div className={`bg-gradient-to-br from-${metric.color}-500 to-${metric.color}-600 p-2 sm:p-3 rounded-full shadow-lg group-hover:scale-110 transition-transform self-end sm:self-auto`}>
+                      <metric.icon className="h-4 w-4 sm:h-6 sm:w-6 text-white" />
                     </div>
                   </div>
                 </CardContent>
@@ -221,18 +223,18 @@ const ExporterDashboard = memo(() => {
             ))}
           </div>
 
-          {/* ⚡ QUICK ACTIONS */}
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-8">
-            <Card className="bg-white shadow-xl border-slate-200 hover:shadow-2xl transition-all group">
-              <CardContent className="p-6">
-                <div className="flex items-center space-x-4">
-                  <div className="bg-gradient-to-br from-blue-500 to-blue-600 p-3 rounded-full shadow-lg group-hover:scale-110 transition-transform">
-                    <Ship className="h-6 w-6 text-white" />
+          {/* 🚢 Mobile-Optimized Quick Actions */}
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-6 mb-6 sm:mb-8">
+            <Card className="bg-white/95 backdrop-blur-sm shadow-lg hover:shadow-xl transition-all duration-300 border-slate-200 rounded-xl group">
+              <CardContent className="p-4 sm:p-6">
+                <div className="flex items-center space-x-3 sm:space-x-4">
+                  <div className="bg-gradient-to-br from-blue-500 to-blue-600 p-2.5 sm:p-3 rounded-full shadow-lg group-hover:scale-110 transition-transform">
+                    <Ship className="h-5 w-5 sm:h-6 sm:w-6 text-white" />
                   </div>
-                  <div>
-                    <h3 className="font-medium text-slate-900">Export Orders</h3>
-                    <p className="text-sm text-slate-600">Manage your export orders</p>
-                    <Link href="/exporter/orders" className="text-blue-600 hover:text-blue-800 text-sm font-medium">
+                  <div className="flex-1">
+                    <h3 className="font-semibold text-sm sm:text-base text-slate-900">Export Orders</h3>
+                    <p className="text-xs sm:text-sm text-slate-600 mb-1">Manage your export orders</p>
+                    <Link href="/exporter/orders" className="text-blue-600 hover:text-blue-800 text-xs sm:text-sm font-medium">
                       View Orders →
                     </Link>
                   </div>
@@ -240,16 +242,16 @@ const ExporterDashboard = memo(() => {
               </CardContent>
             </Card>
 
-            <Card className="bg-white shadow-xl border-slate-200 hover:shadow-2xl transition-all group">
-              <CardContent className="p-6">
-                <div className="flex items-center space-x-4">
-                  <div className="bg-gradient-to-br from-green-500 to-green-600 p-3 rounded-full shadow-lg group-hover:scale-110 transition-transform">
-                    <ShoppingCart className="h-6 w-6 text-white" />
+            <Card className="bg-white/95 backdrop-blur-sm shadow-lg hover:shadow-xl transition-all duration-300 border-slate-200 rounded-xl group">
+              <CardContent className="p-4 sm:p-6">
+                <div className="flex items-center space-x-3 sm:space-x-4">
+                  <div className="bg-gradient-to-br from-green-500 to-green-600 p-2.5 sm:p-3 rounded-full shadow-lg group-hover:scale-110 transition-transform">
+                    <ShoppingCart className="h-5 w-5 sm:h-6 sm:w-6 text-white" />
                   </div>
-                  <div>
-                    <h3 className="font-medium text-slate-900">Marketplace</h3>
-                    <p className="text-sm text-slate-600">Browse available commodities</p>
-                    <Link href="/exporter/marketplace" className="text-green-600 hover:text-green-800 text-sm font-medium">
+                  <div className="flex-1">
+                    <h3 className="font-semibold text-sm sm:text-base text-slate-900">Marketplace</h3>
+                    <p className="text-xs sm:text-sm text-slate-600 mb-1">Browse available commodities</p>
+                    <Link href="/exporter/marketplace" className="text-green-600 hover:text-green-800 text-xs sm:text-sm font-medium">
                       Explore Market →
                     </Link>
                   </div>
@@ -257,11 +259,11 @@ const ExporterDashboard = memo(() => {
               </CardContent>
             </Card>
 
-            <Card className="bg-white shadow-xl border-slate-200 hover:shadow-2xl transition-all group">
-              <CardContent className="p-6">
-                <div className="flex items-center space-x-4">
-                  <div className="bg-gradient-to-br from-purple-500 to-purple-600 p-3 rounded-full shadow-lg group-hover:scale-110 transition-transform">
-                    <FileText className="h-6 w-6 text-white" />
+            <Card className="bg-white/95 backdrop-blur-sm shadow-lg hover:shadow-xl transition-all duration-300 border-slate-200 rounded-xl group">
+              <CardContent className="p-4 sm:p-6">
+                <div className="flex items-center space-x-3 sm:space-x-4">
+                  <div className="bg-gradient-to-br from-purple-500 to-purple-600 p-2.5 sm:p-3 rounded-full shadow-lg group-hover:scale-110 transition-transform">
+                    <FileText className="h-5 w-5 sm:h-6 sm:w-6 text-white" />
                   </div>
                   <div>
                     <h3 className="font-medium text-slate-900">Certificates</h3>

@@ -517,8 +517,13 @@ export default function RealMapBoundaryMapper({
       const containerWidth = tilesContainer.clientWidth || 280;
       const containerHeight = tilesContainer.clientHeight || 280;
       
-      // Scale tiles to fill container completely
-      const scaledTileSize = containerWidth / 3; // 3x3 grid
+      console.log(`📐 Container dimensions: ${containerWidth}px × ${containerHeight}px`);
+      
+      // Scale tiles to fill container completely (use both width AND height)
+      const scaledTileWidth = containerWidth / 3;  // 3x3 grid
+      const scaledTileHeight = containerHeight / 3; // 3x3 grid
+      
+      console.log(`📐 Tile dimensions: ${scaledTileWidth}px × ${scaledTileHeight}px`);
       
       // Load a 3x3 grid of tiles for better coverage
       const tileRadius = 1;
@@ -529,8 +534,8 @@ export default function RealMapBoundaryMapper({
           const tileY = centerTileY + dy;
           
           // Calculate tile position in container (SCALED to fill full container)
-          const posX = (dx + tileRadius) * scaledTileSize;
-          const posY = (dy + tileRadius) * scaledTileSize;
+          const posX = (dx + tileRadius) * scaledTileWidth;
+          const posY = (dy + tileRadius) * scaledTileHeight;
           
           // Create tile image element
           const tileImg = document.createElement('img');
@@ -538,8 +543,8 @@ export default function RealMapBoundaryMapper({
             position: absolute;
             left: ${posX}px;
             top: ${posY}px;
-            width: ${scaledTileSize}px;
-            height: ${scaledTileSize}px;
+            width: ${scaledTileWidth}px;
+            height: ${scaledTileHeight}px;
             z-index: 2;
             opacity: 1;
             display: block;

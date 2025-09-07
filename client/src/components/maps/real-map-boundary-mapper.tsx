@@ -513,6 +513,13 @@ export default function RealMapBoundaryMapper({
       // Clear previous tiles safely
       tilesContainer.innerHTML = '';
       
+      // Get container dimensions for proper scaling
+      const containerWidth = tilesContainer.clientWidth || 280;
+      const containerHeight = tilesContainer.clientHeight || 280;
+      
+      // Scale tiles to fill container completely
+      const scaledTileSize = containerWidth / 3; // 3x3 grid
+      
       // Load a 3x3 grid of tiles for better coverage
       const tileRadius = 1;
       
@@ -521,9 +528,9 @@ export default function RealMapBoundaryMapper({
           const tileX = centerTileX + dx;
           const tileY = centerTileY + dy;
           
-          // Calculate tile position in container (FIXED: No offset for seamless tiles)
-          const posX = (dx + tileRadius) * tileSize;
-          const posY = (dy + tileRadius) * tileSize;
+          // Calculate tile position in container (SCALED to fill full container)
+          const posX = (dx + tileRadius) * scaledTileSize;
+          const posY = (dy + tileRadius) * scaledTileSize;
           
           // Create tile image element
           const tileImg = document.createElement('img');
@@ -531,11 +538,12 @@ export default function RealMapBoundaryMapper({
             position: absolute;
             left: ${posX}px;
             top: ${posY}px;
-            width: ${tileSize}px;
-            height: ${tileSize}px;
+            width: ${scaledTileSize}px;
+            height: ${scaledTileSize}px;
             z-index: 2;
             opacity: 1;
             display: block;
+            object-fit: cover;
           `;
           
           // Build tile URL based on provider

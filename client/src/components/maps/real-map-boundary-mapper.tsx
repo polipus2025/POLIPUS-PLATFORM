@@ -85,6 +85,7 @@ export default function RealMapBoundaryMapper({
   const [rtkAccuracyImprovement, setRtkAccuracyImprovement] = useState<number>(1);
   const [internetConnectivity, setInternetConnectivity] = useState<boolean>(navigator.onLine);
   const [agriculturalData, setAgriculturalData] = useState<any>(null);
+  const [hasAutoCompleted, setHasAutoCompleted] = useState<boolean>(false);
 
   // SW Maps-style Enhanced GPS Tracking Functions
   const startWalkingMode = () => {
@@ -208,19 +209,10 @@ export default function RealMapBoundaryMapper({
       navigator.vibrate(100);
     }
 
-    // Update status with confirmation
-    setStatus(`✅ Point ${String.fromCharCode(65 + points.length)} added! | Next: Point ${nextLabel} | ${points.length + 1}/${minPoints}+ needed`);
-    
-    // SW Maps-style: Auto-trigger agricultural analysis when enough points are collected
-    // Use functional state update to avoid stale closure
-    setTimeout(() => {
-      setPoints(currentPoints => {
-        if (currentPoints.length >= minPoints && currentPoints.length === points.length + 1) {
-          generateAgriculturalData(currentPoints);
-        }
-        return currentPoints;
-      });
-    }, 1000);
+    // Update status with confirmation and real-time area
+    const currentArea = calculateArea([...points, newPoint]);
+    const areaText = currentArea > 0 ? ` | Area: ${currentArea.toFixed(2)} hectares` : '';
+    setStatus(`✅ Point ${String.fromCharCode(65 + points.length)} added! | Next: Point ${nextLabel} | ${points.length + 1}/${minPoints}+ needed${areaText}`);
   };
 
   const addCurrentGPSPoint = async (forceAdd = false) => {
@@ -300,8 +292,8 @@ export default function RealMapBoundaryMapper({
       setEudrReport(eudrAnalysis);
       setStatus(`✅ EUDR Analysis complete! Risk level: ${eudrAnalysis.riskLevel.toUpperCase()}`);
       
-      // Complete the mapping workflow
-      setTimeout(() => completeBoundaryMapping(), 1000);
+      // Complete the mapping workflow (using first 6 points for auto-completion)
+      setTimeout(() => completeBoundaryMapping(true), 1000);
       
     } catch (error) {
       console.error('EUDR analysis error:', error);
@@ -310,17 +302,19 @@ export default function RealMapBoundaryMapper({
   };
 
   // Complete boundary mapping and prepare for farmer account creation
-  const completeBoundaryMapping = () => {
-    const area = calculateArea(points);
+  const completeBoundaryMapping = (useFirstSixPoints = false) => {
+    const pointsToUse = useFirstSixPoints ? points.slice(0, 6) : points;
+    const area = calculateArea(pointsToUse);
     const boundaryData: BoundaryData = {
-      points,
+      points: pointsToUse,
       area,
       eudrCompliance: eudrReport,
       deforestationReport,
       complianceReports: agriculturalData
     };
     
-    setStatus(`🎉 Land mapping complete! ${area.toFixed(2)} hectares mapped with ${points.length} GPS points. Ready for farmer onboarding.`);
+    const pointLabel = useFirstSixPoints ? "6-point EUDR compliant" : `${points.length}-point high precision`;
+    setStatus(`🎉 Land mapping complete! ${area.toFixed(2)} hectares mapped with ${pointLabel} boundary. Ready for farmer onboarding.`);
     
     // Trigger the completion callback for farmer account creation
     onBoundaryComplete(boundaryData);
@@ -423,6 +417,20 @@ export default function RealMapBoundaryMapper({
       }
     ];
   };
+
+  // AUTO-COMPLETION: Watch points array for both GPS and click methods
+  useEffect(() => {
+    if (points.length === minPoints && !hasAutoCompleted) {
+      console.log(`🎯 Auto-completion triggered at ${minPoints} points (both GPS and click methods supported)`);
+      setHasAutoCompleted(true);
+      setStatus(`🔄 Processing boundary data with ${minPoints} points for EUDR compliance...`);
+      
+      // Start the agricultural analysis workflow with first 6 points
+      setTimeout(() => {
+        generateAgriculturalData(points.slice(0, minPoints));
+      }, 500);
+    }
+  }, [points.length, hasAutoCompleted, minPoints]);
 
   useEffect(() => {
     if (!mapRef.current || initializedRef.current) return;
@@ -2554,7 +2562,7 @@ export default function RealMapBoundaryMapper({
       setStatus('✅ Boundary mapping complete! GPS tracking stopped.');
       
       onBoundaryComplete({ 
-        points, 
+        points, // Manual completion sends ALL points for high precision
         area, 
         eudrCompliance: eudrReport || undefined,
         deforestationReport: deforestationReport || undefined,

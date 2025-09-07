@@ -464,7 +464,6 @@ export default function RealMapBoundaryMapper({
         testImg.onload = () => {
           console.log(`✅ Satellite imagery loaded: ${tileInfo.name}`);
           setStatus(`✅ Satellite imagery loaded from ${tileInfo.name}`);
-          setMapReady(true); // Clear loading state immediately
           createMapWithTile(tileInfo, lat, lng);
         };
         
@@ -551,7 +550,12 @@ export default function RealMapBoundaryMapper({
       }
       
       setStatus(`✅ ${tileInfo.name} satellite imagery loaded successfully`);
-      setMapReady(true);
+      
+      // Set map ready after a short delay to ensure tiles are rendered
+      setTimeout(() => {
+        setMapReady(true);
+        console.log(`✅ Map ready: ${tileInfo.name} tiles rendered`);
+      }, 500);
       
       console.log(`✅ SATELLITE TILE GRID LOADED: ${tileInfo.name} with 3x3 tiles at zoom ${zoom}`);
     };

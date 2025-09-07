@@ -549,7 +549,11 @@ export default function RealMapBoundaryMapper({
             top: ${posY}px;
             width: ${tileSize}px;
             height: ${tileSize}px;
-            z-index: 1;
+            z-index: 2;
+            opacity: 1;
+            display: block;
+            visibility: visible;
+            background-color: transparent;
           `;
           
           // Build tile URL based on provider
@@ -564,11 +568,19 @@ export default function RealMapBoundaryMapper({
             tileUrl = `https://tile.openstreetmap.org/${zoom}/${tileX}/${tileY}.png`;
           }
           
+          tileImg.crossOrigin = "anonymous";
           tileImg.src = tileUrl;
+          
+          tileImg.onload = () => {
+            console.log(`✅ Satellite tile loaded visually: ${tileX},${tileY} from ${tileInfo.name}`);
+          };
+          
           tileImg.onerror = () => {
-            console.log(`Failed to load tile: ${tileUrl}`);
-            // Fallback to a transparent tile
-            tileImg.style.backgroundColor = '#e5e7eb';
+            console.log(`❌ Failed to load tile: ${tileUrl}`);
+            // Fallback to a visible placeholder
+            tileImg.style.backgroundColor = '#4ade80';
+            tileImg.style.border = '1px solid #22c55e';
+            tileImg.alt = 'Satellite tile loading failed';
           };
           
           // CRITICAL FIX: Safe tile image append
@@ -680,7 +692,7 @@ export default function RealMapBoundaryMapper({
           }
         </style>
         <div class="real-map" id="real-map">
-          <div id="satellite-tiles" style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; z-index: 1;"></div>
+          <div id="satellite-tiles" style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; z-index: 0; display: block; visibility: visible; opacity: 1;"></div>
           <div class="map-overlay"></div>
           <svg class="map-polygon" style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; pointer-events: none;">
           </svg>

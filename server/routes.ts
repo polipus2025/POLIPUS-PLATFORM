@@ -1745,13 +1745,29 @@ export async function registerRoutes(app: Express): Promise<Server> {
         .limit(1);
       
       const bookingId = inspectionBooking[0]?.bookingId;
+      console.log(`🔍 Found booking ID: ${bookingId} for custody: ${custodyId}`);
       
       // Update inspection completion status to include payment request
-      if (bookingId && inspectionCompletionStatus[bookingId]) {
+      if (bookingId) {
+        // Create the inspection completion status if it doesn't exist
+        if (!inspectionCompletionStatus[bookingId]) {
+          inspectionCompletionStatus[bookingId] = {
+            inspectionCompleted: false,
+            paymentRequested: false,
+            paymentConfirmed: false,
+            paymentValidated: false,
+            workflowCompleted: false,
+            exporterPaymentStatus: 'NONE'
+          };
+        }
+        
+        // Update payment request status
         inspectionCompletionStatus[bookingId].paymentRequested = true;
         inspectionCompletionStatus[bookingId].paymentRequestId = paymentRequestId;
         inspectionCompletionStatus[bookingId].requestedAt = requestedAt;
         inspectionCompletionStatus[bookingId].exporterPaymentStatus = 'PAYMENT_CONFIRMATION_REQUIRED';
+        
+        console.log(`🔄 Updated payment status for booking ${bookingId}:`, inspectionCompletionStatus[bookingId]);
       }
 
       console.log(`✅ Payment request ${paymentRequestId} created for exporter ${transaction.exporterId}`);

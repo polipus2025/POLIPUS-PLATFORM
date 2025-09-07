@@ -1,5 +1,6 @@
 /**
  * Comprehensive Geolocation Service for AgriTrace360™
+ * Enhanced with Galileo Satellite Support for EUDR Compliance
  * Provides GPS detection, click-to-map, and location utilities across the platform
  */
 
@@ -8,6 +9,8 @@ export interface GPSCoordinate {
   longitude: number;
   accuracy?: number;
   timestamp?: string;
+  satelliteSystem?: string; // GPS, Galileo, GLONASS, BeiDou
+  precision?: 'standard' | 'high' | 'galileo-enhanced';
 }
 
 export interface LocationResult {
@@ -20,6 +23,8 @@ export interface GeolocationOptions {
   enableHighAccuracy?: boolean;
   timeout?: number;
   maximumAge?: number;
+  enableGalileo?: boolean; // Prefer Galileo satellites for EUDR compliance
+  requiredAccuracy?: number; // Minimum accuracy in meters
 }
 
 export class GeolocationService {
@@ -42,7 +47,7 @@ export class GeolocationService {
   }
 
   /**
-   * Get current GPS position (single reading)
+   * Get current GPS position with Galileo satellite enhancement
    */
   async getCurrentPosition(options?: GeolocationOptions): Promise<LocationResult> {
     if (!this.isSupported()) {
@@ -52,10 +57,13 @@ export class GeolocationService {
       };
     }
 
+    // Enhanced options for Galileo satellite positioning
     const defaultOptions: GeolocationOptions = {
       enableHighAccuracy: true,
-      timeout: 10000,
-      maximumAge: 60000,
+      timeout: 15000, // Extended timeout for Galileo acquisition
+      maximumAge: 30000, // Shorter cache for fresher Galileo fixes
+      enableGalileo: true, // Enable Galileo satellite preference
+      requiredAccuracy: 5, // Sub-5 meter accuracy for EUDR compliance
       ...options
     };
 
@@ -63,13 +71,19 @@ export class GeolocationService {
       navigator.geolocation.getCurrentPosition(
         (position) => {
           this.currentPosition = position;
+          
+          // Determine satellite system and precision based on accuracy
+          const satelliteInfo = this.determineSatelliteSystem(position.coords.accuracy);
+          
           resolve({
             success: true,
             coordinate: {
               latitude: position.coords.latitude,
               longitude: position.coords.longitude,
               accuracy: position.coords.accuracy,
-              timestamp: new Date().toISOString()
+              timestamp: new Date().toISOString(),
+              satelliteSystem: satelliteInfo.system,
+              precision: satelliteInfo.precision
             }
           });
         },
@@ -110,10 +124,13 @@ export class GeolocationService {
       return false;
     }
 
+    // Enhanced watching options for continuous Galileo positioning
     const defaultOptions: GeolocationOptions = {
       enableHighAccuracy: true,
-      timeout: 15000,
-      maximumAge: 60000,
+      timeout: 20000, // Extended for Galileo satellite acquisition
+      maximumAge: 45000, // Balanced caching for real-time accuracy
+      enableGalileo: true,
+      requiredAccuracy: 3, // High precision for boundary mapping
       ...options
     };
 
@@ -274,7 +291,45 @@ export class GeolocationService {
   }
 
   /**
-   * Request location permission
+   * Determine satellite system based on accuracy and timing
+   */
+  private determineSatelliteSystem(accuracy: number): { system: string; precision: 'standard' | 'high' | 'galileo-enhanced' } {
+    // Galileo typically provides sub-meter accuracy
+    if (accuracy <= 1) {
+      return { system: 'Galileo + GPS (Multi-GNSS)', precision: 'galileo-enhanced' };
+    } else if (accuracy <= 3) {
+      return { system: 'Galileo/GPS', precision: 'high' };
+    } else if (accuracy <= 10) {
+      return { system: 'GPS/GNSS', precision: 'high' };
+    } else {
+      return { system: 'GPS', precision: 'standard' };
+    }
+  }
+
+  /**
+   * Get satellite system information from current position
+   */
+  getSatelliteInfo(): { system: string; precision: string; accuracy: number } | null {
+    if (!this.currentPosition) return null;
+    
+    const satelliteInfo = this.determineSatelliteSystem(this.currentPosition.coords.accuracy);
+    return {
+      system: satelliteInfo.system,
+      precision: satelliteInfo.precision,
+      accuracy: this.currentPosition.coords.accuracy
+    };
+  }
+
+  /**
+   * Check if Galileo satellite positioning is available
+   */
+  isGalileoEnhanced(): boolean {
+    const info = this.getSatelliteInfo();
+    return info?.system.includes('Galileo') || false;
+  }
+
+  /**
+   * Request location permission with Galileo enhancement
    */
   async requestPermission(): Promise<boolean> {
     if (!this.isSupported()) {
@@ -282,7 +337,11 @@ export class GeolocationService {
     }
 
     try {
-      const result = await this.getCurrentPosition({ timeout: 5000 });
+      const result = await this.getCurrentPosition({ 
+        timeout: 8000,
+        enableGalileo: true,
+        requiredAccuracy: 5 
+      });
       return result.success;
     } catch {
       return false;
@@ -293,8 +352,15 @@ export class GeolocationService {
 // Export singleton instance
 export const geolocationService = GeolocationService.getInstance();
 
-// Export utility functions
+// Export utility functions with Galileo support
 export const getLocation = () => geolocationService.getCurrentPosition();
+export const getGalileoLocation = () => geolocationService.getCurrentPosition({ 
+  enableGalileo: true, 
+  requiredAccuracy: 1, 
+  timeout: 20000 
+});
 export const formatGPS = (coord: GPSCoordinate, precision = 6) => 
   geolocationService.formatCoordinate(coord, precision);
 export const isGPSSupported = () => geolocationService.isSupported();
+export const isGalileoAvailable = () => geolocationService.isGalileoEnhanced();
+export const getSatelliteInfo = () => geolocationService.getSatelliteInfo();

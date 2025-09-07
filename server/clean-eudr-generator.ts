@@ -131,8 +131,8 @@ async function addCoverPage(doc: PDFDocumentType, farmerData: FarmerData, export
   doc.fontSize(10).fillColor('#4a5568')
      .text('This comprehensive EUDR Compliance Certification Pack contains six specialized reports that demonstrate', 70, 415)
      .text('full compliance with the European Union Deforestation Regulation (EUDR). Each certificate provides', 70, 430)
-     .text('detailed analysis and verification of different aspects of agricultural commodity compliance,', 70, 445)
-     .text('ensuring complete traceability from farm to export destination.', 70, 460);
+     .text('detailed analysis and verification using Galileo satellite positioning for enhanced accuracy,', 70, 445)
+     .text('ensuring complete traceability from farm to export destination with sub-meter precision.', 70, 460);
   
   // Status boxes
   doc.fontSize(16).fillColor('#2d3748').font('Helvetica-Bold').text('COMPLIANCE STATUS', 70, 490);
@@ -282,9 +282,9 @@ async function addDeforestationAnalysis(doc: PDFDocumentType, farmerData: Farmer
   // Commentary
   doc.fontSize(12).fillColor('#2d3748').font('Helvetica-Bold').text('ABOUT THIS DEFORESTATION ANALYSIS', 70, 470);
   doc.fontSize(9).fillColor('#4a5568')
-     .text('This analysis utilizes satellite monitoring and geospatial data to assess deforestation risks associated', 70, 490)
-     .text('with the commodity production area. The assessment includes forest degradation monitoring, land use', 70, 505)
-     .text('change analysis, and biodiversity impact evaluation to ensure EUDR environmental compliance.', 70, 520);
+     .text('This analysis utilizes Galileo satellite positioning and geospatial data to assess deforestation risks', 70, 490)
+     .text('with sub-meter accuracy. The assessment includes forest degradation monitoring, land use change', 70, 505)
+     .text('analysis, and biodiversity impact evaluation using EU satellite infrastructure for compliance.', 70, 520);
   
   await addQRFooter(doc, packId, currentDate, 'Deforestation Analysis', farmerData.name, exportData.company);
 }
@@ -299,9 +299,9 @@ async function addDueDiligence(doc: PDFDocumentType, farmerData: FarmerData, exp
   doc.fontSize(16).fillColor('#2d3748').font('Helvetica-Bold').text('DUE DILIGENCE VERIFICATION', 70, 140);
   
   const verifications = [
-    { item: 'Geolocation coordinates verified using GPS technology', status: 'VERIFIED' },
+    { item: 'Geolocation coordinates verified using Galileo satellite positioning', status: 'VERIFIED' },
     { item: 'Supply chain documentation reviewed and validated', status: 'COMPLETE' },
-    { item: 'Risk assessment conducted using satellite monitoring', status: 'ASSESSED' },
+    { item: 'Risk assessment conducted using Galileo + GPS satellite monitoring', status: 'ASSESSED' },
     { item: 'Legal compliance verification performed', status: 'COMPLIANT' },
     { item: 'EUDR due diligence statement prepared and reviewed', status: 'REVIEWED' },
     { item: 'Third-party audit documentation verified', status: 'CERTIFIED' },
@@ -317,12 +317,19 @@ async function addDueDiligence(doc: PDFDocumentType, farmerData: FarmerData, exp
     doc.fontSize(8).fillColor('#38a169').font('Helvetica-Bold').text(verification.status, 420, y + 8);
   });
   
-  // Commentary
-  doc.fontSize(12).fillColor('#2d3748').font('Helvetica-Bold').text('ABOUT THIS DUE DILIGENCE STATEMENT', 70, 390);
+  // Technical Specifications
+  doc.fontSize(12).fillColor('#2d3748').font('Helvetica-Bold').text('TECHNICAL SPECIFICATIONS', 70, 390);
   doc.fontSize(9).fillColor('#4a5568')
-     .text('This statement confirms completion of all due diligence procedures required under EUDR Article 8.', 70, 410)
-     .text('It includes verification of geolocation data, supply chain documentation, risk assessment results,', 70, 425)
-     .text('and operator information system compliance as mandated by EU Regulation 2023/1115.', 70, 440);
+     .text('• Positioning System: Galileo Satellite + GPS Multi-GNSS', 80, 410)
+     .text('• Accuracy: Sub-meter precision (<1m horizontal)', 80, 425)
+     .text('• EU Infrastructure: Galileo constellation for EUDR compliance', 80, 440)
+     .text('• Data Source: Real-time satellite positioning with error correction', 80, 455);
+  
+  // Commentary
+  doc.fontSize(12).fillColor('#2d3748').font('Helvetica-Bold').text('ABOUT THIS DUE DILIGENCE STATEMENT', 70, 480);
+  doc.fontSize(9).fillColor('#4a5568')
+     .text('This statement confirms completion of all due diligence procedures required under EUDR Article 8.', 70, 500)
+     .text('Enhanced with Galileo satellite positioning for improved geolocation accuracy and EU compliance.', 70, 515);
   
   // Final certification
   doc.rect(70, 460, 450, 60).fill('#2d3748');

@@ -425,10 +425,11 @@ export default function RealMapBoundaryMapper({
   };
 
   useEffect(() => {
-    if (!mapRef.current || initializedRef.current || isCleaningUp.current) return;
+    if (!mapRef.current || initializedRef.current) return;
     
     initializedRef.current = true;
-    isCleaningUp.current = false;
+    isCleaningUp.current = false; // Always reset cleanup flag
+    console.log("🔧 Map component initializing, cleaningUp reset to false");
 
     // Get user's GPS location or use default
     navigator.geolocation.getCurrentPosition(

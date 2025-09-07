@@ -707,9 +707,9 @@ export default function RealMapBoundaryMapper({
           
           @media (max-width: 480px) {
             .real-map {
-              height: 340px !important;
-              min-height: 320px !important;
-              max-height: 360px !important;
+              height: 500px !important;
+              min-height: 450px !important;
+              max-height: 550px !important;
             }
             .map-marker {
               width: 8px !important;
@@ -872,9 +872,9 @@ export default function RealMapBoundaryMapper({
           
           @media (max-width: 480px) {
             .fallback-map {
-              height: 340px !important;
-              min-height: 320px !important;
-              max-height: 360px !important;
+              height: 500px !important;
+              min-height: 450px !important;
+              max-height: 550px !important;
             }
             .map-marker {
               width: 16px !important;

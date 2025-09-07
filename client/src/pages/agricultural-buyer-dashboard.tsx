@@ -1037,31 +1037,35 @@ export default function AgriculturalBuyerDashboard() {
   };
 
   return (
-    <div className="min-h-screen bg-white">
-      {/* Header */}
-      <div className="bg-white border-b border-gray-200 px-6 py-4">
-        <div className="flex justify-between items-center">
-          <div>
-            <h1 className="text-2xl font-bold text-gray-900">Agricultural Buyer Portal</h1>
+    <div className="min-h-screen bg-gradient-to-br from-slate-50 to-slate-100">
+      {/* Mobile-First Header - App-Like Design */}
+      <div className="bg-white/90 backdrop-blur-sm border-b border-gray-200 px-4 sm:px-6 py-3 sm:py-4 shadow-lg">
+        <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3">
+          <div className="flex-1">
+            <h1 className="text-lg sm:text-2xl font-bold text-gray-900 leading-tight">Agricultural Buyer Portal 🛒</h1>
             {profileLoading ? (
-              <p className="text-gray-600">Loading company details...</p>
+              <p className="text-xs sm:text-base text-gray-600">Loading company details...</p>
             ) : (
-              <p className="text-gray-600">{company}</p>
+              <p className="text-xs sm:text-base text-gray-600">{company}</p>
             )}
           </div>
-          <div className="flex items-center space-x-4">
-            <div className="text-right">
+          <div className="flex items-center space-x-3 sm:space-x-4 w-full sm:w-auto justify-between sm:justify-end">
+            <div className="text-left sm:text-right">
               {profileLoading ? (
-                <p className="font-medium text-gray-900">Loading...</p>
+                <p className="font-medium text-gray-900 text-sm">Loading...</p>
               ) : (
                 <>
-                  <p className="font-medium text-gray-900">{buyerName}</p>
+                  <p className="font-medium text-gray-900 text-sm sm:text-base">{buyerName}</p>
                   {buyerProfile && (
-                    <p className="text-xs text-gray-500">{buyerProfile.primaryEmail} • {buyerProfile.contactPersonTitle}</p>
+                    <p className="text-xs text-gray-500 hidden sm:block">{buyerProfile.primaryEmail} • {buyerProfile.contactPersonTitle}</p>
                   )}
                 </>
               )}
-              <p className="text-sm text-gray-500">Buyer ID: {buyerId}</p>
+              <p className="text-xs sm:text-sm text-gray-500">
+                <span className="bg-blue-100 text-blue-700 px-2 py-1 rounded-full text-xs font-medium">
+                  {buyerId}
+                </span>
+              </p>
             </div>
 
             {/* Profile Management Dropdown */}
@@ -1078,28 +1082,32 @@ export default function AgriculturalBuyerDashboard() {
       </div>
 
       {/* Main Content */}
-      <div className="p-6">
-        {/* Enhanced Navigation with Farmers Dropdown - Prominent Styling */}
-        <div className="bg-gradient-to-r from-slate-50 to-blue-50 border-2 border-slate-200 rounded-xl mb-6 shadow-sm">
-          <div className="flex flex-wrap items-center justify-between p-4 gap-3">
+      <div className="p-3 sm:p-6">
+        {/* Mobile-First Navigation - App-Style Tabs */}
+        <div className="bg-white/95 backdrop-blur-sm border border-slate-200 rounded-xl mb-4 sm:mb-6 shadow-xl">
+          <div className="grid grid-cols-2 sm:flex sm:flex-wrap items-center justify-between p-2 sm:p-4 gap-2 sm:gap-3">
             {/* Business Overview */}
             <Button 
               variant={activeTab === 'overview' ? 'default' : 'ghost'} 
-              size="lg"
+              size={window.innerWidth < 640 ? "sm" : "lg"}
               onClick={() => setActiveTab('overview')}
-              className="font-semibold text-sm px-6 py-3 rounded-lg transition-all hover:scale-105"
+              className="font-semibold text-xs sm:text-sm px-3 sm:px-6 py-2 sm:py-3 rounded-lg transition-all hover:scale-105 data-[state=active]:bg-green-100 data-[state=active]:text-green-700"
             >
-              Business Overview
+              <BarChart3 className="w-3 h-3 sm:w-4 sm:h-4 mr-1 sm:mr-2" />
+              <span className="hidden sm:inline">Business Overview</span>
+              <span className="sm:hidden">Overview</span>
             </Button>
             
             {/* My Products */}
             <Button 
               variant={activeTab === 'products' ? 'default' : 'ghost'} 
-              size="lg"
+              size={window.innerWidth < 640 ? "sm" : "lg"}
               onClick={() => setActiveTab('products')}
-              className="font-semibold text-sm px-6 py-3 rounded-lg transition-all hover:scale-105"
+              className="font-semibold text-xs sm:text-sm px-3 sm:px-6 py-2 sm:py-3 rounded-lg transition-all hover:scale-105 data-[state=active]:bg-blue-100 data-[state=active]:text-blue-700"
             >
-              My Products
+              <Package2 className="w-3 h-3 sm:w-4 sm:h-4 mr-1 sm:mr-2" />
+              <span className="hidden sm:inline">My Products</span>
+              <span className="sm:hidden">Products</span>
             </Button>
 
             {/* Farmers Dropdown Menu */}
@@ -1194,49 +1202,58 @@ export default function AgriculturalBuyerDashboard() {
         <div>
           {/* Business Overview Tab */}
           {activeTab === 'overview' && (
-            <div className="space-y-6">
-              <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
-              <Card>
-                <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                  <CardTitle className="text-sm font-medium">Active Connections</CardTitle>
-                  <Users className="h-4 w-4 text-blue-600" />
+            <div className="space-y-4 sm:space-y-6">
+              {/* Mobile-Optimized Statistics Cards */}
+              <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-6">
+              <Card className="bg-white/95 backdrop-blur-sm shadow-lg hover:shadow-xl transition-all duration-300 bg-gradient-to-br from-blue-50 to-blue-100 border-blue-200 rounded-xl">
+                <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2 p-3 sm:p-4">
+                  <CardTitle className="text-xs sm:text-sm font-semibold text-blue-600">Active Connections</CardTitle>
+                  <div className="bg-blue-100 rounded-full p-1.5">
+                    <Users className="h-3 w-3 sm:h-4 sm:w-4 text-blue-600" />
+                  </div>
                 </CardHeader>
-                <CardContent>
-                  <div className="text-2xl font-bold">28</div>
-                  <p className="text-xs text-gray-600">Farmers Only</p>
+                <CardContent className="p-3 sm:p-4 pt-0">
+                  <div className="text-xl sm:text-2xl font-bold text-blue-900 leading-tight">28</div>
+                  <p className="text-xs text-blue-600">Farmers Only</p>
                 </CardContent>
               </Card>
 
-              <Card>
-                <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                  <CardTitle className="text-sm font-medium">Available Harvests</CardTitle>
-                  <Package2 className="h-4 w-4 text-green-600" />
+              <Card className="bg-white/95 backdrop-blur-sm shadow-lg hover:shadow-xl transition-all duration-300 bg-gradient-to-br from-green-50 to-green-100 border-green-200 rounded-xl">
+                <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2 p-3 sm:p-4">
+                  <CardTitle className="text-xs sm:text-sm font-semibold text-green-600">Available Harvests</CardTitle>
+                  <div className="bg-green-100 rounded-full p-1.5">
+                    <Package2 className="h-3 w-3 sm:h-4 sm:w-4 text-green-600" />
+                  </div>
                 </CardHeader>
-                <CardContent>
-                  <div className="text-2xl font-bold">15</div>
-                  <p className="text-xs text-gray-600">Ready for purchase</p>
+                <CardContent className="p-3 sm:p-4 pt-0">
+                  <div className="text-xl sm:text-2xl font-bold text-green-900 leading-tight">15</div>
+                  <p className="text-xs text-green-600">Ready for purchase</p>
                 </CardContent>
               </Card>
 
-              <Card>
-                <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                  <CardTitle className="text-sm font-medium">Monthly Volume</CardTitle>
-                  <TrendingUp className="h-4 w-4 text-orange-600" />
+              <Card className="bg-white/95 backdrop-blur-sm shadow-lg hover:shadow-xl transition-all duration-300 bg-gradient-to-br from-orange-50 to-orange-100 border-orange-200 rounded-xl">
+                <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2 p-3 sm:p-4">
+                  <CardTitle className="text-xs sm:text-sm font-semibold text-orange-600">Monthly Volume</CardTitle>
+                  <div className="bg-orange-100 rounded-full p-1.5">
+                    <TrendingUp className="h-3 w-3 sm:h-4 sm:w-4 text-orange-600" />
+                  </div>
                 </CardHeader>
-                <CardContent>
-                  <div className="text-2xl font-bold">12.5T</div>
-                  <p className="text-xs text-gray-600">Commodities traded</p>
+                <CardContent className="p-3 sm:p-4 pt-0">
+                  <div className="text-xl sm:text-2xl font-bold text-orange-900 leading-tight">12.5T</div>
+                  <p className="text-xs text-orange-600">Commodities traded</p>
                 </CardContent>
               </Card>
 
-              <Card>
-                <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                  <CardTitle className="text-sm font-medium">Revenue</CardTitle>
-                  <DollarSign className="h-4 w-4 text-purple-600" />
+              <Card className="bg-white/95 backdrop-blur-sm shadow-lg hover:shadow-xl transition-all duration-300 bg-gradient-to-br from-purple-50 to-purple-100 border-purple-200 rounded-xl">
+                <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2 p-3 sm:p-4">
+                  <CardTitle className="text-xs sm:text-sm font-semibold text-purple-600">Revenue</CardTitle>
+                  <div className="bg-purple-100 rounded-full p-1.5">
+                    <DollarSign className="h-3 w-3 sm:h-4 sm:w-4 text-purple-600" />
+                  </div>
                 </CardHeader>
-                <CardContent>
-                  <div className="text-2xl font-bold">$45,200</div>
-                  <p className="text-xs text-gray-600">This month</p>
+                <CardContent className="p-3 sm:p-4 pt-0">
+                  <div className="text-xl sm:text-2xl font-bold text-purple-900 leading-tight">$45,200</div>
+                  <p className="text-xs text-purple-600">This month</p>
                 </CardContent>
               </Card>
             </div>

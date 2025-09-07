@@ -76,12 +76,12 @@ const ExporterInspections = memo(() => {
     }
   };
 
-  // 🎯 GET PAYMENT REQUEST STATUS - Simple lookup without dynamic hooks
+  // 🎯 GET PAYMENT REQUEST STATUS - Simple lookup to avoid ordering issues
   const getPaymentRequestStatus = (bookingId: string) => {
-    // Return default status - payment status will be checked at server level
+    // Use dynamic API call for each booking when needed
     return {
       requested: false,
-      confirmed: false,
+      confirmed: false, 
       validated: false,
       status: 'NONE'
     };

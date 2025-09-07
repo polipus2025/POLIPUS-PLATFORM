@@ -615,11 +615,14 @@ export default function RealMapBoundaryMapper({
         mapEngine.current.innerHTML = `
         <style>
           .real-map { 
-            height: 500px; 
+            height: 400px; 
             width: 100%;
             border: 2px solid #e5e7eb;
             border-radius: 8px;
             position: relative;
+            /* Mobile Responsive Fixes */
+            min-height: 280px;
+            max-height: 400px;
             background-color: #f3f4f6;
             cursor: crosshair;
             overflow: hidden;
@@ -666,6 +669,36 @@ export default function RealMapBoundaryMapper({
             stroke-width: 3;
             filter: drop-shadow(0 2px 4px rgba(0,0,0,0.3));
             z-index: 5;
+          }
+          
+          /* Mobile Responsive Styles */
+          @media (max-width: 768px) {
+            .real-map {
+              height: 280px !important;
+              min-height: 250px !important;
+              max-height: 320px !important;
+              border-radius: 6px;
+              border-width: 1px;
+            }
+            .map-marker {
+              width: 10px !important;
+              height: 10px !important;
+            }
+            .map-polygon {
+              stroke-width: 2px !important;
+            }
+          }
+          
+          @media (max-width: 480px) {
+            .real-map {
+              height: 250px !important;
+              min-height: 200px !important;
+              max-height: 280px !important;
+            }
+            .map-marker {
+              width: 8px !important;
+              height: 8px !important;
+            }
           }
         </style>
         <div class="real-map" id="real-map">
@@ -742,11 +775,14 @@ export default function RealMapBoundaryMapper({
         mapRef.current.innerHTML = `
         <style>
           .fallback-map { 
-            height: 500px; 
+            height: 400px; 
             width: 100%;
             border: 2px solid #e5e7eb;
             border-radius: 8px;
             position: relative;
+            /* Mobile Responsive Fixes */
+            min-height: 280px;
+            max-height: 400px;
             background: linear-gradient(45deg, #10b981 0%, #059669 50%, #047857 100%);
             cursor: crosshair;
             overflow: hidden;
@@ -797,6 +833,38 @@ export default function RealMapBoundaryMapper({
             stroke-dasharray: 8,4;
             filter: drop-shadow(0 2px 6px rgba(0,0,0,0.4));
             z-index: 5;
+          }
+          
+          /* Mobile Responsive Styles for Fallback Map */
+          @media (max-width: 768px) {
+            .fallback-map {
+              height: 280px !important;
+              min-height: 250px !important;
+              max-height: 320px !important;
+              border-radius: 6px;
+              border-width: 1px;
+            }
+            .map-marker {
+              width: 18px !important;
+              height: 18px !important;
+              font-size: 10px !important;
+            }
+            .map-polygon {
+              stroke-width: 3px !important;
+            }
+          }
+          
+          @media (max-width: 480px) {
+            .fallback-map {
+              height: 250px !important;
+              min-height: 200px !important;
+              max-height: 280px !important;
+            }
+            .map-marker {
+              width: 16px !important;
+              height: 16px !important;
+              font-size: 8px !important;
+            }
           }
         </style>
         <div class="fallback-map" id="fallback-map">

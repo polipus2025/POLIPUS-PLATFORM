@@ -76,14 +76,15 @@ const ExporterInspections = memo(() => {
     }
   };
 
-  // 🎯 GET PAYMENT REQUEST STATUS FROM API
-  const { data: paymentRequestData } = useQuery({
-    queryKey: [`/api/exporter/payment-request-status/PINSP-20250902-XEZS`],
-    staleTime: 10000, // Refresh every 10 seconds for real-time updates
-    refetchInterval: 10000, // Auto-refresh every 10 seconds
-  });
-
+  // 🎯 GET PAYMENT REQUEST STATUS FROM API - Dynamic for any booking ID
   const getPaymentRequestStatus = (bookingId: string) => {
+    // Query payment status for this specific booking ID
+    const { data: paymentRequestData } = useQuery({
+      queryKey: [`/api/exporter/payment-request-status/${bookingId}`],
+      staleTime: 5000, // Refresh every 5 seconds for real-time updates
+      refetchInterval: 5000, // Auto-refresh every 5 seconds
+    });
+
     return {
       requested: paymentRequestData?.data?.requested || false,
       confirmed: paymentRequestData?.data?.confirmed || false,

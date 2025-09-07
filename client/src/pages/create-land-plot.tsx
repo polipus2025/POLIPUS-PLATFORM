@@ -11,7 +11,7 @@ import { useMutation, useQuery } from "@tanstack/react-query";
 import { apiRequest } from "@/lib/queryClient";
 import { ArrowLeft, MapPin, Globe, TreePine, Target, Users, Crosshair, Satellite, Zap, RefreshCw, Download } from "lucide-react";
 import { Link } from "wouter";
-import RealMapBoundaryMapper from '@/components/maps/real-map-boundary-mapper';
+import RealMapBoundaryMapper from '@/components/maps/real-map-boundary-mapper-safe';
 
 export default function CreateLandPlot() {
   const { toast } = useToast();

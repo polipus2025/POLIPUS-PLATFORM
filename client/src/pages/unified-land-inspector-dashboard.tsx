@@ -24,7 +24,7 @@ import { useQuery } from "@tanstack/react-query";
 import { Link } from "wouter";
 import ProfileDropdown from "@/components/ProfileDropdown";
 import { useToast } from "@/hooks/use-toast";
-import RealMapBoundaryMapper from "@/components/maps/real-map-boundary-mapper";
+import RealMapBoundaryMapper from "@/components/maps/real-map-boundary-mapper-safe";
 
 export default function UnifiedLandInspectorDashboard() {
   const [activeTab, setActiveTab] = useState("overview");

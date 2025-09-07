@@ -13,7 +13,7 @@ import { ArrowLeft, MapPin, Target, Globe, TreePine, Upload, User, Users, Key, C
 import { Link, useLocation } from "wouter";
 // Lazy load the boundary mapper for better performance
 import { lazy, Suspense } from 'react';
-const RealMapBoundaryMapper = lazy(() => import('@/components/maps/real-map-boundary-mapper'));
+const RealMapBoundaryMapper = lazy(() => import('@/components/maps/real-map-boundary-mapper-safe'));
 const LandOwnershipDocumentation = lazy(() => import('@/components/LandOwnershipDocumentation'));
 
 const LIBERIAN_COUNTIES = [

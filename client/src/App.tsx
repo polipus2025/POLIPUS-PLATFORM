@@ -132,7 +132,10 @@ function App() {
             <Route path="/certificate-testing-dashboard" component={CertificateTestingDashboard} />
             
             {/* AGRICULTURAL AUTHENTICATION ROUTES */}
-            <Route path="/farmer-login" component={FarmerLogin} />
+            <Route path="/farmer-login" component={() => {
+              console.log('✅ Farmer login route matched!');
+              return <FarmerLogin />;
+            }} />
             <Route path="/farmer-login-portal" component={FarmerLoginPortal} />
             <Route path="/regulatory-login" component={RegulatoryLogin} />
             <Route path="/inspector-login" component={InspectorLogin} />
@@ -208,8 +211,11 @@ function App() {
             {/* POLIPUS REDIRECT */}
             <Route path="/polipus" component={FrontPage} />
             
-            {/* Default fallback */}
-            <Route component={FrontPage} />
+            {/* Default fallback - Debug routing */}
+            <Route path="*" component={() => {
+              console.log('⚠️ Route not matched, showing FrontPage');
+              return <FrontPage />;
+            }} />
           </Switch>
           <Toaster />
         </TooltipProvider>

@@ -9,7 +9,8 @@ import { Badge } from "@/components/ui/badge";
 import { useToast } from "@/hooks/use-toast";
 import { useMutation } from "@tanstack/react-query";
 import { apiRequest } from "@/lib/queryClient";
-import { ArrowLeft, MapPin, Target, Globe, TreePine, Upload, User, Users, Key, Copy, Eye, EyeOff, FileText, CheckCircle } from "lucide-react";
+import { geolocationService, getSatelliteInfo, isGalileoAvailable } from "@/services/geolocation-service";
+import { ArrowLeft, MapPin, Target, Globe, TreePine, Upload, User, Users, Key, Copy, Eye, EyeOff, FileText, CheckCircle, Satellite, Zap } from "lucide-react";
 import { Link, useLocation } from "wouter";
 // Lazy load the boundary mapper for better performance
 import { lazy, Suspense } from 'react';
@@ -26,6 +27,8 @@ export default function OnboardFarmer() {
   const { toast } = useToast();
   const [, setLocation] = useLocation();
   const [isDetectingGPS, setIsDetectingGPS] = useState(false);
+  const [satelliteInfo, setSatelliteInfo] = useState<any>(null);
+  const [galileoStatus, setGalileoStatus] = useState<string>("Not detected");
   
   const [farmerData, setFarmerData] = useState({
     firstName: "",
@@ -58,56 +61,52 @@ export default function OnboardFarmer() {
   const inspectorId = localStorage.getItem("inspectorId") || "land_inspector";
   const inspectorName = localStorage.getItem("inspectorName") || "Land Inspector";
 
-  // GPS Detection
-  const getCurrentLocation = (isForFarmer = false) => {
-    console.log("🔄 Get Location button clicked!");
+  // Enhanced GPS Detection with Galileo Satellite Support
+  const getCurrentLocation = async (isForFarmer = false) => {
+    console.log("🛰️ Enhanced Galileo GPS Detection started!");
     setIsDetectingGPS(true);
     
-    if (!navigator.geolocation) {
-      toast({
-        title: "GPS Not Available",
-        description: "Geolocation is not supported by this device/browser",
-        variant: "destructive",
+    try {
+      const result = await geolocationService.getCurrentPosition({
+        enableGalileo: true,
+        requiredAccuracy: 3,
+        timeout: 20000
       });
-      setIsDetectingGPS(false);
-      return;
-    }
 
-    const options = {
-      enableHighAccuracy: true,
-      timeout: 15000,
-      maximumAge: 60000
-    };
-
-    navigator.geolocation.getCurrentPosition(
-      (position) => {
-        const { latitude, longitude, accuracy } = position.coords;
+      if (result.success && result.coordinate) {
+        const { latitude, longitude, accuracy, satelliteSystem, precision } = result.coordinate;
         const coordinates = `${latitude.toFixed(6)}, ${longitude.toFixed(6)}`;
         
-        console.log(`✅ GPS coordinates detected: ${coordinates}`);
+        console.log(`✅ Enhanced GPS coordinates detected: ${coordinates}`);
+        console.log(`🛰️ Satellite System: ${satelliteSystem}, Precision: ${precision}`);
+        
+        // Update satellite information
+        const satInfo = geolocationService.getSatelliteInfo();
+        setSatelliteInfo(satInfo);
+        setGalileoStatus(satInfo?.system.includes('Galileo') ? "Active" : "GPS Only");
+
         setFarmerData(prev => ({
           ...prev,
           gpsCoordinates: coordinates
         }));
-        console.log("✅ GPS coordinates saved to farmer data - map should appear now!");
 
         toast({
-          title: "GPS Location Detected",
-          description: `Coordinates: ${coordinates} (±${accuracy?.toFixed(0)}m)`,
+          title: satelliteSystem?.includes('Galileo') ? "🛰️ Galileo Positioning Active" : "📍 GPS Position Detected",
+          description: `${coordinates} (±${accuracy?.toFixed(1)}m) - ${precision} precision`,
         });
         setIsDetectingGPS(false);
-      },
-      (error) => {
-        console.error("GPS Error:", error);
-        toast({
-          title: "GPS Detection Failed",
-          description: "Unable to detect GPS coordinates. Please enter manually or try again.",
-          variant: "destructive",
-        });
-        setIsDetectingGPS(false);
-      },
-      options
-    );
+      } else {
+        throw new Error(result.error || "Failed to get position");
+      }
+    } catch (error) {
+      console.error("Enhanced GPS Error:", error);
+      toast({
+        title: "Positioning Failed",
+        description: "Unable to detect coordinates. Please try again or enter manually.",
+        variant: "destructive",
+      });
+      setIsDetectingGPS(false);
+    }
   };
 
   const [showCredentialsModal, setShowCredentialsModal] = useState({
@@ -530,6 +529,42 @@ export default function OnboardFarmer() {
                         )}
                         {isDetectingGPS ? "Detecting..." : "Get Location"}
                       </Button>
+                    </div>
+                    
+                    {/* Galileo Satellite Status Indicator */}
+                    <div className="mt-3 p-3 bg-gradient-to-r from-blue-50 to-purple-50 border border-blue-200 rounded-lg">
+                      <div className="flex items-center justify-between">
+                        <div className="flex items-center space-x-2">
+                          <Satellite className={`w-4 h-4 ${galileoStatus === "Active" ? "text-green-600" : "text-gray-400"}`} />
+                          <span className="text-sm font-medium text-gray-700">
+                            Galileo Satellite Status:
+                          </span>
+                          <Badge variant={galileoStatus === "Active" ? "default" : "secondary"} className="text-xs">
+                            {galileoStatus}
+                          </Badge>
+                        </div>
+                        {satelliteInfo && (
+                          <div className="flex items-center space-x-1">
+                            <Zap className="w-3 h-3 text-blue-600" />
+                            <span className="text-xs text-blue-600">
+                              ±{satelliteInfo.accuracy.toFixed(1)}m
+                            </span>
+                          </div>
+                        )}
+                      </div>
+                      {satelliteInfo && (
+                        <div className="mt-2 text-xs text-gray-600">
+                          <div className="flex items-center justify-between">
+                            <span>System: {satelliteInfo.system}</span>
+                            <span>Precision: {satelliteInfo.precision}</span>
+                          </div>
+                        </div>
+                      )}
+                      {!satelliteInfo && (
+                        <div className="mt-1 text-xs text-gray-500">
+                          Click "Get Location" to activate Galileo positioning
+                        </div>
+                      )}
                     </div>
                   </div>
                 </CardContent>

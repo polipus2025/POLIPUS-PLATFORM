@@ -10,6 +10,7 @@ import { useToast } from "@/hooks/use-toast";
 import { useMutation, useQuery } from "@tanstack/react-query";
 import { apiRequest } from "@/lib/queryClient";
 import { ArrowLeft, MapPin, Globe, TreePine, Target, Users, Crosshair, Satellite, Zap, RefreshCw, Download } from "lucide-react";
+import { geolocationService } from "@/services/geolocation-service";
 import { Link } from "wouter";
 import RealMapBoundaryMapper from '@/components/maps/real-map-boundary-mapper';
 
@@ -35,6 +36,8 @@ export default function CreateLandPlot() {
   const [isAnalyzing, setIsAnalyzing] = useState(false);
   const [isGettingLocation, setIsGettingLocation] = useState(false);
   const [currentLocation, setCurrentLocation] = useState<{lat: number, lng: number} | null>(null);
+  const [satelliteInfo, setSatelliteInfo] = useState<any>(null);
+  const [galileoStatus, setGalileoStatus] = useState<string>("Not detected");
 
   const inspectorId = localStorage.getItem("inspectorId") || "land_inspector";
   
@@ -104,36 +107,39 @@ export default function CreateLandPlot() {
     }
   };
 
-  const getCurrentLocation = () => {
+  const getCurrentLocation = async () => {
     setIsGettingLocation(true);
     
-    if (navigator.geolocation) {
-      navigator.geolocation.getCurrentPosition(
-        (position) => {
-          setCurrentLocation({
-            lat: position.coords.latitude,
-            lng: position.coords.longitude
-          });
-          setIsGettingLocation(false);
-          toast({
-            title: "Location Acquired",
-            description: "GPS coordinates captured successfully.",
-          });
-        },
-        (error) => {
-          setIsGettingLocation(false);
-          toast({
-            title: "Location Error",
-            description: "Unable to get current location.",
-            variant: "destructive",
-          });
-        }
-      );
-    } else {
+    try {
+      const result = await geolocationService.getCurrentPosition({
+        enableGalileo: true,
+        requiredAccuracy: 2,
+        timeout: 20000
+      });
+
+      if (result.success && result.coordinate) {
+        const { latitude, longitude, accuracy, satelliteSystem, precision } = result.coordinate;
+        
+        setCurrentLocation({ lat: latitude, lng: longitude });
+        
+        // Update satellite information
+        const satInfo = geolocationService.getSatelliteInfo();
+        setSatelliteInfo(satInfo);
+        setGalileoStatus(satInfo?.system.includes('Galileo') ? "Active" : "GPS Only");
+        
+        setIsGettingLocation(false);
+        toast({
+          title: satelliteSystem?.includes('Galileo') ? "🛰️ Galileo Positioning Active" : "📍 GPS Location Acquired",
+          description: `${latitude.toFixed(6)}, ${longitude.toFixed(6)} (±${accuracy?.toFixed(1)}m)`,
+        });
+      } else {
+        throw new Error(result.error || "Failed to get position");
+      }
+    } catch (error) {
       setIsGettingLocation(false);
       toast({
-        title: "GPS Not Supported",
-        description: "Geolocation is not supported by this browser.",
+        title: "Location Error",
+        description: "Unable to get current location.",
         variant: "destructive",
       });
     }

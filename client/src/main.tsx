@@ -49,17 +49,14 @@ function initializeApp() {
   `;
 
   try {
-    // Ensure React is fully loaded before creating root
-    if (!React || typeof React.createElement !== 'function') {
-      console.error('React not properly loaded, retrying...');
-      setTimeout(initializeApp, 100);
-      return;
-    }
-    
     const root = createRoot(rootElement);
     
-    // Render app immediately
-    root.render(<App />);
+    // Render app with proper error boundary
+    root.render(
+      React.createElement(React.StrictMode, null,
+        React.createElement(App)
+      )
+    );
     
     // Remove loader after app mounts
     setTimeout(() => {

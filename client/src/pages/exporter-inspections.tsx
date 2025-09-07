@@ -407,6 +407,7 @@ const ExporterInspections = memo(() => {
                               </Button>
                               {(() => {
                                 const booking = getBookingDetails(pickup.requestId);
+                                const paymentRequestStatus = getPaymentRequestStatus(booking?.booking_id);
                                 return (
                                   <div className="text-xs text-slate-600 space-y-1">
                                     <p><strong>Booking ID:</strong> {booking?.booking_id}</p>
@@ -420,9 +421,17 @@ const ExporterInspections = memo(() => {
                                       <Badge className={`ml-2 text-xs ${
                                         booking?.inspection_status === 'INSPECTION PASSED' 
                                           ? 'bg-green-100 text-green-800 border-green-300' 
-                                          : 'bg-blue-100 text-blue-800 border-blue-300'
+                                          : paymentRequestStatus.requested 
+                                            ? 'bg-orange-100 text-orange-800 border-orange-300'
+                                            : 'bg-blue-100 text-blue-800 border-blue-300'
                                       }`}>
-                                        {booking?.inspection_status || booking?.assignment_status?.replace('_', ' ') || 'pending'}
+                                        {
+                                          paymentRequestStatus.requested 
+                                            ? (paymentRequestStatus.confirmed 
+                                                ? (paymentRequestStatus.validated ? 'Payment Completed' : 'Payment Confirmed') 
+                                                : 'Payment Requested')
+                                            : (booking?.inspection_status || booking?.assignment_status?.replace('_', ' ') || 'pending')
+                                        }
                                       </Badge>
                                     </p>
                                     {/* 🎯 INSPECTION COMPLETION DETAILS */}
@@ -441,7 +450,6 @@ const ExporterInspections = memo(() => {
 
                                     {/* 🎯 PAYMENT CONFIRMATION BUTTON - Only when buyer requests payment */}
                                     {(() => {
-                                      const paymentRequestStatus = getPaymentRequestStatus(booking.booking_id);
                                       
                                       if (booking?.completion_status === 'INSPECTION_PASSED' && paymentRequestStatus.requested && !paymentRequestStatus.confirmed) {
                                         return (

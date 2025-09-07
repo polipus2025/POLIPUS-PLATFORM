@@ -107,9 +107,19 @@ function initializeApp() {
   }
 }
 
-// Initialize when DOM is ready
-if (document.readyState === "loading") {
-  document.addEventListener("DOMContentLoaded", initializeApp);
-} else {
+// Initialize immediately - Fix React loading issue
+try {
+  console.log('🚀 Initializing React app...');
   initializeApp();
+} catch (error) {
+  console.error('❌ React initialization failed:', error);
+  // Fallback initialization
+  setTimeout(() => {
+    try {
+      console.log('🔄 Retrying React initialization...');
+      initializeApp();
+    } catch (retryError) {
+      console.error('❌ Retry failed:', retryError);
+    }
+  }, 1000);
 }

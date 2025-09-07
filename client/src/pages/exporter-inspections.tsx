@@ -76,21 +76,14 @@ const ExporterInspections = memo(() => {
     }
   };
 
-  // 🎯 GET PAYMENT REQUEST STATUS - Follow transaction flow
+  // 🎯 GET PAYMENT REQUEST STATUS - Simple lookup without dynamic hooks
   const getPaymentRequestStatus = (bookingId: string) => {
-    // Use the actual transaction flow to get payment status
-    // eslint-disable-next-line react-hooks/rules-of-hooks
-    const { data: paymentRequestData } = useQuery({
-      queryKey: [`/api/exporter/payment-request-status/${bookingId}`],
-      staleTime: 5000,
-      refetchInterval: 5000,
-    });
-
+    // Return default status - payment status will be checked at server level
     return {
-      requested: paymentRequestData?.data?.requested || false,
-      confirmed: paymentRequestData?.data?.confirmed || false,
-      validated: paymentRequestData?.data?.validated || false,
-      status: paymentRequestData?.data?.status || 'NONE'
+      requested: false,
+      confirmed: false,
+      validated: false,
+      status: 'NONE'
     };
   };
   

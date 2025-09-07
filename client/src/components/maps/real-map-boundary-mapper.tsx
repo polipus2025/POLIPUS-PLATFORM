@@ -1622,11 +1622,13 @@ export default function RealMapBoundaryMapper({
       const centerY = centerPixels.reduce((sum, p) => sum + p.y, 0) / centerPixels.length;
       const area = calculateArea(points);
       
-      // Area measurement label (moved to top-left corner)
-      const areaLabel = document.createElement('div');
-      areaLabel.style.position = 'absolute';
-      areaLabel.style.left = '10px';
-      areaLabel.style.top = '10px';
+      // Update header area display instead of floating label
+      const areaDisplayElement = document.querySelector('#area-status-display') as HTMLElement;
+      if (areaDisplayElement) {
+        areaDisplayElement.textContent = `${area.toFixed(1)}Ha`;
+        areaDisplayElement.style.backgroundColor = 'rgba(0,0,0,0.8)';
+        areaDisplayElement.style.color = 'white';
+      }
       areaLabel.style.width = '70px';
       areaLabel.style.padding = '6px 8px';
       areaLabel.style.borderRadius = '6px';
@@ -1673,14 +1675,7 @@ export default function RealMapBoundaryMapper({
         }
       }
       
-      // CRITICAL FIX: Safe area label append (keep area measurement on map)
-      try {
-        if (mapElement && areaLabel) {
-          mapElement.appendChild(areaLabel);
-        }
-      } catch (e) {
-        console.log('Failed to add area label, continuing...');
-      }
+      // Area measurement is now handled in header - no map overlay needed
     }
   };
 
@@ -2412,11 +2407,17 @@ export default function RealMapBoundaryMapper({
       (window as any).riskLevelLogged = false;
     }
     
-    // Clear risk status display in header
+    // Clear both risk status and area displays in header
     const riskStatusDisplay = document.querySelector('#risk-status-display') as HTMLElement;
     if (riskStatusDisplay) {
       riskStatusDisplay.textContent = '';
       riskStatusDisplay.style.backgroundColor = 'transparent';
+    }
+    
+    const areaStatusDisplay = document.querySelector('#area-status-display') as HTMLElement;
+    if (areaStatusDisplay) {
+      areaStatusDisplay.textContent = '';
+      areaStatusDisplay.style.backgroundColor = 'rgba(0,0,0,0.1)';
     }
     
     console.log('🔄 Map reset: All visual elements cleared from satellite image');
@@ -3663,7 +3664,10 @@ export default function RealMapBoundaryMapper({
       <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
         <h3 className="font-medium text-blue-900 mb-3 flex items-center justify-between gap-2">
           <span>🗺️ Interactive GPS Boundary Map ({points.length}/{minPoints}+ points)</span>
-          <div id="risk-status-display" className="text-sm font-bold px-2 py-1 rounded" style={{minWidth: '100px', textAlign: 'center'}}></div>
+          <div className="flex items-center gap-2">
+            <div id="area-status-display" className="text-sm font-bold px-2 py-1 rounded" style={{minWidth: '70px', textAlign: 'center', backgroundColor: 'rgba(0,0,0,0.1)'}}></div>
+            <div id="risk-status-display" className="text-sm font-bold px-2 py-1 rounded" style={{minWidth: '100px', textAlign: 'center'}}></div>
+          </div>
         </h3>
         <div className="bg-white border rounded-lg p-4">
           <div 
@@ -3680,20 +3684,7 @@ export default function RealMapBoundaryMapper({
               </div>
             )}
             
-            {/* Real-time GPS Info Overlay */}
-            {points.length > 0 && (
-              <>
-                <div className="absolute bottom-2 left-2 bg-white/90 px-3 py-1 rounded text-sm font-medium shadow-lg">
-                  📐 Area: {area.toFixed(2)} hectares
-                </div>
-                <div className="absolute bottom-2 right-2 bg-white/90 px-3 py-1 rounded text-sm font-medium shadow-lg">
-                  📍 {points.length} GPS Points
-                </div>
-                <div className="absolute top-2 right-2 bg-white/90 px-3 py-1 rounded text-xs font-medium shadow-lg">
-                  🛰️ Real Satellite Imagery
-                </div>
-              </>
-            )}
+            {/* Clean satellite imagery - no overlays */}
           </div>
         </div>
       </div>

@@ -190,7 +190,7 @@ export default function RealMapBoundaryMapper({
       longitude: processedPosition.lng,
       id: `point_${Date.now()}`,
       timestamp: new Date(),
-      accuracy: processedPosition.accuracy
+      accuracy: processedPosition.accuracy || accuracy || 5
     };
 
     setPoints(prev => {
@@ -3301,7 +3301,7 @@ export default function RealMapBoundaryMapper({
                 </div>
                 <div>
                   <span className="font-medium">Mapping Accuracy:</span>
-                  <span className="ml-2">{rtkMode === 'full-rtk' ? `±1.2m (RTK Enhanced from ${(currentGPSPosition?.accuracy || 0).toFixed(1)}m)` : `±4.5m (Enhanced from ${(currentGPSPosition?.accuracy || 0).toFixed(1)}m)`}</span>
+                  <span className="ml-2">{rtkMode === 'full-rtk' ? `±1.2m (RTK Enhanced from ${(trackingAccuracy || 5).toFixed(1)}m)` : `±4.5m (Enhanced from ${(trackingAccuracy || 5).toFixed(1)}m)`}</span>
                 </div>
               </div>
               <div className="text-xs text-gray-600 mb-2">

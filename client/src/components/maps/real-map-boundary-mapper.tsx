@@ -3497,11 +3497,21 @@ export default function RealMapBoundaryMapper({
           </Button>
           <Button
             onClick={handleComplete}
-            disabled={!canComplete}
+            disabled={!canComplete || isCompleted}
             size="sm"
+            variant={isCompleted ? "outline" : "default"}
           >
-            <Check className="h-4 w-4 mr-1" />
-            Complete ({points.length}/{minPoints}+)
+            {isCompleted ? (
+              <>
+                <Check className="h-4 w-4 mr-1" />
+                ✅ Completed
+              </>
+            ) : (
+              <>
+                <Check className="h-4 w-4 mr-1" />
+                Complete ({points.length}/{minPoints}+)
+              </>
+            )}
           </Button>
         </div>
       </div>

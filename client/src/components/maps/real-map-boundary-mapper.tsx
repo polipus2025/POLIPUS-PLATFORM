@@ -1579,9 +1579,9 @@ export default function RealMapBoundaryMapper({
       const areaRisk = calculateAreaRisk(points);
       
       // Only log risk level once per session to avoid spam
-      if (typeof window !== 'undefined' && !window.riskLevelLogged) {
+      if (typeof window !== 'undefined' && !(window as any).riskLevelLogged) {
         console.log(`Area classification: ${areaRisk.level} risk zone`);
-        window.riskLevelLogged = true;
+        (window as any).riskLevelLogged = true;
       }
       
       // Create main boundary polygon with risk-based styling
@@ -2359,9 +2359,61 @@ export default function RealMapBoundaryMapper({
   };
 
   const handleReset = () => {
+    // Clear all data
     setPoints([]);
     setEudrReport(null);
     setDeforestationReport(null);
+    
+    // Clear all visual elements from satellite map
+    if (mapRef.current) {
+      const mapElement = mapRef.current.querySelector('#real-map') as HTMLElement;
+      if (mapElement) {
+        // Remove all GPS markers (A, B, C, etc.)
+        const markers = mapElement.querySelectorAll('.map-marker');
+        markers.forEach(marker => {
+          try {
+            marker.remove();
+          } catch (e) {
+            console.log('Marker removal skipped');
+          }
+        });
+        
+        // Remove all text labels (area measurements, risk classifications)
+        const labels = mapElement.querySelectorAll('.area-risk-label');
+        labels.forEach(label => {
+          try {
+            label.remove();
+          } catch (e) {
+            console.log('Label removal skipped');
+          }
+        });
+        
+        // Clear all SVG polygons and lines
+        const svg = mapElement.querySelector('svg.map-polygon') as SVGElement;
+        if (svg) {
+          svg.innerHTML = `
+            <defs>
+              <pattern id="crosshatch-red" patternUnits="userSpaceOnUse" width="8" height="8">
+                <path d="M0,0 L8,8 M0,8 L8,0" stroke="#dc2626" stroke-width="1" opacity="0.4"/>
+              </pattern>
+              <pattern id="crosshatch-yellow" patternUnits="userSpaceOnUse" width="8" height="8">
+                <path d="M0,0 L8,8 M0,8 L8,0" stroke="#f59e0b" stroke-width="1" opacity="0.4"/>
+              </pattern>
+              <pattern id="crosshatch-green" patternUnits="userSpaceOnUse" width="8" height="8">
+                <path d="M0,0 L8,8 M0,8 L8,0" stroke="#10b981" stroke-width="1" opacity="0.4"/>
+              </pattern>
+            </defs>
+          `;
+        }
+      }
+    }
+    
+    // Reset risk logging
+    if (typeof window !== 'undefined') {
+      (window as any).riskLevelLogged = false;
+    }
+    
+    console.log('🔄 Map reset: All visual elements cleared from satellite image');
   };
 
   // Professional PDF Report Generation with AgriTrace LACRA Letterhead

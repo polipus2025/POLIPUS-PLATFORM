@@ -482,23 +482,72 @@ export default function RealMapBoundaryMapper({
       tryLoadTile(0);
     };
 
-    // FIXED: Use React state instead of DOM manipulation
+    // FIXED: Load satellite tiles safely without DOM conflicts  
     const loadSatelliteTileGrid = (tileInfo: any, centerLat: number, centerLng: number, mapElement: HTMLElement) => {
-      // No direct DOM manipulation - just set state for React to handle
-      console.log(`Loading satellite tiles from ${tileInfo.name}`);
+      const tilesContainer = mapElement.querySelector('#satellite-tiles') as HTMLElement;
+      if (!tilesContainer) return;
       
       const zoom = 18;
       const tileSize = 256;
-      const containerWidth = 500;
-      const containerHeight = 500;
       
       // Calculate center tile coordinates
       const n = Math.pow(2, zoom);
       const centerTileX = Math.floor(n * ((centerLng + 180) / 360));
       const centerTileY = Math.floor(n * (1 - Math.log(Math.tan((centerLat * Math.PI) / 180) + 1 / Math.cos((centerLat * Math.PI) / 180)) / Math.PI) / 2);
       
-      // FIXED: Just validate tiles exist, React will handle display
-      console.log(`Satellite tiles configured for ${tileInfo.name} at zoom ${zoom}`);
+      // Clear previous tiles safely
+      tilesContainer.innerHTML = '';
+      
+      // Load a 3x3 grid of tiles for better coverage
+      const tileRadius = 1;
+      
+      for (let dx = -tileRadius; dx <= tileRadius; dx++) {
+        for (let dy = -tileRadius; dy <= tileRadius; dy++) {
+          const tileX = centerTileX + dx;
+          const tileY = centerTileY + dy;
+          
+          // Calculate tile position in container
+          const posX = (dx + tileRadius) * tileSize - tileSize/2;
+          const posY = (dy + tileRadius) * tileSize - tileSize/2;
+          
+          // Create tile image element
+          const tileImg = document.createElement('img');
+          tileImg.style.cssText = `
+            position: absolute;
+            left: ${posX}px;
+            top: ${posY}px;
+            width: ${tileSize}px;
+            height: ${tileSize}px;
+            z-index: 2;
+            opacity: 1;
+            display: block;
+          `;
+          
+          // Build tile URL based on provider
+          let tileUrl = '';
+          if (tileInfo.name.includes('Esri')) {
+            tileUrl = `https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/${zoom}/${tileY}/${tileX}`;
+          } else {
+            tileUrl = `https://tile.openstreetmap.org/${zoom}/${tileX}/${tileY}.png`;
+          }
+          
+          tileImg.crossOrigin = "anonymous";
+          tileImg.src = tileUrl;
+          
+          tileImg.onload = () => {
+            console.log(`✅ Satellite tile loaded: ${tileX},${tileY}`);
+          };
+          
+          tileImg.onerror = () => {
+            console.log(`❌ Failed to load tile: ${tileUrl}`);
+            tileImg.style.backgroundColor = '#4ade80';
+            tileImg.style.border = '1px solid #22c55e';
+          };
+          
+          // Add tile to container
+          tilesContainer.appendChild(tileImg);
+        }
+      }
       
       setStatus(`✅ ${tileInfo.name} satellite imagery loaded successfully`);
       setMapReady(true);

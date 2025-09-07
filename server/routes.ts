@@ -16025,57 +16025,50 @@ export async function registerRoutes(app: Express): Promise<Server> {
           inspectionCompletionStatus[inspectionId].warehouseCustodyStatus = 'PASSED - Request Payment to Exporter';
           console.log(`✅ 3️⃣ BUYER Dashboard Updated: ${custodyRecord[0].buyerId} My Products in Warehouse Custody changed to PASSED - Request Payment`);
         }
-      }
 
-      console.log(`🎯 ALL 3 DASHBOARD UPDATES COMPLETED SIMULTANEOUSLY for inspection ${inspectionId}`);
+        console.log(`🎯 ALL 3 DASHBOARD UPDATES COMPLETED SIMULTANEOUSLY for inspection ${inspectionId}`);
 
-      // SEND REAL NOTIFICATIONS TO ALL STAKEHOLDERS
-      // ✅ USE MASTER REGISTRY for notifications - Right person gets notified
-      // (reuse transaction variable from above)
-      
-      // 🔒 DYNAMIC NOTIFICATION: Send to real stakeholders from booking data
-      const notificationResult = await sendInspectionCompletionNotifications({
-        inspectionId,
-        // 🚢 REAL EXPORTER from booking data
-        exporterId: booking.exporterId,
-        exporterName: booking.exporterName,
-        // 🛒 REAL BUYER from custody record
-        buyerName: custodyRecord[0]?.buyerName || 'Buyer TBD', 
-        // 🔐 REAL VERIFICATION CODES from booking
-        verificationCode: booking.verificationCode,
-        firstVerificationCode: booking.verificationCode,
-        qrBatchCode: booking.verificationCode, // Use booking verification as QR code
-        commodity: booking.commodityType,
-        quantity: `${booking.quantity} ${booking.unit}`,
-        inspectorName: booking.assignedInspectorName,
-        // 📋 TRANSACTION TRACEABILITY
-        masterTransactionId: booking.transactionId,
-        farmerName: 'System Generated', // Farmer name not available in booking
-        farmerId: 'SYSTEM'
-      });
-
-      // 🔒 DYNAMIC MASTER TRANSACTION UPDATE - Works for ANY inspection
-      try {
-        // Update transaction using booking's transaction ID
-        if (booking.transactionId) {
-          await updateMasterTransactionByMasterTxId(booking.transactionId, 'inspection_completed', {
-            inspectionId: inspectionId,
-            inspectorName: data.completedBy || 'James Kofi',
-            inspectionResults: completionResult.verificationResults
+        // SEND REAL NOTIFICATIONS TO ALL STAKEHOLDERS
+        // 🔒 DYNAMIC NOTIFICATION: Send to real stakeholders from booking data
+        try {
+          const notificationResult = await sendInspectionCompletionNotifications({
+            inspectionId,
+            // 🚢 REAL EXPORTER from booking data
+            exporterId: booking.exporterId,
+            exporterName: booking.exporterName,
+            // 🛒 REAL BUYER from custody record
+            buyerName: custodyRecord[0]?.buyerName || 'Buyer TBD', 
+            // 🔐 REAL VERIFICATION CODES from booking
+            verificationCode: booking.verificationCode,
+            firstVerificationCode: booking.verificationCode,
+            qrBatchCode: booking.verificationCode, // Use booking verification as QR code
+            commodity: booking.commodityType,
+            quantity: `${booking.quantity} ${booking.unit}`,
+            inspectorName: booking.assignedInspectorName,
+            // 📋 TRANSACTION TRACEABILITY
+            masterTransactionId: booking.transactionId,
+            farmerName: 'System Generated', // Farmer name not available in booking
+            farmerId: 'SYSTEM'
           });
-          console.log(`🎯 MASTER TRANSACTION UPDATED: Inspection completion stage for ${transaction.masterTransactionId}`);
+
+          // 🔒 DYNAMIC MASTER TRANSACTION UPDATE - Works for ANY inspection
+          if (booking.transactionId) {
+            await updateMasterTransactionByMasterTxId(booking.transactionId, 'inspection_completed', {
+              inspectionId: inspectionId,
+              inspectorName: data.completedBy || 'James Kofi',
+              inspectionResults: completionResult.verificationResults
+            });
+            console.log(`🎯 MASTER TRANSACTION UPDATED: Inspection completion stage for ${booking.transactionId}`);
+          }
+        } catch (notificationError) {
+          console.error('❌ Failed to send notifications or update transaction:', notificationError);
         }
-      } catch (masterError) {
-        console.error('❌ Failed to update master transaction (inspection completion):', masterError);
-        // Don't fail the inspection completion, just log the error
       }
 
       res.json({ 
         success: true, 
         message: 'Inspection completed successfully - All stakeholders notified',
-        data: completionResult,
-        notifications: notificationResult.notifications || [],
-        notificationStatus: notificationResult.success ? 'All notifications sent' : 'Notification error'
+        data: completionResult
       });
       
     } catch (error) {

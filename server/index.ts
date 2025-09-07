@@ -160,6 +160,9 @@ if (MAINTENANCE_MODE) {
       const certificateRoutes = await import('./certificate-routes');
       app.use('/api/certificates', certificateRoutes.default);
       
+      // Add SPA routing fallback BEFORE other routes
+      console.log('🔧 Setting up SPA routing for direct URL access...');
+      
       // Setup Vite for development or serve static files for production
       if (process.env.NODE_ENV === 'production') {
         console.log('🏭 Production mode - serving static files...');

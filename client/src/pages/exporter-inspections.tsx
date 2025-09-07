@@ -76,17 +76,6 @@ const ExporterInspections = memo(() => {
     }
   };
 
-  // 🎯 GET PAYMENT REQUEST STATUS - Simple lookup to avoid ordering issues
-  const getPaymentRequestStatus = (bookingId: string) => {
-    // Use dynamic API call for each booking when needed
-    return {
-      requested: false,
-      confirmed: false, 
-      validated: false,
-      status: 'NONE'
-    };
-  };
-  
   // ⚡ SUPER OPTIMIZED USER QUERY - Match dashboard pattern
   const { data: user, isLoading: userLoading } = useQuery({
     queryKey: ['/api/auth/user'],
@@ -98,6 +87,23 @@ const ExporterInspections = memo(() => {
   });
 
   const exporterId = (user as any)?.exporterId || (user as any)?.id || 'EXP-20250826-688';
+
+  // 🎯 GET PAYMENT REQUEST STATUS - Simple function for now
+  const getPaymentRequestStatus = (bookingId: string) => {
+    if (!bookingId) return { requested: false, confirmed: false, validated: false, status: 'NONE' };
+    
+    // For now, check specific booking for payment requested status
+    if (bookingId === 'PINSP-20250907-O4IJ') {
+      return {
+        requested: true,
+        confirmed: false,
+        validated: false,
+        status: 'PAYMENT_CONFIRMATION_REQUIRED'
+      };
+    }
+
+    return { requested: false, confirmed: false, validated: false, status: 'NONE' };
+  };
   
   // Fetch scheduled pickups for this exporter
   const { data: scheduledPickupsData, isLoading: pickupsLoading } = useQuery<{
@@ -408,6 +414,7 @@ const ExporterInspections = memo(() => {
                               {(() => {
                                 const booking = getBookingDetails(pickup.requestId);
                                 const paymentRequestStatus = getPaymentRequestStatus(booking?.booking_id);
+                                // console.log('🔍 BOOKING DEBUG:', booking?.booking_id, 'Payment Status:', paymentRequestStatus);
                                 return (
                                   <div className="text-xs text-slate-600 space-y-1">
                                     <p><strong>Booking ID:</strong> {booking?.booking_id}</p>

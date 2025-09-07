@@ -789,9 +789,9 @@
     .map-container,
     .real-map,
     .fallback-map {
-      height: 250px !important;
-      min-height: 200px !important;
-      max-height: 280px !important;
+      height: 500px !important;
+      min-height: 450px !important;
+      max-height: 550px !important;
     }
     
     .map-marker {
@@ -800,7 +800,7 @@
     }
     
     #satellite-tiles {
-      height: 250px !important;
+      height: 500px !important;
     }
   }
 

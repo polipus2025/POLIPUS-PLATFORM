@@ -1577,7 +1577,12 @@ export default function RealMapBoundaryMapper({
       
       // Calculate overall area risk for coloring
       const areaRisk = calculateAreaRisk(points);
-      console.log(`Area risk level: ${areaRisk.level}`);
+      
+      // Only log risk level once per session to avoid spam
+      if (typeof window !== 'undefined' && !window.riskLevelLogged) {
+        console.log(`Area classification: ${areaRisk.level} risk zone`);
+        window.riskLevelLogged = true;
+      }
       
       // Create main boundary polygon with risk-based styling
       const polygon = document.createElementNS('http://www.w3.org/2000/svg', 'polygon');
@@ -1598,8 +1603,6 @@ export default function RealMapBoundaryMapper({
       polygon.setAttribute('stroke-dasharray', '8,4');
       polygon.setAttribute('opacity', '0.9');
       
-      console.log(`✓ EUDR Risk polygon created with ${areaRisk.level} risk level and crosshatch pattern overlay`);
-      
       // CRITICAL FIX: Safe polygon append
       try {
         if (svg && polygon) {
@@ -1613,19 +1616,17 @@ export default function RealMapBoundaryMapper({
       polygon.style.display = 'block';
       polygon.style.visibility = 'visible';
       
-      console.log(`✓ Risk overlay now visible on map with ${areaRisk.level} risk styling`);
-      
       // Calculate center using centralized coordinate conversion
       const centerPixels = points.map(p => convertGPSToPixel(p.latitude, p.longitude, mapElement));
       const centerX = centerPixels.reduce((sum, p) => sum + p.x, 0) / centerPixels.length;
       const centerY = centerPixels.reduce((sum, p) => sum + p.y, 0) / centerPixels.length;
       const area = calculateArea(points);
       
-      // Area measurement label
+      // Area measurement label (moved to top-left corner)
       const areaLabel = document.createElement('div');
       areaLabel.style.position = 'absolute';
-      areaLabel.style.left = `${centerX - 35}px`;
-      areaLabel.style.top = `${centerY - 25}px`;
+      areaLabel.style.left = '10px';
+      areaLabel.style.top = '10px';
       areaLabel.style.width = '70px';
       areaLabel.style.padding = '6px 8px';
       areaLabel.style.borderRadius = '6px';
@@ -1638,12 +1639,12 @@ export default function RealMapBoundaryMapper({
       areaLabel.style.boxShadow = '0 2px 6px rgba(0,0,0,0.4)';
       areaLabel.textContent = `${area.toFixed(1)}Ha`;
       
-      // Risk level label  
+      // Risk level label (moved below map, outside polygon)
       const riskLabel = document.createElement('div');
       riskLabel.className = `area-risk-label risk-${areaRisk.level}`;
       riskLabel.style.position = 'absolute';
-      riskLabel.style.left = `${centerX - 45}px`;
-      riskLabel.style.top = `${centerY + 5}px`;
+      riskLabel.style.left = '10px';
+      riskLabel.style.bottom = '10px';
       riskLabel.style.width = '90px';
       riskLabel.style.padding = '3px 6px';
       riskLabel.style.borderRadius = '8px';

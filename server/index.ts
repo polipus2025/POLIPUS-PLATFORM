@@ -185,10 +185,11 @@ if (MAINTENANCE_MODE) {
         await setupVite(app, httpServer);
       }
       
-      // Start the server
+      // Start the server - Fix port binding issue
       const port = parseInt(process.env.PORT || '5000', 10);
-      const host = process.env.HOST || '0.0.0.0';
+      const host = '0.0.0.0'; // Force external binding for Replit
       
+      console.log(`🔧 Attempting to bind server to ${host}:${port}`);
       httpServer.listen(port, host, () => {
         console.log(`🚀 POLIPUS READY: http://localhost:${port}`);
         console.log(`🌐 PLATFORM ACCESS URLs:`);

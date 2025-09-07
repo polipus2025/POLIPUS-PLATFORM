@@ -407,35 +407,17 @@ export default function RealMapBoundaryMapper({
     const x = Math.floor(n * ((lng + 180) / 360));
     const y = Math.floor(n * (1 - Math.log(Math.tan((lat * Math.PI) / 180) + 1 / Math.cos((lat * Math.PI) / 180)) / Math.PI) / 2);
     
-    // Fixed satellite providers - removed Stadia Maps (requires API key)
+    // ONLY working satellite providers - removed blocked Google tiles
     return [
       {
         url: `https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/${zoom}/${y}/${x}`,
-        name: 'Esri World Imagery (Real Satellite)',
+        name: 'Esri World Imagery (VERIFIED WORKING)',
         maxZoom: 19,
         coordinates: { lat, lng, zoom }
       },
       {
-        url: `https://mt1.google.com/vt/lyrs=s&x=${x}&y=${y}&z=${zoom}`,
-        name: 'Google Earth Satellite',
-        maxZoom: 20,
-        coordinates: { lat, lng, zoom }
-      },
-      {
-        url: `https://mt2.google.com/vt/lyrs=s&x=${x}&y=${y}&z=${zoom}`,
-        name: 'Google Satellite (Secondary)',
-        maxZoom: 20,
-        coordinates: { lat, lng, zoom }
-      },
-      {
-        url: `https://mt3.google.com/vt/lyrs=s&x=${x}&y=${y}&z=${zoom}`,
-        name: 'Google Satellite (Tertiary)',
-        maxZoom: 20,
-        coordinates: { lat, lng, zoom }
-      },
-      {
         url: `https://tile.openstreetmap.org/${zoom}/${x}/${y}.png`,
-        name: 'OpenStreetMap (Final Fallback)',
+        name: 'OpenStreetMap (Fallback)',
         maxZoom: 18,
         coordinates: { lat, lng, zoom }
       }

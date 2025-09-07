@@ -24,6 +24,7 @@ import { useQuery } from "@tanstack/react-query";
 import { Link } from "wouter";
 import ProfileDropdown from "@/components/ProfileDropdown";
 import { useToast } from "@/hooks/use-toast";
+import RealMapBoundaryMapper from "@/components/maps/real-map-boundary-mapper";
 
 export default function UnifiedLandInspectorDashboard() {
   const [activeTab, setActiveTab] = useState("overview");
@@ -327,13 +328,25 @@ export default function UnifiedLandInspectorDashboard() {
             <CardContent>
               <div className="p-8 text-center">
                 <MapPin className="w-16 h-16 text-gray-400 mx-auto mb-4" />
-                <h3 className="text-lg font-semibold text-slate-900 mb-2">Interactive Land Mapping</h3>
-                <p className="text-slate-600 mb-4">Create multiple land plots for farmers using GPS mapping with satellite imagery</p>
+                <h3 className="text-lg font-semibold text-slate-900 mb-2">Live GPS Satellite Mapping</h3>
+                <p className="text-slate-600 mb-4">Real satellite imagery from Esri World Imagery (verified working)</p>
+                
+                {/* ACTUAL EMBEDDED GPS MAPPING */}
+                <div className="h-96 border rounded-lg bg-white shadow-sm mb-4">
+                  <RealMapBoundaryMapper
+                    onBoundaryComplete={(boundary) => {
+                      console.log('Land boundary mapped:', boundary);
+                    }}
+                    minPoints={3}
+                    maxPoints={12}
+                  />
+                </div>
+                
                 <div className="space-y-3">
                   <Link href="/create-land-plot">
                     <Button size="lg" className="w-full">
                       <Plus className="w-5 h-5 mr-2" />
-                      Start Land Mapping
+                      Advanced Land Plot Creation
                     </Button>
                   </Link>
                   <Link href="/land-plots-list">

@@ -1628,34 +1628,13 @@ export default function RealMapBoundaryMapper({
         areaDisplayElement.textContent = `${area.toFixed(1)}Ha`;
         areaDisplayElement.style.backgroundColor = 'rgba(0,0,0,0.8)';
         areaDisplayElement.style.color = 'white';
+        console.log(`📊 Area display updated: ${area.toFixed(1)}Ha`);
+      } else {
+        console.log('⚠️ Area display element not found');
       }
-      areaLabel.style.width = '70px';
-      areaLabel.style.padding = '6px 8px';
-      areaLabel.style.borderRadius = '6px';
-      areaLabel.style.fontSize = '11px';
-      areaLabel.style.fontWeight = 'bold';
-      areaLabel.style.textAlign = 'center';
-      areaLabel.style.color = 'white';
-      areaLabel.style.backgroundColor = 'rgba(0,0,0,0.8)';
-      areaLabel.style.border = '2px solid white';
-      areaLabel.style.boxShadow = '0 2px 6px rgba(0,0,0,0.4)';
-      areaLabel.textContent = `${area.toFixed(1)}Ha`;
+      // Area label styling removed - now handled in header
       
-      // Risk level label (moved to top area next to points counter)
-      const riskLabel = document.createElement('div');
-      riskLabel.className = `area-risk-label risk-${areaRisk.level}`;
-      riskLabel.style.position = 'absolute';
-      riskLabel.style.right = '10px';
-      riskLabel.style.top = '-45px';
-      riskLabel.style.width = '90px';
-      riskLabel.style.padding = '3px 6px';
-      riskLabel.style.borderRadius = '8px';
-      riskLabel.style.fontSize = '9px';
-      riskLabel.style.fontWeight = 'bold';
-      riskLabel.style.textAlign = 'center';
-      riskLabel.style.color = 'white';
-      riskLabel.style.border = '1px solid white';
-      riskLabel.style.boxShadow = '0 2px 4px rgba(0,0,0,0.3)';
+      // Risk label now handled in header display
       
       // Update the header risk status display instead of floating label
       const riskStatusDisplay = document.querySelector('#risk-status-display') as HTMLElement;
@@ -1673,9 +1652,13 @@ export default function RealMapBoundaryMapper({
           riskStatusDisplay.style.color = 'white';
           riskStatusDisplay.textContent = 'LOW RISK';
         }
+        console.log(`🚨 Risk display updated: ${areaRisk.level.toUpperCase()} RISK`);
+      } else {
+        console.log('⚠️ Risk display element not found');
       }
       
-      // Area measurement is now handled in header - no map overlay needed
+      // Both area and risk measurements now handled in header displays
+      console.log(`📊 Updated header displays: Area=${area.toFixed(1)}Ha, Risk=${areaRisk.level.toUpperCase()}`);
     }
   };
 

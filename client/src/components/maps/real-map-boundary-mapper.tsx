@@ -519,8 +519,10 @@ export default function RealMapBoundaryMapper({
       
       console.log(`📐 Container dimensions: ${containerWidth}px × ${containerHeight}px`);
       
-      // Keep tiles SQUARE for uniform satellite imagery (use smaller dimension)
-      const maxTileSize = Math.min(containerWidth, containerHeight) / 3; // 3x3 grid
+      // Make satellite image BIGGER to fill more of the container
+      // Use average of width and height for better coverage
+      const avgDimension = (containerWidth + containerHeight) / 2;
+      const maxTileSize = avgDimension / 3; // 3x3 grid
       const scaledTileWidth = maxTileSize;
       const scaledTileHeight = maxTileSize;
       

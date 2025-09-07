@@ -464,6 +464,7 @@ export default function RealMapBoundaryMapper({
         testImg.onload = () => {
           console.log(`✅ Satellite imagery loaded: ${tileInfo.name}`);
           setStatus(`✅ Satellite imagery loaded from ${tileInfo.name}`);
+          console.log(`🔄 Calling createMapWithTile for ${tileInfo.name}`);
           createMapWithTile(tileInfo, lat, lng);
         };
         
@@ -564,8 +565,12 @@ export default function RealMapBoundaryMapper({
     };
 
     const createMapWithTile = (tileInfo: any, centerLat: number, centerLng: number) => {
+      console.log(`🔄 createMapWithTile called for ${tileInfo.name}`);
       // CRITICAL FIX: Implement ownership boundary pattern
-      if (!mapRef.current || isCleaningUp.current) return;
+      if (!mapRef.current || isCleaningUp.current) {
+        console.log(`❌ createMapWithTile failed: mapRef=${!!mapRef.current}, cleaningUp=${isCleaningUp.current}`);
+        return;
+      }
       
       // Create dedicated map engine container if not exists
       if (!mapEngine.current) {

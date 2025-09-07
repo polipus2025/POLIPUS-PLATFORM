@@ -484,8 +484,13 @@ export default function RealMapBoundaryMapper({
 
     // FIXED: Load satellite tiles safely without DOM conflicts  
     const loadSatelliteTileGrid = (tileInfo: any, centerLat: number, centerLng: number, mapElement: HTMLElement) => {
+      console.log(`🔄 loadSatelliteTileGrid called for ${tileInfo.name}`);
       const tilesContainer = mapElement.querySelector('#satellite-tiles') as HTMLElement;
-      if (!tilesContainer) return;
+      if (!tilesContainer) {
+        console.log(`❌ No #satellite-tiles container found!`);
+        return;
+      }
+      console.log(`✅ Found #satellite-tiles container`);
       
       const zoom = 18;
       const tileSize = 256;

@@ -58,8 +58,14 @@ const ExporterInspections = memo(() => {
         })
       });
 
-      // ✅ Update local state immediately 
-      setPaymentConfirmed(true);
+      // ✅ Update local state immediately for this specific booking
+      setPaymentStates(prev => ({
+        ...prev,
+        [bookingId]: { 
+          confirmed: true, 
+          validated: prev[bookingId]?.validated || false 
+        }
+      }));
 
       toast({
         title: "Payment Confirmed",
@@ -91,53 +97,62 @@ const ExporterInspections = memo(() => {
 
   const exporterId = (user as any)?.exporterId || (user as any)?.id || 'EXP-20250826-688';
 
-  // 🎯 PAYMENT STATE TRACKING - Track payment confirmation status
-  const [paymentConfirmed, setPaymentConfirmed] = useState(false);
-  const [paymentValidated, setPaymentValidated] = useState(false);
+  // 🎯 PAYMENT STATE TRACKING - Dynamic tracking for all bookings
+  const [paymentStates, setPaymentStates] = useState<{[key: string]: {confirmed: boolean, validated: boolean}}>({});
 
-  // 🔄 CHECK INITIAL PAYMENT STATUS - Simple simulation for PINSP-20250907-O4IJ
+  // 🔄 CHECK INITIAL PAYMENT STATUS - Load from database for all bookings
   useEffect(() => {
-    // Since the logs show payment was already confirmed by exporter and validated by buyer,
-    // let's set the initial state correctly for this booking
-    const checkExistingState = () => {
-      // This is a simplified version - in production this would check the database
-      // From the workflow logs, we can see both confirmation and validation happened:
-      // "✅ Payment confirmed by exporter EXP-20250826-688" 
-      // "🎉 Transaction completed successfully! Buyer validated payment"
-      setPaymentConfirmed(true); // Exporter already confirmed payment ✅
-      setPaymentValidated(true); // Buyer already validated payment ✅
+    const fetchPaymentStates = async () => {
+      try {
+        const response = await fetch(`/api/exporter/${exporterId}/all-payment-states`);
+        if (response.ok) {
+          const data = await response.json();
+          setPaymentStates(data.paymentStates || {});
+        }
+      } catch (error) {
+        console.log('Could not fetch payment states:', error);
+      }
     };
     
-    checkExistingState();
-  }, []);
+    if (exporterId) {
+      fetchPaymentStates();
+    }
+  }, [exporterId]);
 
-  // 🎯 GET PAYMENT REQUEST STATUS - Check real payment state
+  // 🎯 GET PAYMENT REQUEST STATUS - Dynamic for all bookings
   const getPaymentRequestStatus = (bookingId: string) => {
     if (!bookingId) return { requested: false, confirmed: false, validated: false, status: 'NONE' };
     
-    // For PINSP-20250907-O4IJ, check actual payment status via API call
-    if (bookingId === 'PINSP-20250907-O4IJ') {
-      // Check if payment has been confirmed by exporter and validated by buyer
-      // This should be dynamic based on actual database state
-      return {
-        requested: true,
-        confirmed: paymentConfirmed, // Track if exporter confirmed
-        validated: paymentValidated, // Track if buyer validated  
-        status: paymentValidated ? 'PAYMENT_COMPLETED' : 
-                paymentConfirmed ? 'PAYMENT_AWAITING_VALIDATION' : 
-                'PAYMENT_CONFIRMATION_REQUIRED'
-      };
-    }
+    // Get payment state for this specific booking
+    const paymentState = paymentStates[bookingId] || { confirmed: false, validated: false };
+    
+    // Check if payment has been requested by buyer (inspection must be completed first)
+    const paymentRequested = existingBookings.some(booking => 
+      booking.booking_id === bookingId && 
+      booking.completion_status === 'INSPECTION_PASSED'
+    );
 
-    return { requested: false, confirmed: false, validated: false, status: 'NONE' };
+    return {
+      requested: paymentRequested,
+      confirmed: paymentState.confirmed,
+      validated: paymentState.validated,  
+      status: paymentState.validated ? 'PAYMENT_COMPLETED' : 
+              paymentState.confirmed ? 'PAYMENT_AWAITING_VALIDATION' : 
+              paymentRequested ? 'PAYMENT_CONFIRMATION_REQUIRED' : 'NONE'
+    };
   };
 
-  // 🎯 GET INSPECTION STATUS - Handle workflow progression  
+  // 🎯 GET INSPECTION STATUS - Universal workflow progression  
   const getInspectionStatus = (booking: any, paymentRequestStatus: any) => {
     if (!booking) return 'pending';
     
-    // For PINSP-20250907-O4IJ, since payment is requested, inspection must be completed
-    if (booking.booking_id === 'PINSP-20250907-O4IJ' && paymentRequestStatus.requested) {
+    // If payment is requested, inspection must be completed
+    if (paymentRequestStatus.requested) {
+      return 'INSPECTION PASSED';
+    }
+    
+    // Check completion status first
+    if (booking.completion_status === 'INSPECTION_PASSED') {
       return 'INSPECTION PASSED';
     }
     

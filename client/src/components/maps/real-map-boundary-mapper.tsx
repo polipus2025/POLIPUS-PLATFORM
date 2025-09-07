@@ -519,11 +519,12 @@ export default function RealMapBoundaryMapper({
       
       console.log(`📐 Container dimensions: ${containerWidth}px × ${containerHeight}px`);
       
-      // Scale tiles to fill container completely (use both width AND height)
-      const scaledTileWidth = containerWidth / 3;  // 3x3 grid
-      const scaledTileHeight = containerHeight / 3; // 3x3 grid
+      // Keep tiles SQUARE for uniform satellite imagery (use smaller dimension)
+      const maxTileSize = Math.min(containerWidth, containerHeight) / 3; // 3x3 grid
+      const scaledTileWidth = maxTileSize;
+      const scaledTileHeight = maxTileSize;
       
-      console.log(`📐 Tile dimensions: ${scaledTileWidth}px × ${scaledTileHeight}px`);
+      console.log(`📐 Tile dimensions (SQUARE): ${scaledTileWidth}px × ${scaledTileHeight}px`);
       
       // Load a 3x3 grid of tiles for better coverage
       const tileRadius = 1;

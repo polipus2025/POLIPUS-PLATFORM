@@ -761,9 +761,9 @@
     .map-container,
     .real-map,
     .fallback-map {
-      height: 280px !important;
-      min-height: 250px !important;
-      max-height: 320px !important;
+      height: 400px !important;
+      min-height: 350px !important;
+      max-height: 450px !important;
       width: 100% !important;
       margin: 0 !important;
       border-radius: 6px !important;
@@ -780,7 +780,7 @@
     }
     
     #satellite-tiles {
-      height: 280px !important;
+      height: 400px !important;
       width: 100% !important;
     }
   }
@@ -789,9 +789,9 @@
     .map-container,
     .real-map,
     .fallback-map {
-      height: 250px !important;
-      min-height: 200px !important;
-      max-height: 280px !important;
+      height: 380px !important;
+      min-height: 300px !important;
+      max-height: 420px !important;
     }
     
     .map-marker {
@@ -800,7 +800,7 @@
     }
     
     #satellite-tiles {
-      height: 250px !important;
+      height: 380px !important;
     }
   }
 

@@ -521,9 +521,9 @@ export default function RealMapBoundaryMapper({
           const tileX = centerTileX + dx;
           const tileY = centerTileY + dy;
           
-          // Calculate tile position in container
-          const posX = (dx + tileRadius) * tileSize - tileSize/2;
-          const posY = (dy + tileRadius) * tileSize - tileSize/2;
+          // Calculate tile position in container (FIXED: No offset for seamless tiles)
+          const posX = (dx + tileRadius) * tileSize;
+          const posY = (dy + tileRadius) * tileSize;
           
           // Create tile image element
           const tileImg = document.createElement('img');

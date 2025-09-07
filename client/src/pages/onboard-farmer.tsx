@@ -60,6 +60,7 @@ export default function OnboardFarmer() {
 
   // GPS Detection
   const getCurrentLocation = (isForFarmer = false) => {
+    console.log("🔄 Get Location button clicked!");
     setIsDetectingGPS(true);
     
     if (!navigator.geolocation) {
@@ -83,10 +84,12 @@ export default function OnboardFarmer() {
         const { latitude, longitude, accuracy } = position.coords;
         const coordinates = `${latitude.toFixed(6)}, ${longitude.toFixed(6)}`;
         
+        console.log(`✅ GPS coordinates detected: ${coordinates}`);
         setFarmerData(prev => ({
           ...prev,
           gpsCoordinates: coordinates
         }));
+        console.log("✅ GPS coordinates saved to farmer data - map should appear now!");
 
         toast({
           title: "GPS Location Detected",

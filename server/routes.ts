@@ -5333,8 +5333,41 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const testPortInspectorCredentials: Record<string, { password: string; firstName: string; lastName: string; county: string; inspectorId: string; portFacility: string }> = {
         'rahul.gupta': { password: 'inspector123', firstName: 'Rahul', lastName: 'Gupta', county: 'Maryland', inspectorId: 'INS-20250831-139', portFacility: 'Port of Monrovia' },
         'ram.gupta': { password: 'inspector123', firstName: 'Ram', lastName: 'Gupta', county: 'Margibi', inspectorId: 'INS-20250831-221', portFacility: 'Port of Monrovia' },
+        'james.kofi': { password: 'portinspector2025', firstName: 'James', lastName: 'Kofi', county: 'Montserrado', inspectorId: 'INS-20250907-342', portFacility: 'Port of Monrovia' },
         // REMOVED: Fake port inspector - only using real inspector data
       };
+
+      // James Kofi - Port Inspector credentials (direct check)
+      if (username === 'james.kofi' && password === 'portinspector2025') {
+        const token = jwt.sign(
+          { 
+            inspectorId: 'INS-20250907-342',
+            username: username,
+            role: 'port_inspector',
+            userType: 'port_inspector',
+            inspectorType: 'port',
+            county: 'Montserrado'
+          },
+          JWT_SECRET,
+          { expiresIn: '24h' }
+        );
+        
+        return res.json({
+          success: true,
+          token,
+          user: {
+            inspectorId: 'INS-20250907-342',
+            username: username,
+            firstName: 'James',
+            lastName: 'Kofi',
+            role: 'port_inspector',
+            userType: 'port_inspector',
+            inspectorType: 'port',
+            county: 'Montserrado',
+            portFacility: 'Port of Monrovia'
+          }
+        });
+      }
 
       if (testPortInspectorCredentials[username] && testPortInspectorCredentials[username].password === password) {
         const token = jwt.sign(

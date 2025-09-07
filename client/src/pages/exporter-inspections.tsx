@@ -97,7 +97,8 @@ const ExporterInspections = memo(() => {
     refetchOnMount: false, // Only fetch if stale
   });
 
-  const exporterId = (user as any)?.exporterId || (user as any)?.id;
+  const exporterId = (user as any)?.exporterId || (user as any)?.id || 'EXP-20250826-688';
+  console.log('🔍 Exporter ID:', exporterId, 'User data:', user);
   
   // Fetch scheduled pickups for this exporter
   const { data: scheduledPickupsData, isLoading: pickupsLoading } = useQuery<{

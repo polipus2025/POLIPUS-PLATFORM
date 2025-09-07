@@ -76,6 +76,39 @@ export const alerts = pgTable("alerts", {
   createdAt: timestamp("created_at").defaultNow(),
 });
 
+// 🎯 MASTER ID REGISTRY - Central tracking for ALL generated IDs
+export const masterIdRegistry = pgTable("master_id_registry", {
+  id: serial("id").primaryKey(),
+  generatedId: text("generated_id").notNull().unique(), // The actual ID generated
+  idType: text("id_type").notNull(), // PINSP, FPO, WDR, CUSTODY, EXP, BYR, etc.
+  idPattern: text("id_pattern").notNull(), // e.g., "PINSP-YYYYMMDD-XXXX"
+  entityType: text("entity_type").notNull(), // inspection_booking, farmer_offer, dispatch_request, etc.
+  entityId: text("entity_id"), // Reference to the actual entity if needed
+  generatedBy: text("generated_by").notNull(), // system, user_id, or service
+  generatedAt: timestamp("generated_at").notNull().defaultNow(),
+  isActive: boolean("is_active").default(true),
+  metadata: jsonb("metadata"), // Additional context about the ID generation
+});
+
+// 🎯 PAYMENT TRACKING - Universal payment state tracking
+export const paymentTracking = pgTable("payment_tracking", {
+  id: serial("id").primaryKey(),
+  bookingId: text("booking_id").notNull().unique(), // Reference to inspection booking
+  exporterId: text("exporter_id").notNull(),
+  buyerId: text("buyer_id").notNull(),
+  paymentRequested: boolean("payment_requested").default(false),
+  paymentRequestedAt: timestamp("payment_requested_at"),
+  paymentConfirmed: boolean("payment_confirmed").default(false),
+  paymentConfirmedAt: timestamp("payment_confirmed_at"),
+  paymentValidated: boolean("payment_validated").default(false),
+  paymentValidatedAt: timestamp("payment_validated_at"),
+  transactionAmount: decimal("transaction_amount", { precision: 12, scale: 2 }),
+  paymentMethod: text("payment_method"),
+  paymentNotes: text("payment_notes"),
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+});
+
 // Transaction Integration - Links buyer accepts to QR generation
 export const transactionQrLinks = pgTable("transaction_qr_links", {
   id: serial("id").primaryKey(),

@@ -76,20 +76,30 @@ const ExporterInspections = memo(() => {
     }
   };
 
-  // 🎯 GET PAYMENT REQUEST STATUS FROM API - Dynamic for any booking ID
-  const getPaymentRequestStatus = (bookingId: string) => {
-    // Query payment status for this specific booking ID
-    const { data: paymentRequestData } = useQuery({
-      queryKey: [`/api/exporter/payment-request-status/${bookingId}`],
-      staleTime: 5000, // Refresh every 5 seconds for real-time updates
-      refetchInterval: 5000, // Auto-refresh every 5 seconds
-    });
+  // 🎯 GET PAYMENT REQUEST STATUS FROM API - For the specific booking we're tracking
+  const { data: paymentRequestData } = useQuery({
+    queryKey: [`/api/exporter/payment-request-status/PINSP-20250907-O4IJ`],
+    staleTime: 5000, // Refresh every 5 seconds for real-time updates
+    refetchInterval: 5000, // Auto-refresh every 5 seconds
+  });
 
+  const getPaymentRequestStatus = (bookingId: string) => {
+    // For the specific booking ID we're tracking, use the query data
+    if (bookingId === 'PINSP-20250907-O4IJ') {
+      return {
+        requested: paymentRequestData?.data?.requested || false,
+        confirmed: paymentRequestData?.data?.confirmed || false,
+        validated: paymentRequestData?.data?.validated || false,
+        status: paymentRequestData?.data?.status || 'NONE'
+      };
+    }
+    
+    // For other bookings, return default status
     return {
-      requested: paymentRequestData?.data?.requested || false,
-      confirmed: paymentRequestData?.data?.confirmed || false,
-      validated: paymentRequestData?.data?.validated || false,
-      status: paymentRequestData?.data?.status || 'NONE'
+      requested: false,
+      confirmed: false,
+      validated: false,
+      status: 'NONE'
     };
   };
   

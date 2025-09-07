@@ -440,15 +440,13 @@ const ExporterInspections = memo(() => {
                                       <Badge className={`ml-2 text-xs ${
                                         getInspectionStatus(booking, paymentRequestStatus) === 'INSPECTION PASSED'
                                           ? 'bg-green-100 text-green-800 border-green-300' 
-                                          : paymentRequestStatus.requested 
-                                            ? 'bg-orange-100 text-orange-800 border-orange-300'
+                                          : paymentRequestStatus.confirmed 
+                                            ? 'bg-green-100 text-green-800 border-green-300'
                                             : 'bg-blue-100 text-blue-800 border-blue-300'
                                       }`}>
                                         {
-                                          paymentRequestStatus.requested 
-                                            ? (paymentRequestStatus.confirmed 
-                                                ? (paymentRequestStatus.validated ? 'Payment Completed' : 'Payment Confirmed') 
-                                                : 'Payment Requested')
+                                          paymentRequestStatus.confirmed 
+                                            ? (paymentRequestStatus.validated ? 'Payment Completed' : 'Payment Confirmed') 
                                             : getInspectionStatus(booking, paymentRequestStatus)
                                         }
                                       </Badge>

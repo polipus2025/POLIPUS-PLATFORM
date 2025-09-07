@@ -1,4 +1,4 @@
-import * as React from "react";
+import React from "react";
 import { createRoot } from "react-dom/client";
 import App from "./App";
 import "./index.css";
@@ -49,6 +49,13 @@ function initializeApp() {
   `;
 
   try {
+    // Ensure React is fully loaded before creating root
+    if (!React || typeof React.createElement !== 'function') {
+      console.error('React not properly loaded, retrying...');
+      setTimeout(initializeApp, 100);
+      return;
+    }
+    
     const root = createRoot(rootElement);
     
     // Render app immediately

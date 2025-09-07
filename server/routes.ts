@@ -1718,10 +1718,13 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const { custodyId, buyerId, requestedAt } = req.body;
       console.log(`💰 Buyer ${buyerId} requesting payment for custody ${custodyId}`);
 
-      // Find the exporter from master transaction registry
+      // Find the exporter from master transaction registry using custody ID
       const transaction = Object.values(masterTransactionRegistry).find(t => 
-        t.qrBatchCode === 'WH-BATCH-1756811448157-LEZW' && 
-        t.exporterId === 'EXP-20250826-688'
+        t.transactionId === custodyId || 
+        t.qrBatchCode === custodyId ||
+        t.masterTransactionId === custodyId
+      ) || Object.values(masterTransactionRegistry).find(t => 
+        t.exporterId === 'EXP-20250826-688' // Fallback for existing transactions
       );
 
       if (!transaction) {
@@ -20493,9 +20496,9 @@ VERIFY: ${qrCodeData.verificationUrl}`;
             // 🎯 PAYMENT WORKFLOW STATUS - Dynamic database lookup for ANY transaction
             paymentWorkflow: (() => {
               // Get inspection booking ID from database (queried below)
-              const bookingRecord = inspectionBookings.find(booking => booking.transaction_id === lot.custodyId);
-              if (bookingRecord && inspectionCompletionStatus[bookingRecord.booking_id]) {
-                const inspectionStatus = inspectionCompletionStatus[bookingRecord.booking_id];
+              const bookingRecord = inspectionBookings.find(booking => booking.transactionId === lot.custodyId);
+              if (bookingRecord && inspectionCompletionStatus[bookingRecord.bookingId]) {
+                const inspectionStatus = inspectionCompletionStatus[bookingRecord.bookingId];
                 return {
                   requested: inspectionStatus.paymentRequested || false,
                   confirmed: inspectionStatus.paymentConfirmed || false,

@@ -407,7 +407,7 @@ export default function RealMapBoundaryMapper({
     const x = Math.floor(n * ((lng + 180) / 360));
     const y = Math.floor(n * (1 - Math.log(Math.tan((lat * Math.PI) / 180) + 1 / Math.cos((lat * Math.PI) / 180)) / Math.PI) / 2);
     
-    // Working satellite providers for real land visualization
+    // Fixed satellite providers - removed Stadia Maps (requires API key)
     return [
       {
         url: `https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/${zoom}/${y}/${x}`,
@@ -422,14 +422,20 @@ export default function RealMapBoundaryMapper({
         coordinates: { lat, lng, zoom }
       },
       {
-        url: `https://tiles.stadiamaps.com/tiles/alidade_satellite/${zoom}/${x}/${y}.jpg`,
-        name: 'Stadia Satellite',
+        url: `https://mt2.google.com/vt/lyrs=s&x=${x}&y=${y}&z=${zoom}`,
+        name: 'Google Satellite (Secondary)',
+        maxZoom: 20,
+        coordinates: { lat, lng, zoom }
+      },
+      {
+        url: `https://mt3.google.com/vt/lyrs=s&x=${x}&y=${y}&z=${zoom}`,
+        name: 'Google Satellite (Tertiary)',
         maxZoom: 20,
         coordinates: { lat, lng, zoom }
       },
       {
         url: `https://tile.openstreetmap.org/${zoom}/${x}/${y}.png`,
-        name: 'OpenStreetMap Fallback',
+        name: 'OpenStreetMap (Final Fallback)',
         maxZoom: 18,
         coordinates: { lat, lng, zoom }
       }
@@ -474,14 +480,20 @@ export default function RealMapBoundaryMapper({
         const testImg = new Image();
         
         testImg.onload = () => {
+          console.log(`✅ Satellite imagery loaded: ${tileInfo.name}`);
+          setStatus(`✅ Satellite imagery loaded from ${tileInfo.name}`);
           createMapWithTile(tileInfo, lat, lng);
         };
         
         testImg.onerror = () => {
+          console.log(`❌ Failed to load satellite from: ${tileInfo.name}`);
+          setStatus(`⚠️ Trying alternative satellite source...`);
           setCurrentTile(tileIndex + 1);
-          setTimeout(() => tryLoadTile(tileIndex + 1), 500);
+          setTimeout(() => tryLoadTile(tileIndex + 1), 1000);
         };
         
+        // Add CORS and caching support
+        testImg.crossOrigin = "anonymous";
         testImg.src = tileInfo.url;
       };
 

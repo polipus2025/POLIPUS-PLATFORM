@@ -1639,12 +1639,12 @@ export default function RealMapBoundaryMapper({
       areaLabel.style.boxShadow = '0 2px 6px rgba(0,0,0,0.4)';
       areaLabel.textContent = `${area.toFixed(1)}Ha`;
       
-      // Risk level label (moved below map, outside polygon)
+      // Risk level label (moved to top area next to points counter)
       const riskLabel = document.createElement('div');
       riskLabel.className = `area-risk-label risk-${areaRisk.level}`;
       riskLabel.style.position = 'absolute';
-      riskLabel.style.left = '10px';
-      riskLabel.style.bottom = '10px';
+      riskLabel.style.right = '10px';
+      riskLabel.style.top = '-45px';
       riskLabel.style.width = '90px';
       riskLabel.style.padding = '3px 6px';
       riskLabel.style.borderRadius = '8px';
@@ -1655,32 +1655,31 @@ export default function RealMapBoundaryMapper({
       riskLabel.style.border = '1px solid white';
       riskLabel.style.boxShadow = '0 2px 4px rgba(0,0,0,0.3)';
       
-      if (areaRisk.level === 'high') {
-        riskLabel.style.backgroundColor = '#dc2626';
-        riskLabel.textContent = 'HIGH RISK';
-      } else if (areaRisk.level === 'standard') {
-        riskLabel.style.backgroundColor = '#f59e0b';
-        riskLabel.textContent = 'STANDARD RISK';
-      } else {
-        riskLabel.style.backgroundColor = '#10b981';
-        riskLabel.textContent = 'LOW RISK';
+      // Update the header risk status display instead of floating label
+      const riskStatusDisplay = document.querySelector('#risk-status-display') as HTMLElement;
+      if (riskStatusDisplay) {
+        if (areaRisk.level === 'high') {
+          riskStatusDisplay.style.backgroundColor = '#dc2626';
+          riskStatusDisplay.style.color = 'white';
+          riskStatusDisplay.textContent = 'HIGH RISK';
+        } else if (areaRisk.level === 'standard') {
+          riskStatusDisplay.style.backgroundColor = '#f59e0b';
+          riskStatusDisplay.style.color = 'white';
+          riskStatusDisplay.textContent = 'STANDARD RISK';
+        } else {
+          riskStatusDisplay.style.backgroundColor = '#10b981';
+          riskStatusDisplay.style.color = 'white';
+          riskStatusDisplay.textContent = 'LOW RISK';
+        }
       }
       
-      // CRITICAL FIX: Safe label appends
+      // CRITICAL FIX: Safe area label append (keep area measurement on map)
       try {
         if (mapElement && areaLabel) {
           mapElement.appendChild(areaLabel);
         }
       } catch (e) {
         console.log('Failed to add area label, continuing...');
-      }
-      
-      try {
-        if (mapElement && riskLabel) {
-          mapElement.appendChild(riskLabel);
-        }
-      } catch (e) {
-        console.log('Failed to add risk label, continuing...');
       }
     }
   };
@@ -2408,9 +2407,16 @@ export default function RealMapBoundaryMapper({
       }
     }
     
-    // Reset risk logging
+    // Reset risk logging and clear header risk display
     if (typeof window !== 'undefined') {
       (window as any).riskLevelLogged = false;
+    }
+    
+    // Clear risk status display in header
+    const riskStatusDisplay = document.querySelector('#risk-status-display') as HTMLElement;
+    if (riskStatusDisplay) {
+      riskStatusDisplay.textContent = '';
+      riskStatusDisplay.style.backgroundColor = 'transparent';
     }
     
     console.log('🔄 Map reset: All visual elements cleared from satellite image');
@@ -3655,8 +3661,9 @@ export default function RealMapBoundaryMapper({
 
       {/* UNIFIED Map Container - Real Satellite Imagery with GPS Markers */}
       <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
-        <h3 className="font-medium text-blue-900 mb-3 flex items-center gap-2">
-          🗺️ Interactive GPS Boundary Map ({points.length}/{minPoints}+ points)
+        <h3 className="font-medium text-blue-900 mb-3 flex items-center justify-between gap-2">
+          <span>🗺️ Interactive GPS Boundary Map ({points.length}/{minPoints}+ points)</span>
+          <div id="risk-status-display" className="text-sm font-bold px-2 py-1 rounded" style={{minWidth: '100px', textAlign: 'center'}}></div>
         </h3>
         <div className="bg-white border rounded-lg p-4">
           <div 

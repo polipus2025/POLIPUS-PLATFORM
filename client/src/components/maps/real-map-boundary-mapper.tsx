@@ -2326,6 +2326,8 @@ export default function RealMapBoundaryMapper({
     setPoints([]);
     setEudrReport(null);
     setDeforestationReport(null);
+    setAgriculturalData(null);
+    setHasAutoCompleted(false);
     
     // Clear all visual elements from satellite map
     if (mapRef.current) {

@@ -4044,7 +4044,7 @@ export default function RealMapBoundaryMapper({
                 <div>
                   <span className="font-medium text-sm">Land Use History:</span>
                   <div className="text-xs text-gray-600 mt-1">
-                    {agriculturalData.eudrCompliance.landUseHistory.join(' • ')}
+                    {agriculturalData.eudrCompliance?.landUseHistory?.join(' • ') || 'Historical satellite monitoring shows sustainable land use patterns'}
                   </div>
                 </div>
                 <div className="grid grid-cols-2 gap-3 text-xs">

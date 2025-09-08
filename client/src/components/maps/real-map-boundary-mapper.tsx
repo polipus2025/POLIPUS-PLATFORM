@@ -695,6 +695,17 @@ export default function RealMapBoundaryMapper({
         organicMatter: realSoilData.organicMatter,
         elevation: realElevation,
         
+        // ENHANCED SOIL PROPERTIES from satellite data
+        sand: realSoilData.sand,
+        clay: realSoilData.clay,
+        silt: realSoilData.silt,
+        nitrogen: realSoilData.nitrogen,
+        phosphorus: realSoilData.phosphorus,
+        potassium: realSoilData.potassium,
+        waterRetention: realSoilData.waterRetention,
+        cationExchangeCapacity: realSoilData.cationExchangeCapacity,
+        bulkDensity: realSoilData.bulkDensity,
+        
         // COMPREHENSIVE ANALYSES
         sustainableCrops: sustainableCrops.crops,
         cropRecommendationReasons: sustainableCrops.reasons,

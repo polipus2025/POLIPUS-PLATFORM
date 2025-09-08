@@ -1741,12 +1741,30 @@ export default function RealMapBoundaryMapper({
 
   // Update bounds when map center changes
   useEffect(() => {
+    // Calculate REAL satellite tile coverage for 3x3 tiles at zoom 18
+    const zoom = 18;
+    const tilesPerSide = 3;
+    const earthCircumference = 40075017; // meters at equator
+    
+    // Calculate real coverage in meters
+    const metersPerTile = earthCircumference * Math.cos(mapCenter.lat * Math.PI / 180) / Math.pow(2, zoom);
+    const totalCoverageMeters = tilesPerSide * metersPerTile;
+    
+    // Convert meters to degrees for accurate GPS bounds
+    const latRange = totalCoverageMeters / 111320; // meters per degree latitude
+    const lngRange = totalCoverageMeters / (111320 * Math.cos(mapCenter.lat * Math.PI / 180));
+    
     mapBoundsRef.current = {
-      latRange: 0.002,
-      lngRange: 0.002,
+      latRange,
+      lngRange,
       centerLat: mapCenter.lat,
       centerLng: mapCenter.lng
     };
+    
+    console.log(`🌍 REAL Satellite Coverage Bounds:
+      Total coverage: ${totalCoverageMeters.toFixed(0)}m x ${totalCoverageMeters.toFixed(0)}m
+      GPS Range: ${latRange.toFixed(6)}° x ${lngRange.toFixed(6)}°
+      Area represents: ~${(totalCoverageMeters * totalCoverageMeters / 10000).toFixed(1)} hectares`);
   }, [mapCenter]);
 
   // Centralized coordinate conversion function

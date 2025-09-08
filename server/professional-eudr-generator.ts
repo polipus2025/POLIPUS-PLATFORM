@@ -45,10 +45,10 @@ export function generateProfessionalEUDRCertificate(
   generateCertificateIdentification(doc, packId, currentDate, centerLat, centerLng);
   generateProducerFarmInfo(doc, farmerData, farmSizeHa, centerLat, centerLng);
   generateRiskAssessment(doc);
+  generateSupplyChainTraceability(doc, packId);
   
   // PAGE 2 - Compliance & Certification
   generateLegalComplianceMatrix(doc);
-  generateSupplyChainTraceability(doc, packId);
   generateCommoditySpecifications(doc, farmSizeHa);
   generateCertificationStatement(doc, farmerData, centerLat, centerLng);
   generateDualSignatures(doc, packId, currentDate);

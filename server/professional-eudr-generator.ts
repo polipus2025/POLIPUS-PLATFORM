@@ -68,7 +68,7 @@ function generateHeader(doc: PDFDocument) {
      .text('REGULATION', 40, 50);
   
   // Main title (center)
-  doc.fontSize(24).fillColor('#ffffff').font('Helvetica-Bold')
+  doc.fontSize(20).fillColor('#ffffff').font('Helvetica-Bold')
      .text('EUDR COMPLIANCE CERTIFICATE', 120, 25);
   
   // Certified by (right)
@@ -80,10 +80,10 @@ function generateHeader(doc: PDFDocument) {
      .text('ISO 14001:2015', 420, 61);
   
   // Subtitle
-  doc.fontSize(12).fillColor('#ffffff')
+  doc.fontSize(10).fillColor('#ffffff')
      .text('EU Regulation 2023/1115 - Deforestation-Free Products', 120, 50);
   
-  doc.fontSize(10).fillColor('#e5e7eb')
+  doc.fontSize(9).fillColor('#e5e7eb')
      .text('Legal Verification & Supply Chain Traceability', 120, 65);
 }
 

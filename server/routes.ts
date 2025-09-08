@@ -22669,5 +22669,29 @@ VERIFY: ${qrCodeData.verificationUrl}`;
     }
   });
 
+  // Simple PDF test endpoint to verify PDF generation works
+  app.get('/api/test-pdf', (req, res) => {
+    try {
+      const PDFDocument = require('pdfkit');
+      const doc = new PDFDocument();
+
+      res.setHeader('Content-Type', 'application/pdf');
+      res.setHeader('Content-Disposition', 'attachment; filename="test.pdf"');
+
+      doc.pipe(res);
+
+      doc.fontSize(20)
+         .text('PDF Generation Test', 100, 100);
+      
+      doc.fontSize(12)
+         .text('If you can see this, PDF generation is working!', 100, 150);
+
+      doc.end();
+    } catch (error) {
+      console.error('PDF test error:', error);
+      res.status(500).json({ error: 'PDF test failed' });
+    }
+  });
+
   return httpServer;
 }

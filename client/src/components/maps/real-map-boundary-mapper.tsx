@@ -3345,96 +3345,77 @@ export default function RealMapBoundaryMapper({
     const packId = `EUDR-${Date.now()}`;
 
     try {
-      let url = '';
-      if (type === 'eudr') {
-        // Generate complete EUDR certificate pack with your coordinates
-        url = `/api/test/eudr-certificate-pack/${packId}`;
-        
-        // Post your real mapping data to backend for certificate generation
-        const response = await fetch('/api/generate-eudr-certificate', {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-          },
-          body: JSON.stringify({
-            farmerData,
-            exportData,
-            packId,
-            mappingData: {
-              coordinates: points.map((p, i) => ({
-                point: String.fromCharCode(65 + i),
-                latitude: p.latitude,
-                longitude: p.longitude,
-                accuracy: p.accuracy || 5.0
-              })),
-              area: area,
-              agriculturalData: agriculturalData,
-              satelliteData: {
-                forestCover: agriculturalData?.forestCover || '78.5%',
-                carbonLoss: agriculturalData?.carbonStockLoss || '1.0 tCO₂/ha',
-                deforestationRisk: agriculturalData?.deforestationAlert || 'Low Risk',
-                eudrCompliance: agriculturalData?.eudrStatus || 'COMPLIANT'
-              }
-            }
-          })
-        });
-
-        if (response.ok) {
-          const blob = await response.blob();
-          const url = window.URL.createObjectURL(blob);
-          const a = document.createElement('a');
-          a.href = url;
-          a.download = `EUDR_Certificate_${farmerData.name}_${packId}.pdf`;
-          document.body.appendChild(a);
-          a.click();
-          window.URL.revokeObjectURL(url);
-          document.body.removeChild(a);
-        } else {
-          throw new Error('Certificate generation failed');
+      const mappingData = {
+        coordinates: points.map((p, i) => ({
+          point: String.fromCharCode(65 + i),
+          latitude: p.latitude,
+          longitude: p.longitude,
+          accuracy: p.accuracy || 5.0
+        })),
+        area: area,
+        agriculturalData: agriculturalData,
+        satelliteData: {
+          forestCover: agriculturalData?.forestCover || '78.5%',
+          carbonLoss: agriculturalData?.carbonStockLoss || '1.0 tCO₂/ha',
+          deforestationRisk: agriculturalData?.deforestationAlert || 'Low Risk',
+          eudrCompliance: agriculturalData?.eudrStatus || 'COMPLIANT'
+        },
+        forestData: {
+          forestCover: agriculturalData?.forestCover || '78.5%',
+          treeLoss: agriculturalData?.treeCoverageLoss || '0.63%',
+          carbonLoss: agriculturalData?.carbonStockLoss || '1.0 tCO₂/ha',
+          riskLevel: agriculturalData?.deforestationAlert || 'Low Risk'
         }
-      } else {
-        // Generate deforestation analysis with your coordinates
-        const response = await fetch('/api/generate-deforestation-certificate', {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-          },
-          body: JSON.stringify({
-            farmerData,
-            mappingData: {
-              coordinates: points.map((p, i) => ({
-                point: String.fromCharCode(65 + i),
-                latitude: p.latitude,
-                longitude: p.longitude
-              })),
-              area: area,
-              forestData: {
-                forestCover: agriculturalData?.forestCover || '78.5%',
-                treeLoss: agriculturalData?.treeCoverageLoss || '0.63%',
-                carbonLoss: agriculturalData?.carbonStockLoss || '1.0 tCO₂/ha',
-                riskLevel: agriculturalData?.deforestationAlert || 'Low Risk'
-              }
-            }
-          })
-        });
+      };
 
-        if (response.ok) {
-          const blob = await response.blob();
-          const url = window.URL.createObjectURL(blob);
-          const a = document.createElement('a');
-          a.href = url;
-          a.download = `Deforestation_Analysis_${farmerData.name}_${Date.now()}.pdf`;
-          document.body.appendChild(a);
-          a.click();
-          window.URL.revokeObjectURL(url);
-          document.body.removeChild(a);
-        } else {
-          throw new Error('Deforestation report generation failed');
-        }
+      const endpoint = type === 'eudr' ? '/api/generate-eudr-certificate' : '/api/generate-deforestation-certificate';
+      const requestBody = type === 'eudr' ? 
+        { farmerData, exportData, packId, mappingData } : 
+        { farmerData, mappingData };
+
+      console.log(`Downloading ${type} certificate with data:`, requestBody);
+
+      const response = await fetch(endpoint, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(requestBody)
+      });
+
+      if (!response.ok) {
+        const errorText = await response.text();
+        console.error('Server error:', errorText);
+        throw new Error(`Server returned ${response.status}: ${errorText}`);
       }
+
+      const blob = await response.blob();
+      
+      if (blob.size === 0) {
+        throw new Error('Empty PDF received from server');
+      }
+
+      console.log(`PDF blob size: ${blob.size} bytes`);
+
+      const url = window.URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = type === 'eudr' ? 
+        `EUDR_Certificate_${farmerData.name}_${packId}.pdf` : 
+        `Deforestation_Analysis_${farmerData.name}_${Date.now()}.pdf`;
+      
+      document.body.appendChild(a);
+      a.click();
+      
+      // Clean up
+      setTimeout(() => {
+        window.URL.revokeObjectURL(url);
+        document.body.removeChild(a);
+      }, 100);
+
     } catch (error) {
       console.error('Certificate download error:', error);
-      alert('Certificate generation failed. Please try again.');
+      alert(`Certificate generation failed: ${error.message}`);
     }
   };
 
@@ -4416,7 +4397,15 @@ export default function RealMapBoundaryMapper({
           <p className="text-sm text-blue-700 mb-4">
             Download professional certificates with your authentic GPS coordinates and satellite verification data
           </p>
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+            <Button
+              onClick={() => window.open('/api/test-pdf', '_blank')}
+              className="h-12 bg-gray-600 hover:bg-gray-700"
+              size="lg"
+            >
+              <Download className="h-5 w-5 mr-2" />
+              Test PDF (Simple)
+            </Button>
             <Button
               onClick={() => downloadReport('eudr')}
               className="h-12 bg-blue-600 hover:bg-blue-700"

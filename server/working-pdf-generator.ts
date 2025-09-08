@@ -24,9 +24,9 @@ export function addWorkingPdfRoutes(app: Express) {
         
         doc.pipe(res);
 
-        // Professional EUDR Header
+        // Professional EUDR Header - NO EMOJIS
         doc.fontSize(28).font('Helvetica-Bold')
-           .text('🇪🇺 EUDR COMPLIANCE CERTIFICATE', 40, 50, { align: 'center' });
+           .text('EUDR COMPLIANCE CERTIFICATE', 40, 50, { align: 'center' });
         
         doc.fontSize(16).font('Helvetica')
            .text('European Union Deforestation Regulation', 40, 90, { align: 'center' });
@@ -77,16 +77,16 @@ export function addWorkingPdfRoutes(app: Express) {
         yPos += 30;
         const satelliteData = mappingData.satelliteData || {};
         doc.fontSize(12).font('Helvetica')
-           .text(`🌳 Forest Cover: ${satelliteData.forestCover || '78.5%'}`, 60, yPos)
-           .text(`💨 Carbon Stock Loss: ${satelliteData.carbonLoss || '1.0 tCO₂/ha'}`, 60, yPos + 20)
-           .text(`⚠️ Deforestation Risk: ${satelliteData.deforestationRisk || 'Low Risk'}`, 60, yPos + 40)
-           .text(`🇪🇺 EUDR Compliance: ${satelliteData.eudrCompliance || 'COMPLIANT'}`, 60, yPos + 60);
+           .text(`Forest Cover: ${satelliteData.forestCover || '78.5%'}`, 60, yPos)
+           .text(`Carbon Stock Loss: ${satelliteData.carbonLoss || '1.0 tCO2/ha'}`, 60, yPos + 20)
+           .text(`Deforestation Risk: ${satelliteData.deforestationRisk || 'Low Risk'}`, 60, yPos + 40)
+           .text(`EUDR Compliance: ${satelliteData.eudrCompliance || 'COMPLIANT'}`, 60, yPos + 60);
         
         // Green approval box
         yPos += 100;
         doc.rect(40, yPos, 530, 60).fillColor('#22c55e').fill();
         doc.fillColor('#ffffff').fontSize(20).font('Helvetica-Bold')
-           .text('✅ EUDR COMPLIANT - APPROVED FOR EU EXPORT', 50, yPos + 20);
+           .text('EUDR COMPLIANT - APPROVED FOR EU EXPORT', 50, yPos + 20);
         
         // Footer
         doc.fillColor('#666666').fontSize(10)
@@ -131,7 +131,7 @@ export function addWorkingPdfRoutes(app: Express) {
 
         // Professional Header
         doc.fontSize(28).font('Helvetica-Bold')
-           .text('🌲 DEFORESTATION RISK ANALYSIS', 40, 50, { align: 'center' });
+           .text('DEFORESTATION RISK ANALYSIS', 40, 50, { align: 'center' });
         
         doc.fontSize(16).font('Helvetica')
            .text('Real GPS Coordinates & Satellite Verification', 40, 90, { align: 'center' });
@@ -182,16 +182,16 @@ export function addWorkingPdfRoutes(app: Express) {
         yPos += 30;
         const forestData = mappingData.forestData || {};
         doc.fontSize(12).font('Helvetica')
-           .text(`🌳 Forest Cover: ${forestData.forestCover || '78.5%'}`, 60, yPos)
-           .text(`📉 Tree Loss: ${forestData.treeLoss || '0.63% annually'}`, 60, yPos + 20)
-           .text(`⚠️ Risk Level: ${forestData.riskLevel || 'Low Risk'}`, 60, yPos + 40)
-           .text(`🛰️ Satellite Verification: Real-time monitoring active`, 60, yPos + 60);
+           .text(`Forest Cover: ${forestData.forestCover || '78.5%'}`, 60, yPos)
+           .text(`Tree Loss: ${forestData.treeLoss || '0.63% annually'}`, 60, yPos + 20)
+           .text(`Risk Level: ${forestData.riskLevel || 'Low Risk'}`, 60, yPos + 40)
+           .text(`Satellite Verification: Real-time monitoring active`, 60, yPos + 60);
         
         // Green approval box
         yPos += 100;
         doc.rect(40, yPos, 530, 60).fillColor('#22c55e').fill();
         doc.fillColor('#ffffff').fontSize(20).font('Helvetica-Bold')
-           .text('✅ EUDR COMPLIANT - LOW RISK', 50, yPos + 20);
+           .text('EUDR COMPLIANT - LOW RISK', 50, yPos + 20);
         
         // Footer
         doc.fillColor('#666666').fontSize(10)

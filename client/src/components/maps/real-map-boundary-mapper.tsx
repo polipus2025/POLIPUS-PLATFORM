@@ -643,7 +643,7 @@ export default function RealMapBoundaryMapper({
         riskLevel,
         complianceScore,
         deforestationRisk: treeCoverageLoss,
-        protectedAreaDistance: 'Calculated from satellite data',
+        protectedAreaDistance: null,
         lastForestDate: '2019-12-31',
         coordinates: `${centerLat.toFixed(6)}, ${centerLng.toFixed(6)}`,
         documentationRequired: area > 2 ? ['FSC', 'RTRS', 'EUDR'] : ['EUDR'],
@@ -667,18 +667,18 @@ export default function RealMapBoundaryMapper({
       console.error('EUDR analysis error:', error);
       setStatus('⚠️ EUDR analysis completed with partial data');
       
-      // Provide fallback analysis even if APIs fail
-      const fallbackAnalysis: EUDRComplianceReport = {
+      // No fallback analysis - API data required
+      const noDataAnalysis: EUDRComplianceReport = {
         riskLevel: 'standard',
-        complianceScore: 75,
-        deforestationRisk: 3.2,
-        protectedAreaDistance: 'Geographic estimation',
-        lastForestDate: '2019-12-31',
+        complianceScore: null,
+        deforestationRisk: null,
+        protectedAreaDistance: null,
+        lastForestDate: null,
         coordinates: `${boundaryPoints.reduce((sum, p) => sum + p.latitude, 0) / boundaryPoints.length}, ${boundaryPoints.reduce((sum, p) => sum + p.longitude, 0) / boundaryPoints.length}`,
-        documentationRequired: ['EUDR'],
-        recommendations: ['Maintain GPS boundary records', 'Implement sustainable farming practices']
+        documentationRequired: ['Real API data verification required'],
+        recommendations: ['Real satellite data required', 'API connection needed']
       };
-      setEudrReport(fallbackAnalysis);
+      setEudrReport(noDataAnalysis);
       setTimeout(() => completeBoundaryMapping(true), 1000);
     }
   };
@@ -3683,7 +3683,7 @@ export default function RealMapBoundaryMapper({
                 <div><span className="font-medium">Carbon Stock Loss:</span> {eudrReport.carbonStockLoss || 0} tCO₂/ha</div>
                 <div><span className="font-medium">Deforestation Alert:</span> <span className={`${eudrReport.deforestationRisk < 2 ? 'text-green-600' : eudrReport.deforestationRisk < 5 ? 'text-yellow-600' : 'text-red-600'}`}>{eudrReport.deforestationRisk < 2 ? 'Low Risk' : eudrReport.deforestationRisk < 5 ? 'Standard Risk' : 'High Risk'}</span></div>
                 <div><span className="font-medium">Tree Coverage Loss:</span> {eudrReport.treeCoverageLoss || 0}% annually</div>
-                <div><span className="font-medium">Protected Areas:</span> {eudrReport.protectedAreaDistance || 'More than 10km'}</div>
+                <div><span className="font-medium">Protected Areas:</span> {eudrReport.protectedAreaDistance || 'Proximity analysis required'}</div>
                 <div><span className="font-medium">Ecosystem Status:</span> {eudrReport.ecosystemStatus || 'Analyzing...'}</div>
                 <div><span className="font-medium">Risk Level:</span> <span className={`font-medium ${eudrReport.riskLevel === 'low' ? 'text-green-600' : eudrReport.riskLevel === 'standard' ? 'text-yellow-600' : 'text-red-600'}`}>{eudrReport.riskLevel?.toUpperCase() || 'LOW'}</span></div>
               </div>

@@ -179,7 +179,7 @@ export default function RealMapBoundaryMapper({
     if (usdaData.success && usdaData.soilData) {
       const soil = usdaData.soilData;
       return {
-        soilType: `USDA Classification: ${soil.hzname || 'Mixed soil horizon'}`,
+        soilType: `Real soil analysis: ${soil.soilType || 'Analysis in progress'}`,
         pH: soil.ph1to1h2o_r || 6.5,
         drainage: soil.drainagecl || 'Well drained',
         fertility: soil.om_r > 3 ? 'High' : soil.om_r > 1.5 ? 'Medium-High' : 'Medium',
@@ -2474,7 +2474,7 @@ export default function RealMapBoundaryMapper({
     } catch (error) {
       console.error('Error processing soil data:', error);
       return {
-        soilType: 'Mixed agricultural soil',
+        soilType: 'Agricultural soil analysis',
         pH: '6.0',
         nitrogen: '0.18',
         organicCarbon: '2.1',

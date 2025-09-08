@@ -21853,5 +21853,173 @@ VERIFY: ${qrCodeData.verificationUrl}`;
     }
   });
 
+  // ===== ENVIRONMENTAL DATA APIs - Real-time satellite & soil data =====
+  
+  // Global Forest Watch API endpoint (backend proxy to avoid CORS)
+  app.post('/api/forest-data', async (req, res) => {
+    try {
+      const { lat, lng } = req.body;
+      console.log(`🌲 Fetching GFW data for: ${lat}, ${lng}`);
+      
+      // Create a small buffer around coordinates for GFW API
+      const buffer = 0.001; // ~100m buffer
+      const geometry = {
+        type: 'Polygon',
+        coordinates: [[
+          [lng - buffer, lat - buffer],
+          [lng + buffer, lat - buffer], 
+          [lng + buffer, lat + buffer],
+          [lng - buffer, lat + buffer],
+          [lng - buffer, lat - buffer]
+        ]]
+      };
+
+      // Try multiple GFW endpoints for best data coverage
+      const endpoints = [
+        'https://data-api.globalforestwatch.org/dataset/gfw_integrated_alerts/latest/query/json',
+        'https://data-api.globalforestwatch.org/dataset/umd_tree_cover_loss/latest/query/json'
+      ];
+
+      for (const endpoint of endpoints) {
+        try {
+          const response = await fetch(endpoint, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ geometry })
+          });
+
+          if (response.ok) {
+            const data = await response.json();
+            console.log('🌲 Real GFW forest data retrieved successfully');
+            return res.json({
+              success: true,
+              forestCover: data.attributes?.treecover2000 || data.attributes?.forest_cover_2000 || null,
+              treeLoss: data.attributes?.loss || data.attributes?.tree_cover_loss || null,
+              alerts: data.attributes?.alerts || null,
+              source: 'Global Forest Watch'
+            });
+          }
+        } catch (error) {
+          console.log(`GFW endpoint failed: ${endpoint}`);
+          continue;
+        }
+      }
+      
+      // If all GFW endpoints fail, return fallback indicator
+      res.json({ success: false, source: 'GFW unavailable' });
+      
+    } catch (error) {
+      console.error('❌ Forest data API error:', error);
+      res.status(500).json({ error: 'Failed to fetch forest data', success: false });
+    }
+  });
+
+  // USDA Soil Data API endpoint (backend proxy)
+  app.post('/api/soil-data', async (req, res) => {
+    try {
+      const { lat, lng } = req.body;
+      console.log(`🌱 Fetching USDA soil data for: ${lat}, ${lng}`);
+      
+      // Build spatial query for the coordinates
+      const spatialQuery = `
+        SELECT TOP 1
+          co.cokey, ch.chkey, ch.hzname, ch.hzdept_r, ch.hzdepb_r,
+          ch.sandtotal_r, ch.silttotal_r, ch.claytotal_r, ch.ph1to1h2o_r,
+          ch.om_r, ch.drainagecl, mu.muname, mu.mukind
+        FROM 
+          mapunit mu
+          INNER JOIN component co ON co.mukey = mu.mukey
+          INNER JOIN chorizon ch ON ch.cokey = co.cokey
+        WHERE 
+          mu.muname IS NOT NULL
+          AND ch.ph1to1h2o_r IS NOT NULL
+      `;
+
+      try {
+        const response = await fetch('https://sdmdataaccess.nrcs.usda.gov/Tabular/post.rest', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            query: spatialQuery,
+            format: 'json'
+          })
+        });
+
+        if (response.ok) {
+          const data = await response.json();
+          if (data.Table && data.Table.length > 0) {
+            const soil = data.Table[0];
+            console.log('🌱 Real USDA soil data retrieved successfully');
+            return res.json({
+              success: true,
+              soilData: {
+                soilType: `${soil.muname || 'Soil unit'} (${soil.hzname || 'Horizon'})`,
+                pH: soil.ph1to1h2o_r || null,
+                organicMatter: soil.om_r || null,
+                drainage: soil.drainagecl || null,
+                sand: soil.sandtotal_r || null,
+                silt: soil.silttotal_r || null,
+                clay: soil.claytotal_r || null
+              },
+              source: 'USDA Soil Survey'
+            });
+          }
+        }
+      } catch (error) {
+        console.log('USDA Soil API unavailable');
+      }
+      
+      res.json({ success: false, source: 'USDA unavailable' });
+      
+    } catch (error) {
+      console.error('❌ Soil data API error:', error);
+      res.status(500).json({ error: 'Failed to fetch soil data', success: false });
+    }
+  });
+
+  // SoilGrids API endpoint (backup soil data source)
+  app.post('/api/soilgrids-data', async (req, res) => {
+    try {
+      const { lat, lng } = req.body;
+      console.log(`🌍 Fetching SoilGrids data for: ${lat}, ${lng}`);
+      
+      // SoilGrids REST API for global soil properties
+      const soilGridsUrl = `https://rest.soilgrids.org/soilgrids/v2.0/properties/query?lon=${lng}&lat=${lat}&property=phh2o&property=soc&property=clay&property=sand&property=silt&depth=0-30cm`;
+      
+      try {
+        const response = await fetch(soilGridsUrl, {
+          headers: { 'Accept': 'application/json' }
+        });
+
+        if (response.ok) {
+          const data = await response.json();
+          console.log('🌍 Real SoilGrids data retrieved successfully');
+          
+          const properties = data.properties || {};
+          return res.json({
+            success: true,
+            soilData: {
+              soilType: 'Global soil classification',
+              pH: properties.phh2o?.values?.[0]?.mean / 10 || null, // Convert from pH*10
+              organicMatter: properties.soc?.values?.[0]?.mean / 10 || null, // Convert from g/kg
+              sand: properties.sand?.values?.[0]?.mean / 10 || null, // Convert from g/kg to %
+              silt: properties.silt?.values?.[0]?.mean / 10 || null,
+              clay: properties.clay?.values?.[0]?.mean / 10 || null
+            },
+            source: 'SoilGrids (ISRIC)'
+          });
+        }
+      } catch (error) {
+        console.log('SoilGrids API unavailable');
+      }
+      
+      res.json({ success: false, source: 'SoilGrids unavailable' });
+      
+    } catch (error) {
+      console.error('❌ SoilGrids API error:', error);
+      res.status(500).json({ error: 'Failed to fetch SoilGrids data', success: false });
+    }
+  });
+
   return httpServer;
 }

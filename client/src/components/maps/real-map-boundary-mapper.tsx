@@ -107,41 +107,25 @@ export default function RealMapBoundaryMapper({
     }
   };
 
-  // Global Forest Watch API Integration (FREE)
+  // Global Forest Watch API Integration (via backend to avoid CORS)
   const getGlobalForestWatchData = async (lat: number, lng: number) => {
     try {
-      // Create a small bounding box around the coordinates for GFW API
-      const buffer = 0.001; // ~100m buffer
-      const geometry = {
-        type: 'Polygon',
-        coordinates: [[
-          [lng - buffer, lat - buffer],
-          [lng + buffer, lat - buffer], 
-          [lng + buffer, lat + buffer],
-          [lng - buffer, lat + buffer],
-          [lng - buffer, lat - buffer]
-        ]]
-      };
-
-      // GFW Data API endpoint (free, no API key needed for basic data)
-      const response = await fetch('https://data-api.globalforestwatch.org/dataset/umd_tree_cover_loss/latest/query/json', {
+      const response = await fetch('/api/forest-data', {
         method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          geometry: geometry
-        })
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ lat, lng })
       });
 
       if (response.ok) {
         const data = await response.json();
-        console.log('🌲 Real GFW forest data retrieved');
-        return {
-          forestCover: data.attributes?.forest_cover_2000 || null,
-          treeLoss: data.attributes?.tree_cover_loss || null,
-          success: true
-        };
+        if (data.success) {
+          console.log('🌲 Real GFW forest data retrieved via backend');
+          return {
+            forestCover: data.forestCover,
+            treeLoss: data.treeLoss,
+            success: true
+          };
+        }
       }
     } catch (error) {
       console.log('GFW API unavailable, using geographic estimation');
@@ -150,46 +134,40 @@ export default function RealMapBoundaryMapper({
     return { success: false };
   };
 
-  // USDA Soil Data Access API (FREE)
+  // USDA Soil Data Access API (via backend to avoid CORS)
   const getUSDAsoilData = async (lat: number, lng: number) => {
     try {
-      // USDA Soil Data Access Web Service (free government data)
-      const soilQuery = `
-        SELECT 
-          co.cokey, ch.chkey, ch.hzname, ch.hzdept_r, ch.hzdepb_r,
-          ch.sandtotal_r, ch.silttotal_r, ch.claytotal_r, ch.ph1to1h2o_r,
-          ch.om_r, ch.drainagecl
-        FROM 
-          legend lg
-          INNER JOIN mapunit mu ON mu.lkey = lg.lkey
-          INNER JOIN component co ON co.mukey = mu.mukey  
-          INNER JOIN chorizon ch ON ch.cokey = co.cokey
-        WHERE 
-          lg.areasymbol LIKE '%'
-          AND mu.muname IS NOT NULL
-        `;
-
-      const response = await fetch('https://sdmdataaccess.nrcs.usda.gov/Tabular/post.rest', {
+      // Try USDA first
+      const response = await fetch('/api/soil-data', {
         method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          query: soilQuery,
-          format: 'json'
-        })
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ lat, lng })
       });
 
       if (response.ok) {
         const data = await response.json();
-        console.log('🌱 Real USDA soil data retrieved');
-        return {
-          soilData: data.Table?.[0] || null,
-          success: true
-        };
+        if (data.success) {
+          console.log('🌱 Real USDA soil data retrieved via backend');
+          return { soilData: data.soilData, success: true };
+        }
+      }
+
+      // Try SoilGrids as backup
+      const soilGridsResponse = await fetch('/api/soilgrids-data', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ lat, lng })
+      });
+
+      if (soilGridsResponse.ok) {
+        const soilGridsData = await soilGridsResponse.json();
+        if (soilGridsData.success) {
+          console.log('🌍 SoilGrids data retrieved as backup');
+          return { soilData: soilGridsData.soilData, success: true };
+        }
       }
     } catch (error) {
-      console.log('USDA Soil API unavailable, using geographic estimation');
+      console.log('All soil APIs unavailable, using geographic estimation');
     }
     
     return { success: false };

@@ -4742,7 +4742,7 @@ export default function RealMapBoundaryMapper({
         <div className="bg-white border rounded-lg p-4">
           <div 
             ref={mapRef} 
-            className="w-full h-[500px] bg-gray-100 border-2 border-gray-300 rounded-lg relative overflow-hidden"
+            className="w-full h-[600px] bg-gray-100 border-2 border-gray-300 rounded-lg relative overflow-hidden"
             style={{ minHeight: '500px', position: 'relative' }}
           >
             {!mapReady && (

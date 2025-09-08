@@ -63,7 +63,7 @@ class SatelliteDataService {
         totalArea: area,
         averageElevation: elevation,
         averageSlope: slope,
-        confidence: 92, // Enhanced with Galileo positioning accuracy
+        confidence: null, // Real confidence requires actual satellite analysis
         dataSource: "Galileo Satellite Positioning, Sentinel-2, SRTM DEM, USGS Soil Database",
         analysisDate: new Date().toISOString(),
         additionalMetrics: {
@@ -198,49 +198,32 @@ class SatelliteDataService {
    * Calculate vegetation index (NDVI simulation)
    */
   private calculateVegetationIndex(lat: number, lon: number): number {
-    // NDVI based on geographic position - no random values
-    const isForested = lat > 6.5; // Northern forested regions
-    const isCoastal = Math.abs(lon) > 9.0; // Coastal areas
-    
-    if (isForested) return 0.75; // High vegetation
-    if (isCoastal) return 0.65; // Moderate coastal vegetation  
-    return 0.55; // Agricultural areas
+    // Vegetation index requires real satellite imagery analysis
+    return null; // No hardcoded values - requires actual NDVI calculation
   }
   
   /**
    * Estimate moisture content based on soil type
    */
   private estimateMoistureContent(soilType: string): number {
-    const moistureMap: { [key: string]: number } = {
-      "Ferralsols": 25,
-      "Acrisols": 30,
-      "Fluvisols": 45,
-      "Gleysols": 60,
-      "Lixisols": 35,
-      "Arenosols": 15
-    };
-    return moistureMap[soilType] || 30;
+    // Moisture content requires real soil moisture analysis
+    return null; // No hardcoded moisture values
   }
   
   /**
    * Get average temperature for the region
    */
   private getAverageTemperature(lat: number, lon: number): number {
-    // Real temperature calculation based on coordinates
-    const isCoastal = Math.abs(lon) > 9.0;
-    const baseTemp = isCoastal ? 26.5 : 25.0;
-    const latitudeEffect = (8.5 - lat) * 0.5; // Cooler at higher latitudes
-    return Math.round((baseTemp + latitudeEffect) * 10) / 10;
+    // Temperature requires real meteorological data
+    return null; // No hardcoded temperature calculations
   }
   
   /**
    * Estimate rock coverage percentage
    */
   private estimateRockCoverage(slope: number, soilType: string): number {
-    let rockCoverage = slope * 1.8; // Realistic slope-rock relationship
-    if (soilType.includes("Arenosols")) rockCoverage += 8;
-    if (soilType.includes("Ferralsols")) rockCoverage -= 3;
-    return Math.max(0, Math.min(40, Math.round(rockCoverage)));
+    // Rock coverage requires geological survey data
+    return null; // No hardcoded rock coverage estimates
   }
 }
 

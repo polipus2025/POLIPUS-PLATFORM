@@ -21873,24 +21873,18 @@ VERIFY: ${qrCodeData.verificationUrl}`;
           const data = await response.json();
           console.log('🌲 NASA MODIS land cover data retrieved');
           
-          // Convert land cover to forest percentage estimate
-          let forestCover = 50; // Default estimate
+          // Use real land cover data only - no defaults
+          let forestCover = null;
           if (data.subset && data.subset.length > 0) {
             const landCoverType = data.subset[0].data[0];
-            // MODIS land cover: 1-5 = forest types, 6-10 = shrublands, etc.
-            if (landCoverType >= 1 && landCoverType <= 5) {
-              forestCover = 80; // Forest types
-            } else if (landCoverType >= 6 && landCoverType <= 10) {
-              forestCover = 30; // Shrublands
-            } else if (landCoverType >= 12 && landCoverType <= 14) {
-              forestCover = 5; // Croplands
-            }
+            // Use real MODIS classification data only
+            forestCover = landCoverType; // Raw MODIS data, no arbitrary conversions
           }
           
           return res.json({
             success: true,
             forestCover,
-            treeLoss: 2.1, // Estimate based on location
+            treeLoss: null, // No hardcoded estimates
             alerts: null,
             source: 'NASA MODIS Land Cover'
           });
@@ -21915,8 +21909,8 @@ VERIFY: ${qrCodeData.verificationUrl}`;
               console.log('🌲 OpenLandMap tree cover data retrieved');
               return res.json({
                 success: true,
-                forestCover: treeLayer.values[0] || 45,
-                treeLoss: 1.8,
+                forestCover: treeLayer.values[0] || null,
+                treeLoss: null,
                 alerts: null,
                 source: 'OpenLandMap Tree Cover'
               });

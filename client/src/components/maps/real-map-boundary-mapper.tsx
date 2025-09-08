@@ -99,7 +99,7 @@ export default function RealMapBoundaryMapper({
       // Use Open-Elevation API for real SRTM elevation data
       const response = await fetch(`https://api.open-elevation.com/api/v1/lookup?locations=${lat},${lng}`);
       const data = await response.json();
-      return data.results?.[0]?.elevation || 0;
+      return data.results?.[0]?.elevation || null;
     } catch (error) {
       console.log('Elevation data unavailable - real API data required');
       // No hardcoded elevation fallbacks
@@ -180,9 +180,9 @@ export default function RealMapBoundaryMapper({
       const soil = usdaData.soilData;
       return {
         soilType: `Real soil analysis: ${soil.soilType || 'Analysis in progress'}`,
-        pH: soil.ph1to1h2o_r || 6.5,
-        drainage: soil.drainagecl || 'Well drained',
-        fertility: soil.om_r > 3 ? 'High' : soil.om_r > 1.5 ? 'Medium-High' : 'Medium',
+        pH: soil.ph1to1h2o_r || null,
+        drainage: soil.drainagecl || null,
+        fertility: soil.om_r ? (soil.om_r > 3 ? 'High' : soil.om_r > 1.5 ? 'Medium-High' : 'Medium') : null,
         organicMatter: soil.om_r ? `${soil.om_r.toFixed(1)}%` : null,
         carbonSequestrationRate: soil.om_r ? soil.om_r * 1.4 : null,
         source: 'USDA Soil Survey'
@@ -302,14 +302,14 @@ export default function RealMapBoundaryMapper({
   };
   
   const calculateRealYield = (area: number, soilData: any, climateData: any): string => {
-    const baseYield = soilData.fertility === 'High' ? 1400 : soilData.fertility === 'Medium-High' ? 1200 : 1000;
+    const baseYield = soilData.fertility ? (soilData.fertility === 'High' ? 1400 : soilData.fertility === 'Medium-High' ? 1200 : 1000) : null;
     const climateBonus = climateData.annualRainfall > 2500 ? 1.1 : 1.0;
     const finalYield = Math.round(area * baseYield * climateBonus);
     return `${finalYield} kg/year`;
   };
   
   const calculateMarketValue = (area: number, soilData: any, climateData: any): string => {
-    const baseValue = soilData.fertility === 'High' ? 2800 : soilData.fertility === 'Medium-High' ? 2200 : 1800;
+    const baseValue = soilData.fertility ? (soilData.fertility === 'High' ? 2800 : soilData.fertility === 'Medium-High' ? 2200 : 1800) : null;
     const finalValue = Math.round(area * baseValue);
     return `$${finalValue}/year`;
   };
@@ -317,7 +317,7 @@ export default function RealMapBoundaryMapper({
   const calculateBiodiversityIndex = (area: number, elevation: number, climateData: any): string => {
     if (area > 2 && elevation > 300) return 'Very High potential for agroforestry';
     if (area > 1) return 'High potential for agroforestry';
-    return 'Medium biodiversity potential';
+    return null; // Biodiversity potential requires real analysis
   };
 
   // Real Environmental Metric Calculations with API Integration
@@ -2310,7 +2310,7 @@ export default function RealMapBoundaryMapper({
       
       // Process real soil data
       const realSoilAnalysis = processSoilGridsData(soilData);
-      const realElevation = elevationData?.results?.[0]?.elevation || 150;
+      const realElevation = elevationData?.results?.[0]?.elevation || null;
       
       // REAL CROP SUITABILITY: FAO Global Agricultural Zones
       const cropSuitability = await getCropSuitabilityData(centerLat, centerLng, realSoilAnalysis, realElevation);
@@ -2367,15 +2367,15 @@ export default function RealMapBoundaryMapper({
       const carbonLayer = layers.find((l: any) => l.name === 'soc_0-5cm_mean');
       const clayLayer = layers.find((l: any) => l.name === 'clay_0-5cm_mean');
       
-      const pH = topLayer?.depths?.[0]?.values?.mean ? (topLayer.depths[0].values.mean / 10).toFixed(1) : '6.2';
+      const pH = topLayer?.depths?.[0]?.values?.mean ? (topLayer.depths[0].values.mean / 10).toFixed(1) : null;
       const nitrogen = nitrogenLayer?.depths?.[0]?.values?.mean ? (nitrogenLayer.depths[0].values.mean / 100).toFixed(2) : '0.15';
       const organicCarbon = carbonLayer?.depths?.[0]?.values?.mean ? (carbonLayer.depths[0].values.mean / 10).toFixed(1) : '2.4';
-      const clayContent = clayLayer?.depths?.[0]?.values?.mean || 25;
+      const clayContent = clayLayer?.depths?.[0]?.values?.mean || null;
       
       // Determine soil type based on clay content and other properties
       let soilType = 'Loamy soil';
       if (clayContent > 40) soilType = 'Clay soil (High fertility)';
-      else if (clayContent > 25) soilType = 'Clay loam (Good drainage)';
+      else if (clayContent && clayContent > 25) soilType = 'Clay loam (Good drainage)';
       else if (clayContent < 15) soilType = 'Sandy loam (Fast drainage)';
       
       return {
@@ -2385,7 +2385,7 @@ export default function RealMapBoundaryMapper({
         organicCarbon,
         clayContent: clayContent.toFixed(0),
         waterRetention: clayContent > 30 ? 'High' : clayContent > 20 ? 'Moderate' : 'Low',
-        drainage: clayContent > 40 ? 'Poor' : clayContent > 25 ? 'Good' : 'Excellent',
+        drainage: clayContent ? (clayContent > 40 ? 'Poor' : clayContent > 25 ? 'Good' : 'Excellent') : null,
         irrigation: clayContent > 30 ? 'Recommended due to high clay content' : 'Moderate requirement',
         phosphorus: null, // Requires separate analysis
         potassium: null   // Requires separate analysis
@@ -2439,19 +2439,19 @@ export default function RealMapBoundaryMapper({
 
   const calculateRealYieldPotential = (soilData: any, cropData: any, area: number) => {
     // Real yield calculations based on soil quality and crop type
-    let baseYield = 2.5; // tons per hectare baseline (increased from 2.0)
+    let baseYield = null; // No baseline yield without real soil analysis
     
     // Safely handle potentially null soil data from APIs
     const pH = soilData.pH ? parseFloat(soilData.pH) : 0; // No default pH values
-    const organicCarbon = soilData.organicCarbon ? parseFloat(soilData.organicCarbon) : 2.0; // Default organic matter
-    const drainage = soilData.drainage || 'Moderate'; // Default drainage
+    const organicCarbon = soilData.organicCarbon ? parseFloat(soilData.organicCarbon) : null;
+    const drainage = soilData.drainage || null;
     
     console.log(`🌱 Yield calculation: pH=${pH}, organicCarbon=${organicCarbon}, drainage=${drainage}`);
     
     // Adjust for soil quality (with safety checks)
-    if (pH > 6.0 && pH < 7.5) baseYield += 0.5; // Optimal pH
-    if (organicCarbon > 2.0) baseYield += 0.3; // Good organic matter
-    if (drainage === 'Good') baseYield += 0.2; // Good drainage
+    if (baseYield && pH > 6.0 && pH < 7.5) baseYield += 0.5; // Optimal pH
+    if (baseYield && organicCarbon && organicCarbon > 2.0) baseYield += 0.3; // Good organic matter
+    if (baseYield && drainage === 'Good') baseYield += 0.2; // Good drainage
     
     // Adjust for crop type  
     if (cropData.optimalCrop === 'Cocoa') baseYield = Math.min(baseYield * 1.2, 3.5);
@@ -2460,7 +2460,7 @@ export default function RealMapBoundaryMapper({
     else if (cropData.optimalCrop === 'Cassava') baseYield = Math.min(baseYield * 0.8, 2.8);
     else if (cropData.optimalCrop === 'Rice') baseYield = Math.min(baseYield * 0.9, 3.2);
     
-    const finalYield = Math.max(baseYield, 1.5); // Minimum 1.5 tons/hectare
+    const finalYield = baseYield ? Math.max(baseYield, 1.5) : null; // Only if base yield available
     console.log(`🌱 Final calculated yield: ${finalYield.toFixed(1)} tons/hectare`);
     
     return { baseYield: finalYield };
@@ -3599,8 +3599,8 @@ export default function RealMapBoundaryMapper({
               <div><span className="font-medium">Market Value:</span> {agriculturalData?.marketValue || 'Market data required'}</div>
               <div><span className="font-medium">Planting Season:</span> {agriculturalData?.seasonality?.plantingSeason || getPlantingSeason(points)}</div>
               <div><span className="font-medium">Harvest Season:</span> {agriculturalData?.seasonality?.harvestSeason || getHarvestSeason(points)}</div>
-              <div><span className="font-medium">Irrigation:</span> {agriculturalData?.irrigation || 'Manual'}</div>
-              <div><span className="font-medium">Drainage:</span> {agriculturalData?.drainage || 'Natural'}</div>
+              <div><span className="font-medium">Irrigation:</span> {agriculturalData?.irrigation || 'Irrigation analysis required'}</div>
+              <div><span className="font-medium">Drainage:</span> {agriculturalData?.drainage || 'Drainage analysis required'}</div>
             </div>
           </div>
 
@@ -3636,11 +3636,11 @@ export default function RealMapBoundaryMapper({
                 🌍 EUDR Environmental Impact Analysis
               </h4>
               <div className="grid grid-cols-2 gap-3 text-sm">
-                <div><span className="font-medium">Forest Cover:</span> {eudrReport.forestCover || 0}%</div>
+                <div><span className="font-medium">Forest Cover:</span> {eudrReport.forestCover || 'Forest data required'}%</div>
                 <div><span className="font-medium">Biodiversity Impact:</span> <span className={`${eudrReport.riskLevel === 'low' ? 'text-green-600' : eudrReport.riskLevel === 'standard' ? 'text-yellow-600' : 'text-red-600'}`}>{eudrReport.riskLevel === 'low' ? 'Low Impact' : eudrReport.riskLevel === 'standard' ? 'Moderate Impact' : 'High Impact'}</span></div>
-                <div><span className="font-medium">Carbon Stock Loss:</span> {eudrReport.carbonStockLoss || 0} tCO₂/ha</div>
+                <div><span className="font-medium">Carbon Stock Loss:</span> {eudrReport.carbonStockLoss || 'Carbon analysis required'} tCO₂/ha</div>
                 <div><span className="font-medium">Deforestation Alert:</span> <span className={`${eudrReport.deforestationRisk < 2 ? 'text-green-600' : eudrReport.deforestationRisk < 5 ? 'text-yellow-600' : 'text-red-600'}`}>{eudrReport.deforestationRisk < 2 ? 'Low Risk' : eudrReport.deforestationRisk < 5 ? 'Standard Risk' : 'High Risk'}</span></div>
-                <div><span className="font-medium">Tree Coverage Loss:</span> {eudrReport.treeCoverageLoss || 0}% annually</div>
+                <div><span className="font-medium">Tree Coverage Loss:</span> {eudrReport.treeCoverageLoss || 'Tree coverage analysis required'}% annually</div>
                 <div><span className="font-medium">Protected Areas:</span> {eudrReport.protectedAreaDistance || 'Proximity analysis required'}</div>
                 <div><span className="font-medium">Ecosystem Status:</span> {eudrReport.ecosystemStatus || 'Ecosystem data required'}</div>
                 <div><span className="font-medium">Risk Level:</span> <span className={`font-medium ${eudrReport.riskLevel === 'low' ? 'text-green-600' : eudrReport.riskLevel === 'standard' ? 'text-yellow-600' : 'text-red-600'}`}>{eudrReport.riskLevel?.toUpperCase() || 'LOW'}</span></div>
@@ -3648,7 +3648,7 @@ export default function RealMapBoundaryMapper({
               <div className="mt-3 pt-3 border-t border-blue-200">
                 <div className="flex items-center justify-between text-xs">
                   <span className="text-blue-700">Environmental Assessment Confidence:</span>
-                  <span className="font-medium text-blue-800">{eudrReport.assessmentConfidence || 85}%</span>
+                  <span className="font-medium text-blue-800">{eudrReport.assessmentConfidence || 'Assessment required'}%</span>
                 </div>
               </div>
             </div>
@@ -3761,7 +3761,7 @@ export default function RealMapBoundaryMapper({
                 </div>
                 <div>
                   <span className="font-medium">Mapping Accuracy:</span>
-                  <span className="ml-2">{rtkMode === 'full-rtk' ? `±1.2m (RTK Enhanced from ${(trackingAccuracy || 5).toFixed(1)}m)` : `±4.5m (Enhanced from ${(trackingAccuracy || 5).toFixed(1)}m)`}</span>
+                  <span className="ml-2">{rtkMode === 'full-rtk' ? `±1.2m (RTK Enhanced from ${trackingAccuracy ? trackingAccuracy.toFixed(1) : 'unknown'}m)` : `±4.5m (Enhanced from ${trackingAccuracy ? trackingAccuracy.toFixed(1) : 'unknown'}m)`}</span>
                 </div>
               </div>
               <div className="text-xs text-gray-600 mb-2">

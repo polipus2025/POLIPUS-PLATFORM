@@ -2327,29 +2327,53 @@ export default function RealMapBoundaryMapper({
   const calculateArea = (points: BoundaryPoint[]): number => {
     if (points.length < 3) return 0;
     
-    // Convert GPS coordinates to accurate area calculation using geodesic methods
-    // This accounts for Earth's curvature and provides precise measurements
-    
-    let area = 0;
-    const earthRadius = 6371000; // Earth radius in meters
-    
-    // Use spherical excess formula for accurate GPS coordinate area calculation
-    for (let i = 0; i < points.length; i++) {
-      const j = (i + 1) % points.length;
-      
-      // Convert degrees to radians
-      const lat1 = points[i].latitude * Math.PI / 180;
-      const lng1 = points[i].longitude * Math.PI / 180;
-      const lat2 = points[j].latitude * Math.PI / 180;
-      const lng2 = points[j].longitude * Math.PI / 180;
-      
-      // Calculate using geodesic area formula (accounts for Earth's curvature)
-      const deltaLng = lng2 - lng1;
-      area += deltaLng * (2 + Math.sin(lat1) + Math.sin(lat2));
+    // Use Haversine formula for accurate GPS coordinate area calculation
+    function toRadians(degrees: number): number {
+      return degrees * (Math.PI / 180);
     }
     
-    // Convert to square meters, then to hectares
-    area = Math.abs(area) * earthRadius * earthRadius / 2;
+    function haversineDistance(lat1: number, lon1: number, lat2: number, lon2: number): number {
+      const R = 6371000; // Earth's radius in meters
+      const dLat = toRadians(lat2 - lat1);
+      const dLon = toRadians(lon2 - lon1);
+      const a = Math.sin(dLat/2) * Math.sin(dLat/2) +
+                Math.cos(toRadians(lat1)) * Math.cos(toRadians(lat2)) *
+                Math.sin(dLon/2) * Math.sin(dLon/2);
+      const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
+      return R * c;
+    }
+    
+    // Shoelace formula with GPS coordinates converted to meters
+    let area = 0;
+    const n = points.length;
+    
+    // Convert GPS to approximate local Cartesian coordinates in meters
+    const centerLat = points.reduce((sum, p) => sum + p.latitude, 0) / n;
+    const centerLon = points.reduce((sum, p) => sum + p.longitude, 0) / n;
+    
+    const cartesianPoints = points.map(point => {
+      const x = haversineDistance(centerLat, centerLon, centerLat, point.longitude) * 
+                (point.longitude > centerLon ? 1 : -1);
+      const y = haversineDistance(centerLat, centerLon, point.latitude, centerLon) * 
+                (point.latitude > centerLat ? 1 : -1);
+      return { x, y };
+    });
+    
+    // Apply shoelace formula
+    for (let i = 0; i < n; i++) {
+      const j = (i + 1) % n;
+      area += cartesianPoints[i].x * cartesianPoints[j].y;
+      area -= cartesianPoints[j].x * cartesianPoints[i].y;
+    }
+    
+    area = Math.abs(area) / 2; // Area in square meters
+    
+    console.log(`🔍 AREA CALCULATION DEBUG:
+      Points: ${n}
+      Raw area (m²): ${area.toFixed(2)}
+      Area in hectares: ${(area / 10000).toFixed(4)}
+    `);
+    
     return area / 10000; // Convert square meters to hectares (1 hectare = 10,000 m²)
   };
 

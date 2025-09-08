@@ -22010,6 +22010,8 @@ VERIFY: ${qrCodeData.verificationUrl}`;
           if (classificationResponse.ok) {
             const classificationData = await classificationResponse.json();
             console.log('🌍 Full classification response:', JSON.stringify(classificationData, null, 2));
+            console.log('🌍 DEBUG classificationData.wrb_class_name:', classificationData.wrb_class_name);
+            console.log('🌍 DEBUG classificationData.most_probable_class:', classificationData.most_probable_class);
             actualSoilType = classificationData.wrb_class_name || classificationData.most_probable_class || 'Classification unavailable';
             console.log('🌍 Real soil classification retrieved:', actualSoilType);
           }
@@ -22043,6 +22045,7 @@ VERIFY: ${qrCodeData.verificationUrl}`;
             });
             
             console.log(`🌍 Texture values for ${lat}, ${lng}: Clay=${clay}%, Sand=${sand}%, Silt=${silt}%`);
+            console.log(`🌍 DEBUG: actualSoilType at this point = '${actualSoilType}'`);
             
             // Determine soil type from texture using USDA classification
             if (clay > 40) {

@@ -61,11 +61,11 @@ function generateHeader(doc: PDFDocument) {
   doc.rect(0, 0, 595, 80).fill('#1e3a8a');
   
   // EU logo placeholder (left)
-  doc.rect(30, 15, 50, 50).fill('#ffffff');
+  doc.rect(30, 15, 65, 50).fill('#ffffff');
   doc.fontSize(14).fillColor('#1e3a8a').font('Helvetica-Bold')
-     .text('EU', 50, 35);
+     .text('EU', 55, 35);
   doc.fontSize(8).fillColor('#1e3a8a')
-     .text('REGULATION', 40, 50);
+     .text('REGULATION', 35, 50);
   
   // Main title (center)
   doc.fontSize(20).fillColor('#ffffff').font('Helvetica-Bold')

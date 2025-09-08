@@ -2520,20 +2520,31 @@ export default function RealMapBoundaryMapper({
 
   const calculateRealYieldPotential = (soilData: any, cropData: any, area: number) => {
     // Real yield calculations based on soil quality and crop type
-    let baseYield = 2.0; // tons per hectare baseline
+    let baseYield = 2.5; // tons per hectare baseline (increased from 2.0)
     
-    // Adjust for soil quality
-    const pH = parseFloat(soilData.pH);
+    // Safely handle potentially null soil data from APIs
+    const pH = soilData.pH ? parseFloat(soilData.pH) : 6.2; // Default neutral pH
+    const organicCarbon = soilData.organicCarbon ? parseFloat(soilData.organicCarbon) : 2.0; // Default organic matter
+    const drainage = soilData.drainage || 'Moderate'; // Default drainage
+    
+    console.log(`🌱 Yield calculation: pH=${pH}, organicCarbon=${organicCarbon}, drainage=${drainage}`);
+    
+    // Adjust for soil quality (with safety checks)
     if (pH > 6.0 && pH < 7.5) baseYield += 0.5; // Optimal pH
-    if (parseFloat(soilData.organicCarbon) > 2.0) baseYield += 0.3; // Good organic matter
-    if (soilData.drainage === 'Good') baseYield += 0.2; // Good drainage
+    if (organicCarbon > 2.0) baseYield += 0.3; // Good organic matter
+    if (drainage === 'Good') baseYield += 0.2; // Good drainage
     
-    // Adjust for crop type
+    // Adjust for crop type  
     if (cropData.optimalCrop === 'Cocoa') baseYield = Math.min(baseYield * 1.2, 3.5);
     else if (cropData.optimalCrop === 'Coffee (Robusta)') baseYield = Math.min(baseYield * 1.1, 3.0);
     else if (cropData.optimalCrop === 'Palm Oil') baseYield = Math.min(baseYield * 1.3, 4.0);
+    else if (cropData.optimalCrop === 'Cassava') baseYield = Math.min(baseYield * 0.8, 2.8);
+    else if (cropData.optimalCrop === 'Rice') baseYield = Math.min(baseYield * 0.9, 3.2);
     
-    return { baseYield: Math.max(baseYield, 1.5) }; // Minimum 1.5 tons/hectare
+    const finalYield = Math.max(baseYield, 1.5); // Minimum 1.5 tons/hectare
+    console.log(`🌱 Final calculated yield: ${finalYield.toFixed(1)} tons/hectare`);
+    
+    return { baseYield: finalYield };
   };
 
   const getRealMarketPrice = async (crop: string) => {

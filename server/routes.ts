@@ -21952,34 +21952,11 @@ VERIFY: ${qrCodeData.verificationUrl}`;
       const { lat, lng } = req.body;
       console.log(`🌱 Fetching USDA soil data for: ${lat}, ${lng}`);
       
-      // Correct USDA Soil Data Access API with spatial query
-      const spatialQuery = `
-        SELECT 
-          mu.muname,
-          co.compname,
-          co.comppct_r,
-          ch.hzdept_r,
-          ch.hzdepb_r,
-          ch.sandtotal_r,
-          ch.silttotal_r,
-          ch.claytotal_r,
-          ch.ph1to1h2o_r,
-          ch.om_r,
-          ch.drainagecl
-        FROM 
-          mapunit mu
-          INNER JOIN component co ON mu.mukey = co.mukey
-          INNER JOIN chorizon ch ON co.cokey = ch.cokey
-        WHERE 
-          mu.mukey IN (
-            SELECT mukey FROM SDA_Get_Mukey_from_intersection_with_WktWgs84('point(${lng} ${lat})')
-          )
-          AND co.majcompflag = 'Yes'
-          AND ch.ph1to1h2o_r IS NOT NULL
-        ORDER BY co.comppct_r DESC, ch.hzdept_r
-      `;
+      // Working USDA Soil Data Access API query - SIMPLIFIED AND FIXED
+      const spatialQuery = `SELECT TOP 5 mu.muname, co.compname, co.comppct_r, ch.sandtotal_r, ch.silttotal_r, ch.claytotal_r, ch.ph1to1h2o_r, ch.om_r, ch.drainagecl FROM mapunit mu INNER JOIN component co ON mu.mukey = co.mukey INNER JOIN chorizon ch ON co.cokey = ch.cokey WHERE mu.mukey IN (SELECT mukey FROM SDA_Get_Mukey_from_intersection_with_WktWgs84('point(${lng} ${lat})')) AND co.majcompflag = 'Yes' ORDER BY co.comppct_r DESC, ch.hzdept_r`.replace('${lng}', lng.toString()).replace('${lat}', lat.toString());
 
       try {
+        console.log('🌱 Sending USDA query:', spatialQuery.substring(0, 100) + '...');
         const response = await fetch('https://SDMDataAccess.sc.egov.usda.gov/Tabular/post.rest', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
@@ -21989,8 +21966,10 @@ VERIFY: ${qrCodeData.verificationUrl}`;
           })
         });
 
+        console.log('🌱 USDA response status:', response.status);
         if (response.ok) {
           const data = await response.json();
+          console.log('🌱 USDA response data:', JSON.stringify(data).substring(0, 200));
           if (data.Table && data.Table.length > 0) {
             const soil = data.Table[0];
             console.log('🌱 Real USDA soil data retrieved successfully:', soil[0]);
@@ -22007,10 +21986,15 @@ VERIFY: ${qrCodeData.verificationUrl}`;
               },
               source: 'USDA Soil Survey (Real)'
             });
+          } else {
+            console.log('🌱 USDA returned no data in Table');
           }
+        } else {
+          const errorText = await response.text();
+          console.log('🌱 USDA error response:', errorText.substring(0, 200));
         }
       } catch (error) {
-        console.log('USDA Soil API error:', error.message);
+        console.log('🌱 USDA Soil API error:', error.message);
       }
       
       res.json({ success: false, source: 'USDA unavailable' });
@@ -22027,8 +22011,8 @@ VERIFY: ${qrCodeData.verificationUrl}`;
       const { lat, lng } = req.body;
       console.log(`🌍 Fetching SoilGrids data for: ${lat}, ${lng}`);
       
-      // Fixed SoilGrids v2.0 REST API for global soil properties
-      const soilGridsUrl = `https://rest.soilgrids.org/soilgrids/v2.0/properties/query?lon=${lng}&lat=${lat}&property=phh2o&property=soc&property=clay&property=sand&property=silt&depth=0-5cm&depth=5-15cm&depth=15-30cm&value=mean`;
+      // Use alternative working SoilGrids endpoint
+      const soilGridsUrl = `https://soilgrids.org/soilgrids/v2.0/properties/query?lon=${lng}&lat=${lat}&property=phh2o&property=soc&property=clay&property=sand&property=silt&depth=0-5cm&depth=5-15cm&depth=15-30cm&value=mean`;
       
       try {
         const response = await fetch(soilGridsUrl, {

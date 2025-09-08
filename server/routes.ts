@@ -21990,37 +21990,84 @@ VERIFY: ${qrCodeData.verificationUrl}`;
       // Try ISRIC SoilGrids for global coverage (including West Africa)
       console.log('🌍 Using ISRIC SoilGrids API for global coordinates');
       try {
-        const soilGridsUrl = `https://rest.isric.org/soilgrids/v2.0/properties/query?lon=${lng}&lat=${lat}&property=clay&property=sand&property=silt&property=phh2o&property=soc&depth=0-5cm&value=mean`;
-        
-        const response = await fetch(soilGridsUrl, {
-          headers: { 'Accept': 'application/json' }
-        });
+        // Get both soil properties AND soil classification
+        const [propertiesResponse, classificationResponse] = await Promise.all([
+          fetch(`https://rest.isric.org/soilgrids/v2.0/properties/query?lon=${lng}&lat=${lat}&property=clay&property=sand&property=silt&property=phh2o&property=soc&depth=0-5cm&value=mean`, {
+            headers: { 'Accept': 'application/json' }
+          }),
+          fetch(`https://rest.isric.org/soilgrids/v2.0/classification/query?lon=${lng}&lat=${lat}&number_classes=0`, {
+            headers: { 'Accept': 'application/json' }
+          })
+        ]);
 
-        if (response.ok) {
-          const data = await response.json();
-          console.log('🌍 Real SoilGrids data retrieved successfully');
+        if (propertiesResponse.ok) {
+          const propertiesData = await propertiesResponse.json();
+          console.log('🌍 Real SoilGrids properties retrieved successfully');
           
-          // Parse SoilGrids response
-          const layers = data.properties?.layers || [];
-          const soilData = { soilType: 'Global Soil Classification', pH: null, organicMatter: null, sand: null, silt: null, clay: null };
+          // Get real soil classification name
+          let actualSoilType = 'Soil classification unavailable';
+          if (classificationResponse.ok) {
+            const classificationData = await classificationResponse.json();
+            actualSoilType = classificationData.properties?.wrb_class_name || classificationData.properties?.most_probable_class || 'Unknown soil classification';
+            console.log('🌍 Real soil classification retrieved:', actualSoilType);
+          }
           
-          layers.forEach(layer => {
-            if (layer.depths?.[0]?.values?.mean) {
-              const value = layer.depths[0].values.mean;
-              switch (layer.name) {
-                case 'clay': soilData.clay = Math.round(value / 10); break;
-                case 'sand': soilData.sand = Math.round(value / 10); break;
-                case 'silt': soilData.silt = Math.round(value / 10); break;
-                case 'phh2o': soilData.pH = (value / 10).toFixed(1); break;
-                case 'soc': soilData.organicMatter = (value / 10).toFixed(1); break;
+          // Parse soil properties
+          const layers = propertiesData.properties?.layers || [];
+          const soilData = { soilType: actualSoilType, pH: null, organicMatter: null, sand: null, silt: null, clay: null };
+          
+          // If no classification available, determine soil type from texture
+          if (actualSoilType === 'Soil classification unavailable' || actualSoilType === 'Unknown soil classification') {
+            let clay = 0, sand = 0, silt = 0;
+            
+            layers.forEach(layer => {
+              if (layer.depths?.[0]?.values?.mean) {
+                const value = layer.depths[0].values.mean;
+                switch (layer.name) {
+                  case 'clay': clay = Math.round(value / 10); soilData.clay = clay; break;
+                  case 'sand': sand = Math.round(value / 10); soilData.sand = sand; break;
+                  case 'silt': silt = Math.round(value / 10); soilData.silt = silt; break;
+                  case 'phh2o': soilData.pH = (value / 10).toFixed(1); break;
+                  case 'soc': soilData.organicMatter = (value / 10).toFixed(1); break;
+                }
               }
+            });
+            
+            // Determine soil type from texture using USDA classification
+            if (clay > 40) {
+              actualSoilType = `Clay soil (${clay}% clay content)`;
+            } else if (clay > 27) {
+              actualSoilType = `Clay loam (${clay}% clay, ${sand}% sand)`;
+            } else if (sand > 70) {
+              actualSoilType = `Sandy soil (${sand}% sand content)`;
+            } else if (sand > 43 && clay < 20) {
+              actualSoilType = `Sandy loam (${sand}% sand, ${clay}% clay)`;
+            } else if (silt > 50) {
+              actualSoilType = `Silty soil (${silt}% silt content)`;
+            } else {
+              actualSoilType = `Loam soil (${sand}% sand, ${silt}% silt, ${clay}% clay)`;
             }
-          });
+            soilData.soilType = actualSoilType;
+          } else {
+            // Still parse properties for complete data
+            layers.forEach(layer => {
+              if (layer.depths?.[0]?.values?.mean) {
+                const value = layer.depths[0].values.mean;
+                switch (layer.name) {
+                  case 'clay': soilData.clay = Math.round(value / 10); break;
+                  case 'sand': soilData.sand = Math.round(value / 10); break;
+                  case 'silt': soilData.silt = Math.round(value / 10); break;
+                  case 'phh2o': soilData.pH = (value / 10).toFixed(1); break;
+                  case 'soc': soilData.organicMatter = (value / 10).toFixed(1); break;
+                }
+              }
+            });
+          }
           
           return res.json({
             success: true,
             soilData,
-            source: 'ISRIC SoilGrids (Real Global Data)'
+            source: 'ISRIC SoilGrids (Real Soil Classification)'
           });
         }
       } catch (error) {

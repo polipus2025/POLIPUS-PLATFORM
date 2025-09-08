@@ -165,6 +165,11 @@ if (MAINTENANCE_MODE) {
       const { addSimplePdfRoutes } = await import('./simple-pdf-routes');
       addSimplePdfRoutes(app);
       
+      // Add Professional EUDR Certificate routes
+      console.log('🎖️ Adding Professional EUDR certificate routes...');
+      const { addProfessionalEudrRoutes } = await import('./professional-eudr-routes');
+      addProfessionalEudrRoutes(app);
+      
       // Add working PDF routes for EUDR compliance
       const { addWorkingPdfRoutes } = await import('./working-pdf-generator');
       addWorkingPdfRoutes(app);

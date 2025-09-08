@@ -901,8 +901,8 @@ export default function RealMapBoundaryMapper({
 
       const packId = `AUTO-${Date.now()}`;
 
-      // 🔥 Call the working PDF generator automatically
-      const response = await fetch('/api/working-eudr-certificate', {
+      // 🔥 Call the PROFESSIONAL EUDR generator automatically
+      const response = await fetch('/api/professional-eudr-certificate', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json'

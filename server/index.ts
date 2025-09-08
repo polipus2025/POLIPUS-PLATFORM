@@ -160,6 +160,11 @@ if (MAINTENANCE_MODE) {
       const certificateRoutes = await import('./certificate-routes');
       app.use('/api/certificates', certificateRoutes.default);
       
+      // Add simple PDF routes (independent of complex routes)
+      console.log('📄 Adding simple PDF routes...');
+      const { addSimplePdfRoutes } = await import('./simple-pdf-routes');
+      addSimplePdfRoutes(app);
+      
       // Add SPA routing fallback BEFORE other routes
       console.log('🔧 Setting up SPA routing for direct URL access...');
       

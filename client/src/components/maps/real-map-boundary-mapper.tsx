@@ -931,7 +931,7 @@ export default function RealMapBoundaryMapper({
   };
 
   // Enhanced function to get location-specific high-resolution satellite imagery
-  const getSatelliteTiles = (lat: number, lng: number, zoom: number = 18) => {
+  const getSatelliteTiles = (lat: number, lng: number, zoom: number = 19) => {
     // Convert lat/lng to tile coordinates with higher precision
     const n = Math.pow(2, zoom);
     const x = Math.floor(n * ((lng + 180) / 360));
@@ -1038,7 +1038,7 @@ export default function RealMapBoundaryMapper({
       }
       console.log(`✅ Found #satellite-tiles container`);
       
-      const zoom = 18;
+      const zoom = 19;
       const tileSize = 256;
       
       // Calculate center tile coordinates

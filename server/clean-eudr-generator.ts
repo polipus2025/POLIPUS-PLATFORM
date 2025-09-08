@@ -137,16 +137,16 @@ async function addCoverPage(doc: PDFDocumentType, farmerData: FarmerData, export
   // Status boxes
   doc.fontSize(16).fillColor('#2d3748').font('Helvetica-Bold').text('COMPLIANCE STATUS', 70, 490);
   const statusBoxes = [
-    { label: 'EUDR Compliant', status: 'APPROVED', color: '#38a169' },
-    { label: 'Export Ready', status: 'CERTIFIED', color: '#3182ce' },
-    { label: 'Risk Level', status: 'LOW', color: '#38a169' }
+    { label: 'EUDR Compliant', status: 'PENDING DATA', color: '#e2e8f0' },
+    { label: 'Export Ready', status: 'ANALYSIS REQUIRED', color: '#e2e8f0' },
+    { label: 'Risk Level', status: 'DATA REQUIRED', color: '#e2e8f0' }
   ];
   
   statusBoxes.forEach((box, index) => {
     const x = 70 + (index * 150);
     doc.rect(x, 520, 140, 60).fill(box.color);
-    doc.fontSize(10).fillColor('#ffffff').font('Helvetica-Bold').text(box.label, x + 10, 535);
-    doc.fontSize(14).fillColor('#ffffff').font('Helvetica-Bold').text(box.status, x + 10, 555);
+    doc.fontSize(10).fillColor('#2d3748').font('Helvetica-Bold').text(box.label, x + 10, 535);
+    doc.fontSize(14).fillColor('#2d3748').font('Helvetica-Bold').text(box.status, x + 10, 555);
   });
   
   await addQRFooter(doc, packId, currentDate, 'Cover Page', farmerData.name, exportData.company);
@@ -163,10 +163,10 @@ async function addExportEligibility(doc: PDFDocumentType, farmerData: FarmerData
   doc.fontSize(16).fillColor('#2d3748').font('Helvetica-Bold').text('EXPORT ELIGIBILITY ASSESSMENT', 70, 140);
   
   const metrics = [
-    { category: 'Quality Standards', score: 98, color: '#38a169' },
-    { category: 'Documentation', score: 96, color: '#3182ce' },
-    { category: 'Traceability', score: 97, color: '#805ad5' },
-    { category: 'Risk Assessment', score: 95, color: '#d69e2e' }
+    { category: 'Quality Standards', score: 0, color: '#e2e8f0', note: 'Real quality data required' },
+    { category: 'Documentation', score: 0, color: '#e2e8f0', note: 'Documentation analysis pending' },
+    { category: 'Traceability', score: 0, color: '#e2e8f0', note: 'Supply chain data required' },
+    { category: 'Risk Assessment', score: 0, color: '#e2e8f0', note: 'Environmental risk analysis required' }
   ];
   
   metrics.forEach((metric, index) => {
@@ -175,7 +175,7 @@ async function addExportEligibility(doc: PDFDocumentType, farmerData: FarmerData
     doc.rect(220, y, 250, 20).fill('#f1f5f9').stroke('#e2e8f0', 1);
     const progressWidth = (metric.score / 100) * 250;
     doc.rect(220, y, progressWidth, 20).fill(metric.color);
-    doc.fontSize(11).fillColor('#ffffff').font('Helvetica-Bold').text(`${metric.score}%`, 225, y + 6);
+    doc.fontSize(11).fillColor('#2d3748').font('Helvetica-Bold').text(metric.note || `${metric.score}%`, 225, y + 6);
   });
   
   // Commentary
@@ -207,11 +207,11 @@ async function addComplianceAssessment(doc: PDFDocumentType, farmerData: FarmerD
   doc.fontSize(16).fillColor('#2d3748').font('Helvetica-Bold').text('COMPLIANCE ASSESSMENT RESULTS', 70, 140);
   
   const assessments = [
-    { area: 'EUDR Compliance', score: '95/100', status: 'APPROVED', risk: 'LOW' },
-    { area: 'Forest Protection', score: '98/100', status: 'EXCELLENT', risk: 'NONE' },
-    { area: 'Documentation', score: '96/100', status: 'COMPLETE', risk: 'LOW' },
-    { area: 'Supply Chain', score: '94/100', status: 'VERIFIED', risk: 'LOW' },
-    { area: 'Environmental', score: '97/100', status: 'SUSTAINABLE', risk: 'MINIMAL' }
+    { area: 'EUDR Compliance', score: 'Real data required', status: 'PENDING', risk: 'UNKNOWN' },
+    { area: 'Forest Protection', score: 'API data required', status: 'PENDING', risk: 'UNKNOWN' },
+    { area: 'Documentation', score: 'Analysis pending', status: 'PENDING', risk: 'UNKNOWN' },
+    { area: 'Supply Chain', score: 'Verification pending', status: 'PENDING', risk: 'UNKNOWN' },
+    { area: 'Environmental', score: 'Environmental data required', status: 'PENDING', risk: 'UNKNOWN' }
   ];
   
   // Table header
@@ -242,8 +242,8 @@ async function addComplianceAssessment(doc: PDFDocumentType, farmerData: FarmerD
   
   // Overall score
   doc.rect(70, 400, 450, 60).fill('#2d3748');
-  doc.fontSize(14).fillColor('#ffffff').font('Helvetica-Bold').text('OVERALL COMPLIANCE SCORE: 96/100', 90, 420);
-  doc.fontSize(12).fillColor('#38a169').font('Helvetica-Bold').text('STATUS: APPROVED FOR EXPORT', 90, 440);
+  doc.fontSize(14).fillColor('#ffffff').font('Helvetica-Bold').text('OVERALL COMPLIANCE SCORE: REAL DATA REQUIRED', 90, 420);
+  doc.fontSize(12).fillColor('#e2e8f0').font('Helvetica-Bold').text('STATUS: PENDING ENVIRONMENTAL DATA ANALYSIS', 90, 440);
   
   await addQRFooter(doc, packId, currentDate, 'Compliance Assessment', farmerData.name, exportData.company);
 }
@@ -258,16 +258,16 @@ async function addDeforestationAnalysis(doc: PDFDocumentType, farmerData: Farmer
   doc.fontSize(16).fillColor('#2d3748').font('Helvetica-Bold').text('FOREST RISK ASSESSMENT', 70, 140);
   
   // Risk chart representation
-  doc.circle(180, 220, 50).fill('#38a169');
-  doc.fontSize(18).fillColor('#ffffff').font('Helvetica-Bold').text('92%', 170, 212);
-  doc.fontSize(12).fillColor('#2d3748').text('NO RISK DETECTED', 100, 280);
+  doc.circle(180, 220, 50).fill('#e2e8f0');
+  doc.fontSize(18).fillColor('#2d3748').font('Helvetica-Bold').text('N/A', 170, 212);
+  doc.fontSize(12).fillColor('#2d3748').text('ANALYSIS REQUIRES REAL DATA', 100, 280);
   
-  // Risk categories
+  // Risk categories - require real API data
   const riskCategories = [
-    { category: 'Deforestation Risk', risk: 2, color: '#38a169' },
-    { category: 'Forest Degradation', risk: 1, color: '#3182ce' },
-    { category: 'Land Use Change', risk: 3, color: '#805ad5' },
-    { category: 'Biodiversity Impact', risk: 1, color: '#d69e2e' }
+    { category: 'Deforestation Risk', risk: 0, color: '#e2e8f0', note: 'Real satellite data required' },
+    { category: 'Forest Degradation', risk: 0, color: '#e2e8f0', note: 'Forest API data required' },
+    { category: 'Land Use Change', risk: 0, color: '#e2e8f0', note: 'Land use data required' },
+    { category: 'Biodiversity Impact', risk: 0, color: '#e2e8f0', note: 'Biodiversity data required' }
   ];
   
   riskCategories.forEach((cat, index) => {
@@ -276,7 +276,7 @@ async function addDeforestationAnalysis(doc: PDFDocumentType, farmerData: Farmer
     doc.rect(250, y, 200, 20).fill('#f1f5f9').stroke('#e2e8f0', 1);
     const riskWidth = (cat.risk / 20) * 200;
     doc.rect(250, y, riskWidth, 20).fill(cat.color);
-    doc.fontSize(10).fillColor('#2d3748').text(`Current: ${cat.risk}%`, 460, y + 6);
+    doc.fontSize(10).fillColor('#2d3748').text(cat.note || `Current: ${cat.risk}%`, 460, y + 6);
   });
   
   // Commentary

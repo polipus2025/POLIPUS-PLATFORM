@@ -21927,17 +21927,14 @@ VERIFY: ${qrCodeData.verificationUrl}`;
         console.log('OpenLandMap API unavailable');
       }
       
-      // If all forest APIs fail, return geographic estimate
-      console.log('🌲 Using geographic forest estimation');
-      const isForested = lat > 0 && lat < 10; // Tropical regions
-      const forestCover = isForested ? 65 : 35;
-      
+      // No forest data available from any API
+      console.log('🌲 All forest APIs unavailable - no fallback data');
       return res.json({
-        success: true,
-        forestCover,
-        treeLoss: 3.2,
-        alerts: 'Geographic estimate',
-        source: 'Geographic Forest Estimation'
+        success: false,
+        forestCover: null,
+        treeLoss: null,
+        alerts: 'Forest data unavailable - real API data required',
+        source: 'No data available'
       });
       
     } catch (error) {

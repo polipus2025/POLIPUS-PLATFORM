@@ -101,9 +101,9 @@ export default function RealMapBoundaryMapper({
       const data = await response.json();
       return data.results?.[0]?.elevation || 0;
     } catch (error) {
-      console.log('Using geographic-based elevation calculation');
-      // Backup: Geographic-based elevation estimation for your region
-      return Math.round(Math.abs(lat * 100) + Math.abs(lng * 10));
+      console.log('Elevation data unavailable - real API data required');
+      // No hardcoded elevation fallbacks
+      return 0;
     }
   };
 
@@ -128,7 +128,7 @@ export default function RealMapBoundaryMapper({
         }
       }
     } catch (error) {
-      console.log('GFW API unavailable, using geographic estimation');
+      console.log('GFW API unavailable - no forest data available');
     }
     
     return { success: false };
@@ -167,7 +167,7 @@ export default function RealMapBoundaryMapper({
         }
       }
     } catch (error) {
-      console.log('All soil APIs unavailable, using geographic estimation');
+      console.log('All soil APIs unavailable - no soil data available');
     }
     
     return { success: false };
@@ -329,15 +329,8 @@ export default function RealMapBoundaryMapper({
       return gfwData.forestCover;
     }
 
-    // Fallback to geographic estimation
-    const isUrban = lat > 18.0 && lng > 70.0;
-    const isCoastal = Math.abs(lng) > 9.0;
-    const isForested = lat > 7.0 && lat < 8.5;
-    
-    if (isUrban) return 12.3;
-    if (isForested) return 78.5;
-    if (isCoastal) return 45.2;
-    return 62.8;
+    // No geographical fallbacks - require real API data
+    return 0;
   };
   
   const calculateCarbonStockLoss = (area: number, forestLoss: number): number => {
@@ -347,12 +340,8 @@ export default function RealMapBoundaryMapper({
   };
   
   const calculateTreeCoverageLoss = (lat: number, lng: number): number => {
-    const isUrban = lat > 18.0 && lng > 70.0;
-    const isProtected = lat > 7.0 && lat < 8.5; // Forest reserves
-    
-    if (isUrban) return 0.8; // Higher loss in urban areas
-    if (isProtected) return 0.02; // Very low loss in protected areas
-    return 0.3; // Normal agricultural conversion rate
+    // No hardcoded tree coverage loss - require real satellite monitoring data
+    return 0;
   };
   
   const determineEcosystemStatus = (lat: number, lng: number, area: number): string | null => {

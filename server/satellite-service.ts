@@ -162,17 +162,11 @@ class SatelliteDataService {
         return Math.round(elevation);
       }
     } catch (error) {
-      console.log('📡 Elevation API unavailable, using geographic estimation');
+      console.log('📡 All elevation APIs unavailable - no elevation data available');
     }
     
-    // Backup: Geographic-based estimation if API fails
-    if (lat >= 4.0 && lat <= 5.0) {
-      return Math.round(Math.abs(lat) * 10 + Math.abs(lon) * 2);
-    } else if (lat >= 7.0 && lat <= 8.5) {
-      return Math.round(Math.abs(lat) * 15 + Math.abs(lon) * 3);
-    } else {
-      return Math.round(Math.abs(lat) * 8 + Math.abs(lon) * 2);
-    }
+    // No geographic estimation - return 0 when API data unavailable
+    return 0;
   }
   
   /**

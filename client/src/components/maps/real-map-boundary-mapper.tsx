@@ -536,9 +536,9 @@ export default function RealMapBoundaryMapper({
     const improvement = 4; // 4x accuracy improvement
     const enhancedAccuracy = Math.max(accuracy / improvement, 3.0); // Minimum 3m
     
-    // Apply noise reduction and multi-constellation averaging
-    const enhancedLat = lat + (Math.random() - 0.5) * 0.000045; // ~2.5m correction
-    const enhancedLng = lng + (Math.random() - 0.5) * 0.000045;
+    // Use actual coordinates without artificial adjustments
+    const enhancedLat = lat; // Preserve real coordinates
+    const enhancedLng = lng; // Preserve real coordinates
     
     return {
       lat: enhancedLat,

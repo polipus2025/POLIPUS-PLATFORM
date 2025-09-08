@@ -189,57 +189,17 @@ export default function RealMapBoundaryMapper({
       };
     }
 
-    // Fallback to geographic analysis if API fails
-    try {
-      const isCoastal = Math.abs(lng) > 9.0;
-      const isHighland = lat > 7.0;
-      
-      let soilType, pH, drainage, fertility, organicMatter, carbonRate;
-      
-      if (isCoastal) {
-        soilType = 'Fluvisols (Alluvial)';
-        pH = 6.8;
-        drainage = 'Well-drained';
-        fertility = 'High';
-        organicMatter = '4.2%';
-        carbonRate = 5.8;
-      } else if (isHighland) {
-        soilType = 'Ferralsols (Oxisols)';
-        pH = 5.9;
-        drainage = 'Well-drained';
-        fertility = 'Medium-High';
-        organicMatter = '3.8%';
-        carbonRate = 4.5;
-      } else {
-        soilType = 'Acrisols (Ultisols)';
-        pH = 6.3;
-        drainage = 'Moderately drained';
-        fertility = 'Medium';
-        organicMatter = '3.4%';
-        carbonRate = 4.2;
-      }
-      
-      return {
-        soilType,
-        pH,
-        drainage,
-        fertility,
-        organicMatter,
-        carbonSequestrationRate: carbonRate,
-        source: 'Geographic Analysis'
-      };
-    } catch (error) {
-      console.log('Using default soil data');
-      return {
-        soilType: 'Acrisols (Ultisols)',
-        pH: 6.2,
-        drainage: 'Well-drained',
-        fertility: 'Medium',
-        organicMatter: '3.5%',
-        carbonSequestrationRate: 4.2,
-        source: 'Default'
-      };
-    }
+    // No hardcoded fallback - only real API data
+    console.log('All soil APIs unavailable - no synthetic data provided');
+    return {
+      soilType: 'Real soil data unavailable',
+      pH: null,
+      drainage: null,
+      fertility: null,
+      organicMatter: null,
+      carbonSequestrationRate: null,
+      source: 'API required'
+    };
   };
   
   const getRealClimateData = async (lat: number, lng: number) => {
@@ -2426,7 +2386,7 @@ export default function RealMapBoundaryMapper({
         },
         marketValue: await getRealMarketPrice(cropSuitability.optimalCrop),
         irrigation: realSoilAnalysis.irrigation || 'Moderate requirement',
-        climateZone: `Tropical ${climateData?.weather?.[0]?.main || 'Humid'}`,
+        climateZone: climateData?.weather?.[0]?.description || 'Climate data required',
         riskFactors: cropSuitability.riskFactors || []
       };
 
@@ -2435,7 +2395,8 @@ export default function RealMapBoundaryMapper({
     } catch (error) {
       console.error('Real data fetch failed, using fallback analysis:', error);
       // Fallback to basic analysis if APIs fail
-      return await getFallbackAgriculturalData(centerLat, centerLng, area);
+      console.log('No hardcoded agricultural data - API required');
+      return null;
     }
   };
 
@@ -2491,7 +2452,7 @@ export default function RealMapBoundaryMapper({
     const isWestAfrica = lat > 0 && lat < 15 && lng > -20 && lng < 10;
     
     let suitableCrops = [];
-    let optimalCrop = 'Mixed farming';
+    let optimalCrop = 'Crop analysis required';
     let riskFactors = [];
     
     if (isLiberia || isWestAfrica) {
@@ -2561,33 +2522,7 @@ export default function RealMapBoundaryMapper({
     return marketPrices[crop] || '$200-400/ton (varies)';
   };
 
-  const getFallbackAgriculturalData = async (lat: number, lng: number, area: number) => {
-    // Simplified fallback when real APIs are unavailable
-    return {
-      soilType: 'Agricultural soil (Analysis required)',
-      elevation: '150-200',
-      pH: '6.0 (Estimated)',
-      organicMatter: '2.0-3.0% (Estimated)',
-      nitrogen: '0.15% (Estimated)',
-      phosphorus: 'Laboratory testing required',
-      potassium: 'Laboratory testing required',
-      waterRetention: 'Moderate',
-      drainage: 'Good',
-      suitableCrops: ['Cocoa', 'Coffee', 'Cassava', 'Rice'],
-      harvestPotential: area * 2.5,
-      optimalCrop: 'Mixed farming',
-      expectedYield: '2.5 tons/hectare/year (Estimated)',
-      seasonality: {
-        plantingSeason: 'March - May',
-        harvestSeason: 'October - December',
-        dryingSeason: 'January - February'
-      },
-      marketValue: '$1,500-2,500/ton (Varies by crop)',
-      irrigation: 'Seasonal rainfall',
-      climateZone: 'Tropical',
-      riskFactors: ['Climate dependency', 'Market price volatility']
-    };
-  };
+  // Removed fallback agricultural data function - no hardcoded values allowed
 
   // Process Global Forest Watch Data
   const processGlobalForestWatchData = async (gfwData: any, lat: number, lng: number) => {
@@ -3728,7 +3663,7 @@ export default function RealMapBoundaryMapper({
                 </div>
               </div>
               <div className="grid grid-cols-2 gap-3 text-sm">
-                <div><span className="font-medium">Climate Zone:</span> {agriculturalData.climateZone || 'Tropical'}</div>
+                <div><span className="font-medium">Climate Zone:</span> {agriculturalData.climateZone || 'Climate analysis required'}</div>
                 <div><span className="font-medium">Water Retention:</span> {agriculturalData.waterRetention}</div>
                 <div><span className="font-medium">Risk Factors:</span> {agriculturalData.riskFactors?.join(', ') || getRiskFactors(points)}</div>
                 <div><span className="font-medium">Drying Season:</span> {agriculturalData?.seasonality?.dryingSeason || getDryingSeason(points)}</div>

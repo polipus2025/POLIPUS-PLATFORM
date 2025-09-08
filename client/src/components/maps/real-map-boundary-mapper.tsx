@@ -1088,8 +1088,7 @@ export default function RealMapBoundaryMapper({
             opacity: 1;
             display: block;
             object-fit: cover;
-            transform: scale(2);
-            transform-origin: center center;
+
           `;
           
           // Build tile URL based on provider
@@ -1498,8 +1497,7 @@ export default function RealMapBoundaryMapper({
             height: 256px;
             object-fit: cover;
             z-index: 1;
-            transform: scale(2);
-            transform-origin: center center;
+
           `;
           
           // Enable CORS for proper image capture in map downloads

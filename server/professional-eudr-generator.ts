@@ -182,7 +182,7 @@ function generateProducerFarmInfo(doc: PDFDocument, farmerData: FarmerData, farm
 }
 
 function generateRiskAssessment(doc: PDFDocument) {
-  const startY = 440;
+  const startY = 420;
   
   // Section header
   doc.rect(30, startY, 535, 25).fill('#f3f4f6');
@@ -222,14 +222,14 @@ function generateRiskAssessment(doc: PDFDocument) {
   
   // Legend
   doc.fontSize(8).fillColor('#6b7280')
-     .text('LEGEND:', 50, startY + 140)
-     .text('Low Risk/Compliant (90-100%)', 100, startY + 140)
-     .text('Medium Risk (70-89%)', 250, startY + 140)
-     .text('High Risk (<70%)', 380, startY + 140);
+     .text('LEGEND:', 50, startY + 120)
+     .text('Low Risk/Compliant (90-100%)', 100, startY + 120)
+     .text('Medium Risk (70-89%)', 250, startY + 120)
+     .text('High Risk (<70%)', 380, startY + 120);
 }
 
 function generateSupplyChainTraceability(doc: PDFDocument, packId: string) {
-  const startY = 620;
+  const startY = 570;
   
   // Section header
   doc.rect(30, startY, 535, 25).fill('#f3f4f6');
@@ -264,16 +264,16 @@ function generateSupplyChainTraceability(doc: PDFDocument, packId: string) {
        .text(step.desc, x - 5, y + 50);
   });
   
-  // QR Code section
-  doc.rect(480, startY + 55, 70, 70).stroke('#d1d5db', 1);
+  // QR Code section  
+  doc.rect(480, startY + 50, 65, 65).stroke('#d1d5db', 1);
   doc.fontSize(8).fillColor('#1f2937').font('Helvetica-Bold')
-     .text('QR CODE', 505, startY + 65);
+     .text('QR CODE', 502, startY + 60);
   doc.fontSize(7).fillColor('#4b5563')
-     .text('Scan for full', 495, startY + 85)
-     .text('traceability', 495, startY + 95)
-     .text('verification', 495, startY + 105);
+     .text('Scan for full', 492, startY + 75)
+     .text('traceability', 492, startY + 85)
+     .text('verification', 492, startY + 95);
   doc.fontSize(6).fillColor('#6b7280')
-     .text(`ID: EUDR-${packId.slice(-6)}`, 485, startY + 115);
+     .text(`ID: EUDR-${packId.slice(-6)}`, 485, startY + 105);
 }
 
 function generateLegalComplianceMatrix(doc: PDFDocument) {

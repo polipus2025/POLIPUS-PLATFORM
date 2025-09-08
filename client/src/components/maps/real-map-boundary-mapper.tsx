@@ -1033,14 +1033,14 @@ export default function RealMapBoundaryMapper({
           position: absolute;
           left: ${x}px;
           top: ${y}px;
-          width: 8px;
-          height: 8px;
+          width: 12px;
+          height: 12px;
           border-radius: 50%;
           background-color: white;
-          border: 2px solid #10b981;
+          border: 1px solid #10b981;
           transform: translate(-50%, -50%);
           z-index: 20;
-          box-shadow: 0 2px 4px rgba(0,0,0,0.3);
+          box-shadow: 0 2px 4px rgba(0,0,0,0.4);
         `;
         
         // Small white round point (no alphabet labels)
@@ -1368,12 +1368,12 @@ export default function RealMapBoundaryMapper({
         position: absolute;
         left: ${pixel.x}px;
         top: ${pixel.y}px;
-        width: 8px;
-        height: 8px;
+        width: 12px;
+        height: 12px;
         border-radius: 50%;
         background-color: white;
-        border: 2px solid #10b981;
-        box-shadow: 0 2px 4px rgba(0,0,0,0.3);
+        border: 1px solid #10b981;
+        box-shadow: 0 2px 4px rgba(0,0,0,0.4);
         z-index: 30;
         transform: translate(-50%, -50%);
         cursor: pointer;

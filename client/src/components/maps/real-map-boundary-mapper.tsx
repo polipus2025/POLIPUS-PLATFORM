@@ -183,8 +183,8 @@ export default function RealMapBoundaryMapper({
         pH: soil.ph1to1h2o_r || 6.5,
         drainage: soil.drainagecl || 'Well drained',
         fertility: soil.om_r > 3 ? 'High' : soil.om_r > 1.5 ? 'Medium-High' : 'Medium',
-        organicMatter: `${(soil.om_r || 3.0).toFixed(1)}%`,
-        carbonSequestrationRate: (soil.om_r || 3.0) * 1.4,
+        organicMatter: soil.om_r ? `${soil.om_r.toFixed(1)}%` : null,
+        carbonSequestrationRate: soil.om_r ? soil.om_r * 1.4 : null,
         source: 'USDA Soil Survey'
       };
     }
@@ -2442,7 +2442,7 @@ export default function RealMapBoundaryMapper({
     let baseYield = 2.5; // tons per hectare baseline (increased from 2.0)
     
     // Safely handle potentially null soil data from APIs
-    const pH = soilData.pH ? parseFloat(soilData.pH) : 6.2; // Default neutral pH
+    const pH = soilData.pH ? parseFloat(soilData.pH) : 0; // No default pH values
     const organicCarbon = soilData.organicCarbon ? parseFloat(soilData.organicCarbon) : 2.0; // Default organic matter
     const drainage = soilData.drainage || 'Moderate'; // Default drainage
     
@@ -3576,14 +3576,14 @@ export default function RealMapBoundaryMapper({
               🌱 Soil Analysis & Land Quality
             </h4>
             <div className="grid grid-cols-2 gap-3 text-sm">
-              <div><span className="font-medium">Soil Type:</span> {agriculturalData?.soilType || 'Clay loam'}</div>
-              <div><span className="font-medium">Elevation:</span> {agriculturalData?.elevation || '120'}m</div>
-              <div><span className="font-medium">pH Level:</span> {agriculturalData?.pH || '6.5'}</div>
-              <div><span className="font-medium">Organic Matter:</span> {agriculturalData?.organicMatter || '3.2'}%</div>
-              <div><span className="font-medium">Nitrogen:</span> {agriculturalData?.nitrogen || '0.8'}%</div>
-              <div><span className="font-medium">Phosphorus:</span> {agriculturalData?.phosphorus || '15'} ppm</div>
-              <div><span className="font-medium">Potassium:</span> {agriculturalData?.potassium || '120'} ppm</div>
-              <div><span className="font-medium">Water Retention:</span> {agriculturalData?.waterRetention || 'Good'}</div>
+              <div><span className="font-medium">Soil Type:</span> {agriculturalData?.soilType || 'Soil analysis required'}</div>
+              <div><span className="font-medium">Elevation:</span> {agriculturalData?.elevation || 'Elevation data required'}m</div>
+              <div><span className="font-medium">pH Level:</span> {agriculturalData?.pH || 'pH analysis required'}</div>
+              <div><span className="font-medium">Organic Matter:</span> {agriculturalData?.organicMatter || 'Organic matter data required'}</div>
+              <div><span className="font-medium">Nitrogen:</span> {agriculturalData?.nitrogen || 'Nitrogen data required'}%</div>
+              <div><span className="font-medium">Phosphorus:</span> {agriculturalData?.phosphorus || 'Phosphorus data required'} ppm</div>
+              <div><span className="font-medium">Potassium:</span> {agriculturalData?.potassium || 'Potassium data required'} ppm</div>
+              <div><span className="font-medium">Water Retention:</span> {agriculturalData?.waterRetention || 'Water retention analysis required'}</div>
             </div>
           </div>
 

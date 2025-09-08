@@ -697,16 +697,31 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const centerLat = lats.reduce((sum, lat) => sum + lat, 0) / lats.length;
       const centerLng = lngs.reduce((sum, lng) => sum + lng, 0) / lngs.length;
       
-      // Calculate area using shoelace formula
+      // Calculate area using geodesic formula (matches main mapping component)
       function calculatePolygonArea(latitudes: number[], longitudes: number[]): number {
+        if (latitudes.length < 3) return 0;
+        
         let area = 0;
-        const n = latitudes.length;
-        for (let i = 0; i < n; i++) {
-          const j = (i + 1) % n;
-          area += latitudes[i] * longitudes[j];
-          area -= latitudes[j] * longitudes[i];
+        const earthRadius = 6371000; // Earth radius in meters
+        
+        // Use spherical excess formula for accurate GPS coordinate area calculation
+        for (let i = 0; i < latitudes.length; i++) {
+          const j = (i + 1) % latitudes.length;
+          
+          // Convert degrees to radians
+          const lat1 = latitudes[i] * Math.PI / 180;
+          const lng1 = longitudes[i] * Math.PI / 180;
+          const lat2 = latitudes[j] * Math.PI / 180;
+          const lng2 = longitudes[j] * Math.PI / 180;
+          
+          // Calculate using geodesic area formula (accounts for Earth's curvature)
+          const deltaLng = lng2 - lng1;
+          area += deltaLng * (2 + Math.sin(lat1) + Math.sin(lat2));
         }
-        return Math.abs(area) / 2 * 111320 * 111320; // Convert to square meters
+        
+        // Convert to square meters
+        area = Math.abs(area) * earthRadius * earthRadius / 2;
+        return area; // Return square meters for this function
       }
       
       const mapAnalysis = {

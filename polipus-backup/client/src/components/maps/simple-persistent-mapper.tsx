@@ -32,15 +32,28 @@ export default function SimplePersistentMapper({
   const calculateArea = (boundaryPoints: BoundaryPoint[]) => {
     if (boundaryPoints.length < 3) return 0;
     
+    // Use same geodesic calculation as main mapping component
     let area = 0;
+    const earthRadius = 6371000; // Earth radius in meters
+    
+    // Use spherical excess formula for accurate GPS coordinate area calculation
     for (let i = 0; i < boundaryPoints.length; i++) {
       const j = (i + 1) % boundaryPoints.length;
-      area += boundaryPoints[i].latitude * boundaryPoints[j].longitude;
-      area -= boundaryPoints[j].latitude * boundaryPoints[i].longitude;
+      
+      // Convert degrees to radians
+      const lat1 = boundaryPoints[i].latitude * Math.PI / 180;
+      const lng1 = boundaryPoints[i].longitude * Math.PI / 180;
+      const lat2 = boundaryPoints[j].latitude * Math.PI / 180;
+      const lng2 = boundaryPoints[j].longitude * Math.PI / 180;
+      
+      // Calculate using geodesic area formula (accounts for Earth's curvature)
+      const deltaLng = lng2 - lng1;
+      area += deltaLng * (2 + Math.sin(lat1) + Math.sin(lat2));
     }
     
-    area = Math.abs(area) / 2;
-    return parseFloat((area * 111.32 * 111.32 / 10000).toFixed(2));
+    // Convert to square meters, then to hectares
+    area = Math.abs(area) * earthRadius * earthRadius / 2;
+    return parseFloat((area / 10000).toFixed(2)); // Convert square meters to hectares
   };
 
   const handleMapClick = (e: React.MouseEvent) => {

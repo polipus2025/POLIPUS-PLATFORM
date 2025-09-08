@@ -81,29 +81,35 @@ class SatelliteDataService {
   }
   
   /**
-   * Calculate polygon area using shoelace formula
+   * Calculate polygon area using geodesic formula (matches main mapping component)
    * @param boundaries GPS coordinate boundaries
    * @returns Area in hectares
    */
   private calculatePolygonArea(boundaries: GPSBoundary[]): number {
     if (boundaries.length < 3) return 0;
     
+    // Use same geodesic calculation as main mapping component
     let area = 0;
-    const n = boundaries.length;
+    const earthRadius = 6371000; // Earth radius in meters
     
-    for (let i = 0; i < n; i++) {
-      const j = (i + 1) % n;
-      area += boundaries[i].latitude * boundaries[j].longitude;
-      area -= boundaries[j].latitude * boundaries[i].longitude;
+    // Use spherical excess formula for accurate GPS coordinate area calculation
+    for (let i = 0; i < boundaries.length; i++) {
+      const j = (i + 1) % boundaries.length;
+      
+      // Convert degrees to radians
+      const lat1 = boundaries[i].latitude * Math.PI / 180;
+      const lng1 = boundaries[i].longitude * Math.PI / 180;
+      const lat2 = boundaries[j].latitude * Math.PI / 180;
+      const lng2 = boundaries[j].longitude * Math.PI / 180;
+      
+      // Calculate using geodesic area formula (accounts for Earth's curvature)
+      const deltaLng = lng2 - lng1;
+      area += deltaLng * (2 + Math.sin(lat1) + Math.sin(lat2));
     }
     
-    area = Math.abs(area) / 2.0;
-    
-    // Convert from square degrees to hectares (approximate)
-    // 1 degree ≈ 111km at equator, 1 hectare = 10,000 m²
-    const areaInHectares = area * 111000 * 111000 / 10000;
-    
-    return areaInHectares;
+    // Convert to square meters, then to hectares
+    area = Math.abs(area) * earthRadius * earthRadius / 2;
+    return area / 10000; // Convert square meters to hectares (1 hectare = 10,000 m²)
   }
   
   /**

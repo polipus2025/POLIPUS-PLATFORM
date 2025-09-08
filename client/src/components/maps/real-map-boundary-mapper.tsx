@@ -3368,7 +3368,7 @@ export default function RealMapBoundaryMapper({
         }
       };
 
-      const endpoint = type === 'eudr' ? '/api/working-eudr-certificate' : '/api/generate-deforestation-certificate';
+      const endpoint = type === 'eudr' ? '/api/working-eudr-certificate' : '/api/working-deforestation-certificate';
       const requestBody = type === 'eudr' ? 
         { farmerData, exportData, packId, mappingData } : 
         { farmerData, mappingData };

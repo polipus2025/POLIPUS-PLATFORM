@@ -1033,23 +1033,17 @@ export default function RealMapBoundaryMapper({
           position: absolute;
           left: ${x}px;
           top: ${y}px;
-          width: 24px;
-          height: 24px;
+          width: 8px;
+          height: 8px;
           border-radius: 50%;
-          border: 3px solid white;
+          background-color: white;
+          border: 2px solid #10b981;
           transform: translate(-50%, -50%);
           z-index: 20;
-          display: flex;
-          align-items: center;
-          justify-content: center;
-          font-size: 12px;
-          font-weight: bold;
-          color: white;
-          text-shadow: 1px 1px 2px rgba(0,0,0,0.8);
-          box-shadow: 0 3px 8px rgba(0,0,0,0.6);
+          box-shadow: 0 2px 4px rgba(0,0,0,0.3);
         `;
         
-        marker.textContent = String.fromCharCode(65 + index); // A, B, C, etc.
+        // Small white round point (no alphabet labels)
         // CRITICAL FIX: Safe marker append
         try {
           if (mapContainer && marker) {
@@ -1361,7 +1355,7 @@ export default function RealMapBoundaryMapper({
       // Use centralized coordinate conversion for consistent positioning
       const pixel = convertGPSToPixel(point.latitude, point.longitude, mapElement);
       
-      console.log(`GPS Point ${String.fromCharCode(65 + index)}: ${point.latitude.toFixed(6)}, ${point.longitude.toFixed(6)} → pixel ${pixel.x.toFixed(0)}, ${pixel.y.toFixed(0)}`);
+      console.log(`GPS Point ${index + 1}: ${point.latitude.toFixed(6)}, ${point.longitude.toFixed(6)} → pixel ${pixel.x.toFixed(0)}, ${pixel.y.toFixed(0)}`);
       
       // Calculate EUDR risk for each point
       const pointRisk = calculatePointRisk(point.latitude, point.longitude);
@@ -1374,29 +1368,21 @@ export default function RealMapBoundaryMapper({
         position: absolute;
         left: ${pixel.x}px;
         top: ${pixel.y}px;
-        width: 28px;
-        height: 28px;
+        width: 8px;
+        height: 8px;
         border-radius: 50%;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        font-size: 14px;
-        font-weight: bold;
-        color: white;
-        text-shadow: 1px 1px 3px rgba(0,0,0,0.9);
-        border: 3px solid white;
-        box-shadow: 0 4px 12px rgba(0,0,0,0.7);
+        background-color: white;
+        border: 2px solid #10b981;
+        box-shadow: 0 2px 4px rgba(0,0,0,0.3);
         z-index: 30;
         transform: translate(-50%, -50%);
         cursor: pointer;
         transition: all 0.3s ease;
-        background-color: ${pointRisk.level === 'high' ? '#dc2626' : pointRisk.level === 'standard' ? '#f59e0b' : '#10b981'};
         ${pointRisk.level === 'high' ? 'animation: pulse 2s infinite;' : ''}
       `;
       
-      // Add alphabetical label (A, B, C, D, etc.)
-      marker.textContent = String.fromCharCode(65 + index);
-      marker.title = `Point ${String.fromCharCode(65 + index)} - EUDR Risk: ${pointRisk.level.toUpperCase()}\nCoordinates: ${point.latitude.toFixed(6)}, ${point.longitude.toFixed(6)}`;
+      // Small white round point (no alphabet labels)
+      marker.title = `Point ${index + 1} - EUDR Risk: ${pointRisk.level.toUpperCase()}\nCoordinates: ${point.latitude.toFixed(6)}, ${point.longitude.toFixed(6)}`;
       
       // CRITICAL FIX: Safe GPS marker append
       try {
@@ -1406,7 +1392,7 @@ export default function RealMapBoundaryMapper({
       } catch (e) {
         console.log('Failed to add GPS marker, continuing...');
       }
-      console.log(`✓ Persistent marker ${String.fromCharCode(65 + index)} added and will remain visible`);
+      console.log(`✓ Persistent marker ${index + 1} added and will remain visible`);
     });
 
     // FIXED: Current GPS position marker (live tracking marker)

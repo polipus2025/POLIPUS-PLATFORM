@@ -165,6 +165,10 @@ if (MAINTENANCE_MODE) {
       const { addSimplePdfRoutes } = await import('./simple-pdf-routes');
       addSimplePdfRoutes(app);
       
+      // Add working PDF routes for EUDR compliance
+      const { addWorkingPdfRoutes } = await import('./working-pdf-generator');
+      addWorkingPdfRoutes(app);
+      
       // Add SPA routing fallback BEFORE other routes
       console.log('🔧 Setting up SPA routing for direct URL access...');
       

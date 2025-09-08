@@ -544,20 +544,64 @@ export default function RealMapBoundaryMapper({
       // Get real climate data
       const realClimateData = await getRealClimateData(centerLat, centerLng);
       
-      // Calculate real agricultural potential based on actual data
+      // ===== COMPREHENSIVE AGRICULTURAL INTELLIGENCE ANALYSIS =====
+      console.log('🚀 STARTING COMPREHENSIVE AGRICULTURAL ANALYSIS');
+      
+      // Get forest data for comprehensive analysis
+      const forestData = await getGlobalForestWatchData(centerLat, centerLng);
+      
+      // 1. SUSTAINABLE CROPS & RECOMMENDATIONS
+      const sustainableCrops = generateSustainableCropRecommendations(realSoilData, forestData);
+      console.log('🌾 Sustainable Crops:', sustainableCrops);
+      
+      // 2. HARVEST POTENTIAL AND PRODUCTIVITY
+      const harvestAnalysis = calculateHarvestPotentialAndProductivity(area, realSoilData, forestData);
+      console.log('📊 Harvest Analysis:', harvestAnalysis);
+      
+      // 3. EUDR ENVIRONMENTAL IMPACT ANALYSIS
+      const environmentalImpact = analyzeEUDREnvironmentalImpact(realSoilData, forestData, area);
+      console.log('🌍 Environmental Impact:', environmentalImpact);
+      
+      // 4. SOIL ANALYSIS & LAND QUALITY
+      const landQuality = analyzeComprehensiveSoilAndLandQuality(realSoilData);
+      console.log('🧪 Land Quality:', landQuality);
+      
+      // Calculate real agricultural potential based on comprehensive data
       const agriculturalAnalysis = {
+        // Basic data
         soilType: realSoilData.soilType,
         pH: realSoilData.pH,
-        optimalCrop: determineOptimalCrop(area, realSoilData, realClimateData, realElevation),
-        expectedYield: calculateRealYield(area, realSoilData, realClimateData),
+        organicMatter: realSoilData.organicMatter,
+        elevation: realElevation,
+        
+        // COMPREHENSIVE ANALYSES
+        sustainableCrops: sustainableCrops.crops,
+        cropRecommendationReasons: sustainableCrops.reasons,
+        harvestPotential: parseFloat(harvestAnalysis.totalPotential),
+        expectedYield: harvestAnalysis.expectedYield,
+        productivityRating: harvestAnalysis.productivityRating,
+        productivityMultiplier: harvestAnalysis.productivityMultiplier,
+        
+        // Environmental Impact
+        environmentalImpact: environmentalImpact.summary,
+        environmentalScore: environmentalImpact.score,
+        eudrCompliance: environmentalImpact.compliance,
+        eudrStatus: environmentalImpact.eudrStatus,
+        riskFactors: environmentalImpact.riskFactors,
+        
+        // Land Quality
+        landQuality: landQuality.rating,
+        soilHealthScore: landQuality.healthScore,
+        qualityFactors: landQuality.qualityFactors,
+        
+        // Legacy fields for compatibility
+        optimalCrop: sustainableCrops.crops[0] || 'Analysis required',
         marketValue: calculateMarketValue(area, realSoilData, realClimateData),
         climateZone: realClimateData.zone,
-        elevation: realElevation,
         drainageClass: realSoilData.drainage,
         fertilityRating: realSoilData.fertility,
         irrigationNeeds: realClimateData.irrigationNeeds,
-        organicMatter: realSoilData.organicMatter,
-        carbonSequestration: `${(area * realSoilData.carbonSequestrationRate).toFixed(1)} tons CO2/year`,
+        carbonSequestration: `${area * (realSoilData.carbonSequestrationRate || 0).toFixed(1)} tons CO2/year`,
         biodiversityIndex: calculateBiodiversityIndex(area, realElevation, realClimateData)
       };
       
@@ -2442,6 +2486,325 @@ export default function RealMapBoundaryMapper({
     }
     
     return { suitableCrops, optimalCrop, riskFactors };
+  };
+
+  // ========== ENHANCED COMPREHENSIVE AGRICULTURAL INTELLIGENCE ==========
+  
+  // 1. SUSTAINABLE CROPS & RECOMMENDATIONS 
+  const generateSustainableCropRecommendations = (soilData: any, forestData: any) => {
+    console.log('🌾 GENERATING SUSTAINABLE CROP RECOMMENDATIONS');
+    
+    if (!soilData?.pH) return { crops: ['Satellite data required'], reasons: ['Complete soil analysis needed'] };
+    
+    const pH = parseFloat(soilData.pH) || 0;
+    const organicMatter = parseFloat(soilData.organicMatter?.replace('%', '')) || 0;
+    const temperature = soilData.climateData?.temperature || 26;
+    const forestCover = forestData?.forestCover || 0;
+    const treeLoss = forestData?.treeLoss || 0;
+    
+    const crops = [];
+    const reasons = [];
+    
+    // COCOA - premium sustainable crop
+    if (forestCover > 70 && pH >= 5.5 && pH <= 7.0 && organicMatter > 2) {
+      crops.push('🍫 Cocoa (Premium Sustainable)');
+      reasons.push(`Cocoa: Excellent forest cover (${forestCover.toFixed(1)}%), optimal pH (${pH}), rich organic matter (${organicMatter}%)`);
+    } else if (forestCover > 50 && pH >= 5.0 && organicMatter > 1.5) {
+      crops.push('🍫 Cocoa (Standard)');
+      reasons.push(`Cocoa: Good forest proximity, acceptable pH (${pH}), moderate organic content`);
+    }
+    
+    // COFFEE - high-value sustainable crop
+    if (pH >= 6.0 && pH <= 6.8 && temperature >= 24 && temperature <= 28 && organicMatter > 1.5) {
+      crops.push('☕ Coffee (Arabica - Premium)');
+      reasons.push(`Coffee: Perfect pH (${pH}), ideal temperature (${temperature}°C), good soil health`);
+    }
+    
+    // OIL PALM - high productivity
+    if (temperature > 25 && soilData.drainage?.includes('drainage') && treeLoss < 2) {
+      crops.push('🌴 Oil Palm (Sustainable)');
+      reasons.push(`Oil Palm: Warm climate (${temperature}°C), good drainage, low deforestation impact`);
+    }
+    
+    // AGROFORESTRY combinations
+    if (forestCover > 60 && organicMatter > 2.5) {
+      crops.push('🌳 Agroforestry (Cocoa + Timber)');
+      reasons.push(`Agroforestry: High forest cover enables sustainable multi-crop systems`);
+    }
+    
+    // RICE - food security
+    if (pH >= 5.5 && pH <= 7.5) {
+      crops.push('🌾 Rice (Upland)');
+      reasons.push(`Rice: Suitable pH range (${pH}), food security crop`);
+    }
+    
+    return { 
+      crops: crops.length ? crops : ['🥬 Mixed Vegetables', '🍠 Cassava', '🍌 Plantain'], 
+      reasons: reasons.length ? reasons : ['Basic subsistence crops suitable for all soil types']
+    };
+  };
+  
+  // 2. HARVEST POTENTIAL AND PRODUCTIVITY
+  const calculateHarvestPotentialAndProductivity = (area: number, soilData: any, forestData: any) => {
+    console.log('📊 CALCULATING HARVEST POTENTIAL & PRODUCTIVITY');
+    
+    if (!soilData?.pH) return { totalPotential: '0.0', expectedYield: 'Data analysis required', productivityRating: 'Analysis pending' };
+    
+    const pH = parseFloat(soilData.pH) || 0;
+    const organicMatter = parseFloat(soilData.organicMatter?.replace('%', '')) || 0;
+    const temperature = soilData.climateData?.temperature || 26;
+    const forestCover = forestData?.forestCover || 0;
+    
+    // PRODUCTIVITY MULTIPLIER CALCULATION
+    let productivityMultiplier = 1.0;
+    
+    // pH optimization (6.0-7.0 optimal for most crops)
+    if (pH >= 6.0 && pH <= 7.0) {
+      productivityMultiplier *= 1.30; // Excellent pH
+    } else if (pH >= 5.5 && pH < 6.0) {
+      productivityMultiplier *= 1.15; // Good pH
+    } else if (pH >= 5.0 && pH < 5.5) {
+      productivityMultiplier *= 0.95; // Acceptable pH
+    } else {
+      productivityMultiplier *= 0.80; // Poor pH
+    }
+    
+    // Organic matter boost (critical for yield)
+    if (organicMatter > 3) {
+      productivityMultiplier *= 1.35; // Excellent organic content
+    } else if (organicMatter > 2) {
+      productivityMultiplier *= 1.20; // Good organic content
+    } else if (organicMatter > 1) {
+      productivityMultiplier *= 1.05; // Fair organic content
+    } else {
+      productivityMultiplier *= 0.85; // Poor organic content
+    }
+    
+    // Climate optimization
+    if (temperature >= 24 && temperature <= 28) {
+      productivityMultiplier *= 1.15; // Optimal tropical temperature
+    } else if (temperature > 28) {
+      productivityMultiplier *= 0.95; // Too hot
+    }
+    
+    // Forest cover bonus (for agroforestry potential)
+    if (forestCover > 70) {
+      productivityMultiplier *= 1.10; // Excellent forest integration
+    }
+    
+    // CROP-SPECIFIC YIELD CALCULATIONS (tons/hectare/year)
+    const cocoaYield = 1.8 * productivityMultiplier;
+    const coffeeYield = 1.2 * productivityMultiplier;  
+    const palmOilYield = 3.5 * productivityMultiplier;
+    const riceYield = 2.8 * productivityMultiplier;
+    
+    // Total farm potential (mixed cultivation)
+    const totalPotential = ((cocoaYield * 0.4) + (coffeeYield * 0.2) + (palmOilYield * 0.3) + (riceYield * 0.1)) * area;
+    
+    // Productivity rating
+    const productivityRating = productivityMultiplier > 1.4 ? '🚀 Outstanding' :
+                              productivityMultiplier > 1.2 ? '⭐ Excellent' :
+                              productivityMultiplier > 1.0 ? '✅ Very Good' :
+                              productivityMultiplier > 0.9 ? '📈 Good' : '⚠️ Needs Improvement';
+    
+    return {
+      totalPotential: totalPotential.toFixed(1),
+      expectedYield: `Cocoa: ${cocoaYield.toFixed(1)}t/ha, Coffee: ${coffeeYield.toFixed(1)}t/ha, Palm: ${palmOilYield.toFixed(1)}t/ha`,
+      productivityRating,
+      productivityMultiplier: productivityMultiplier.toFixed(2)
+    };
+  };
+  
+  // 3. EUDR ENVIRONMENTAL IMPACT ANALYSIS
+  const analyzeEUDREnvironmentalImpact = (soilData: any, forestData: any, area: number) => {
+    console.log('🌍 ANALYZING EUDR ENVIRONMENTAL IMPACT');
+    
+    if (!forestData?.forestCover) return { summary: 'Environmental analysis pending', score: 0, compliance: 'Data required' };
+    
+    const forestCover = forestData.forestCover;
+    const treeLoss = forestData.treeLoss || 0;
+    const organicMatter = parseFloat(soilData?.organicMatter?.replace('%', '')) || 0;
+    const complianceScore = forestData.eudrCompliance?.complianceScore || 0;
+    
+    let impactScore = 100; // Start with perfect score
+    let riskFactors = [];
+    
+    // FOREST IMPACT ASSESSMENT
+    if (treeLoss > 5) {
+      impactScore -= 40;
+      riskFactors.push(`🚨 HIGH deforestation risk: ${treeLoss.toFixed(1)}% tree loss`);
+    } else if (treeLoss > 2) {
+      impactScore -= 25;
+      riskFactors.push(`⚠️ MODERATE deforestation: ${treeLoss.toFixed(1)}% tree loss`);
+    } else if (treeLoss > 0) {
+      impactScore -= 10;
+      riskFactors.push(`🌳 LOW deforestation: ${treeLoss.toFixed(1)}% tree loss`);
+    } else {
+      riskFactors.push(`✅ NO deforestation detected`);
+    }
+    
+    // FOREST COVER ASSESSMENT
+    if (forestCover > 75) {
+      impactScore += 5;
+      riskFactors.push(`🌲 EXCELLENT forest cover: ${forestCover.toFixed(1)}%`);
+    } else if (forestCover > 50) {
+      riskFactors.push(`🌳 GOOD forest cover: ${forestCover.toFixed(1)}%`);
+    } else if (forestCover > 25) {
+      impactScore -= 15;
+      riskFactors.push(`🌿 MODERATE forest cover: ${forestCover.toFixed(1)}%`);
+    } else {
+      impactScore -= 30;
+      riskFactors.push(`⚠️ LOW forest cover: ${forestCover.toFixed(1)}%`);
+    }
+    
+    // CARBON STORAGE ASSESSMENT
+    if (organicMatter > 3) {
+      impactScore += 5;
+      riskFactors.push(`♻️ HIGH carbon storage: ${organicMatter}% organic matter`);
+    } else if (organicMatter < 1.5) {
+      impactScore -= 10;
+      riskFactors.push(`📉 LOW carbon storage: ${organicMatter}% organic matter`);
+    }
+    
+    // AREA IMPACT (larger farms need stricter compliance)  
+    if (area > 10) {
+      impactScore -= 15;
+      riskFactors.push(`📏 LARGE FARM: ${area.toFixed(1)}ha requires enhanced sustainability`);
+    } else if (area > 5) {
+      impactScore -= 8;
+      riskFactors.push(`📐 MEDIUM FARM: ${area.toFixed(1)}ha needs sustainable practices`);
+    }
+    
+    // EUDR COMPLIANCE STATUS
+    let eudrStatus = '';
+    let complianceLevel = '';
+    
+    if (impactScore > 85) {
+      eudrStatus = '🇪🇺 EUDR COMPLIANT';
+      complianceLevel = 'LOW RISK';
+    } else if (impactScore > 70) {
+      eudrStatus = '🔶 EUDR CAUTION';
+      complianceLevel = 'MODERATE RISK';
+    } else {
+      eudrStatus = '🔴 EUDR NON-COMPLIANT';
+      complianceLevel = 'HIGH RISK';
+    }
+    
+    const summary = `${eudrStatus}: ${complianceLevel} (Score: ${impactScore}/100)`;
+    
+    return { 
+      summary, 
+      score: impactScore, 
+      compliance: complianceLevel,
+      riskFactors,
+      eudrStatus 
+    };
+  };
+  
+  // 4. SOIL ANALYSIS & LAND QUALITY COMPREHENSIVE ASSESSMENT
+  const analyzeComprehensiveSoilAndLandQuality = (soilData: any) => {
+    console.log('🧪 COMPREHENSIVE SOIL & LAND QUALITY ANALYSIS');
+    
+    if (!soilData?.pH) return { rating: 'Soil analysis required', healthScore: 0, qualityFactors: ['Complete satellite soil analysis needed'] };
+    
+    const pH = parseFloat(soilData.pH) || 0;
+    const organicMatter = parseFloat(soilData.organicMatter?.replace('%', '')) || 0;
+    const temperature = soilData.climateData?.temperature || 26;
+    const sand = parseFloat(soilData.sand?.replace('%', '')) || 0;
+    const clay = parseFloat(soilData.clay?.replace('%', '')) || 0;
+    const silt = parseFloat(soilData.silt?.replace('%', '')) || 0;
+    const drainage = soilData.drainage || '';
+    
+    let healthScore = 0;
+    let qualityFactors = [];
+    
+    // pH ANALYSIS (25 points max)
+    if (pH >= 6.0 && pH <= 7.0) {
+      healthScore += 25;
+      qualityFactors.push(`✅ OPTIMAL pH (${pH}) - perfect nutrient availability`);
+    } else if (pH >= 5.5 && pH < 6.0) {
+      healthScore += 20;
+      qualityFactors.push(`🟢 GOOD pH (${pH}) - suitable for most crops`);
+    } else if (pH >= 5.0 && pH < 5.5) {
+      healthScore += 15;
+      qualityFactors.push(`🟡 FAIR pH (${pH}) - some crops may struggle`);
+    } else {
+      healthScore += 8;
+      qualityFactors.push(`🔴 POOR pH (${pH}) - lime amendment strongly recommended`);
+    }
+    
+    // ORGANIC MATTER ANALYSIS (25 points max)
+    if (organicMatter > 3.5) {
+      healthScore += 25;
+      qualityFactors.push(`🌟 EXCEPTIONAL organic matter (${organicMatter}%) - premium soil health`);
+    } else if (organicMatter > 2.5) {
+      healthScore += 22;
+      qualityFactors.push(`✅ HIGH organic matter (${organicMatter}%) - excellent soil structure`);
+    } else if (organicMatter > 1.5) {
+      healthScore += 18;
+      qualityFactors.push(`🟢 GOOD organic matter (${organicMatter}%) - healthy soil biology`);
+    } else if (organicMatter > 1.0) {
+      healthScore += 12;
+      qualityFactors.push(`🟡 MODERATE organic matter (${organicMatter}%) - needs improvement`);
+    } else {
+      healthScore += 5;
+      qualityFactors.push(`🔴 LOW organic matter (${organicMatter}%) - urgent compost needed`);
+    }
+    
+    // SOIL TEXTURE ANALYSIS (20 points max)
+    const totalTexture = sand + clay + silt;
+    if (totalTexture > 90) { // Valid texture data
+      if (clay >= 20 && clay <= 35 && sand >= 30 && sand <= 50) {
+        healthScore += 20;
+        qualityFactors.push(`✅ IDEAL texture: ${sand}% sand, ${clay}% clay, ${silt}% silt - perfect for crops`);
+      } else if (clay > 35) {
+        healthScore += 15;
+        qualityFactors.push(`🟡 CLAY-heavy soil: ${clay}% clay - good fertility but may need drainage`);
+      } else if (sand > 60) {
+        healthScore += 12;
+        qualityFactors.push(`🟡 SANDY soil: ${sand}% sand - good drainage but needs organic matter`);
+      } else {
+        healthScore += 16;
+        qualityFactors.push(`🟢 BALANCED texture: ${sand}% sand, ${clay}% clay, ${silt}% silt`);
+      }
+    } else {
+      healthScore += 10;
+      qualityFactors.push(`📊 Texture analysis: Additional sampling recommended`);
+    }
+    
+    // CLIMATE SUITABILITY (15 points max)
+    if (temperature >= 24 && temperature <= 28) {
+      healthScore += 15;
+      qualityFactors.push(`🌡️ OPTIMAL temperature (${temperature}°C) - ideal for tropical crops`);
+    } else if (temperature >= 22 && temperature <= 30) {
+      healthScore += 12;
+      qualityFactors.push(`🌡️ SUITABLE temperature (${temperature}°C) - good growing conditions`);
+    } else {
+      healthScore += 8;
+      qualityFactors.push(`🌡️ CHALLENGING temperature (${temperature}°C) - crop selection important`);
+    }
+    
+    // DRAINAGE ASSESSMENT (15 points max)
+    if (drainage.toLowerCase().includes('well') || drainage.toLowerCase().includes('good')) {
+      healthScore += 15;
+      qualityFactors.push(`💧 EXCELLENT drainage - prevents root rot and waterlogging`);
+    } else if (drainage.toLowerCase().includes('moderate') || drainage.toLowerCase().includes('poor')) {
+      healthScore += 8;
+      qualityFactors.push(`💧 DRAINAGE CONCERNS - may need tile drains or raised beds`);
+    } else {
+      healthScore += 10;
+      qualityFactors.push(`💧 DRAINAGE STATUS: Assessment needed for optimal crop selection`);
+    }
+    
+    // OVERALL LAND QUALITY RATING
+    const rating = healthScore > 90 ? '🏆 PREMIUM Land Quality - Exceptional for agriculture' :
+                  healthScore > 80 ? '⭐ EXCELLENT Land Quality - Very suitable for crops' :
+                  healthScore > 70 ? '✅ VERY GOOD Land Quality - Good agricultural potential' :
+                  healthScore > 60 ? '🟢 GOOD Land Quality - Suitable with improvements' :
+                  healthScore > 45 ? '🟡 FAIR Land Quality - Needs soil amendments' : 
+                  '🔴 POOR Land Quality - Significant improvements required';
+    
+    return { rating, healthScore, qualityFactors };
   };
 
   const calculateRealYieldPotential = (soilData: any, cropData: any, area: number) => {

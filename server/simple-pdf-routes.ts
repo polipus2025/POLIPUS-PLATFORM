@@ -4,9 +4,9 @@ export function addSimplePdfRoutes(app: Express) {
   console.log('📄 Adding simple PDF routes...');
 
   // Simple test PDF endpoint
-  app.get('/api/test-pdf', (req, res) => {
+  app.get('/api/test-pdf', async (req, res) => {
     try {
-      const PDFDocument = require('pdfkit');
+      const PDFDocument = (await import('pdfkit')).default;
       const doc = new PDFDocument();
 
       res.setHeader('Content-Type', 'application/pdf');
@@ -23,7 +23,7 @@ export function addSimplePdfRoutes(app: Express) {
   });
 
   // EUDR Certificate generation
-  app.post('/api/generate-eudr-certificate', (req, res) => {
+  app.post('/api/generate-eudr-certificate', async (req, res) => {
     try {
       console.log('🛰️ Starting EUDR certificate generation...');
       
@@ -40,7 +40,7 @@ export function addSimplePdfRoutes(app: Express) {
       
       console.log('✅ Data validation passed, creating PDF...');
       
-      const PDFDocument = require('pdfkit');
+      const PDFDocument = (await import('pdfkit')).default;
       const doc = new PDFDocument();
       
       console.log('✅ PDFDocument created, setting headers...');
@@ -101,7 +101,7 @@ export function addSimplePdfRoutes(app: Express) {
   });
 
   // Deforestation Analysis Certificate
-  app.post('/api/generate-deforestation-certificate', (req, res) => {
+  app.post('/api/generate-deforestation-certificate', async (req, res) => {
     try {
       console.log('🌲 Starting deforestation analysis generation...');
       
@@ -117,7 +117,7 @@ export function addSimplePdfRoutes(app: Express) {
       
       console.log('✅ Data validation passed, creating PDF...');
       
-      const PDFDocument = require('pdfkit');
+      const PDFDocument = (await import('pdfkit')).default;
       const doc = new PDFDocument();
       
       console.log('✅ PDFDocument created, setting headers...');

@@ -39,13 +39,16 @@ export function generateProfessionalEUDRCertificate(
   const centerLat = mappingData.coordinates.reduce((sum, c) => sum + c.latitude, 0) / mappingData.coordinates.length;
   const centerLng = mappingData.coordinates.reduce((sum, c) => sum + c.longitude, 0) / mappingData.coordinates.length;
   
+  // PAGE 1 - Basic Info & Farm Details
   generateHeader(doc);
   generateLegalBasisSection(doc, packId, currentDate);
   generateCertificateIdentification(doc, packId, currentDate, centerLat, centerLng);
   generateProducerFarmInfo(doc, farmerData, farmSizeHa, centerLat, centerLng);
   generateRiskAssessment(doc);
-  generateSupplyChainTraceability(doc, packId);
+  
+  // PAGE 2 - Compliance & Certification
   generateLegalComplianceMatrix(doc);
+  generateSupplyChainTraceability(doc, packId);
   generateCommoditySpecifications(doc, farmSizeHa);
   generateCertificationStatement(doc, farmerData, centerLat, centerLng);
   generateDualSignatures(doc, packId, currentDate);
@@ -97,13 +100,13 @@ function generateLegalBasisSection(doc: PDFDocument, packId: string, currentDate
      .text('LEGAL FRAMEWORK: EU REGULATION 2023/1115 - DEFORESTATION-FREE PRODUCTS', 40, startY + 35);
   
   doc.fontSize(9).fillColor('#4b5563')
-     .text('This certificate is issued under EU Regulation 2023/1115 laying down rules on the making available on the Union', 40, startY + 50)
-     .text('market and the export from the Union of certain commodities and products associated with deforestation and forest degradation.', 40, startY + 62)
-     .text('Articles 3, 4, 5, 10 & 30 - Due Diligence Statement & Traceability Requirements Compliance Verified.', 40, startY + 74);
+     .text('This certificate is issued under EU Regulation 2023/1115 laying down rules on the making available on the Union', 40, startY + 45)
+     .text('market and the export from the Union of certain commodities and products associated with deforestation and forest degradation.', 40, startY + 58)
+     .text('Articles 3, 4, 5, 10 & 30 - Due Diligence Statement & Traceability Requirements Compliance Verified.', 40, startY + 71);
 }
 
 function generateCertificateIdentification(doc: PDFDocument, packId: string, currentDate: string, lat: number, lng: number) {
-  const startY = 200;
+  const startY = 210;
   
   // Section header
   doc.rect(30, startY, 535, 25).fill('#f3f4f6');
@@ -113,7 +116,7 @@ function generateCertificateIdentification(doc: PDFDocument, packId: string, cur
   // Two column layout
   const leftCol = 40;
   const rightCol = 320;
-  const contentY = startY + 40;
+  const contentY = startY + 35;
   
   // Left column
   doc.fontSize(10).fillColor('#1f2937').font('Helvetica-Bold')
@@ -147,7 +150,7 @@ function generateCertificateIdentification(doc: PDFDocument, packId: string, cur
 }
 
 function generateProducerFarmInfo(doc: PDFDocument, farmerData: FarmerData, farmSize: string, lat: number, lng: number) {
-  const startY = 320;
+  const startY = 340;
   
   // Section header
   doc.rect(30, startY, 535, 25).fill('#f3f4f6');
@@ -155,7 +158,7 @@ function generateProducerFarmInfo(doc: PDFDocument, farmerData: FarmerData, farm
      .text('VERIFIED PRODUCER & FARM INFORMATION', 40, startY + 8);
   
   // Two boxes side by side
-  const boxY = startY + 40;
+  const boxY = startY + 35;
   
   // Producer box (left)
   doc.rect(40, boxY, 250, 80).stroke('#d1d5db', 1);
@@ -179,7 +182,7 @@ function generateProducerFarmInfo(doc: PDFDocument, farmerData: FarmerData, farm
 }
 
 function generateRiskAssessment(doc: PDFDocument) {
-  const startY = 440;
+  const startY = 470;
   
   // Section header
   doc.rect(30, startY, 535, 25).fill('#f3f4f6');
@@ -187,7 +190,7 @@ function generateRiskAssessment(doc: PDFDocument) {
      .text('DEFORESTATION RISK ASSESSMENT & ANALYSIS', 40, startY + 8);
   
   doc.fontSize(12).fillColor('#1f2937').font('Helvetica-Bold')
-     .text('COMPREHENSIVE RISK ANALYSIS WITH VISUAL INDICATORS', 40, startY + 35);
+     .text('COMPREHENSIVE RISK ANALYSIS WITH VISUAL INDICATORS', 40, startY + 30);
   
   // Risk indicators with progress bars
   const indicators = [
@@ -198,7 +201,7 @@ function generateRiskAssessment(doc: PDFDocument) {
   ];
   
   indicators.forEach((indicator, index) => {
-    const y = startY + 60 + (index * 20);
+    const y = startY + 55 + (index * 18);
     
     // Label
     doc.fontSize(10).fillColor('#4b5563')
@@ -219,14 +222,15 @@ function generateRiskAssessment(doc: PDFDocument) {
   
   // Legend
   doc.fontSize(8).fillColor('#6b7280')
-     .text('LEGEND:', 50, startY + 160)
-     .text('Low Risk/Compliant (90-100%)', 100, startY + 160)
-     .text('Medium Risk (70-89%)', 250, startY + 160)
-     .text('High Risk (<70%)', 380, startY + 160);
+     .text('LEGEND:', 50, startY + 140)
+     .text('Low Risk/Compliant (90-100%)', 100, startY + 140)
+     .text('Medium Risk (70-89%)', 250, startY + 140)
+     .text('High Risk (<70%)', 380, startY + 140);
 }
 
 function generateSupplyChainTraceability(doc: PDFDocument, packId: string) {
-  const startY = 620;
+  // Now on page 2 - better spacing
+  const startY = 210;
   
   // Section header
   doc.rect(30, startY, 535, 25).fill('#f3f4f6');
@@ -310,7 +314,7 @@ function generateLegalComplianceMatrix(doc: PDFDocument) {
 }
 
 function generateCommoditySpecifications(doc: PDFDocument, farmSize: string) {
-  const startY = 220;
+  const startY = 350;
   
   // Section header
   doc.rect(30, startY, 535, 25).fill('#f3f4f6');
@@ -355,7 +359,7 @@ function generateCommoditySpecifications(doc: PDFDocument, farmSize: string) {
 }
 
 function generateCertificationStatement(doc: PDFDocument, farmerData: FarmerData, lat: number, lng: number) {
-  const startY = 360;
+  const startY = 490;
   
   // Section header
   doc.rect(30, startY, 535, 25).fill('#f3f4f6');
@@ -372,7 +376,7 @@ function generateCertificationStatement(doc: PDFDocument, farmerData: FarmerData
 }
 
 function generateDualSignatures(doc: PDFDocument, packId: string, currentDate: string) {
-  const startY = 480;
+  const startY = 620;
   
   // Two signature boxes
   // LACRA box (left)

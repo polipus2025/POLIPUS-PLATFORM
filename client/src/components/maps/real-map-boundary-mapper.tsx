@@ -174,17 +174,24 @@ export default function RealMapBoundaryMapper({
   };
   
   const getRealSoilData = async (lat: number, lng: number) => {
+    console.log('🌱 Real USDA soil data retrieved via backend');
+    
     // Try USDA API first for real soil data
     const usdaData = await getUSDAsoilData(lat, lng);
     if (usdaData.success && usdaData.soilData) {
       const soil = usdaData.soilData;
+      console.log('🌱 Backend soil data:', soil);
+      
+      // Parse organic matter percentage from string format like "2.3%"
+      const omValue = soil.organicMatter ? parseFloat(soil.organicMatter.replace('%', '')) : null;
+      
       return {
-        soilType: `Real soil analysis: ${soil.soilType || 'Analysis in progress'}`,
-        pH: soil.ph1to1h2o_r || null,
-        drainage: soil.drainagecl || null,
-        fertility: soil.om_r ? (soil.om_r > 3 ? 'High' : soil.om_r > 1.5 ? 'Medium-High' : 'Medium') : null,
-        organicMatter: soil.om_r ? `${soil.om_r.toFixed(1)}%` : null,
-        carbonSequestrationRate: soil.om_r ? soil.om_r * 1.4 : null,
+        soilType: soil.soilType || 'Soil analysis completed',
+        pH: soil.pH || null,  // Fixed: use pH instead of ph1to1h2o_r
+        drainage: soil.drainage || null,
+        fertility: omValue ? (omValue > 3 ? 'High' : omValue > 1.5 ? 'Medium-High' : 'Medium') : null,
+        organicMatter: soil.organicMatter || null,  // Use direct value
+        carbonSequestrationRate: omValue ? omValue * 1.4 : null,
         source: 'USDA Soil Survey'
       };
     }

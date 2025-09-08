@@ -423,6 +423,28 @@ export default function CreateLandPlot() {
                           </div>
                         </div>
 
+                        {/* Create Land Plot Button - Positioned under the 3 main boxes */}
+                        <div className="mt-6 text-center">
+                          <Button 
+                            type="submit" 
+                            size="lg" 
+                            disabled={createLandPlot.isPending || !selectedFarmerId || !landPlotData.boundaryData}
+                            className="bg-green-600 hover:bg-green-700 px-8 py-3 text-lg shadow-lg"
+                          >
+                            {createLandPlot.isPending ? (
+                              <>
+                                <RefreshCw className="w-4 h-4 mr-2 animate-spin" />
+                                Creating Land Plot...
+                              </>
+                            ) : (
+                              <>
+                                <Target className="w-4 h-4 mr-2" />
+                                🗺️ Create Land Plot & Generate EUDR Report
+                              </>
+                            )}
+                          </Button>
+                        </div>
+
                         {/* EUDR Download Section - RIGHT HERE WHERE IT SHOULD BE */}
                         <div className="mt-4 p-4 bg-yellow-50 border-2 border-yellow-200 rounded-lg">
                           <div className="text-center space-y-3">
@@ -761,27 +783,6 @@ export default function CreateLandPlot() {
             </div>
           </div>
 
-          {/* Submit Button */}
-          <div className="mt-8 text-center">
-            <Button 
-              type="submit" 
-              size="lg" 
-              disabled={createLandPlot.isPending || !selectedFarmerId || !landPlotData.boundaryData}
-              className="bg-green-600 hover:bg-green-700 px-8 py-3 text-lg"
-            >
-              {createLandPlot.isPending ? (
-                <>
-                  <RefreshCw className="w-4 h-4 mr-2 animate-spin" />
-                  Creating Land Plot...
-                </>
-              ) : (
-                <>
-                  <Target className="w-4 h-4 mr-2" />
-                  🗺️ Create Land Plot & Generate EUDR Report
-                </>
-              )}
-            </Button>
-          </div>
         </form>
       </div>
     </div>

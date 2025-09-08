@@ -1088,7 +1088,7 @@ export default function RealMapBoundaryMapper({
             opacity: 1;
             display: block;
             object-fit: cover;
-            transform: scale(3);
+            transform: scale(2);
             transform-origin: center center;
           `;
           
@@ -1498,7 +1498,7 @@ export default function RealMapBoundaryMapper({
             height: 256px;
             object-fit: cover;
             z-index: 1;
-            transform: scale(3);
+            transform: scale(2);
             transform-origin: center center;
           `;
           

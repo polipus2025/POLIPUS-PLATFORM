@@ -1036,8 +1036,8 @@ export default function RealMapBoundaryMapper({
           width: 4px;
           height: 4px;
           border-radius: 50%;
-          background-color: white;
-          border: 1px solid rgba(0,0,0,0.3);
+          background-color: black;
+          border: 1px solid rgba(255,255,255,0.5);
           transform: translate(-50%, -50%);
           z-index: 20;
           box-shadow: 0 1px 3px rgba(0,0,0,0.5);
@@ -1371,8 +1371,8 @@ export default function RealMapBoundaryMapper({
         width: 4px;
         height: 4px;
         border-radius: 50%;
-        background-color: white;
-        border: 1px solid rgba(0,0,0,0.3);
+        background-color: black;
+        border: 1px solid rgba(255,255,255,0.5);
         box-shadow: 0 1px 3px rgba(0,0,0,0.5);
         z-index: 30;
         transform: translate(-50%, -50%);

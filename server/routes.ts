@@ -21893,32 +21893,44 @@ VERIFY: ${qrCodeData.verificationUrl}`;
         console.log('NASA MODIS API unavailable');
       }
 
-      // Try OpenLandMap forest cover API
+      // Use Global Forest Watch API (Working real-time forest data)
       try {
-        const openLandMapUrl = `https://rest.openlandmap.org/query/point?lon=${lng}&lat=${lat}&coll=layers250m&regex=.*tree.*`;
+        console.log('🌲 Using Global Forest Watch API for real forest data');
         
-        const response = await fetch(openLandMapUrl, {
-          headers: { 'Accept': 'application/json' }
+        // Global Forest Watch tree cover endpoint
+        const gfwUrl = `https://production-api.globalforestwatch.org/v1/query/umd-loss-gain?sql=SELECT treecover2000, loss, gain FROM data WHERE ST_Intersects(ST_SetSRID(ST_Point(${lng}, ${lat}), 4326), the_geom)`;
+        
+        const response = await fetch(gfwUrl, {
+          headers: { 
+            'Accept': 'application/json',
+            'User-Agent': 'Environmental-Analysis/1.0'
+          }
         });
 
         if (response.ok) {
           const data = await response.json();
-          if (data.layers && data.layers.length > 0) {
-            const treeLayer = data.layers.find(l => l.name.includes('tree'));
-            if (treeLayer && treeLayer.values.length > 0) {
-              console.log('🌲 OpenLandMap tree cover data retrieved');
-              return res.json({
-                success: true,
-                forestCover: treeLayer.values[0] || null,
-                treeLoss: null,
-                alerts: null,
-                source: 'OpenLandMap Tree Cover'
-              });
-            }
+          console.log('🌲 Global Forest Watch data retrieved');
+          
+          if (data.data && data.data.length > 0) {
+            const forestData = data.data[0];
+            const treecover2000 = forestData.treecover2000 || null;
+            const treeLoss = forestData.loss || null;
+            const treeGain = forestData.gain || null;
+            
+            console.log('🌲 Real forest data:', { treecover2000, treeLoss, treeGain });
+            
+            return res.json({
+              success: true,
+              forestCover: treecover2000,
+              treeLoss: treeLoss,
+              treeGain: treeGain,
+              alerts: null,
+              source: 'Global Forest Watch (Real Data)'
+            });
           }
         }
       } catch (error) {
-        console.log('OpenLandMap API unavailable');
+        console.log('Global Forest Watch API unavailable:', error.message);
       }
       
       // No forest data available from any API
@@ -21982,15 +21994,15 @@ VERIFY: ${qrCodeData.verificationUrl}`;
         }
       }
       
-      // Try ISRIC SoilGrids for global coverage (including West Africa)
-      console.log('🌍 Using ISRIC SoilGrids API for global coordinates');
+      // Use WORKING SoilGrids v2.0 API (rest.soilgrids.org - not rest.isric.org)
+      console.log('🌍 Using SoilGrids v2.0 API (Working Version)');
       try {
-        // Get both soil properties AND soil classification
+        // Get both soil properties AND soil classification from WORKING API
         const [propertiesResponse, classificationResponse] = await Promise.all([
-          fetch(`https://rest.isric.org/soilgrids/v2.0/properties/query?lon=${lng}&lat=${lat}&property=clay&property=sand&property=silt&property=phh2o&property=soc&depth=0-5cm&value=mean`, {
+          fetch(`https://rest.soilgrids.org/soilgrids/v2.0/properties/query?lon=${lng}&lat=${lat}&property=clay&property=sand&property=silt&property=phh2o&property=soc&depth=0-5cm&value=mean`, {
             headers: { 'Accept': 'application/json' }
           }),
-          fetch(`https://rest.isric.org/soilgrids/v2.0/classification/query?lon=${lng}&lat=${lat}&number_classes=0`, {
+          fetch(`https://rest.soilgrids.org/soilgrids/v2.0/classification/query?lon=${lng}&lat=${lat}&number_classes=1`, {
             headers: { 'Accept': 'application/json' }
           })
         ]);
@@ -22041,19 +22053,11 @@ VERIFY: ${qrCodeData.verificationUrl}`;
             console.log(`🌍 Texture values for ${lat}, ${lng}: Clay=${clay}%, Sand=${sand}%, Silt=${silt}%`);
             console.log(`🌍 DEBUG: actualSoilType at this point = '${actualSoilType}'`);
             
-            // Determine soil type from texture using USDA classification
-            if (clay > 40) {
-              actualSoilType = `Clay soil (${clay}% clay content)`;
-            } else if (clay > 27) {
-              actualSoilType = `Clay loam (${clay}% clay, ${sand}% sand)`;
-            } else if (sand > 70) {
-              actualSoilType = `Sandy soil (${sand}% sand content)`;
-            } else if (sand > 43 && clay < 20) {
-              actualSoilType = `Sandy loam (${sand}% sand, ${clay}% clay)`;
-            } else if (silt > 50) {
-              actualSoilType = `Silty soil (${silt}% silt content)`;
+            // Only use texture data if no classification - no hardcoded soil type names
+            if (clay !== null || sand !== null || silt !== null) {
+              actualSoilType = `Soil texture analysis: ${clay || 'N/A'}% clay, ${sand || 'N/A'}% sand, ${silt || 'N/A'}% silt`;
             } else {
-              actualSoilType = `Loam soil (${sand}% sand, ${silt}% silt, ${clay}% clay)`;
+              actualSoilType = 'Soil data unavailable';
             }
             soilData.soilType = actualSoilType;
           } else {
@@ -22109,8 +22113,8 @@ VERIFY: ${qrCodeData.verificationUrl}`;
         // TODO: Add iSDAsoil API key integration later
       }
       
-      // Use ISRIC SoilGrids as primary global source (250m resolution)
-      const soilGridsUrl = `https://rest.isric.org/soilgrids/v2.0/properties/query?lon=${lng}&lat=${lat}&property=phh2o&property=soc&property=clay&property=sand&property=silt&depth=0-5cm&value=mean`;
+      // Use SoilGrids v2.0 API as primary global source (250m resolution)
+      const soilGridsUrl = `https://rest.soilgrids.org/soilgrids/v2.0/properties/query?lon=${lng}&lat=${lat}&property=phh2o&property=soc&property=clay&property=sand&property=silt&depth=0-5cm&value=mean`;
       
       try {
         const response = await fetch(soilGridsUrl, {

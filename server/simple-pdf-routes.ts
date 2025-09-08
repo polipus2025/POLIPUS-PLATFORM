@@ -3,18 +3,6 @@ import { Express } from 'express';
 export function addSimplePdfRoutes(app: Express) {
   console.log('📄 Adding simple text certificate routes...');
 
-  // Simple test endpoint - no PDF, just text
-  app.get('/api/test-pdf', (req, res) => {
-    try {
-      console.log('✅ Test endpoint hit - generating simple text response');
-      res.setHeader('Content-Type', 'text/plain');
-      res.setHeader('Content-Disposition', 'attachment; filename="test.txt"');
-      res.send('Certificate Generation Test\n\nIf you can see this, certificate generation is working!\n\nGenerated: ' + new Date().toLocaleString());
-    } catch (error) {
-      console.error('Test error:', error);
-      res.status(500).json({ error: 'Test failed' });
-    }
-  });
 
   // EUDR Certificate generation - TEXT VERSION (NO PDF LIBRARIES)
   app.post('/api/generate-eudr-certificate', (req, res) => {

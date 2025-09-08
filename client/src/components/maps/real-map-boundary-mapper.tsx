@@ -4397,15 +4397,7 @@ export default function RealMapBoundaryMapper({
           <p className="text-sm text-blue-700 mb-4">
             Download professional certificates with your authentic GPS coordinates and satellite verification data
           </p>
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-            <Button
-              onClick={() => window.open('/api/test-pdf', '_blank')}
-              className="h-12 bg-gray-600 hover:bg-gray-700"
-              size="lg"
-            >
-              <Download className="h-5 w-5 mr-2" />
-              Test PDF (Simple)
-            </Button>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <Button
               onClick={() => downloadReport('eudr')}
               className="h-12 bg-blue-600 hover:bg-blue-700"

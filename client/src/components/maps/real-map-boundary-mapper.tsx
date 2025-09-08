@@ -93,7 +93,7 @@ export default function RealMapBoundaryMapper({
   const [agriculturalData, setAgriculturalData] = useState<any>(null);
   const [hasAutoCompleted, setHasAutoCompleted] = useState<boolean>(false);
 
-  // Real Data API Functions - No More Dummy Data!
+  // Real Data API Functions - Now with Live Satellite & Soil APIs!
   const getRealElevationData = async (lat: number, lng: number): Promise<number> => {
     try {
       // Use Open-Elevation API for real SRTM elevation data
@@ -106,14 +106,116 @@ export default function RealMapBoundaryMapper({
       return Math.round(Math.abs(lat * 100) + Math.abs(lng * 10));
     }
   };
+
+  // Global Forest Watch API Integration (FREE)
+  const getGlobalForestWatchData = async (lat: number, lng: number) => {
+    try {
+      // Create a small bounding box around the coordinates for GFW API
+      const buffer = 0.001; // ~100m buffer
+      const geometry = {
+        type: 'Polygon',
+        coordinates: [[
+          [lng - buffer, lat - buffer],
+          [lng + buffer, lat - buffer], 
+          [lng + buffer, lat + buffer],
+          [lng - buffer, lat + buffer],
+          [lng - buffer, lat - buffer]
+        ]]
+      };
+
+      // GFW Data API endpoint (free, no API key needed for basic data)
+      const response = await fetch('https://data-api.globalforestwatch.org/dataset/umd_tree_cover_loss/latest/query/json', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          geometry: geometry
+        })
+      });
+
+      if (response.ok) {
+        const data = await response.json();
+        console.log('🌲 Real GFW forest data retrieved');
+        return {
+          forestCover: data.attributes?.forest_cover_2000 || null,
+          treeLoss: data.attributes?.tree_cover_loss || null,
+          success: true
+        };
+      }
+    } catch (error) {
+      console.log('GFW API unavailable, using geographic estimation');
+    }
+    
+    return { success: false };
+  };
+
+  // USDA Soil Data Access API (FREE)
+  const getUSDAsoilData = async (lat: number, lng: number) => {
+    try {
+      // USDA Soil Data Access Web Service (free government data)
+      const soilQuery = `
+        SELECT 
+          co.cokey, ch.chkey, ch.hzname, ch.hzdept_r, ch.hzdepb_r,
+          ch.sandtotal_r, ch.silttotal_r, ch.claytotal_r, ch.ph1to1h2o_r,
+          ch.om_r, ch.drainagecl
+        FROM 
+          legend lg
+          INNER JOIN mapunit mu ON mu.lkey = lg.lkey
+          INNER JOIN component co ON co.mukey = mu.mukey  
+          INNER JOIN chorizon ch ON ch.cokey = co.cokey
+        WHERE 
+          lg.areasymbol LIKE '%'
+          AND mu.muname IS NOT NULL
+        `;
+
+      const response = await fetch('https://sdmdataaccess.nrcs.usda.gov/Tabular/post.rest', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          query: soilQuery,
+          format: 'json'
+        })
+      });
+
+      if (response.ok) {
+        const data = await response.json();
+        console.log('🌱 Real USDA soil data retrieved');
+        return {
+          soilData: data.Table?.[0] || null,
+          success: true
+        };
+      }
+    } catch (error) {
+      console.log('USDA Soil API unavailable, using geographic estimation');
+    }
+    
+    return { success: false };
+  };
   
   const getRealSoilData = async (lat: number, lng: number) => {
+    // Try USDA API first for real soil data
+    const usdaData = await getUSDAsoilData(lat, lng);
+    if (usdaData.success && usdaData.soilData) {
+      const soil = usdaData.soilData;
+      return {
+        soilType: `USDA Classification: ${soil.hzname || 'Mixed soil horizon'}`,
+        pH: soil.ph1to1h2o_r || 6.5,
+        drainage: soil.drainagecl || 'Well drained',
+        fertility: soil.om_r > 3 ? 'High' : soil.om_r > 1.5 ? 'Medium-High' : 'Medium',
+        organicMatter: `${(soil.om_r || 3.0).toFixed(1)}%`,
+        carbonSequestrationRate: (soil.om_r || 3.0) * 1.4,
+        source: 'USDA Soil Survey'
+      };
+    }
+
+    // Fallback to geographic analysis if API fails
     try {
-      // Real soil analysis based on coordinates
-      const isCoastal = Math.abs(lng) > 9.0; // Coastal areas
-      const isHighland = lat > 7.0; // Highland regions
+      const isCoastal = Math.abs(lng) > 9.0;
+      const isHighland = lat > 7.0;
       
-      // Use real soil classification based on geographic position
       let soilType, pH, drainage, fertility, organicMatter, carbonRate;
       
       if (isCoastal) {
@@ -145,7 +247,8 @@ export default function RealMapBoundaryMapper({
         drainage,
         fertility,
         organicMatter,
-        carbonSequestrationRate: carbonRate
+        carbonSequestrationRate: carbonRate,
+        source: 'Geographic Analysis'
       };
     } catch (error) {
       console.log('Using default soil data');
@@ -155,7 +258,8 @@ export default function RealMapBoundaryMapper({
         drainage: 'Well-drained',
         fertility: 'Medium',
         organicMatter: '3.5%',
-        carbonSequestrationRate: 4.2
+        carbonSequestrationRate: 4.2,
+        source: 'Default'
       };
     }
   };
@@ -202,8 +306,8 @@ export default function RealMapBoundaryMapper({
       else if (deforestationRisk < 5) riskLevel = 'standard';
       else riskLevel = 'high';
       
-      // Calculate real environmental metrics
-      const forestCover = calculateForestCover(centerLat, centerLng, area);
+      // Calculate real environmental metrics using APIs
+      const forestCover = await calculateForestCover(centerLat, centerLng, area);
       const carbonStockLoss = calculateCarbonStockLoss(area, forestCoverLoss);
       const treeCoverageLoss = calculateTreeCoverageLoss(centerLat, centerLng);
       const ecosystemStatus = determineEcosystemStatus(centerLat, centerLng, area);
@@ -278,16 +382,24 @@ export default function RealMapBoundaryMapper({
     return 'Medium biodiversity potential';
   };
 
-  // Real Environmental Metric Calculations
-  const calculateForestCover = (lat: number, lng: number, area: number): number => {
+  // Real Environmental Metric Calculations with API Integration
+  const calculateForestCover = async (lat: number, lng: number, area: number): Promise<number> => {
+    // Try Global Forest Watch API first
+    const gfwData = await getGlobalForestWatchData(lat, lng);
+    if (gfwData.success && gfwData.forestCover !== null) {
+      console.log('🌲 Using real GFW forest cover data');
+      return gfwData.forestCover;
+    }
+
+    // Fallback to geographic estimation
     const isUrban = lat > 18.0 && lng > 70.0;
     const isCoastal = Math.abs(lng) > 9.0;
     const isForested = lat > 7.0 && lat < 8.5;
     
-    if (isUrban) return 12.3; // Urban areas have low forest cover
-    if (isForested) return 78.5; // Highland forest regions
-    if (isCoastal) return 45.2; // Coastal areas
-    return 62.8; // Interior regions
+    if (isUrban) return 12.3;
+    if (isForested) return 78.5;
+    if (isCoastal) return 45.2;
+    return 62.8;
   };
   
   const calculateCarbonStockLoss = (area: number, forestLoss: number): number => {

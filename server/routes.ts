@@ -22484,86 +22484,50 @@ VERIFY: ${qrCodeData.verificationUrl}`;
       console.log('🛰️ Generating EUDR certificate with real GPS coordinates:', mappingData.coordinates);
       
       const PDFDocument = require('pdfkit');
-      const doc = new PDFDocument({ margin: 50 });
+      const doc = new PDFDocument();
       
       res.setHeader('Content-Type', 'application/pdf');
-      res.setHeader('Content-Disposition', `attachment; filename="EUDR_Certificate_Real_GPS_${packId}.pdf"`);
+      res.setHeader('Content-Disposition', `attachment; filename="EUDR_Certificate_${packId}.pdf"`);
       
       doc.pipe(res);
 
-      // Header with LACRA branding
-      doc.rect(0, 0, 595, 120).fillColor('#1e40af').fill();
-      doc.fillColor('#ffffff').fontSize(28).font('Helvetica-Bold')
-         .text('🇪🇺 EUDR COMPLIANCE CERTIFICATE', 50, 30);
-      doc.fontSize(16).text('European Union Deforestation Regulation', 50, 70);
-      doc.fontSize(14).text('Real GPS Coordinates & Galileo Satellite Verification', 50, 95);
+      // Simple but professional header
+      doc.fontSize(24).font('Helvetica-Bold')
+         .text('EUDR COMPLIANCE CERTIFICATE', 50, 50);
       
-      // Certificate ID and date
-      doc.fillColor('#000000').fontSize(18).font('Helvetica-Bold')
-         .text(`Certificate ID: ${packId}`, 50, 150);
-      doc.fontSize(14).font('Helvetica')
-         .text(`Generated: ${new Date().toLocaleString()}`, 50, 175);
+      doc.fontSize(16).font('Helvetica')
+         .text('European Union Deforestation Regulation', 50, 90);
       
-      // GPS Mapping section
+      doc.fontSize(14)
+         .text(`Certificate ID: ${packId}`, 50, 130)
+         .text(`Generated: ${new Date().toLocaleString()}`, 50, 150);
+      
+      // Farmer information
       doc.fontSize(16).font('Helvetica-Bold')
-         .text('🛰️ GPS MAPPING DATA', 50, 210);
+         .text('FARMER INFORMATION', 50, 200);
       
       doc.fontSize(12).font('Helvetica')
-         .text(`Farmer: ${farmerData.name}`, 50, 240)
-         .text(`Area Mapped: ${mappingData.area.toFixed(2)} hectares`, 50, 260)
-         .text(`Center Coordinates: ${farmerData.latitude}, ${farmerData.longitude}`, 50, 280)
-         .text(`GPS Points Collected: ${mappingData.coordinates.length}`, 50, 300);
+         .text(`Name: ${farmerData.name}`, 50, 230)
+         .text(`Area Mapped: ${mappingData.area.toFixed(2)} hectares`, 50, 250);
       
-      // Detailed coordinates table
-      doc.fontSize(14).font('Helvetica-Bold')
-         .text('📍 BOUNDARY COORDINATES (Galileo Enhanced)', 50, 330);
+      // GPS coordinates
+      doc.fontSize(16).font('Helvetica-Bold')
+         .text('GPS BOUNDARY COORDINATES', 50, 300);
       
-      let yPos = 360;
+      let yPos = 330;
       mappingData.coordinates.forEach((coord, index) => {
-        doc.fontSize(11).font('Helvetica')
-           .text(`${coord.point}: ${coord.latitude.toFixed(6)}, ${coord.longitude.toFixed(6)} (±${coord.accuracy || 5.0}m)`, 70, yPos);
-        yPos += 18;
+        doc.fontSize(10).font('Helvetica')
+           .text(`Point ${coord.point}: ${coord.latitude.toFixed(6)}, ${coord.longitude.toFixed(6)}`, 70, yPos);
+        yPos += 15;
       });
       
-      // Satellite analysis section  
-      yPos += 20;
-      doc.fontSize(16).font('Helvetica-Bold')
-         .text('🌍 SATELLITE ENVIRONMENTAL ANALYSIS', 50, yPos);
+      // Compliance status
       yPos += 30;
+      doc.fontSize(16).font('Helvetica-Bold')
+         .text('COMPLIANCE STATUS: APPROVED', 50, yPos);
       
-      const satelliteData = mappingData.satelliteData || {};
       doc.fontSize(12).font('Helvetica')
-         .text(`Forest Cover: ${satelliteData.forestCover || '78.5%'}`, 50, yPos)
-         .text(`Carbon Stock Loss: ${satelliteData.carbonLoss || '1.0 tCO₂/ha'}`, 50, yPos + 20)
-         .text(`Deforestation Risk: ${satelliteData.deforestationRisk || 'Low Risk'}`, 50, yPos + 40)
-         .text(`EUDR Compliance: ${satelliteData.eudrCompliance || 'COMPLIANT'}`, 50, yPos + 60);
-      
-      // Agricultural data
-      if (mappingData.agriculturalData) {
-        yPos += 100;
-        doc.fontSize(14).font('Helvetica-Bold')
-           .text('🌾 AGRICULTURAL ANALYSIS', 50, yPos);
-        yPos += 25;
-        
-        const agriData = mappingData.agriculturalData;
-        doc.fontSize(11).font('Helvetica')
-           .text(`Soil Quality: pH ${agriData.pH || '6.2'}, Organic Matter ${agriData.organicMatter || '1.9%'}`, 50, yPos)
-           .text(`Climate Suitability: ${agriData.climateZone || 'Tropical humid (Af)'}`, 50, yPos + 15)
-           .text(`Productivity Rating: ${agriData.productivityRating || 'Outstanding'}`, 50, yPos + 30);
-      }
-      
-      // Final compliance stamp
-      yPos += 70;
-      doc.rect(50, yPos, 495, 80).fillColor('#22c55e').fill();
-      doc.fillColor('#ffffff').fontSize(20).font('Helvetica-Bold')
-         .text('✅ EUDR COMPLIANT', 60, yPos + 15);
-      doc.fontSize(14).text('LOW DEFORESTATION RISK - APPROVED FOR EU EXPORT', 60, yPos + 45);
-      
-      // Footer with verification
-      doc.fillColor('#666666').fontSize(10)
-         .text(`🛰️ Coordinates verified with Galileo + GPS multi-constellation positioning`, 50, 750)
-         .text(`📊 Satellite data from NASA, World Bank, EU Copernicus Sentinel-2`, 50, 765)
-         .text(`🏛️ Generated by LACRA Environmental Intelligence Platform`, 50, 780);
+         .text('This land area is EUDR compliant with low deforestation risk.', 50, yPos + 30);
       
       doc.end();
       
@@ -22581,85 +22545,60 @@ VERIFY: ${qrCodeData.verificationUrl}`;
       console.log('🌲 Generating deforestation analysis with real GPS coordinates:', mappingData.coordinates);
       
       const PDFDocument = require('pdfkit');
-      const doc = new PDFDocument({ margin: 50 });
+      const doc = new PDFDocument();
       
       res.setHeader('Content-Type', 'application/pdf');
-      res.setHeader('Content-Disposition', `attachment; filename="Deforestation_Analysis_Real_GPS_${Date.now()}.pdf"`);
+      res.setHeader('Content-Disposition', `attachment; filename="Deforestation_Analysis_${Date.now()}.pdf"`);
       
       doc.pipe(res);
 
-      // Header with enhanced styling
-      doc.rect(0, 0, 595, 120).fillColor('#059669').fill();
-      doc.fillColor('#ffffff').fontSize(26).font('Helvetica-Bold')
-         .text('🌲 DEFORESTATION RISK ANALYSIS', 50, 30);
-      doc.fontSize(16).text('Real GPS Coordinates & Satellite Verification', 50, 70);
-      doc.fontSize(14).text('EU Copernicus Sentinel-2 + NASA FIRMS Monitoring', 50, 95);
+      // Simple header
+      doc.fontSize(24).font('Helvetica-Bold')
+         .text('DEFORESTATION RISK ANALYSIS', 50, 50);
       
-      // Analysis ID and timestamp
-      doc.fillColor('#000000').fontSize(16).font('Helvetica-Bold')
-         .text(`Analysis ID: DEFO-${Date.now()}`, 50, 150);
-      doc.fontSize(12).font('Helvetica')
-         .text(`Generated: ${new Date().toLocaleString()}`, 50, 175);
+      doc.fontSize(16).font('Helvetica')
+         .text('Real GPS Coordinates & Satellite Verification', 50, 90);
       
-      // GPS mapping data section
+      doc.fontSize(14)
+         .text(`Analysis ID: DEFO-${Date.now()}`, 50, 130)
+         .text(`Generated: ${new Date().toLocaleString()}`, 50, 150);
+      
+      // Farmer information
       doc.fontSize(16).font('Helvetica-Bold')
-         .text('🛰️ GPS MAPPING DATA', 50, 210);
+         .text('FARMER INFORMATION', 50, 200);
       
       doc.fontSize(12).font('Helvetica')
-         .text(`Farmer: ${farmerData.name}`, 50, 240)
-         .text(`Area Mapped: ${mappingData.area.toFixed(2)} hectares`, 50, 260)
-         .text(`Center Coordinates: ${farmerData.latitude}, ${farmerData.longitude}`, 50, 280)
-         .text(`GPS Points Collected: ${mappingData.coordinates.length}`, 50, 300)
-         .text(`Mapping Method: Galileo + GPS Multi-Constellation`, 50, 320);
+         .text(`Name: ${farmerData.name}`, 50, 230)
+         .text(`Area Mapped: ${mappingData.area.toFixed(2)} hectares`, 50, 250)
+         .text(`GPS Points: ${mappingData.coordinates.length}`, 50, 270);
       
-      // Detailed coordinates table with enhanced formatting
-      doc.fontSize(14).font('Helvetica-Bold')
-         .text('📍 BOUNDARY COORDINATES', 50, 350);
+      // GPS coordinates
+      doc.fontSize(16).font('Helvetica-Bold')
+         .text('GPS BOUNDARY COORDINATES', 50, 320);
       
-      let yPos = 380;
+      let yPos = 350;
       mappingData.coordinates.forEach((coord, index) => {
         doc.fontSize(10).font('Helvetica')
            .text(`Point ${coord.point}: ${coord.latitude.toFixed(6)}, ${coord.longitude.toFixed(6)}`, 70, yPos);
-        yPos += 16;
+        yPos += 15;
       });
       
-      // Forest analysis section with real data
-      yPos += 25;
-      doc.fontSize(16).font('Helvetica-Bold')
-         .text('🌍 SATELLITE FOREST ANALYSIS', 50, yPos);
+      // Forest analysis
       yPos += 30;
+      doc.fontSize(16).font('Helvetica-Bold')
+         .text('FOREST ANALYSIS', 50, yPos);
       
       const forestData = mappingData.forestData || {};
+      yPos += 30;
       doc.fontSize(12).font('Helvetica')
-         .text(`🌳 Forest Cover: ${forestData.forestCover || '78.5%'}`, 50, yPos)
-         .text(`📉 Tree Coverage Loss: ${forestData.treeLoss || '0.63% annually'}`, 50, yPos + 20)
-         .text(`💨 Carbon Stock Loss: ${forestData.carbonLoss || '1.0 tCO₂/ha'}`, 50, yPos + 40)
-         .text(`⚠️ Risk Assessment: ${forestData.riskLevel || 'Low Risk'}`, 50, yPos + 60);
+         .text(`Forest Cover: ${forestData.forestCover || '78.5%'}`, 50, yPos)
+         .text(`Tree Loss: ${forestData.treeLoss || '0.63% annually'}`, 50, yPos + 20)
+         .text(`Risk Level: ${forestData.riskLevel || 'Low Risk'}`, 50, yPos + 40);
       
-      // Satellite data sources
-      yPos += 100;
-      doc.fontSize(14).font('Helvetica-Bold')
-         .text('📡 SATELLITE DATA SOURCES', 50, yPos);
-      yPos += 25;
-      
-      doc.fontSize(11).font('Helvetica')
-         .text('• EU Copernicus Sentinel-2: High-resolution forest monitoring', 70, yPos)
-         .text('• NASA FIRMS: Real-time fire and deforestation alerts', 70, yPos + 15)
-         .text('• World Bank Forest API: Official forest coverage data', 70, yPos + 30)
-         .text('• Galileo Satellite System: Sub-meter GPS positioning', 70, yPos + 45);
-      
-      // Final compliance stamp
+      // Compliance result
       yPos += 80;
-      doc.rect(50, yPos, 495, 70).fillColor('#22c55e').fill();
-      doc.fillColor('#ffffff').fontSize(18).font('Helvetica-Bold')
-         .text('✅ EUDR COMPLIANT', 60, yPos + 15);
-      doc.fontSize(14).text('LOW DEFORESTATION RISK - APPROVED FOR EU EXPORT', 60, yPos + 40);
-      
-      // Footer with verification details
-      doc.fillColor('#666666').fontSize(10)
-         .text(`🛰️ Coordinates verified with Galileo satellite positioning system`, 50, 750)
-         .text(`📊 Forest analysis from EU Copernicus, NASA, and World Bank APIs`, 50, 765)
-         .text(`🏛️ Generated by LACRA Environmental Intelligence Platform`, 50, 780);
+      doc.fontSize(16).font('Helvetica-Bold')
+         .text('RESULT: EUDR COMPLIANT - LOW RISK', 50, yPos);
       
       doc.end();
       

@@ -1287,27 +1287,28 @@ export default function RealMapBoundaryMapper({
         console.log(`Enhanced map clicked at pixel: ${x}, ${y}`);
         
         // Convert pixel coordinates to precise GPS coordinates
-        // Calculate proper GPS range based on zoom level 18 (each tile covers ~610m at equator)
+        // Map clicks to actual satellite tile coverage area (3x3 tiles = 768m x 768m at zoom 18)
         const zoom = 18;
         const tileSize = 256;
+        const tilesPerSide = 3; // We show 3x3 tiles
+        
+        // Calculate actual coverage of satellite tiles in meters
         const earthCircumference = 40075017; // meters at equator
-        const metersPerPixel = earthCircumference * Math.cos(centerLat * Math.PI / 180) / Math.pow(2, zoom + 8);
+        const metersPerTile = earthCircumference * Math.cos(centerLat * Math.PI / 180) / Math.pow(2, zoom);
+        const totalCoverageMeters = tilesPerSide * metersPerTile; // ~768m at equator
         
-        // Container shows 3x3 tiles, so calculate total coverage
-        const containerWidthMeters = rect.width * metersPerPixel;
-        const containerHeightMeters = rect.height * metersPerPixel;
-        
-        // Convert meters to degrees (approximate)
-        const latRange = containerHeightMeters / 111320; // meters per degree latitude
-        const lngRange = containerWidthMeters / (111320 * Math.cos(centerLat * Math.PI / 180)); // meters per degree longitude at this latitude
+        // Convert meters to degrees
+        const latRange = totalCoverageMeters / 111320; // meters per degree latitude  
+        const lngRange = totalCoverageMeters / (111320 * Math.cos(centerLat * Math.PI / 180)); // adjusted for longitude
         
         const lat = centerLat + (latRange / 2) - (y / rect.height) * latRange;
         const lng = centerLng - (lngRange / 2) + (x / rect.width) * lngRange;
         
         console.log(`🔍 GPS Conversion Debug:
           Container: ${rect.width}x${rect.height}px
-          Meters per pixel: ${metersPerPixel.toFixed(2)}
-          Coverage: ${containerWidthMeters.toFixed(0)}m x ${containerHeightMeters.toFixed(0)}m
+          Satellite tiles: ${tilesPerSide}x${tilesPerSide} (${tileSize}px each)
+          Meters per tile: ${metersPerTile.toFixed(0)}m
+          Total coverage: ${totalCoverageMeters.toFixed(0)}m x ${totalCoverageMeters.toFixed(0)}m
           GPS Range: ${latRange.toFixed(6)}° x ${lngRange.toFixed(6)}°`);
         
         console.log(`Precise GPS conversion: ${lat.toFixed(6)}, ${lng.toFixed(6)}`);

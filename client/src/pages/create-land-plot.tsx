@@ -423,27 +423,6 @@ export default function CreateLandPlot() {
                           </div>
                         </div>
 
-                        {/* Create Land Plot Button - Positioned under the 3 main boxes */}
-                        <div className="mt-6 text-center">
-                          <Button 
-                            type="submit" 
-                            size="lg" 
-                            disabled={createLandPlot.isPending || !selectedFarmerId || !landPlotData.boundaryData}
-                            className="bg-green-600 hover:bg-green-700 px-8 py-3 text-lg shadow-lg"
-                          >
-                            {createLandPlot.isPending ? (
-                              <>
-                                <RefreshCw className="w-4 h-4 mr-2 animate-spin" />
-                                Creating Land Plot...
-                              </>
-                            ) : (
-                              <>
-                                <Target className="w-4 h-4 mr-2" />
-                                🗺️ Create Land Plot & Generate EUDR Report
-                              </>
-                            )}
-                          </Button>
-                        </div>
 
                         {/* EUDR Download Section - RIGHT HERE WHERE IT SHOULD BE */}
                         <div className="mt-4 p-4 bg-yellow-50 border-2 border-yellow-200 rounded-lg">
@@ -552,6 +531,34 @@ export default function CreateLandPlot() {
                             </div>
                           </div>
                         </div>
+                      </div>
+                    )}
+                    
+                    {/* Create Land Plot Button - Always visible when boundary data exists */}
+                    {landPlotData.boundaryData && (
+                      <div className="mt-6 text-center p-4 bg-gradient-to-r from-green-50 to-blue-50 rounded-lg border-2 border-green-200">
+                        <h4 className="font-medium text-green-800 mb-3">🌍 Ready to Create Land Plot</h4>
+                        <Button 
+                          type="submit" 
+                          size="lg" 
+                          disabled={createLandPlot.isPending || !selectedFarmerId}
+                          className="bg-green-600 hover:bg-green-700 px-8 py-3 text-lg shadow-lg"
+                        >
+                          {createLandPlot.isPending ? (
+                            <>
+                              <RefreshCw className="w-4 h-4 mr-2 animate-spin" />
+                              Creating Land Plot...
+                            </>
+                          ) : (
+                            <>
+                              <Target className="w-4 h-4 mr-2" />
+                              🗺️ Create Land Plot & Generate EUDR Report
+                            </>
+                          )}
+                        </Button>
+                        <p className="text-sm text-green-700 mt-2">
+                          {satelliteAnalysis ? "Ready with satellite analysis data" : "Optional: Run satellite analysis for enhanced data"}
+                        </p>
                       </div>
                     )}
                   </div>

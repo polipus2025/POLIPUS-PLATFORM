@@ -1287,11 +1287,28 @@ export default function RealMapBoundaryMapper({
         console.log(`Enhanced map clicked at pixel: ${x}, ${y}`);
         
         // Convert pixel coordinates to precise GPS coordinates
-        const latRange = 0.002; // Approximately 200m
-        const lngRange = 0.002;
+        // Calculate proper GPS range based on zoom level 18 (each tile covers ~610m at equator)
+        const zoom = 18;
+        const tileSize = 256;
+        const earthCircumference = 40075017; // meters at equator
+        const metersPerPixel = earthCircumference * Math.cos(centerLat * Math.PI / 180) / Math.pow(2, zoom + 8);
+        
+        // Container shows 3x3 tiles, so calculate total coverage
+        const containerWidthMeters = rect.width * metersPerPixel;
+        const containerHeightMeters = rect.height * metersPerPixel;
+        
+        // Convert meters to degrees (approximate)
+        const latRange = containerHeightMeters / 111320; // meters per degree latitude
+        const lngRange = containerWidthMeters / (111320 * Math.cos(centerLat * Math.PI / 180)); // meters per degree longitude at this latitude
         
         const lat = centerLat + (latRange / 2) - (y / rect.height) * latRange;
         const lng = centerLng - (lngRange / 2) + (x / rect.width) * lngRange;
+        
+        console.log(`🔍 GPS Conversion Debug:
+          Container: ${rect.width}x${rect.height}px
+          Meters per pixel: ${metersPerPixel.toFixed(2)}
+          Coverage: ${containerWidthMeters.toFixed(0)}m x ${containerHeightMeters.toFixed(0)}m
+          GPS Range: ${latRange.toFixed(6)}° x ${lngRange.toFixed(6)}°`);
         
         console.log(`Precise GPS conversion: ${lat.toFixed(6)}, ${lng.toFixed(6)}`);
         

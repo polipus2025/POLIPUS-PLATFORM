@@ -21968,14 +21968,18 @@ VERIFY: ${qrCodeData.verificationUrl}`;
           if (response.ok) {
             const data = await response.json();
             if (data.Table && data.Table.length > 0) {
+              // Get additional soil properties for US coordinates
+              const detailQuery = `SELECT TOP 1 comp.comppct_r, comp.compname, comp.taxclname FROM component comp INNER JOIN mapunit mu ON comp.mukey = mu.mukey WHERE mu.mukey IN (SELECT mukey FROM SDA_Get_Mukey_from_intersection_with_WktWgs84('point(${lng} ${lat})'))`;
+              
               return res.json({
                 success: true,
                 soilData: {
                   soilType: data.Table[0][0] || 'USDA Soil Classification',
-                  pH: 6.5, organicMatter: 3.2, drainage: 'Well drained',
-                  sand: 35, silt: 40, clay: 25
+                  pH: null, organicMatter: null, drainage: null,
+                  sand: null, silt: null, clay: null
                 },
-                source: 'USDA Soil Survey (Real Data)'
+                source: 'USDA Soil Survey (Real Data)',
+                note: 'USDA detailed properties require additional API calls'
               });
             }
           }
@@ -22005,16 +22009,18 @@ VERIFY: ${qrCodeData.verificationUrl}`;
           let actualSoilType = 'Soil classification unavailable';
           if (classificationResponse.ok) {
             const classificationData = await classificationResponse.json();
-            actualSoilType = classificationData.properties?.wrb_class_name || classificationData.properties?.most_probable_class || 'Unknown soil classification';
+            console.log('🌍 Full classification response:', JSON.stringify(classificationData, null, 2));
+            actualSoilType = classificationData.properties?.wrb_class_name || classificationData.properties?.most_probable_class || 'Classification unavailable';
             console.log('🌍 Real soil classification retrieved:', actualSoilType);
           }
           
           // Parse soil properties
           const layers = propertiesData.properties?.layers || [];
+          console.log('🌍 SoilGrids layers data:', JSON.stringify(layers, null, 2));
           const soilData = { soilType: actualSoilType, pH: null, organicMatter: null, sand: null, silt: null, clay: null };
           
           // If no classification available, determine soil type from texture
-          if (actualSoilType === 'Soil classification unavailable' || actualSoilType === 'Unknown soil classification') {
+          if (actualSoilType === 'Soil classification unavailable' || actualSoilType === 'Classification unavailable') {
             let clay = 0, sand = 0, silt = 0;
             
             layers.forEach(layer => {
@@ -22029,6 +22035,8 @@ VERIFY: ${qrCodeData.verificationUrl}`;
                 }
               }
             });
+            
+            console.log(`🌍 Texture values for ${lat}, ${lng}: Clay=${clay}%, Sand=${sand}%, Silt=${silt}%`);
             
             // Determine soil type from texture using USDA classification
             if (clay > 40) {

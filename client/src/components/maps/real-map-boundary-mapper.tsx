@@ -355,15 +355,9 @@ export default function RealMapBoundaryMapper({
     return 0.3; // Normal agricultural conversion rate
   };
   
-  const determineEcosystemStatus = (lat: number, lng: number, area: number): string => {
-    const isUrban = lat > 18.0 && lng > 70.0;
-    const isCoastal = Math.abs(lng) > 9.0;
-    const largeArea = area > 5;
-    
-    if (isUrban) return 'Fragmented - Urban pressure';
-    if (isCoastal && largeArea) return 'Stable with high biodiversity';
-    if (largeArea) return 'Stable - Good connectivity';
-    return 'Moderately stable';
+  const determineEcosystemStatus = (lat: number, lng: number, area: number): string | null => {
+    // No hardcoded ecosystem status - requires real biodiversity API data
+    return null;
   };
   
   const calculateAssessmentConfidence = (lat: number, lng: number): number => {
@@ -378,48 +372,23 @@ export default function RealMapBoundaryMapper({
 
   // Real Agricultural Season Calculations
   const getPlantingSeason = (points: BoundaryPoint[]): string => {
-    if (points.length === 0) return 'March-May';
-    const centerLat = points.reduce((sum, p) => sum + p.latitude, 0) / points.length;
-    const isUrban = centerLat > 18.0;
-    const isTropical = centerLat < 10.0;
-    
-    if (isUrban) return 'June-September (monsoon)';
-    if (isTropical) return 'April-June (wet season)';
-    return 'March-May (spring)';
+    // No hardcoded seasonal data - requires real climate API data
+    return 'Seasonal data required';
   };
 
   const getHarvestSeason = (points: BoundaryPoint[]): string => {
-    if (points.length === 0) return 'September-November';
-    const centerLat = points.reduce((sum, p) => sum + p.latitude, 0) / points.length;
-    const isUrban = centerLat > 18.0;
-    const isTropical = centerLat < 10.0;
-    
-    if (isUrban) return 'October-December';
-    if (isTropical) return 'September-November';
-    return 'August-October';
+    // No hardcoded seasonal data - requires real climate API data
+    return 'Seasonal data required';
   };
 
   const getDryingSeason = (points: BoundaryPoint[]): string => {
-    if (points.length === 0) return 'December-February';
-    const centerLat = points.reduce((sum, p) => sum + p.latitude, 0) / points.length;
-    const isUrban = centerLat > 18.0;
-    const isTropical = centerLat < 10.0;
-    
-    if (isUrban) return 'January-March (winter)';
-    if (isTropical) return 'December-February (dry season)';
-    return 'November-January';
+    // No hardcoded seasonal data - requires real climate API data
+    return 'Seasonal data required';
   };
 
   const getRiskFactors = (points: BoundaryPoint[]): string => {
-    if (points.length === 0) return 'Low environmental risk';
-    const centerLat = points.reduce((sum, p) => sum + p.latitude, 0) / points.length;
-    const centerLng = points.reduce((sum, p) => sum + p.longitude, 0) / points.length;
-    const isUrban = centerLat > 18.0 && centerLng > 70.0;
-    const isCoastal = Math.abs(centerLng) > 9.0;
-    
-    if (isUrban) return 'Urban pollution, water scarcity';
-    if (isCoastal) return 'Salt spray, coastal erosion risk';
-    return 'Seasonal flooding, pest pressure';
+    // No hardcoded risk factors - requires real environmental API data
+    return 'Risk analysis required';
   };
 
   // SW Maps-style Enhanced GPS Tracking Functions
@@ -3636,9 +3605,9 @@ export default function RealMapBoundaryMapper({
             </h4>
             <div className="grid grid-cols-2 gap-3 text-sm">
               <div><span className="font-medium">Total Potential:</span> {agriculturalData?.harvestPotential?.toFixed(1) || '0.0'} tons/year</div>
-              <div><span className="font-medium">Expected Yield:</span> {agriculturalData?.expectedYield || 'Calculating...'}</div>
-              <div><span className="font-medium">Optimal Crop:</span> {agriculturalData?.optimalCrop || 'Analyzing...'}</div>
-              <div><span className="font-medium">Market Value:</span> {agriculturalData?.marketValue || 'Calculating...'}</div>
+              <div><span className="font-medium">Expected Yield:</span> {agriculturalData?.expectedYield || 'Yield analysis required'}</div>
+              <div><span className="font-medium">Optimal Crop:</span> {agriculturalData?.optimalCrop || 'Crop analysis required'}</div>
+              <div><span className="font-medium">Market Value:</span> {agriculturalData?.marketValue || 'Market data required'}</div>
               <div><span className="font-medium">Planting Season:</span> {agriculturalData?.seasonality?.plantingSeason || getPlantingSeason(points)}</div>
               <div><span className="font-medium">Harvest Season:</span> {agriculturalData?.seasonality?.harvestSeason || getHarvestSeason(points)}</div>
               <div><span className="font-medium">Irrigation:</span> {agriculturalData?.irrigation || 'Manual'}</div>
@@ -3684,7 +3653,7 @@ export default function RealMapBoundaryMapper({
                 <div><span className="font-medium">Deforestation Alert:</span> <span className={`${eudrReport.deforestationRisk < 2 ? 'text-green-600' : eudrReport.deforestationRisk < 5 ? 'text-yellow-600' : 'text-red-600'}`}>{eudrReport.deforestationRisk < 2 ? 'Low Risk' : eudrReport.deforestationRisk < 5 ? 'Standard Risk' : 'High Risk'}</span></div>
                 <div><span className="font-medium">Tree Coverage Loss:</span> {eudrReport.treeCoverageLoss || 0}% annually</div>
                 <div><span className="font-medium">Protected Areas:</span> {eudrReport.protectedAreaDistance || 'Proximity analysis required'}</div>
-                <div><span className="font-medium">Ecosystem Status:</span> {eudrReport.ecosystemStatus || 'Analyzing...'}</div>
+                <div><span className="font-medium">Ecosystem Status:</span> {eudrReport.ecosystemStatus || 'Ecosystem data required'}</div>
                 <div><span className="font-medium">Risk Level:</span> <span className={`font-medium ${eudrReport.riskLevel === 'low' ? 'text-green-600' : eudrReport.riskLevel === 'standard' ? 'text-yellow-600' : 'text-red-600'}`}>{eudrReport.riskLevel?.toUpperCase() || 'LOW'}</span></div>
               </div>
               <div className="mt-3 pt-3 border-t border-blue-200">

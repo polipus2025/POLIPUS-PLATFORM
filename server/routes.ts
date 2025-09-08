@@ -22010,7 +22010,7 @@ VERIFY: ${qrCodeData.verificationUrl}`;
           if (classificationResponse.ok) {
             const classificationData = await classificationResponse.json();
             console.log('🌍 Full classification response:', JSON.stringify(classificationData, null, 2));
-            actualSoilType = classificationData.properties?.wrb_class_name || classificationData.properties?.most_probable_class || 'Classification unavailable';
+            actualSoilType = classificationData.wrb_class_name || classificationData.most_probable_class || 'Classification unavailable';
             console.log('🌍 Real soil classification retrieved:', actualSoilType);
           }
           
@@ -22024,14 +22024,20 @@ VERIFY: ${qrCodeData.verificationUrl}`;
             let clay = 0, sand = 0, silt = 0;
             
             layers.forEach(layer => {
-              if (layer.depths?.[0]?.values?.mean) {
-                const value = layer.depths[0].values.mean;
-                switch (layer.name) {
-                  case 'clay': clay = Math.round(value / 10); soilData.clay = clay; break;
-                  case 'sand': sand = Math.round(value / 10); soilData.sand = sand; break;
-                  case 'silt': silt = Math.round(value / 10); soilData.silt = silt; break;
-                  case 'phh2o': soilData.pH = (value / 10).toFixed(1); break;
-                  case 'soc': soilData.organicMatter = (value / 10).toFixed(1); break;
+              if (layer.depths?.[0]?.values) {
+                const values = layer.depths[0].values;
+                // Try different value properties that might be available
+                const value = values.mean || values.Q0_5 || values.value || values.prediction;
+                if (value !== null && value !== undefined) {
+                  switch (layer.name) {
+                    case 'clay': clay = Math.round(value / 10); soilData.clay = clay; break;
+                    case 'sand': sand = Math.round(value / 10); soilData.sand = sand; break;
+                    case 'silt': silt = Math.round(value / 10); soilData.silt = silt; break;
+                    case 'phh2o': soilData.pH = (value / 10).toFixed(1); break;
+                    case 'soc': soilData.organicMatter = (value / 10).toFixed(1); break;
+                  }
+                } else {
+                  console.log(`🌍 ${layer.name} values:`, JSON.stringify(values, null, 2));
                 }
               }
             });
@@ -22056,14 +22062,17 @@ VERIFY: ${qrCodeData.verificationUrl}`;
           } else {
             // Still parse properties for complete data
             layers.forEach(layer => {
-              if (layer.depths?.[0]?.values?.mean) {
-                const value = layer.depths[0].values.mean;
-                switch (layer.name) {
-                  case 'clay': soilData.clay = Math.round(value / 10); break;
-                  case 'sand': soilData.sand = Math.round(value / 10); break;
-                  case 'silt': soilData.silt = Math.round(value / 10); break;
-                  case 'phh2o': soilData.pH = (value / 10).toFixed(1); break;
-                  case 'soc': soilData.organicMatter = (value / 10).toFixed(1); break;
+              if (layer.depths?.[0]?.values) {
+                const values = layer.depths[0].values;
+                const value = values.mean || values.Q0_5 || values.value || values.prediction;
+                if (value !== null && value !== undefined) {
+                  switch (layer.name) {
+                    case 'clay': soilData.clay = Math.round(value / 10); break;
+                    case 'sand': soilData.sand = Math.round(value / 10); break;
+                    case 'silt': soilData.silt = Math.round(value / 10); break;
+                    case 'phh2o': soilData.pH = (value / 10).toFixed(1); break;
+                    case 'soc': soilData.organicMatter = (value / 10).toFixed(1); break;
+                  }
                 }
               }
             });

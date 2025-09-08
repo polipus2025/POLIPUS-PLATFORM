@@ -1287,29 +1287,22 @@ export default function RealMapBoundaryMapper({
         console.log(`Enhanced map clicked at pixel: ${x}, ${y}`);
         
         // Convert pixel coordinates to precise GPS coordinates
-        // Map clicks to actual satellite tile coverage area (3x3 tiles = 768m x 768m at zoom 18)
-        const zoom = 18;
-        const tileSize = 256;
-        const tilesPerSide = 3; // We show 3x3 tiles
+        // Use EXACT same bounds as convertGPSToPixel for perfect precision
+        const bounds = mapBoundsRef.current;
+        if (!bounds) {
+          console.error('Map bounds not available for pixel conversion');
+          return;
+        }
         
-        // Calculate actual coverage of satellite tiles in meters
-        const earthCircumference = 40075017; // meters at equator
-        const metersPerTile = earthCircumference * Math.cos(centerLat * Math.PI / 180) / Math.pow(2, zoom);
-        const totalCoverageMeters = tilesPerSide * metersPerTile; // ~768m at equator
+        // EXACT reverse of convertGPSToPixel formula
+        const lng = (bounds.centerLng - bounds.lngRange / 2) + (x / rect.width) * bounds.lngRange;
+        const lat = (bounds.centerLat + bounds.latRange / 2) - (y / rect.height) * bounds.latRange;
         
-        // Convert meters to degrees
-        const latRange = totalCoverageMeters / 111320; // meters per degree latitude  
-        const lngRange = totalCoverageMeters / (111320 * Math.cos(centerLat * Math.PI / 180)); // adjusted for longitude
-        
-        const lat = centerLat + (latRange / 2) - (y / rect.height) * latRange;
-        const lng = centerLng - (lngRange / 2) + (x / rect.width) * lngRange;
-        
-        console.log(`🔍 GPS Conversion Debug:
+        console.log(`🔍 PRECISE GPS Conversion:
+          Click: ${x}px, ${y}px
           Container: ${rect.width}x${rect.height}px
-          Satellite tiles: ${tilesPerSide}x${tilesPerSide} (${tileSize}px each)
-          Meters per tile: ${metersPerTile.toFixed(0)}m
-          Total coverage: ${totalCoverageMeters.toFixed(0)}m x ${totalCoverageMeters.toFixed(0)}m
-          GPS Range: ${latRange.toFixed(6)}° x ${lngRange.toFixed(6)}°`);
+          Bounds: lat=${bounds.latRange.toFixed(6)}°, lng=${bounds.lngRange.toFixed(6)}°
+          GPS: ${lat.toFixed(6)}, ${lng.toFixed(6)}`);
         
         console.log(`Precise GPS conversion: ${lat.toFixed(6)}, ${lng.toFixed(6)}`);
         

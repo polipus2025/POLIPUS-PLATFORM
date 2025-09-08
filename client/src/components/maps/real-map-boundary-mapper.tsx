@@ -4288,6 +4288,39 @@ export default function RealMapBoundaryMapper({
         </div>
       )}
 
+      {/* PERMANENT DOWNLOAD BUTTONS - Always visible after mapping completion */}
+      {isCompleted && points.length >= 6 && (
+        <div className="bg-gradient-to-r from-blue-50 to-green-50 border-2 border-blue-200 rounded-lg p-6 mb-4">
+          <h3 className="font-bold text-lg text-blue-900 mb-4 flex items-center gap-2">
+            🛰️ EU Copernicus EUDR Compliance Certificates Available
+          </h3>
+          <p className="text-sm text-blue-700 mb-4">
+            Download professional certificates with your authentic GPS coordinates and satellite verification data
+          </p>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <Button
+              onClick={() => downloadReport('eudr')}
+              className="h-12 bg-blue-600 hover:bg-blue-700"
+              size="lg"
+            >
+              <Download className="h-5 w-5 mr-2" />
+              Download EUDR Compliance Certificate
+            </Button>
+            <Button
+              onClick={() => downloadReport('deforestation')}
+              className="h-12 bg-green-600 hover:bg-green-700"
+              size="lg"
+            >
+              <Download className="h-5 w-5 mr-2" />
+              Download Deforestation Analysis
+            </Button>
+          </div>
+          <div className="mt-3 text-xs text-gray-600">
+            ✅ Certificates include: Your GPS coordinates • Galileo satellite positioning • Real forest data • EUDR compliance verification • QR codes for authentication
+          </div>
+        </div>
+      )}
+
       {/* EUDR Compliance & Deforestation Analysis */}
       {(eudrReport || deforestationReport || isAnalyzing) && (
         <div className="space-y-3">

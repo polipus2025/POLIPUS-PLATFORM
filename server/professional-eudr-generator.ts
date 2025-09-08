@@ -88,7 +88,7 @@ function generateHeader(doc: PDFDocument) {
 }
 
 function generateLegalBasisSection(doc: PDFDocument, packId: string, currentDate: string) {
-  const startY = 100;
+  const startY = 95;
   
   // Section header
   doc.rect(30, startY, 535, 25).fill('#f3f4f6');
@@ -100,13 +100,13 @@ function generateLegalBasisSection(doc: PDFDocument, packId: string, currentDate
      .text('LEGAL FRAMEWORK: EU REGULATION 2023/1115 - DEFORESTATION-FREE PRODUCTS', 40, startY + 35);
   
   doc.fontSize(9).fillColor('#4b5563')
-     .text('This certificate is issued under EU Regulation 2023/1115 laying down rules on the making available on the Union', 40, startY + 45)
-     .text('market and the export from the Union of certain commodities and products associated with deforestation and forest degradation.', 40, startY + 58)
-     .text('Articles 3, 4, 5, 10 & 30 - Due Diligence Statement & Traceability Requirements Compliance Verified.', 40, startY + 71);
+     .text('This certificate is issued under EU Regulation 2023/1115 laying down rules on the making available on the Union', 40, startY + 40)
+     .text('market and the export from the Union of certain commodities and products associated with deforestation and forest degradation.', 40, startY + 52)
+     .text('Articles 3, 4, 5, 10 & 30 - Due Diligence Statement & Traceability Requirements Compliance Verified.', 40, startY + 64);
 }
 
 function generateCertificateIdentification(doc: PDFDocument, packId: string, currentDate: string, lat: number, lng: number) {
-  const startY = 210;
+  const startY = 185;
   
   // Section header
   doc.rect(30, startY, 535, 25).fill('#f3f4f6');
@@ -150,7 +150,7 @@ function generateCertificateIdentification(doc: PDFDocument, packId: string, cur
 }
 
 function generateProducerFarmInfo(doc: PDFDocument, farmerData: FarmerData, farmSize: string, lat: number, lng: number) {
-  const startY = 340;
+  const startY = 305;
   
   // Section header
   doc.rect(30, startY, 535, 25).fill('#f3f4f6');
@@ -182,7 +182,9 @@ function generateProducerFarmInfo(doc: PDFDocument, farmerData: FarmerData, farm
 }
 
 function generateRiskAssessment(doc: PDFDocument) {
-  const startY = 470;
+  // Move to page 2 for proper spacing
+  doc.addPage();
+  const startY = 50;
   
   // Section header
   doc.rect(30, startY, 535, 25).fill('#f3f4f6');
@@ -229,8 +231,8 @@ function generateRiskAssessment(doc: PDFDocument) {
 }
 
 function generateSupplyChainTraceability(doc: PDFDocument, packId: string) {
-  // Now on page 2 - better spacing
-  const startY = 210;
+  // Continue on page 2 after compliance matrix
+  const startY = 350;
   
   // Section header
   doc.rect(30, startY, 535, 25).fill('#f3f4f6');
@@ -278,9 +280,8 @@ function generateSupplyChainTraceability(doc: PDFDocument, packId: string) {
 }
 
 function generateLegalComplianceMatrix(doc: PDFDocument) {
-  // Start new page for better spacing
-  doc.addPage();
-  const startY = 50;
+  // Continue on page 2 after risk assessment
+  const startY = 220;
   
   // Section header
   doc.rect(30, startY, 535, 25).fill('#f3f4f6');
@@ -314,7 +315,7 @@ function generateLegalComplianceMatrix(doc: PDFDocument) {
 }
 
 function generateCommoditySpecifications(doc: PDFDocument, farmSize: string) {
-  const startY = 350;
+  const startY = 480;
   
   // Section header
   doc.rect(30, startY, 535, 25).fill('#f3f4f6');
@@ -359,7 +360,7 @@ function generateCommoditySpecifications(doc: PDFDocument, farmSize: string) {
 }
 
 function generateCertificationStatement(doc: PDFDocument, farmerData: FarmerData, lat: number, lng: number) {
-  const startY = 490;
+  const startY = 600;
   
   // Section header
   doc.rect(30, startY, 535, 25).fill('#f3f4f6');
@@ -376,7 +377,7 @@ function generateCertificationStatement(doc: PDFDocument, farmerData: FarmerData
 }
 
 function generateDualSignatures(doc: PDFDocument, packId: string, currentDate: string) {
-  const startY = 620;
+  const startY = 700;
   
   // Two signature boxes
   // LACRA box (left)

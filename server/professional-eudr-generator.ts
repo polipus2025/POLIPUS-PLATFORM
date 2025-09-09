@@ -73,11 +73,11 @@ function generateHeader(doc: PDFDocument) {
   
   // Certified by (right)
   doc.fontSize(10).fillColor('#ffffff').font('Helvetica-Bold')
-     .text('CERTIFIED BY:', 460, 20);
+     .text('CERTIFIED BY:', 470, 20);
   doc.fontSize(9).fillColor('#e5e7eb')
-     .text('LACRA - LIBERIA', 460, 35)
-     .text('ECOENVIROS - EU', 460, 48)
-     .text('ISO 14001:2015', 460, 61);
+     .text('LACRA - LIBERIA', 470, 35)
+     .text('ECOENVIROS - EU', 470, 48)
+     .text('ISO 14001:2015', 470, 61);
   
   // Subtitle
   doc.fontSize(10).fillColor('#ffffff')

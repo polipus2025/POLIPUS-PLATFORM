@@ -1,5 +1,6 @@
 import type { Express } from "express";
 import { createServer, type Server } from "http";
+import session from "express-session";
 import { storage } from "./storage";
 import { db } from "./db";
 import { 
@@ -628,6 +629,17 @@ import { registerPolipusRoutes } from './polipus-routes';
 import { satelliteService, type SatelliteAnalysisResult } from './satellite-service';
 
 export async function registerRoutes(app: Express): Promise<Server> {
+  // Configure session middleware for authentication
+  app.use(session({
+    secret: process.env.SESSION_SECRET || crypto.randomBytes(64).toString('hex'),
+    resave: false,
+    saveUninitialized: false,
+    cookie: { 
+      secure: process.env.NODE_ENV === 'production',
+      httpOnly: true,
+      maxAge: 24 * 60 * 60 * 1000 // 24 hours
+    }
+  }));
   // Register farmer routes
   registerFarmerRoutes(app);
 
@@ -3057,13 +3069,11 @@ export async function registerRoutes(app: Express): Promise<Server> {
       }
 
       // CONSISTENT WITH DISABLED JWT: Use session-based authentication
-      if (req.session) {
-        req.session.userId = 'agritrace_admin';
-        req.session.username = username;
-        req.session.userType = 'agritrace_admin';
-        req.session.role = 'system_administrator';
-        req.session.isAuthenticated = true;
-      }
+      req.session.userId = 'agritrace_admin';
+      req.session.username = username;
+      req.session.userType = 'agritrace_admin';
+      req.session.role = 'system_administrator';
+      req.session.isAuthenticated = true;
 
       // Log admin login (simplified for now)
       console.log(`[AgriTrace Admin] ${username} logged in successfully`);

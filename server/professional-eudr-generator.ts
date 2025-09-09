@@ -281,7 +281,7 @@ function generateSupplyChainTraceability(doc: PDFDocument, packId: string, qrCod
        .text(step.desc, x - 5, y + 50);
   });
   
-  // QR Code section - REAL QR CODE (restored to original position)
+  // QR Code section - REAL QR CODE
   doc.image(qrCodeBuffer, 515, startY + 125, { width: 55, height: 55 });
   doc.fontSize(8).fillColor('#1f2937').font('Helvetica-Bold')
      .text('QR CODE', 532, startY + 185);
@@ -293,8 +293,7 @@ function generateSupplyChainTraceability(doc: PDFDocument, packId: string, qrCod
 }
 
 function generateLegalComplianceMatrix(doc: PDFDocument) {
-  // Add page break to start page 2 properly
-  doc.addPage();
+  // Continue on page 2 without adding extra pages  
   const startY = 50;
   
   // Section header

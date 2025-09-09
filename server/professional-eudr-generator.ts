@@ -66,8 +66,8 @@ export async function generateProfessionalEUDRCertificate(
   
   // PAGE 2 - Compliance & Certification
   generateLegalComplianceMatrix(doc);
-  generateCommoditySpecifications(doc, farmSizeHa);
-  generateCertificationStatement(doc, farmerData, centerLat, centerLng);
+  // generateCommoditySpecifications(doc, farmSizeHa);
+  // generateCertificationStatement(doc, farmerData, centerLat, centerLng);
   generateDualSignatures(doc, packId, currentDate, qrCodeBuffer2);
 
   return doc;

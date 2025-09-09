@@ -349,7 +349,7 @@ function generateCommoditySpecifications(doc: PDFDocument, farmSize: string) {
      .text('Certification Level:', rightCol, contentY + 60);
   
   doc.fontSize(10).fillColor('#4b5563')
-     .text('EUDR Relevant Commodity', rightCol + 120, contentY)
+     .text('EUDR Relevant', rightCol + 120, contentY)
      .text('Premium Export Quality', rightCol + 120, contentY + 20)
      .text('≥ 80% Well Fermented', rightCol + 120, contentY + 40);
   

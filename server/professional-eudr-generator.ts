@@ -281,19 +281,20 @@ function generateSupplyChainTraceability(doc: PDFDocument, packId: string, qrCod
        .text(step.desc, x - 5, y + 50);
   });
   
-  // QR Code section - REAL QR CODE (moved up to fit on page 1)
-  doc.image(qrCodeBuffer, 515, startY + 85, { width: 55, height: 55 });
+  // QR Code section - REAL QR CODE (restored to original position)
+  doc.image(qrCodeBuffer, 515, startY + 125, { width: 55, height: 55 });
   doc.fontSize(8).fillColor('#1f2937').font('Helvetica-Bold')
-     .text('QR CODE', 532, startY + 145);
+     .text('QR CODE', 532, startY + 185);
   doc.fontSize(7).fillColor('#4b5563')
-     .text('Scan for full', 522, startY + 155)
-     .text('traceability', 522, startY + 165);
+     .text('Scan for full', 522, startY + 195)
+     .text('traceability', 522, startY + 205);
   doc.fontSize(6).fillColor('#6b7280')
-     .text(`ID: EUDR-${packId.slice(-6)}`, 515, startY + 175);
+     .text(`ID: EUDR-${packId.slice(-6)}`, 515, startY + 215);
 }
 
 function generateLegalComplianceMatrix(doc: PDFDocument) {
-  // Continue on page 2 without adding extra pages  
+  // Add page break to start page 2 properly
+  doc.addPage();
   const startY = 50;
   
   // Section header

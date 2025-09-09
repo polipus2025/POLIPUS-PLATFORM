@@ -101,8 +101,8 @@ function generateLegalBasisSection(doc: PDFDocument, packId: string, currentDate
   
   doc.fontSize(9).fillColor('#4b5563')
      .text('This certificate is issued under EU Regulation 2023/1115 laying down rules on the making available on the Union', 40, startY + 50)
-     .text('market and the export from the Union of certain commodities and products associated with deforestation and forest degradation.', 40, startY + 62)
-     .text('Articles 3, 4, 5, 10 & 30 - Due Diligence Statement & Traceability Requirements Compliance Verified.', 40, startY + 74);
+     .text('market and the export from the Union of certain commodities and products associated with deforestation and forest', 40, startY + 62)
+     .text('degradation. Articles 3, 4, 5, 10 & 30 - Due Diligence Statement & Traceability Requirements Compliance Verified.', 40, startY + 74);
 }
 
 function generateCertificateIdentification(doc: PDFDocument, packId: string, currentDate: string, lat: number, lng: number) {

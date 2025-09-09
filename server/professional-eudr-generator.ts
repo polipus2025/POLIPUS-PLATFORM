@@ -369,8 +369,8 @@ function generateCertificationStatement(doc: PDFDocument, farmerData: FarmerData
      .text('✓ CERTIFIED EUDR COMPLIANT - APPROVED FOR EU MARKET ENTRY', 40, startY + 35);
   
   doc.fontSize(10).fillColor('#4b5563')
-     .text(`This certificate confirms that cocoa produced by ${farmerData.name} at GPS coordinates ${lat.toFixed(4)}° N, ${Math.abs(lng).toFixed(4)}°`, 40, startY + 65)
-     .text('W in Bong County, Liberia meets all requirements of EU Regulation 2023/1115. The production is verified as', 40, startY + 80)
+     .text(`This certificate confirms that cocoa produced by ${farmerData.name} at GPS coordinates ${lat.toFixed(4)}° N, ${Math.abs(lng).toFixed(4)}° W`, 40, startY + 65)
+     .text('in Bong County, Liberia meets all requirements of EU Regulation 2023/1115. The production is verified as', 40, startY + 80)
      .text('deforestation-free with complete due diligence documentation and supply chain traceability systems in place.', 40, startY + 95);
 }
 

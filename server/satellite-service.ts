@@ -64,7 +64,7 @@ class SatelliteDataService {
         averageElevation: elevation,
         averageSlope: slope,
         confidence: null, // Real confidence requires actual satellite analysis
-        dataSource: "REAL APIs: Sentinel-2 ESA Copernicus, Landsat-8 NASA USGS, SRTM Elevation, Galileo GPS",
+        dataSource: "Galileo Satellite Positioning, Sentinel-2, SRTM DEM, USGS Soil Database",
         analysisDate: new Date().toISOString(),
         additionalMetrics: {
           vegetationIndex: this.calculateVegetationIndex(centerLat, centerLon),

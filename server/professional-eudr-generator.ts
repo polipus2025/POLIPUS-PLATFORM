@@ -66,8 +66,8 @@ export async function generateProfessionalEUDRCertificate(
   
   // PAGE 2 - Compliance & Certification
   generateLegalComplianceMatrix(doc);
-  // generateCommoditySpecifications(doc, farmSizeHa);
-  // generateCertificationStatement(doc, farmerData, centerLat, centerLng);
+  generateCommoditySpecifications(doc, farmSizeHa);
+  generateCertificationStatement(doc, farmerData, centerLat, centerLng);
   generateDualSignatures(doc, packId, currentDate, qrCodeBuffer2);
 
   return doc;
@@ -293,7 +293,8 @@ function generateSupplyChainTraceability(doc: PDFDocument, packId: string, qrCod
 }
 
 function generateLegalComplianceMatrix(doc: PDFDocument) {
-  // Continue on page 2 without adding extra pages  
+  // Force page 2 to start here
+  doc.addPage();
   const startY = 50;
   
   // Section header
@@ -328,7 +329,7 @@ function generateLegalComplianceMatrix(doc: PDFDocument) {
 }
 
 function generateCommoditySpecifications(doc: PDFDocument, farmSize: string) {
-  const startY = 240;
+  const startY = 200;
   
   // Section header
   doc.rect(30, startY, 535, 25).fill('#f3f4f6');

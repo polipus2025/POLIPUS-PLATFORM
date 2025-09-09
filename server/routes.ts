@@ -316,6 +316,7 @@ import { AgriTraceWorkflowService } from './agritrace-workflow';
 import { registerPaymentConfirmationFix } from './payment-confirmation-fix';
 
 // JWT Secret - in production, this should be in environment variables
+// TEMPORARILY DISABLED: JWT authentication bypassed for production deployment
 const JWT_SECRET = process.env.JWT_SECRET || "agritrace360-dev-secret-key";
 
 // Helper function to generate JWT token for regulatory departments

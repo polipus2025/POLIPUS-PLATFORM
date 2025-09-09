@@ -21,9 +21,12 @@ if (process.env.NODE_ENV === 'production') {
 export interface AuthRequest extends Request {
   user?: {
     id: number;
+    userId?: number;
     farmerId?: string;
+    exporterId?: string;
     role: string;
     username: string;
+    userType?: string;
   };
 }
 
@@ -56,9 +59,11 @@ export function verifyToken(req: AuthRequest, res: Response, next: NextFunction)
   // Set a temporary user for API compatibility  
   req.user = {
     id: 1,
+    userId: 1,
     farmerId: 'temp-farmer',
     role: 'farmer',
-    username: 'temporary-user'
+    username: 'temporary-user',
+    userType: 'farmer'
   };
   
   next();

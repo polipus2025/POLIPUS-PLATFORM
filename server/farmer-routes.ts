@@ -56,10 +56,10 @@ export function registerFarmerRoutes(app: Express) {
       const farmer = await storage.createFarmer({
         ...farmerData,
         farmerId,
-        numberOfChildren: farmerData.numberOfChildren ? parseInt(farmerData.numberOfChildren) : null,
-        dependents: farmerData.dependents ? parseInt(farmerData.dependents) : null,
-        farmingExperience: farmerData.farmingExperience ? parseInt(farmerData.farmingExperience) : null,
-        irrigationAccess: farmerData.irrigationAccess === "true" || farmerData.irrigationAccess === true,
+        numberOfChildren: (farmerData as any).numberOfChildren ? parseInt((farmerData as any).numberOfChildren) : null,
+        dependents: (farmerData as any).dependents ? parseInt((farmerData as any).dependents) : null,
+        farmingExperience: (farmerData as any).farmingExperience ? parseInt((farmerData as any).farmingExperience) : null,
+        irrigationAccess: (farmerData as any).irrigationAccess === "true" || (farmerData as any).irrigationAccess === true,
         farmBoundaries: farmerData.farmBoundaries || null,
         landMapData: farmerData.landMapData || null
       });
@@ -418,7 +418,7 @@ export function registerFarmerRoutes(app: Express) {
           return res.status(404).json({ error: "Farmer not found" });
         }
 
-        const harvestSchedules = await storage.getFarmerHarvestSchedules(farmer.id);
+        const harvestSchedules = await storage.getHarvestSchedules();
         res.json(harvestSchedules);
       } catch (dbError) {
         return res.json([]);

@@ -88,7 +88,7 @@ async function addQRFooter(doc: PDFDocumentType, packId: string, currentDate: st
     });
     
     const qrBuffer = Buffer.from(qrCodeDataURL.split(',')[1], 'base64');
-    doc.image(qrBuffer, 520, 755, { width: 35, height: 35 });
+    doc.image(qrBuffer, 520, 747, { width: 35, height: 35 });
     doc.fontSize(6).fillColor('#a0aec0').text('Scan to verify', 520, 792);
   } catch (error) {
     doc.fontSize(6).fillColor('#a0aec0').text(`Verify: ${packId.slice(-6)}`, 520, 775);

@@ -265,15 +265,15 @@ function generateSupplyChainTraceability(doc: PDFDocument, packId: string) {
   });
   
   // QR Code section  
-  doc.rect(510, startY + 50, 65, 65).stroke('#d1d5db', 1);
+  doc.rect(510, startY + 120, 65, 65).stroke('#d1d5db', 1);
   doc.fontSize(8).fillColor('#1f2937').font('Helvetica-Bold')
-     .text('QR CODE', 532, startY + 60);
+     .text('QR CODE', 532, startY + 130);
   doc.fontSize(7).fillColor('#4b5563')
-     .text('Scan for full', 522, startY + 75)
-     .text('traceability', 522, startY + 85)
-     .text('verification', 522, startY + 95);
+     .text('Scan for full', 522, startY + 145)
+     .text('traceability', 522, startY + 155)
+     .text('verification', 522, startY + 165);
   doc.fontSize(6).fillColor('#6b7280')
-     .text(`ID: EUDR-${packId.slice(-6)}`, 515, startY + 105);
+     .text(`ID: EUDR-${packId.slice(-6)}`, 515, startY + 175);
 }
 
 function generateLegalComplianceMatrix(doc: PDFDocument) {

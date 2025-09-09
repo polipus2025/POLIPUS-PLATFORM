@@ -222,14 +222,14 @@ function generateRiskAssessment(doc: PDFDocument) {
   
   // Legend
   doc.fontSize(8).fillColor('#6b7280')
-     .text('LEGEND:', 50, startY + 120)
-     .text('Low Risk/Compliant (90-100%)', 100, startY + 120)
-     .text('Medium Risk (70-89%)', 250, startY + 120)
-     .text('High Risk (<70%)', 380, startY + 120);
+     .text('LEGEND:', 50, startY + 140)
+     .text('Low Risk/Compliant (90-100%)', 100, startY + 140)
+     .text('Medium Risk (70-89%)', 250, startY + 140)
+     .text('High Risk (<70%)', 380, startY + 140);
 }
 
 function generateSupplyChainTraceability(doc: PDFDocument, packId: string) {
-  const startY = 590;
+  const startY = 610;
   
   // Section header
   doc.rect(30, startY, 535, 25).fill('#f3f4f6');

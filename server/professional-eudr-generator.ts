@@ -375,7 +375,7 @@ function generateCertificationStatement(doc: PDFDocument, farmerData: FarmerData
 }
 
 function generateDualSignatures(doc: PDFDocument, packId: string, currentDate: string) {
-  const startY = 480;
+  const startY = 500;
   
   // Two signature boxes
   // LACRA box (left)

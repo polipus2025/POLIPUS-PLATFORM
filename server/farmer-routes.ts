@@ -149,63 +149,7 @@ export function registerFarmerRoutes(app: Express) {
       const { credentialId, password } = validation.data;
       // Login attempt logged without exposing credential details
 
-      // EXISTING TEST ACCOUNTS PRESERVED - Only available in development
-      if (process.env.NODE_ENV !== 'production' && credentialId === "FRM434923" && password === "Test2025!") {
-        console.log("✅ Test farmer login successful");
-        
-        const tokenPayload = {
-          id: 1,
-          farmerId: "FARMER-1755883520291-288",
-          role: "farmer",
-          username: credentialId
-        };
-        
-        const accessToken = generateAccessToken(tokenPayload);
-        const refreshToken = generateRefreshToken(tokenPayload);
-        setSecureTokenCookies(res, accessToken, refreshToken);
-        
-        return res.json({
-          success: true,
-          farmer: {
-            id: 1,
-            farmerId: "FARMER-1755883520291-288", // Paolo Jr's actual farmer ID
-            firstName: "Paolo",
-            lastName: "Jr",
-            mustChangePassword: false
-          },
-          // Still provide token for backward compatibility but use secure JWT
-          token: accessToken
-        });
-      }
-
-      // EXISTING TEST ACCOUNT PRESERVED - Only available in development
-      if (process.env.NODE_ENV !== 'production' && credentialId === "FARM-1755271600707-BQA7R4QFP" && password === "farmer123") {
-        console.log("✅ Active farmer login successful");
-        
-        const tokenPayload = {
-          id: 2,
-          farmerId: "FARM-1755271600707-BQA7R4QFP",
-          role: "farmer",
-          username: credentialId
-        };
-        
-        const accessToken = generateAccessToken(tokenPayload);
-        const refreshToken = generateRefreshToken(tokenPayload);
-        setSecureTokenCookies(res, accessToken, refreshToken);
-        
-        return res.json({
-          success: true,
-          farmer: {
-            id: 2,
-            farmerId: "FARM-1755271600707-BQA7R4QFP",
-            firstName: "John",
-            lastName: "Konneh",
-            mustChangePassword: false
-          },
-          // Still provide token for backward compatibility but use secure JWT
-          token: accessToken
-        });
-      }
+      // TEST CREDENTIALS REMOVED - Only real database credentials work now
 
       try {
         const credentials = await storage.getFarmerCredentialsByUsername(credentialId);

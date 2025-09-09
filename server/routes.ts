@@ -3037,11 +3037,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const { username, password, accessCode } = req.body;
       
       // AgriTrace-specific admin credentials
-      const agriTraceAdminCredentials = {
-        'agritrace.admin': { password: 'agritrace123', firstName: 'AgriTrace', lastName: 'Administrator' },
-        'admin.agritrace': { password: 'admin2025', firstName: 'System', lastName: 'Admin' },
-        'lacra.admin': { password: 'lacra2025', firstName: 'LACRA', lastName: 'Admin' }
-      };
+      // TEST CREDENTIALS REMOVED - Only real database credentials work now
+      const agriTraceAdminCredentials = {};
 
       // Check access code
       if (accessCode !== 'AGRITRACE2025') {
@@ -3752,10 +3749,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
     try {
       const { username, password } = req.body;
       
-      // Monitoring admin credentials - allow both dedicated monitoring credentials and admin credentials
-      if ((username === 'monitor001' && password === 'monitor123') || 
-          (username === 'admin' && password === 'admin123') ||
-          (username === 'admin001' && password === 'password123')) {
+      // TEST CREDENTIALS REMOVED - Only real database credentials work now
+      if (false) {
         const userId = username === 'admin' ? 1 : (username === 'admin001' ? 2 : 999);
         const firstName = username === 'admin' ? 'Administrator' : (username === 'admin001' ? 'Inspector' : 'Monitoring');
         const lastName = username === 'admin' ? 'LACRA' : (username === 'admin001' ? 'System' : 'Portal');
@@ -4232,15 +4227,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
         });
       }
 
-      // Test credentials for LiveTrace farmers
-      const testCredentials: Record<string, { password: string; firstName: string; lastName: string }> = {
-        farmer001: { password: 'password123', firstName: 'John', lastName: 'Farmer' },
-        rancher001: { password: 'password123', firstName: 'Mike', lastName: 'Rancher' },
-        smallholder001: { password: 'password123', firstName: 'Mary', lastName: 'Smallholder' },
-        coop001: { password: 'password123', firstName: 'Coop', lastName: 'Manager' }
-      };
+      // TEST CREDENTIALS REMOVED - Only real database credentials work now
+      const testCredentials = {};
 
-      if (testCredentials[username] && testCredentials[username].password === password) {
+      if (false) {
         const token = jwt.sign(
           { 
             userId: 2,
@@ -4444,15 +4434,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
         });
       }
 
-      // Test credentials for development
-      const testCredentials: Record<string, { password: string; role: string; firstName: string; lastName: string }> = {
-        admin001: { password: 'password123', role: 'regulatory_admin', firstName: 'Admin', lastName: 'User' },
-        admin: { password: 'admin123', role: 'regulatory_admin', firstName: 'Administrator', lastName: 'LACRA' },
-        inspector001: { password: 'password123', role: 'inspector', firstName: 'Inspector', lastName: 'User' },
-        'office.admin': { password: 'office123', role: 'office_admin', firstName: 'Office', lastName: 'Administrator' }
-      };
+      // TEST CREDENTIALS REMOVED - Only real database credentials work now
+      const testCredentials = {};
 
-      if (testCredentials[username] && testCredentials[username].password === password) {
+      if (false) {
         // Determine userType based on role
         const userTypeForToken = testCredentials[username].role === 'office_admin' ? 'office_admin' : 'regulatory';
         

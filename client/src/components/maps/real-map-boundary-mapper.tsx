@@ -2636,7 +2636,8 @@ export default function RealMapBoundaryMapper({
       console.log('🚀 STARTING COMPREHENSIVE AGRICULTURAL ANALYSIS');
       
       // Get real soil data via working backend API
-      const realSoilData = await getRealSoilData(centerLat, centerLng);
+      const soilResponse = await getRealSoilData(centerLat, centerLng);
+      const realSoilData = soilResponse?.soilData || soilResponse || {};
       
       // Get real climate data  
       const realClimateData = await getRealClimateData(centerLat, centerLng);

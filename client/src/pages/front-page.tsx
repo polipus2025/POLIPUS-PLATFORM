@@ -61,7 +61,7 @@ export default function FrontPage() {
       icon: Truck,
       color: 'bg-blue-500',
       route: '/live-trace',
-      isActive: false,
+      isActive: true,
       description: 'Livestock movement monitoring and control system'
     },
     {
@@ -70,7 +70,7 @@ export default function FrontPage() {
       icon: MapPin,
       color: 'bg-purple-500',
       route: '/landmap360-portal',
-      isActive: false,
+      isActive: true,
       description: 'Land mapping and dispute prevention services'
     },
     {
@@ -79,7 +79,7 @@ export default function FrontPage() {
       icon: Shield,
       color: 'bg-orange-500',
       route: '/mine-watch',
-      isActive: false,
+      isActive: true,
       description: 'Mineral resource protection and community safeguarding'
     },
     {
@@ -88,7 +88,7 @@ export default function FrontPage() {
       icon: TreePine,
       color: 'bg-teal-500',
       route: '/forest-guard',
-      isActive: false,
+      isActive: true,
       description: 'Forest protection and carbon credit management'
     },
     {
@@ -97,7 +97,7 @@ export default function FrontPage() {
       icon: Waves,
       color: 'bg-indigo-500',
       route: '/aqua-trace',
-      isActive: false,
+      isActive: true,
       description: 'Ocean & river monitoring with fishing rights protection'
     },
     {
@@ -106,7 +106,7 @@ export default function FrontPage() {
       icon: DollarSign,
       color: 'bg-cyan-500',
       route: '/blue-carbon360',
-      isActive: false,
+      isActive: true,
       description: 'Conservation economics and real economic benefits'
     },
     {
@@ -115,7 +115,7 @@ export default function FrontPage() {
       icon: Globe,
       color: 'bg-emerald-500',
       route: '/carbon-trace',
-      isActive: false,
+      isActive: true,
       description: 'Environmental monitoring and carbon credit certification'
     }
   ];
@@ -194,8 +194,8 @@ export default function FrontPage() {
               <CheckCircle className="h-4 w-4 sm:h-6 sm:w-6 text-white" />
             </div>
             <p className="text-slate-600 text-xs sm:text-sm mb-1">Active Modules</p>
-            <p className="text-xl sm:text-3xl font-bold text-slate-900 mb-1 sm:mb-2">1/8</p>
-            <p className="text-slate-600 text-xs sm:text-sm">AgriTrace Only</p>
+            <p className="text-xl sm:text-3xl font-bold text-slate-900 mb-1 sm:mb-2">8/8</p>
+            <p className="text-slate-600 text-xs sm:text-sm">All Systems</p>
           </div>
           
           <div className="bg-white shadow-xl border-slate-200 rounded-lg p-6 text-center">
@@ -251,6 +251,32 @@ export default function FrontPage() {
                     <Link href={module.route} className="h-full flex flex-col relative block group">
                       <div className="flex flex-col items-center text-center h-full p-3 sm:p-4">
                         <div className={`w-12 h-12 sm:w-16 sm:h-16 rounded-2xl bg-gradient-to-br from-green-500 to-green-600 flex items-center justify-center group-hover:scale-110 transition-transform mb-3`}>
+                          <IconComponent className="h-6 w-6 sm:h-8 sm:w-8 text-white" />
+                        </div>
+                        <div className="flex-1 flex flex-col justify-between">
+                          <div>
+                            <h3 className="text-sm sm:text-lg font-bold text-slate-900 mb-1 sm:mb-2">{module.title}</h3>
+                            {module.description && (
+                              <p className="text-xs text-slate-600 mb-2 sm:mb-3 leading-relaxed">
+                                {module.description}
+                              </p>
+                            )}
+                            <Badge className="bg-green-100 text-green-800 border-green-200">
+                              <CheckCircle className="w-3 h-3 mr-1" />
+                              Active
+                            </Badge>
+                          </div>
+                          <Button className="w-full text-xs sm:text-sm bg-gradient-to-r from-slate-400 to-slate-500 hover:from-slate-500 hover:to-slate-600 text-white mt-4">
+                            <ArrowRight className="h-3 w-3 sm:h-4 sm:w-4 mr-1 sm:mr-2" />
+                            Enter Platform
+                          </Button>
+                        </div>
+                      </div>
+                    </Link>
+                  ) : module.isActive ? (
+                    <Link href={module.route} className="h-full flex flex-col relative block group">
+                      <div className="flex flex-col items-center text-center h-full p-3 sm:p-4">
+                        <div className={`w-12 h-12 sm:w-16 sm:h-16 rounded-2xl ${module.color} flex items-center justify-center group-hover:scale-110 transition-transform mb-3`}>
                           <IconComponent className="h-6 w-6 sm:h-8 sm:w-8 text-white" />
                         </div>
                         <div className="flex-1 flex flex-col justify-between">

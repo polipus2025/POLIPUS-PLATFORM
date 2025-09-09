@@ -3056,24 +3056,21 @@ export async function registerRoutes(app: Express): Promise<Server> {
         });
       }
 
-      const token = jwt.sign(
-        { 
-          userId: 'agritrace_admin',
-          username: username,
-          userType: 'agritrace_admin',
-          role: 'system_administrator',
-          scope: 'agritrace_module_only'
-        },
-        JWT_SECRET,
-        { expiresIn: '8h' }
-      );
+      // CONSISTENT WITH DISABLED JWT: Use session-based authentication
+      if (req.session) {
+        req.session.userId = 'agritrace_admin';
+        req.session.username = username;
+        req.session.userType = 'agritrace_admin';
+        req.session.role = 'system_administrator';
+        req.session.isAuthenticated = true;
+      }
 
       // Log admin login (simplified for now)
       console.log(`[AgriTrace Admin] ${username} logged in successfully`);
 
       res.json({
         success: true,
-        token,
+        message: 'Login successful',
         user: {
           username,
           userType: 'agritrace_admin',
@@ -4682,21 +4679,18 @@ export async function registerRoutes(app: Express): Promise<Server> {
       };
 
       if (testBuyerCredentials[buyerId] && testBuyerCredentials[buyerId].password === password) {
-        const token = jwt.sign(
-          { 
-            userId: 301,
-            buyerId: buyerId,
-            userType: 'buyer',
-            role: 'buyer',
-            company: companyName || testBuyerCredentials[buyerId].company
-          },
-          JWT_SECRET,
-          { expiresIn: '24h' }
-        );
+        // CONSISTENT WITH DISABLED JWT: Use session-based authentication
+        if (req.session) {
+          req.session.userId = 301;
+          req.session.buyerId = buyerId;
+          req.session.userType = 'buyer';
+          req.session.role = 'buyer';
+          req.session.isAuthenticated = true;
+        }
         
         return res.json({
           success: true,
-          token,
+          message: 'Login successful',
           user: {
             id: 301,
             buyerId: buyerId,
@@ -5221,22 +5215,18 @@ export async function registerRoutes(app: Express): Promise<Server> {
       };
 
       if (testLandInspectorCredentials[username] && testLandInspectorCredentials[username].password === password) {
-        const token = jwt.sign(
-          { 
-            inspectorId: testLandInspectorCredentials[username].inspectorId,
-            username: username,
-            role: 'land_inspector',
-            userType: 'land_inspector',
-            inspectorType: 'land',
-            county: testLandInspectorCredentials[username].county
-          },
-          JWT_SECRET,
-          { expiresIn: '24h' }
-        );
+        // CONSISTENT WITH DISABLED JWT: Use session-based authentication
+        if (req.session) {
+          req.session.inspectorId = testLandInspectorCredentials[username].inspectorId;
+          req.session.username = username;
+          req.session.userType = 'land_inspector';
+          req.session.role = 'land_inspector';
+          req.session.isAuthenticated = true;
+        }
         
         return res.json({
           success: true,
-          token,
+          message: 'Login successful',
           user: {
             inspectorId: testLandInspectorCredentials[username].inspectorId,
             username: username,
@@ -5368,22 +5358,18 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
       // James Kofi - Port Inspector credentials (direct check)
       if (username === 'james.kofi' && password === 'portinspector2025') {
-        const token = jwt.sign(
-          { 
-            inspectorId: 'INS-20250907-342',
-            username: username,
-            role: 'port_inspector',
-            userType: 'port_inspector',
-            inspectorType: 'port',
-            county: 'Montserrado'
-          },
-          JWT_SECRET,
-          { expiresIn: '24h' }
-        );
+        // CONSISTENT WITH DISABLED JWT: Use session-based authentication
+        if (req.session) {
+          req.session.inspectorId = 'INS-20250907-342';
+          req.session.username = username;
+          req.session.userType = 'port_inspector';
+          req.session.role = 'port_inspector';
+          req.session.isAuthenticated = true;
+        }
         
         return res.json({
           success: true,
-          token,
+          message: 'Login successful',
           user: {
             inspectorId: 'INS-20250907-342',
             username: username,
@@ -5399,22 +5385,18 @@ export async function registerRoutes(app: Express): Promise<Server> {
       }
 
       if (testPortInspectorCredentials[username] && testPortInspectorCredentials[username].password === password) {
-        const token = jwt.sign(
-          { 
-            inspectorId: testPortInspectorCredentials[username].inspectorId,
-            username: username,
-            role: 'port_inspector',
-            userType: 'port_inspector',
-            inspectorType: 'port',
-            county: testPortInspectorCredentials[username].county
-          },
-          JWT_SECRET,
-          { expiresIn: '24h' }
-        );
+        // CONSISTENT WITH DISABLED JWT: Use session-based authentication
+        if (req.session) {
+          req.session.inspectorId = testPortInspectorCredentials[username].inspectorId;
+          req.session.username = username;
+          req.session.userType = 'port_inspector';
+          req.session.role = 'port_inspector';
+          req.session.isAuthenticated = true;
+        }
         
         return res.json({
           success: true,
-          token,
+          message: 'Login successful',
           user: {
             inspectorId: testPortInspectorCredentials[username].inspectorId,
             username: username,

@@ -3979,12 +3979,18 @@ export async function registerRoutes(app: Express): Promise<Server> {
         .set({ lastLogin: new Date() })
         .where(eq(regulatoryDepartments.id, regulator.id));
 
-      // Generate JWT token
-      const token = generateRegulatoryToken(regulator);
+      // CONSISTENT WITH DISABLED JWT: Use session-based authentication
+      if (req.session) {
+        req.session.userId = regulator.id;
+        req.session.username = regulator.username;
+        req.session.userType = regulator.departmentLevel; // dg, ddgots, ddgaf
+        req.session.role = regulator.departmentLevel;
+        req.session.isAuthenticated = true;
+      }
 
       res.json({
         success: true,
-        token,
+        message: 'Login successful',
         regulator: {
           id: regulator.id,
           regulatorId: regulator.regulatorId,
@@ -4051,12 +4057,18 @@ export async function registerRoutes(app: Express): Promise<Server> {
         .set({ lastLogin: new Date() })
         .where(eq(regulatoryDepartments.id, regulator.id));
 
-      // Generate JWT token
-      const token = generateRegulatoryToken(regulator);
+      // CONSISTENT WITH DISABLED JWT: Use session-based authentication
+      if (req.session) {
+        req.session.userId = regulator.id;
+        req.session.username = regulator.username;
+        req.session.userType = regulator.departmentLevel; // dg, ddgots, ddgaf
+        req.session.role = regulator.departmentLevel;
+        req.session.isAuthenticated = true;
+      }
 
       res.json({
         success: true,
-        token,
+        message: 'Login successful',
         regulator: {
           id: regulator.id,
           regulatorId: regulator.regulatorId,
@@ -4123,12 +4135,18 @@ export async function registerRoutes(app: Express): Promise<Server> {
         .set({ lastLogin: new Date() })
         .where(eq(regulatoryDepartments.id, regulator.id));
 
-      // Generate JWT token
-      const token = generateRegulatoryToken(regulator);
+      // CONSISTENT WITH DISABLED JWT: Use session-based authentication
+      if (req.session) {
+        req.session.userId = regulator.id;
+        req.session.username = regulator.username;
+        req.session.userType = regulator.departmentLevel; // dg, ddgots, ddgaf
+        req.session.role = regulator.departmentLevel;
+        req.session.isAuthenticated = true;
+      }
 
       res.json({
         success: true,
-        token,
+        message: 'Login successful',
         regulator: {
           id: regulator.id,
           regulatorId: regulator.regulatorId,

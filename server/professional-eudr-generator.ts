@@ -400,4 +400,15 @@ function generateDualSignatures(doc: PDFDocument, packId: string, currentDate: s
   doc.fontSize(8).fillColor('#6b7280')
      .text('This certificate is digitally generated and verified. For online validation: verify.lacra.gov.lr/eudr', 50, startY + 100)
      .text(`Certificate ID: EUDR-${packId.slice(-6)} | Generated: ${new Date().toISOString()} | Regulation: EU 2023/1115`, 50, startY + 115);
+
+  // QR Code section on second page
+  doc.rect(520, startY + 130, 45, 45).stroke('#d1d5db', 1);
+  doc.fontSize(7).fillColor('#1f2937').font('Helvetica-Bold')
+     .text('QR CODE', 530, startY + 135);
+  doc.fontSize(6).fillColor('#4b5563')
+     .text('Scan for full', 525, startY + 145)
+     .text('traceability', 525, startY + 155)
+     .text('verification', 525, startY + 165);
+  doc.fontSize(5).fillColor('#6b7280')
+     .text(`ID: EUDR-${packId.slice(-6)}`, 522, startY + 172);
 }

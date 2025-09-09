@@ -293,8 +293,7 @@ function generateSupplyChainTraceability(doc: PDFDocument, packId: string, qrCod
 }
 
 function generateLegalComplianceMatrix(doc: PDFDocument) {
-  // Add page break to start page 2 properly
-  doc.addPage();
+  // No page break - keep everything on 2 pages total
   const startY = 50;
   
   // Section header

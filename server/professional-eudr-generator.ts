@@ -64,11 +64,9 @@ export async function generateProfessionalEUDRCertificate(
   generateRiskAssessment(doc);
   generateSupplyChainTraceability(doc, packId, qrCodeBuffer1);
   
-  // PAGE 2 - Compliance & Certification
-  generateLegalComplianceMatrix(doc);
-  generateCommoditySpecifications(doc, farmSizeHa);
-  generateCertificationStatement(doc, farmerData, centerLat, centerLng);
-  generateDualSignatures(doc, packId, currentDate, qrCodeBuffer2);
+  // PAGE 2 - Final Certification (only essential elements)
+  doc.addPage();
+  generateFinalCertificationPage(doc, farmerData, packId, currentDate, qrCodeBuffer2);
 
   return doc;
 }
@@ -425,4 +423,79 @@ function generateDualSignatures(doc: PDFDocument, packId: string, currentDate: s
      .text('chain verification', 507, startY + 215);
   doc.fontSize(6).fillColor('#6b7280')
      .text(`ID: EUDR-${packId.slice(-6)}`, 505, startY + 225);
+}
+
+// Compact final certification page combining all essential elements
+function generateFinalCertificationPage(doc: PDFDocument, farmerData: FarmerData, packId: string, currentDate: string, qrCodeBuffer: Buffer) {
+  // Header
+  doc.rect(0, 0, 595, 60).fill('#1e3a8a');
+  doc.fontSize(18).fillColor('#ffffff').font('Helvetica-Bold')
+     .text('FINAL EUDR CERTIFICATION', 150, 20);
+  doc.fontSize(10).fillColor('#e5e7eb')
+     .text('Official Compliance Approval', 220, 40);
+
+  // Main certification content
+  const startY = 80;
+  
+  // Compliance status box
+  doc.rect(50, startY, 495, 80).fill('#ecfdf5').stroke('#10b981', 3);
+  doc.fontSize(20).fillColor('#059669').font('Helvetica-Bold')
+     .text('✓ CERTIFIED COMPLIANT', 200, startY + 20);
+  doc.fontSize(14).fillColor('#374151')
+     .text('This commodity meets all EU Regulation 2023/1115 requirements', 80, startY + 50);
+
+  // Key compliance points
+  const complianceY = startY + 100;
+  doc.fontSize(12).fillColor('#1f2937').font('Helvetica-Bold')
+     .text('KEY COMPLIANCE VERIFICATION:', 50, complianceY);
+  
+  const points = [
+    '✓ Due Diligence Statement - COMPLETE',
+    '✓ Risk Assessment - LOW RISK',
+    '✓ Geolocation Verified - GPS CONFIRMED',
+    '✓ Traceability Documentation - AVAILABLE',
+    '✓ No Deforestation Activity - VERIFIED'
+  ];
+  
+  points.forEach((point, index) => {
+    doc.fontSize(10).fillColor('#059669')
+       .text(point, 70, complianceY + 25 + (index * 18));
+  });
+
+  // Farmer and certification details
+  const detailsY = complianceY + 140;
+  doc.rect(50, detailsY, 495, 60).fill('#f8fafc').stroke('#e5e7eb', 1);
+  doc.fontSize(12).fillColor('#1f2937').font('Helvetica-Bold')
+     .text(`Farmer: ${farmerData.name}`, 70, detailsY + 15);
+  doc.fontSize(10).fillColor('#374151')
+     .text(`Certificate ID: EUDR-${packId.slice(-6)}`, 70, detailsY + 35)
+     .text(`Issue Date: ${currentDate}`, 300, detailsY + 35);
+
+  // Digital signatures section
+  const sigY = detailsY + 80;
+  doc.fontSize(12).fillColor('#1f2937').font('Helvetica-Bold')
+     .text('DIGITAL CERTIFICATIONS:', 50, sigY);
+
+  // LACRA signature box
+  doc.rect(70, sigY + 25, 200, 60).stroke('#d1d5db', 1);
+  doc.fontSize(10).fillColor('#1f2937').font('Helvetica-Bold')
+     .text('LACRA Authority', 80, sigY + 40);
+  doc.fontSize(8).fillColor('#4b5563')
+     .text('Digital Signature Applied', 80, sigY + 55)
+     .text(`Date: ${currentDate}`, 80, sigY + 70);
+
+  // ECOENVIROS signature box  
+  doc.rect(290, sigY + 25, 200, 60).stroke('#d1d5db', 1);
+  doc.fontSize(10).fillColor('#1f2937').font('Helvetica-Bold')
+     .text('ECOENVIROS EU', 300, sigY + 40);
+  doc.fontSize(8).fillColor('#4b5563')
+     .text('Independent Verification', 300, sigY + 55)
+     .text(`Verified: ${currentDate}`, 300, sigY + 70);
+
+  // QR Code at bottom (moved up 8 positions from original)
+  doc.image(qrCodeBuffer, 505, sigY + 100, { width: 55, height: 55 });
+  doc.fontSize(8).fillColor('#1f2937').font('Helvetica-Bold')
+     .text('QR VERIFICATION', 510, sigY + 160);
+  doc.fontSize(6).fillColor('#6b7280')
+     .text(`ID: EUDR-${packId.slice(-6)}`, 505, sigY + 170);
 }

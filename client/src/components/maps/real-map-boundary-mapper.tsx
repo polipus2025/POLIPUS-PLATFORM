@@ -2623,7 +2623,7 @@ export default function RealMapBoundaryMapper({
     }
   };
 
-  // Real Agricultural Potential Analysis with Live Data Sources
+  // Real Agricultural Potential Analysis with Working Backend APIs
   const analyzeAgriculturalPotential = async (analysisPoints: BoundaryPoint[]) => {
     const area = calculateArea(analysisPoints);
     const centerLat = analysisPoints.reduce((sum, p) => sum + p.latitude, 0) / analysisPoints.length;
@@ -2632,64 +2632,96 @@ export default function RealMapBoundaryMapper({
     console.log(`🌍 Fetching REAL agricultural data for coordinates: ${centerLat.toFixed(6)}, ${centerLng.toFixed(6)}`);
     
     try {
-      // REAL SOIL DATA: SoilGrids API - World's most comprehensive soil database
-      const soilResponse = await fetch(`https://rest.isric.org/soilgrids/v2.0/properties/query?lon=${centerLng}&lat=${centerLat}&property=phh2o&property=nitrogen&property=soc&property=bdod&property=clay&depth=0-5cm&depth=5-15cm&value=mean`);
-      const soilData = await soilResponse.json();
+      // Use working backend APIs instead of direct external calls
+      console.log('🚀 STARTING COMPREHENSIVE AGRICULTURAL ANALYSIS');
       
-      // REAL ELEVATION DATA: Open-Topo API
-      const elevationResponse = await fetch(`https://api.opentopodata.org/v1/aster30m?locations=${centerLat},${centerLng}`);
-      const elevationData = await elevationResponse.json();
+      // Get real soil data via working backend API
+      const realSoilData = await getRealSoilData(centerLat, centerLng);
       
-      // REAL CLIMATE DATA: OpenWeatherMap Climate API  
-      const climateResponse = await fetch(`https://api.openweathermap.org/data/2.5/weather?lat=${centerLat}&lon=${centerLng}&appid=demo&units=metric`);
-      const climateData = await climateResponse.json();
+      // Get real climate data  
+      const realClimateData = await getRealClimateData(centerLat, centerLng);
       
-      // Process real soil data
-      const realSoilAnalysis = processSoilGridsData(soilData);
-      const realElevation = elevationData?.results?.[0]?.elevation || null;
+      // Get forest data for comprehensive analysis
+      const forestData = await getGlobalForestWatchData(centerLat, centerLng);
       
-      // REAL CROP SUITABILITY: FAO Global Agricultural Zones
-      const cropSuitability = await getCropSuitabilityData(centerLat, centerLng, realSoilAnalysis, realElevation);
       
-      // Calculate real harvest potential based on actual soil and climate data
-      const realYieldPotential = calculateRealYieldPotential(realSoilAnalysis, cropSuitability, area);
+      // Get real elevation data
+      const realElevation = await getElevationData(centerLat, centerLng);
       
-      console.log(`✅ Real agricultural data retrieved: ${realSoilAnalysis.soilType}, elevation: ${realElevation}m`);
+      // ===== COMPREHENSIVE AGRICULTURAL INTELLIGENCE ANALYSIS =====      
       
-      const harvestPotential = area * realYieldPotential.baseYield;
-    
-      // Return REAL agricultural data from authentic sources
-      const agriculturalData = {
-        soilType: realSoilAnalysis.soilType,
-        elevation: realElevation.toFixed(1),
-        pH: realSoilAnalysis.pH,
-        organicMatter: realSoilAnalysis.organicCarbon,
-        nitrogen: realSoilAnalysis.nitrogen,
-        phosphorus: realSoilAnalysis.phosphorus || 'Testing required',
-        potassium: realSoilAnalysis.potassium || 'Testing required',
-        waterRetention: realSoilAnalysis.waterRetention,
-        drainage: realSoilAnalysis.drainage,
-        suitableCrops: cropSuitability.suitableCrops,
-        harvestPotential,
-        optimalCrop: cropSuitability.optimalCrop,
-        expectedYield: `${realYieldPotential.baseYield.toFixed(1)} tons/hectare/year`,
-        seasonality: {
-          plantingSeason: 'March - May',
-          harvestSeason: 'October - December',
-          dryingSeason: 'January - February'
-        },
-        marketValue: await getRealMarketPrice(cropSuitability.optimalCrop),
-        irrigation: realSoilAnalysis.irrigation || 'Moderate requirement',
-        climateZone: climateData?.weather?.[0]?.description || 'Climate data required',
-        riskFactors: cropSuitability.riskFactors || []
+      // 1. SUSTAINABLE CROPS & RECOMMENDATIONS
+      const sustainableCrops = generateSustainableCropRecommendations(realSoilData, forestData);
+      console.log('🌾 Sustainable Crops:', sustainableCrops);
+      
+      // 2. HARVEST POTENTIAL AND PRODUCTIVITY
+      const harvestAnalysis = calculateHarvestPotentialAndProductivity(area, realSoilData, forestData);
+      console.log('📊 Harvest Analysis:', harvestAnalysis);
+      
+      // 3. EUDR ENVIRONMENTAL IMPACT ANALYSIS
+      const environmentalImpact = analyzeEUDREnvironmentalImpact(realSoilData, forestData, area);
+      console.log('🌍 Environmental Impact:', environmentalImpact);
+      
+      // 4. SOIL ANALYSIS & LAND QUALITY
+      const landQuality = analyzeComprehensiveSoilAndLandQuality(realSoilData);
+      console.log('🧪 Land Quality:', landQuality);
+      
+      console.log(`✅ Real agricultural data retrieved: ${realSoilData.soilType}, elevation: ${realElevation}m`);
+      
+      // Calculate real agricultural potential based on comprehensive data
+      const agriculturalAnalysis = {
+        // Basic data
+        soilType: realSoilData.soilType,
+        pH: realSoilData.pH,
+        organicMatter: realSoilData.organicMatter,
+        elevation: realElevation,
+        
+        // ENHANCED SOIL PROPERTIES from satellite data
+        sand: realSoilData.sand,
+        clay: realSoilData.clay,
+        silt: realSoilData.silt,
+        nitrogen: realSoilData.nitrogen,
+        phosphorus: realSoilData.phosphorus,
+        potassium: realSoilData.potassium,
+        waterRetention: realSoilData.waterRetention,
+        cationExchangeCapacity: realSoilData.cationExchangeCapacity,
+        bulkDensity: realSoilData.bulkDensity,
+        
+        // COMPREHENSIVE ANALYSES
+        sustainableCrops: sustainableCrops.crops,
+        cropRecommendationReasons: sustainableCrops.reasons,
+        harvestPotential: parseFloat(harvestAnalysis.totalPotential),
+        expectedYield: harvestAnalysis.expectedYield,
+        productivityRating: harvestAnalysis.productivityRating,
+        productivityMultiplier: harvestAnalysis.productivityMultiplier,
+        
+        // Environmental Impact
+        environmentalImpact: environmentalImpact.summary,
+        environmentalScore: environmentalImpact.score,
+        eudrCompliance: environmentalImpact.compliance,
+        eudrStatus: environmentalImpact.eudrStatus,
+        riskFactors: environmentalImpact.riskFactors,
+        
+        // Land Quality
+        landQuality: landQuality.rating,
+        soilHealthScore: landQuality.healthScore,
+        qualityFactors: landQuality.qualityFactors,
+        
+        // Legacy fields for compatibility
+        optimalCrop: sustainableCrops.crops[0] || 'Analysis required',
+        marketValue: calculateMarketValue(area, realSoilData, realClimateData),
+        climateZone: realClimateData.zone,
+        drainageClass: realSoilData.drainage,
+        fertilityRating: realSoilData.fertility,
+        irrigationNeeds: realClimateData.irrigationNeeds,
+        carbonSequestration: `${area * (realSoilData.carbonSequestrationRate || 0).toFixed(1)} tons CO2/year`,
+        biodiversityIndex: calculateBiodiversityIndex(area, realElevation, realClimateData)
       };
 
-      return agriculturalData;
+      return agriculturalAnalysis;
       
     } catch (error) {
-      console.error('Real data fetch failed, using fallback analysis:', error);
-      // Fallback to basic analysis if APIs fail
-      console.log('No hardcoded agricultural data - API required');
+      console.error('Agricultural analysis error:', error);
       return null;
     }
   };

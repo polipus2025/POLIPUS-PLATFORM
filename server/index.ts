@@ -74,7 +74,7 @@ if (MAINTENANCE_MODE) {
       }
       
       if (process.env.NODE_ENV === 'production') {
-        const allowedOrigins = process.env.ALLOWED_ORIGINS?.split(',') || [];
+        const allowedOrigins = process.env.ALLOWED_ORIGINS?.split(',') || ['https://davinciinnov.com'];
         callback(null, allowedOrigins.includes(origin));
       } else {
         // Development: Allow localhost and Replit URLs
@@ -112,7 +112,7 @@ if (MAINTENANCE_MODE) {
           }
           
           const allowedOrigins = process.env.NODE_ENV === 'production' 
-            ? (process.env.ALLOWED_ORIGINS?.split(',') || [])
+            ? (process.env.ALLOWED_ORIGINS?.split(',') || ['https://davinciinnov.com'])
             : ['http://localhost:5000', 'http://127.0.0.1:5000'];
           
           // In development, allow Replit dev URLs (.replit.dev domains)

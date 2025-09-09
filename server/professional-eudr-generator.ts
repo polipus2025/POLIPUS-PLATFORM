@@ -77,7 +77,7 @@ function generateHeader(doc: PDFDocument) {
   doc.fontSize(9).fillColor('#e5e7eb')
      .text('LACRA - LIBERIA', 470, 35)
      .text('ECOENVIROS - EU', 470, 48)
-     .text('ISO 14001:2015', 470, 61);
+     .text('Independent Auditors', 470, 61);
   
   // Subtitle
   doc.fontSize(10).fillColor('#ffffff')
@@ -393,7 +393,7 @@ function generateDualSignatures(doc: PDFDocument, packId: string, currentDate: s
      .text('ECOENVIROS EU Auditor', 300, startY + 15);
   doc.fontSize(10).fillColor('#4b5563')
      .text('Third-Party Verification', 300, startY + 35)
-     .text('ISO 14001:2015 Certified', 300, startY + 50)
+     .text('Independent Auditors', 300, startY + 50)
      .text(`Verification: ${currentDate}`, 300, startY + 65);
   
   // Footer verification info

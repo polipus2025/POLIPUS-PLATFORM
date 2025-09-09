@@ -293,8 +293,7 @@ function generateSupplyChainTraceability(doc: PDFDocument, packId: string, qrCod
 }
 
 function generateLegalComplianceMatrix(doc: PDFDocument) {
-  // Start new page for better spacing
-  doc.addPage();
+  // Continue on page 2 without adding extra pages  
   const startY = 50;
   
   // Section header

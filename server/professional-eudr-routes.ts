@@ -5,7 +5,7 @@ export function addProfessionalEudrRoutes(app: Express) {
   console.log('📄 Adding Professional EUDR certificate routes...');
 
   // Professional EUDR Certificate endpoint
-  app.post('/api/professional-eudr-certificate', (req, res) => {
+  app.post('/api/professional-eudr-certificate', async (req, res) => {
     try {
       console.log('🎖️ Generating Professional EUDR Certificate...');
       
@@ -15,8 +15,8 @@ export function addProfessionalEudrRoutes(app: Express) {
         return res.status(400).json({ error: 'Missing required data' });
       }
       
-      // Generate the professional certificate
-      const doc = generateProfessionalEUDRCertificate(farmerData, mappingData, packId);
+      // Generate the professional certificate (now async)
+      const doc = await generateProfessionalEUDRCertificate(farmerData, mappingData, packId);
       
       res.setHeader('Content-Type', 'application/pdf');
       res.setHeader('Content-Disposition', `attachment; filename="Professional_EUDR_Certificate_${packId}.pdf"`);

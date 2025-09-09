@@ -1,4 +1,5 @@
 import PDFDocument from 'pdfkit';
+import QRCode from 'qrcode';
 
 interface MappingData {
   coordinates: Array<{
@@ -18,11 +19,11 @@ interface FarmerData {
   longitude: number;
 }
 
-export function generateProfessionalEUDRCertificate(
+export async function generateProfessionalEUDRCertificate(
   farmerData: FarmerData,
   mappingData: MappingData,
   packId: string
-): PDFDocument {
+): Promise<PDFDocument> {
   const doc = new PDFDocument({ 
     size: 'A4', 
     margins: { top: 30, bottom: 30, left: 30, right: 30 }
@@ -38,6 +39,22 @@ export function generateProfessionalEUDRCertificate(
   const farmSizeHa = (mappingData.area / 10000).toFixed(1); // Convert m² to hectares
   const centerLat = mappingData.coordinates.reduce((sum, c) => sum + c.latitude, 0) / mappingData.coordinates.length;
   const centerLng = mappingData.coordinates.reduce((sum, c) => sum + c.longitude, 0) / mappingData.coordinates.length;
+
+  // Generate QR codes for both pages
+  const qrUrl1 = `https://verify.lacra.gov.lr/eudr/EUDR-${packId.slice(-6)}`;
+  const qrUrl2 = `https://trace.lacra.gov.lr/supply-chain/EUDR-${packId.slice(-6)}`;
+  
+  const qrCodeBuffer1 = await QRCode.toBuffer(qrUrl1, {
+    width: 60,
+    margin: 1,
+    color: { dark: '#1f2937' }
+  });
+  
+  const qrCodeBuffer2 = await QRCode.toBuffer(qrUrl2, {
+    width: 60,
+    margin: 1,
+    color: { dark: '#1f2937' }
+  });
   
   // PAGE 1 - Basic Info & Farm Details
   generateHeader(doc);
@@ -45,13 +62,13 @@ export function generateProfessionalEUDRCertificate(
   generateCertificateIdentification(doc, packId, currentDate, centerLat, centerLng);
   generateProducerFarmInfo(doc, farmerData, farmSizeHa, centerLat, centerLng);
   generateRiskAssessment(doc);
-  generateSupplyChainTraceability(doc, packId);
+  generateSupplyChainTraceability(doc, packId, qrCodeBuffer1);
   
   // PAGE 2 - Compliance & Certification
   generateLegalComplianceMatrix(doc);
   generateCommoditySpecifications(doc, farmSizeHa);
   generateCertificationStatement(doc, farmerData, centerLat, centerLng);
-  generateDualSignatures(doc, packId, currentDate);
+  generateDualSignatures(doc, packId, currentDate, qrCodeBuffer2);
 
   return doc;
 }
@@ -228,7 +245,7 @@ function generateRiskAssessment(doc: PDFDocument) {
      .text('High Risk (<70%)', 380, startY + 140);
 }
 
-function generateSupplyChainTraceability(doc: PDFDocument, packId: string) {
+function generateSupplyChainTraceability(doc: PDFDocument, packId: string, qrCodeBuffer: Buffer) {
   const startY = 610;
   
   // Section header
@@ -264,16 +281,15 @@ function generateSupplyChainTraceability(doc: PDFDocument, packId: string) {
        .text(step.desc, x - 5, y + 50);
   });
   
-  // QR Code section  
-  doc.rect(510, startY + 120, 65, 65).stroke('#d1d5db', 1);
+  // QR Code section - REAL QR CODE
+  doc.image(qrCodeBuffer, 515, startY + 125, { width: 55, height: 55 });
   doc.fontSize(8).fillColor('#1f2937').font('Helvetica-Bold')
-     .text('QR CODE', 532, startY + 130);
+     .text('QR CODE', 532, startY + 185);
   doc.fontSize(7).fillColor('#4b5563')
-     .text('Scan for full', 522, startY + 145)
-     .text('traceability', 522, startY + 155)
-     .text('verification', 522, startY + 165);
+     .text('Scan for full', 522, startY + 195)
+     .text('traceability', 522, startY + 205);
   doc.fontSize(6).fillColor('#6b7280')
-     .text(`ID: EUDR-${packId.slice(-6)}`, 515, startY + 175);
+     .text(`ID: EUDR-${packId.slice(-6)}`, 515, startY + 215);
 }
 
 function generateLegalComplianceMatrix(doc: PDFDocument) {
@@ -374,7 +390,7 @@ function generateCertificationStatement(doc: PDFDocument, farmerData: FarmerData
      .text('deforestation-free with complete due diligence documentation and supply chain traceability systems in place.', 40, startY + 95);
 }
 
-function generateDualSignatures(doc: PDFDocument, packId: string, currentDate: string) {
+function generateDualSignatures(doc: PDFDocument, packId: string, currentDate: string, qrCodeBuffer: Buffer) {
   const startY = 530;
   
   // Two signature boxes
@@ -401,14 +417,13 @@ function generateDualSignatures(doc: PDFDocument, packId: string, currentDate: s
      .text('This certificate is digitally generated and verified. For online validation: verify.lacra.gov.lr/eudr', 50, startY + 100)
      .text(`Certificate ID: EUDR-${packId.slice(-6)} | Generated: ${new Date().toISOString()} | Regulation: EU 2023/1115`, 50, startY + 115);
 
-  // QR Code section on second page
-  doc.rect(500, startY + 130, 65, 65).stroke('#d1d5db', 1);
+  // QR Code section on second page - REAL QR CODE
+  doc.image(qrCodeBuffer, 505, startY + 135, { width: 55, height: 55 });
   doc.fontSize(8).fillColor('#1f2937').font('Helvetica-Bold')
-     .text('QR CODE', 522, startY + 140);
+     .text('QR CODE', 522, startY + 195);
   doc.fontSize(7).fillColor('#4b5563')
-     .text('Scan for full', 512, startY + 155)
-     .text('traceability', 512, startY + 165)
-     .text('verification', 512, startY + 175);
+     .text('Scan for supply', 510, startY + 205)
+     .text('chain verification', 507, startY + 215);
   doc.fontSize(6).fillColor('#6b7280')
-     .text(`ID: EUDR-${packId.slice(-6)}`, 505, startY + 185);
+     .text(`ID: EUDR-${packId.slice(-6)}`, 505, startY + 225);
 }

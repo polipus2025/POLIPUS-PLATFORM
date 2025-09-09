@@ -182,7 +182,7 @@ function generateProducerFarmInfo(doc: PDFDocument, farmerData: FarmerData, farm
 }
 
 function generateRiskAssessment(doc: PDFDocument) {
-  const startY = 420;
+  const startY = 440;
   
   // Section header
   doc.rect(30, startY, 535, 25).fill('#f3f4f6');
@@ -229,7 +229,7 @@ function generateRiskAssessment(doc: PDFDocument) {
 }
 
 function generateSupplyChainTraceability(doc: PDFDocument, packId: string) {
-  const startY = 570;
+  const startY = 590;
   
   // Section header
   doc.rect(30, startY, 535, 25).fill('#f3f4f6');

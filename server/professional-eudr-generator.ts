@@ -369,9 +369,9 @@ function generateCertificationStatement(doc: PDFDocument, farmerData: FarmerData
      .text('✓ CERTIFIED EUDR COMPLIANT - APPROVED FOR EU MARKET ENTRY', 40, startY + 35);
   
   doc.fontSize(10).fillColor('#4b5563')
-     .text(`This certificate confirms that cocoa produced by ${farmerData.name} at GPS coordinates ${lat.toFixed(4)}° N, ${Math.abs(lng).toFixed(4)}° W in Bong County,`, 40, startY + 60)
-     .text('Liberia meets all requirements of EU Regulation 2023/1115. The production is verified as deforestation-free with', 40, startY + 75)
-     .text('complete due diligence documentation and supply chain traceability systems in place.', 40, startY + 90);
+     .text(`This certificate confirms that cocoa produced by ${farmerData.name} at GPS coordinates ${lat.toFixed(4)}° N, ${Math.abs(lng).toFixed(4)}° W in Bong County,`, 40, startY + 65)
+     .text('Liberia meets all requirements of EU Regulation 2023/1115. The production is verified as deforestation-free with', 40, startY + 80)
+     .text('complete due diligence documentation and supply chain traceability systems in place.', 40, startY + 95);
 }
 
 function generateDualSignatures(doc: PDFDocument, packId: string, currentDate: string) {

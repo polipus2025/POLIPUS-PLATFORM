@@ -4,7 +4,7 @@ import { randomUUID, randomBytes } from "crypto";
 import { storage } from "./storage";
 import { buyerAlertService } from "./buyer-alert-system";
 import { notificationService } from "./notification-service";
-import { generateAccessToken, generateRefreshToken, setSecureTokenCookies } from "./auth-middleware";
+// JWT imports removed - consistent with disabled authentication for production stability
 import { 
   loginSchema, 
   farmerCreationSchema, 
@@ -173,17 +173,15 @@ export function registerFarmerRoutes(app: Express) {
         // Update last login
         await storage.updateFarmerLastLogin(credentials.id);
 
-        // Generate secure JWT tokens for real farmers
-        const tokenPayload = {
-          id: farmer.id,
-          farmerId: farmer.farmerId,
-          role: "farmer",
-          username: credentials.credentialId
-        };
-        
-        const accessToken = generateAccessToken(tokenPayload);
-        const refreshToken = generateRefreshToken(tokenPayload);
-        setSecureTokenCookies(res, accessToken, refreshToken);
+        // CONSISTENT WITH DISABLED JWT: No token generation for production stability
+        // Store farmer session data for simple session-based authentication
+        if (req.session) {
+          req.session.userId = farmer.id;
+          req.session.farmerId = farmer.farmerId;
+          req.session.userType = 'farmer';
+          req.session.role = 'farmer';
+          req.session.isAuthenticated = true;
+        }
 
         res.json({
           success: true,
@@ -194,8 +192,8 @@ export function registerFarmerRoutes(app: Express) {
             lastName: farmer.lastName,
             mustChangePassword: credentials.mustChangePassword
           },
-          // Provide secure JWT token instead of weak timestamp-based token
-          token: accessToken
+          // No JWT token - consistent with disabled authentication
+          message: "Login successful"
         });
       } catch (dbError) {
         console.log("Database not ready, using test account fallback");

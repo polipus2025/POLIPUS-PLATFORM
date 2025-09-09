@@ -358,7 +358,7 @@ function generateCommoditySpecifications(doc: PDFDocument, farmSize: string) {
 }
 
 function generateCertificationStatement(doc: PDFDocument, farmerData: FarmerData, lat: number, lng: number) {
-  const startY = 380;
+  const startY = 400;
   
   // Section header
   doc.rect(30, startY, 535, 25).fill('#f3f4f6');

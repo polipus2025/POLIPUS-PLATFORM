@@ -313,7 +313,7 @@ function generateLegalComplianceMatrix(doc: PDFDocument) {
 }
 
 function generateCommoditySpecifications(doc: PDFDocument, farmSize: string) {
-  const startY = 220;
+  const startY = 240;
   
   // Section header
   doc.rect(30, startY, 535, 25).fill('#f3f4f6');
@@ -358,7 +358,7 @@ function generateCommoditySpecifications(doc: PDFDocument, farmSize: string) {
 }
 
 function generateCertificationStatement(doc: PDFDocument, farmerData: FarmerData, lat: number, lng: number) {
-  const startY = 360;
+  const startY = 380;
   
   // Section header
   doc.rect(30, startY, 535, 25).fill('#f3f4f6');

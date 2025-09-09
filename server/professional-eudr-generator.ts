@@ -336,7 +336,7 @@ function generateCommoditySpecifications(doc: PDFDocument, farmSize: string) {
      .text('Bean Count:', leftCol, contentY + 60);
   
   doc.fontSize(10).fillColor('#4b5563')
-     .text('1801.00.10 - Cocoa Beans, Raw', leftCol + 120, contentY)
+     .text('1801.00.10 - Cocoa Beans', leftCol + 120, contentY)
      .text(`${(parseFloat(farmSize) * 2450).toFixed(0)} kg`, leftCol + 120, contentY + 20)
      .text('≤ 7.5% (EU Standard)', leftCol + 120, contentY + 40)
      .text('100+ beans/100g', leftCol + 120, contentY + 60);

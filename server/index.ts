@@ -169,11 +169,6 @@ if (MAINTENANCE_MODE) {
       console.log('🎖️ Adding Professional EUDR certificate routes...');
       const { addProfessionalEudrRoutes } = await import('./professional-eudr-routes');
       addProfessionalEudrRoutes(app);
-
-      // Add Enhanced Deforestation Analysis Certificate routes
-      console.log('🌳 Adding Enhanced Deforestation Analysis certificate routes...');
-      const { addDeforestationCertificateRoutes } = await import('./deforestation-certificate-routes');
-      addDeforestationCertificateRoutes(app);
       
       // Add working PDF routes for EUDR compliance
       const { addWorkingPdfRoutes } = await import('./working-pdf-generator');

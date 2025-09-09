@@ -901,11 +901,8 @@ export default function RealMapBoundaryMapper({
 
       const packId = `AUTO-${Date.now()}`;
 
-      // 🔥 Call BOTH certificate generators automatically - DUAL GENERATION
-      setStatus('🚀 Generating both Professional EUDR and Enhanced Deforestation Analysis certificates...');
-      
-      // Generate Professional EUDR Certificate
-      const eudrResponse = await fetch('/api/professional-eudr-certificate', {
+      // 🔥 Call the PROFESSIONAL EUDR generator automatically
+      const response = await fetch('/api/professional-eudr-certificate', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json'
@@ -921,64 +918,21 @@ export default function RealMapBoundaryMapper({
         })
       });
 
-      // Generate Enhanced Deforestation Analysis Certificate  
-      const deforestationResponse = await fetch('/api/deforestation-certificate', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json'
-        },
-        body: JSON.stringify({
-          farmerData,
-          mappingData,
-          packId,
-          satelliteData: {
-            forestCoverChange: boundaryData.eudrCompliance?.treeCoverageLoss ? `-${boundaryData.eudrCompliance.treeCoverageLoss.toFixed(1)}%` : '-0.2%',
-            biodiversityImpact: boundaryData.eudrCompliance?.riskLevel === 'low' ? 'Minimal' : 'Moderate',
-            carbonStockLoss: boundaryData.eudrCompliance?.carbonStockLoss ? `${boundaryData.eudrCompliance.carbonStockLoss.toFixed(1)} tCO2` : '0.1 tCO2',
-            deforestationAlert: boundaryData.eudrCompliance?.riskLevel === 'low' ? 'None' : 'Monitor'
-          }
-        })
-      });
-
-      let successCount = 0;
-      let downloadedCerts = [];
-
-      // Download Professional EUDR Certificate
-      if (eudrResponse.ok) {
-        const eudrBlob = await eudrResponse.blob();
-        const eudrUrl = window.URL.createObjectURL(eudrBlob);
-        const eudrLink = document.createElement('a');
-        eudrLink.href = eudrUrl;
-        eudrLink.download = `Professional_EUDR_Certificate_${packId}.pdf`;
-        document.body.appendChild(eudrLink);
-        eudrLink.click();
-        window.URL.revokeObjectURL(eudrUrl);
-        document.body.removeChild(eudrLink);
-        successCount++;
-        downloadedCerts.push('Professional EUDR Certificate');
-      }
-
-      // Download Enhanced Deforestation Analysis Certificate
-      if (deforestationResponse.ok) {
-        const deforestationBlob = await deforestationResponse.blob();
-        const deforestationUrl = window.URL.createObjectURL(deforestationBlob);
-        const deforestationLink = document.createElement('a');
-        deforestationLink.href = deforestationUrl;
-        deforestationLink.download = `Enhanced_Deforestation_Analysis_${packId}.pdf`;
-        document.body.appendChild(deforestationLink);
-        deforestationLink.click();
-        window.URL.revokeObjectURL(deforestationUrl);
-        document.body.removeChild(deforestationLink);
-        successCount++;
-        downloadedCerts.push('Enhanced Deforestation Analysis Certificate');
-      }
-
-      if (successCount === 2) {
-        setStatus('✅ BOTH certificates generated automatically and downloaded! Professional EUDR + Enhanced Deforestation Analysis');
-      } else if (successCount === 1) {
-        setStatus(`✅ ${downloadedCerts[0]} generated successfully! (${2-successCount} certificate had issues)`);
+      if (response.ok) {
+        // Get the PDF blob and trigger download
+        const blob = await response.blob();
+        const url = window.URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = `EUDR_Certificate_${packId}.pdf`;
+        document.body.appendChild(a);
+        a.click();
+        window.URL.revokeObjectURL(url);
+        document.body.removeChild(a);
+        
+        setStatus('✅ EUDR Certificate generated automatically and downloaded!');
       } else {
-        throw new Error('Both certificate generations failed');
+        throw new Error('Certificate generation failed');
       }
 
     } catch (error) {

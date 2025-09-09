@@ -27,7 +27,7 @@ export async function generateCleanEUDRPack(
   exportData: ExportData,
   packId: string
 ): Promise<PDFDocumentType> {
-  // Create document - EXACTLY 2 pages (1 and 6 only)
+  // Create document - EXACTLY 6 pages, no more, no less
   const doc = new PDFDocument({ 
     size: 'A4', 
     margins: { top: 50, bottom: 50, left: 50, right: 50 }
@@ -38,11 +38,27 @@ export async function generateCleanEUDRPack(
   // CERTIFICATE 1: Cover Page (automatic first page - DO NOT call addPage)
   await addCoverPage(doc, farmerData, exportData, packId, currentDate);
   
-  // CERTIFICATE 6: Supply Chain Traceability (only other complete page)
+  // CERTIFICATE 2: Export Eligibility  
+  doc.addPage();
+  await addExportEligibility(doc, farmerData, exportData, packId, currentDate);
+  
+  // CERTIFICATE 3: Compliance Assessment
+  doc.addPage();
+  await addComplianceAssessment(doc, farmerData, exportData, packId, currentDate);
+  
+  // CERTIFICATE 4: Deforestation Analysis
+  doc.addPage();
+  await addDeforestationAnalysis(doc, farmerData, exportData, packId, currentDate);
+  
+  // CERTIFICATE 5: Due Diligence
+  doc.addPage();
+  await addDueDiligence(doc, farmerData, exportData, packId, currentDate);
+  
+  // CERTIFICATE 6: Supply Chain Traceability
   doc.addPage();
   await addSupplyTraceability(doc, farmerData, exportData, packId, currentDate);
 
-  // Document complete - exactly 2 pages (1 and 6)
+  // Document complete - exactly 6 pages
   return doc;
 }
 
@@ -72,7 +88,7 @@ async function addQRFooter(doc: PDFDocumentType, packId: string, currentDate: st
     });
     
     const qrBuffer = Buffer.from(qrCodeDataURL.split(',')[1], 'base64');
-    doc.image(qrBuffer, 520, 739, { width: 35, height: 35 }); // Moved up 8 positions
+    doc.image(qrBuffer, 520, 755, { width: 35, height: 35 });
     doc.fontSize(6).fillColor('#a0aec0').text('Scan to verify', 520, 792);
   } catch (error) {
     doc.fontSize(6).fillColor('#a0aec0').text(`Verify: ${packId.slice(-6)}`, 520, 775);

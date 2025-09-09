@@ -11653,13 +11653,18 @@ export async function registerRoutes(app: Express): Promise<Server> {
       doc.circle(470, 717, 20).fill('#22c55e').stroke('#ffffff', 3);
       doc.fontSize(14).fillColor('#ffffff').text('✓', 464, 712);
 
-      // PAGES 2,3,4,5 REMOVED - Jump directly to PAGE 6
-      
-      // PAGE 6: FINAL CERTIFICATION (now page 2)
+      // PAGE 2: DUE DILIGENCE STATEMENT
       doc.addPage();
       
-      // Cleaned - duplicate page 6 code removed
-      doc.rect(fcLogoSection.x, fcLogoSection.y, fcLogoSection.width, fcLogoSection.height)
+      // SYSTEMATIC PAGE 2 HEADER - DUE DILIGENCE
+      doc.rect(0, 0, 595, 120).fill('#1e40af'); 
+      doc.rect(0, 0, 595, 60).fill('#1d4ed8');   
+      doc.rect(0, 60, 595, 60).fill('#3b82f6');  
+      doc.rect(0, 60, 595, 2).fill('#ffffff');
+      
+      // Logo panel for page 2
+      const ddLogoSection = { x: 450, y: 15, width: 130, height: 90 };
+      doc.rect(ddLogoSection.x, ddLogoSection.y, ddLogoSection.width, ddLogoSection.height)
          .fill('#ffffff').stroke('#e5e7eb', 2);
       
       try {
@@ -12054,9 +12059,17 @@ export async function registerRoutes(app: Express): Promise<Server> {
         doc.fontSize(14).fillColor('#ffffff').font('Helvetica-Bold').text('✓', 495, y + 38);
       });
       
-      // Duplicate PAGE 6 removed
+      // PAGE 6: FINAL CERTIFICATION
+      doc.addPage();
       
-      // Cleaned - duplicate page 6 code removed
+      // Final Certification Header
+      doc.rect(0, 0, 595, 120).fill('#1e40af'); 
+      doc.rect(0, 0, 595, 60).fill('#1d4ed8');   
+      doc.rect(0, 60, 595, 60).fill('#3b82f6');  
+      doc.rect(0, 60, 595, 2).fill('#ffffff');
+      
+      // Logo panel for page 6 - Final Certificate
+      const fcLogoSection = { x: 450, y: 15, width: 130, height: 90 };
       doc.rect(fcLogoSection.x, fcLogoSection.y, fcLogoSection.width, fcLogoSection.height)
          .fill('#ffffff').stroke('#e5e7eb', 2);
       

@@ -38,27 +38,11 @@ export async function generateCleanEUDRPack(
   // CERTIFICATE 1: Cover Page (automatic first page - DO NOT call addPage)
   await addCoverPage(doc, farmerData, exportData, packId, currentDate);
   
-  // CERTIFICATE 2: Export Eligibility  
-  doc.addPage();
-  await addExportEligibility(doc, farmerData, exportData, packId, currentDate);
-  
-  // CERTIFICATE 3: Compliance Assessment
-  doc.addPage();
-  await addComplianceAssessment(doc, farmerData, exportData, packId, currentDate);
-  
-  // CERTIFICATE 4: Deforestation Analysis
-  doc.addPage();
-  await addDeforestationAnalysis(doc, farmerData, exportData, packId, currentDate);
-  
-  // CERTIFICATE 5: Due Diligence
-  doc.addPage();
-  await addDueDiligence(doc, farmerData, exportData, packId, currentDate);
-  
-  // CERTIFICATE 6: Supply Chain Traceability
+  // CERTIFICATE 6: Supply Chain Traceability (only other complete page)
   doc.addPage();
   await addSupplyTraceability(doc, farmerData, exportData, packId, currentDate);
 
-  // Document complete - exactly 6 pages
+  // Document complete - exactly 2 pages (1 and 6)
   return doc;
 }
 

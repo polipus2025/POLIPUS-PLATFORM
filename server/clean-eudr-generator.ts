@@ -27,7 +27,7 @@ export async function generateCleanEUDRPack(
   exportData: ExportData,
   packId: string
 ): Promise<PDFDocumentType> {
-  // Create document - EXACTLY 6 pages, no more, no less
+  // Create document - EXACTLY 2 pages (1 and 6 only)
   const doc = new PDFDocument({ 
     size: 'A4', 
     margins: { top: 50, bottom: 50, left: 50, right: 50 }

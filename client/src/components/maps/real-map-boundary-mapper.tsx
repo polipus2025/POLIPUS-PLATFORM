@@ -579,12 +579,14 @@ export default function RealMapBoundaryMapper({
     }
 
     setIsWalkingMode(true);
+    setWalkingDistance(0); // Reset walking distance for new session
+    setRealTimeTrail([]); // Clear previous trail
     setStatus('🚶‍♂️ Walking mode active - Move to field boundaries');
     
     const options = {
       enableHighAccuracy: true,
-      timeout: 5000,
-      maximumAge: 0
+      timeout: 15000, // Longer timeout for mobile GPS lock
+      maximumAge: 2000 // Allow slightly cached positions for better mobile performance
     };
 
     const watchId = navigator.geolocation.watchPosition(
@@ -605,21 +607,25 @@ export default function RealMapBoundaryMapper({
           return newHistory.slice(-1000); // Keep last 1000 GPS positions
         });
         
+        // Calculate walking distance BEFORE adding new position
+        let distanceToAdd = 0;
+        if (realTimeTrail.length > 0) {
+          const lastPos = realTimeTrail[realTimeTrail.length - 1];
+          distanceToAdd = calculateDistance(lastPos.lat, lastPos.lng, latitude, longitude);
+        }
+
         // Add to real-time trail (last 50 positions for smooth trail)
         setRealTimeTrail(prev => {
           const newTrail = [...prev, { lat: latitude, lng: longitude }];
           return newTrail.slice(-50); // Keep last 50 positions
         });
 
-        // Calculate walking distance
-        if (realTimeTrail.length > 0) {
-          const lastPos = realTimeTrail[realTimeTrail.length - 1];
-          const dist = calculateDistance(lastPos.lat, lastPos.lng, latitude, longitude);
-          setWalkingDistance(prev => prev + dist);
-        }
-
-        // Update status with current position info
-        setStatus(`📍 GPS Active - Accuracy: ${accuracy?.toFixed(1)}m | Walking: ${walkingDistance.toFixed(0)}m | Next: Point ${nextPointLabel}`);
+        // Update walking distance and status with current position info
+        setWalkingDistance(currentDistance => {
+          const newDistance = distanceToAdd > 0 ? currentDistance + distanceToAdd : currentDistance;
+          setStatus(`📍 GPS Active - Accuracy: ${accuracy?.toFixed(1)}m | Walking: ${newDistance.toFixed(0)}m | Next: Point ${nextPointLabel}`);
+          return newDistance;
+        });
       },
       (error) => {
         console.error('GPS Error:', error);
@@ -639,7 +645,8 @@ export default function RealMapBoundaryMapper({
     }
     setIsWalkingMode(false);
     setIsTrackingGPS(false);
-    setStatus('🚶‍♂️ Walking mode stopped');
+    // Keep walking distance displayed for reference, don't reset
+    setStatus(`🚶‍♂️ Walking mode stopped - Total distance: ${walkingDistance.toFixed(0)}m`);
   };
 
   // Unified point addition function with validation
@@ -2407,8 +2414,8 @@ export default function RealMapBoundaryMapper({
 
     const options = {
       enableHighAccuracy: true,
-      timeout: 5000, // Quick timeout for instant response
-      maximumAge: 1000
+      timeout: 10000, // Longer timeout for mobile devices
+      maximumAge: 3000 // Allow cached positions for better mobile performance
     };
 
     const watchId = navigator.geolocation.watchPosition(

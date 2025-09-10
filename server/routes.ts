@@ -22122,6 +22122,9 @@ VERIFY: ${qrCodeData.verificationUrl}`;
         } catch (error) {
           console.log('🌲 Forest API processing error:', error.message);
         }
+      } catch (error) {
+        console.log('🌲 Forest analysis error:', error.message);
+      }
       
       // 2. Fallback: Real elevation-based forest estimation
       try {

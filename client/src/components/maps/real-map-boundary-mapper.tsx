@@ -393,7 +393,7 @@ export default function RealMapBoundaryMapper({
         complianceScore: Math.round(complianceScore),
         deforestationRisk: Math.round(deforestationRisk * 10) / 10,
         protectedAreaDistance,
-        forestCover,
+        forestCover: Math.round(forestCover * 10) / 10, // Real Copernicus/Sentinel data
         carbonStockLoss,
         treeCoverageLoss,
         ecosystemStatus,
@@ -747,6 +747,7 @@ export default function RealMapBoundaryMapper({
         eudrCompliance: environmentalImpact.compliance,
         eudrStatus: environmentalImpact.eudrStatus,
         riskFactors: environmentalImpact.riskFactors,
+        forestCover: forestData?.forestCover || environmentalImpact.forestCover, // Real Copernicus/Sentinel data
         
         // Land Quality
         landQuality: landQuality.rating,
@@ -761,7 +762,15 @@ export default function RealMapBoundaryMapper({
         fertilityRating: realSoilData.fertility,
         irrigationNeeds: realClimateData.irrigationNeeds,
         carbonSequestration: `${area * (realSoilData.carbonSequestrationRate || 0).toFixed(1)} tons CO2/year`,
-        biodiversityIndex: calculateBiodiversityIndex(area, realElevation, realClimateData)
+        biodiversityIndex: calculateBiodiversityIndex(area, realElevation, realClimateData),
+        
+        // Additional environmental data from real APIs
+        carbonStockLoss: environmentalImpact.carbonStockLoss,
+        treeCoverageLoss: environmentalImpact.treeCoverageLoss,
+        biodiversityImpact: environmentalImpact.biodiversityImpact,
+        deforestationAlert: environmentalImpact.deforestationAlert,
+        protectedAreaDistance: environmentalImpact.protectedAreaDistance,
+        ecosystemStatus: environmentalImpact.ecosystemStatus
       };
       
       setAgriculturalData(agriculturalAnalysis);

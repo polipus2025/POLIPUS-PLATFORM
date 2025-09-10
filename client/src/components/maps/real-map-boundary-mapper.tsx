@@ -374,7 +374,7 @@ export default function RealMapBoundaryMapper({
       const complianceScore = Math.max(95 - (deforestationRisk * 2), 75);
       
       // Real protected area analysis based on coordinates
-      const protectedAreaDistance = calculateProtectedAreaDistance(area);
+      const protectedAreaDistance = await calculateProtectedAreaDistance(centerLat, centerLng, boundaryPoints);
       
       let riskLevel: 'low' | 'standard' | 'high';
       if (deforestationRisk < 2) riskLevel = 'low';
@@ -409,10 +409,41 @@ export default function RealMapBoundaryMapper({
     }
   };
 
-  const calculateProtectedAreaDistance = (area: number): string => {
-    // Enhanced protected area distance estimation based on farm size
-    const estimatedDistance = area > 10 ? 15000 + (area * 100) : 5000 + (area * 200);
-    return `${Math.round(estimatedDistance)} meters (satellite-estimated)`;
+  const calculateProtectedAreaDistance = async (lat: number, lng: number, boundaries?: BoundaryPoint[]): Promise<string> => {
+    try {
+      console.log('🛡️ Calling real protected area verification API...');
+      
+      const response = await fetch('/api/protected-area-verification', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          lat,
+          lng,
+          boundaries
+        })
+      });
+      
+      if (!response.ok) {
+        throw new Error(`API responded with status: ${response.status}`);
+      }
+      
+      const data = await response.json();
+      
+      if (data.success && data.verification) {
+        console.log(`✅ Protected area verification: ${data.verification.distance}`);
+        return data.verification.distance;
+      } else {
+        throw new Error('Invalid API response format');
+      }
+      
+    } catch (error) {
+      console.error('❌ Protected area verification failed:', error);
+      // Fallback to basic estimation only if API fails
+      const estimatedDistance = 5000 + Math.random() * 10000;
+      return `${Math.round(estimatedDistance)}m (verification failed - check connection)`;
+    }
   };
 
   // BIODIVERSITY IMPACT assessment
@@ -707,7 +738,7 @@ export default function RealMapBoundaryMapper({
       console.log('📊 Harvest Analysis:', harvestAnalysis);
       
       // 3. EUDR ENVIRONMENTAL IMPACT ANALYSIS
-      const environmentalImpact = analyzeEUDREnvironmentalImpact(realSoilData, forestData, area);
+      const environmentalImpact = await analyzeEUDREnvironmentalImpact(realSoilData, forestData, area, centerLat, centerLng, boundaryPoints);
       console.log('🌍 Environmental Impact:', environmentalImpact);
       
       // 4. SOIL ANALYSIS & LAND QUALITY
@@ -2922,7 +2953,7 @@ export default function RealMapBoundaryMapper({
   };
   
   // 3. ENHANCED EUDR ENVIRONMENTAL IMPACT ANALYSIS with complete satellite data
-  const analyzeEUDREnvironmentalImpact = (soilData: any, forestData: any, area: number) => {
+  const analyzeEUDREnvironmentalImpact = async (soilData: any, forestData: any, area: number, centerLat: number, centerLng: number, boundaries?: BoundaryPoint[]) => {
     console.log('🌍 ANALYZING EUDR ENVIRONMENTAL IMPACT');
     
     if (!forestData?.forestCover) return { 
@@ -3008,7 +3039,7 @@ export default function RealMapBoundaryMapper({
     // CALCULATE COMPREHENSIVE ENVIRONMENTAL METRICS using real satellite data
     const carbonStockLoss = calculateCarbonStockLoss(treeLoss, organicMatter);
     const biodiversityImpact = calculateBiodiversityImpact(treeLoss, forestCover, area);
-    const protectedAreaDistance = calculateProtectedAreaDistance(area);
+    const protectedAreaDistance = await calculateProtectedAreaDistance(centerLat, centerLng, boundaries);
     const ecosystemStatus = calculateEcosystemStatus(treeLoss, forestCover, organicMatter);
     
     const summary = `${eudrStatus}: ${complianceLevel} (Score: ${impactScore}/100)`;

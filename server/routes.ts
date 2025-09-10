@@ -21914,7 +21914,30 @@ VERIFY: ${qrCodeData.verificationUrl}`;
           const overpassUrl = `https://overpass-api.de/api/interpreter?data=[out:json][timeout:25];(way["landuse"="forest"](around:1000,${lat},${lng}););out geom;`;
           
           // 3. Try World Bank Forest API (if available)
-          const wbForestUrl = `https://api.worldbank.org/v2/country/LBR/indicator/AG.LND.FRST.ZS?format=json&date=2020:2023`;
+          // Detect country from coordinates for accurate forest data
+          const getCountryCode = async (lat: number, lng: number): Promise<string> => {
+            try {
+              const response = await fetch(`https://api.bigdatacloud.net/data/reverse-geocode-client?latitude=${lat}&longitude=${lng}&localityLanguage=en`);
+              if (response.ok) {
+                const data = await response.json();
+                console.log(`🌍 Country detected: ${data.countryCode} for coordinates: ${lat}, ${lng}`);
+                return data.countryCode || 'LBR';
+              }
+            } catch (error) {
+              console.log('🌍 Country detection failed, using coordinate-based fallback');
+            }
+            
+            // Fallback: coordinate-based detection
+            if (lat >= 4.0 && lat <= 8.5 && lng >= -11.5 && lng <= -7.3) return 'LBR'; // Liberia
+            if (lat >= 8.0 && lat <= 37.0 && lng >= 68.0 && lng <= 97.5) return 'IND'; // India
+            if (lat >= 25.0 && lat <= 49.0 && lng >= -125.0 && lng <= -66.0) return 'USA'; // USA
+            if (lat >= -34.0 && lat <= 5.0 && lng >= -74.0 && lng <= -35.0) return 'BRA'; // Brazil
+            if (lat >= 35.0 && lat <= 71.0 && lng >= -141.0 && lng <= -52.0) return 'CAN'; // Canada
+            return 'LBR'; // Default fallback
+          };
+          
+          const countryCode = await getCountryCode(lat, lng);
+          const wbForestUrl = `https://api.worldbank.org/v2/country/${countryCode}/indicator/AG.LND.FRST.ZS?format=json&date=2020:2023`;
           
           const [nasaFirmsResponse, overpassResponse, wbForestResponse] = await Promise.all([
             fetch(nasaFirmsUrl, {

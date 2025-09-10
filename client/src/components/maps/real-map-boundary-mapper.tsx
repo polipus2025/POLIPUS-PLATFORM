@@ -108,12 +108,18 @@ export default function RealMapBoundaryMapper({
   };
 
   // Global Forest Watch API Integration (via backend to avoid CORS)
-  const getGlobalForestWatchData = async (lat: number, lng: number) => {
+  const getGlobalForestWatchData = async (lat: number, lng: number, plotBoundaries?: any[]) => {
     try {
+      const requestBody = plotBoundaries && plotBoundaries.length >= 3 
+        ? { lat, lng, boundaries: plotBoundaries }  // Send plot boundaries for specific analysis
+        : { lat, lng };  // Fallback to single point
+        
+      console.log(`🌲 Real GFW forest data request:`, plotBoundaries ? `${plotBoundaries.length} boundary points` : `single point ${lat}, ${lng}`);
+      
       const response = await fetch('/api/forest-data', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ lat, lng })
+        body: JSON.stringify(requestBody)
       });
 
       if (response.ok) {
@@ -462,10 +468,15 @@ export default function RealMapBoundaryMapper({
 
   // Real Environmental Metric Calculations with API Integration
   const calculateForestCover = async (lat: number, lng: number, area: number): Promise<number> => {
-    // Try Global Forest Watch API first
-    const gfwData = await getGlobalForestWatchData(lat, lng);
+    // Try Global Forest Watch API first with plot boundaries if available
+    const plotBoundaries = boundaryPoints.length >= 3 ? boundaryPoints : null;
+    const gfwData = await getGlobalForestWatchData(lat, lng, plotBoundaries);
+    
     if (gfwData.success && gfwData.forestCover !== null) {
-      console.log('🌲 Using real GFW forest cover data');
+      console.log(`🌲 Using real ${gfwData.source} forest cover data: ${gfwData.forestCover}%`);
+      if (gfwData.plotArea) {
+        console.log(`📐 Satellite-confirmed plot area: ${gfwData.plotArea} hectares`);
+      }
       return gfwData.forestCover;
     }
 
@@ -683,8 +694,9 @@ export default function RealMapBoundaryMapper({
       // ===== COMPREHENSIVE AGRICULTURAL INTELLIGENCE ANALYSIS =====
       console.log('🚀 STARTING COMPREHENSIVE AGRICULTURAL ANALYSIS');
       
-      // Get forest data for comprehensive analysis
-      const forestData = await getGlobalForestWatchData(centerLat, centerLng);
+      // Get forest data for comprehensive analysis with plot boundaries
+      const plotBoundaries = boundaryPoints.length >= 3 ? boundaryPoints : null;
+      const forestData = await getGlobalForestWatchData(centerLat, centerLng, plotBoundaries);
       
       // 1. SUSTAINABLE CROPS & RECOMMENDATIONS
       const sustainableCrops = generateSustainableCropRecommendations(realSoilData, forestData);

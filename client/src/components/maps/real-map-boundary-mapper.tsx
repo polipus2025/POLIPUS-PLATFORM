@@ -3505,16 +3505,16 @@ export default function RealMapBoundaryMapper({
         area: area,
         agriculturalData: agriculturalData,
         satelliteData: {
-          forestCover: agriculturalData?.forestCover || '78.5%',
-          carbonLoss: agriculturalData?.carbonStockLoss || '1.0 tCO₂/ha',
-          deforestationRisk: agriculturalData?.deforestationAlert || 'Low Risk',
-          eudrCompliance: agriculturalData?.eudrStatus || 'COMPLIANT'
+          forestCover: agriculturalData?.forestCover ? `${agriculturalData.forestCover}%` : 'No data',
+          carbonLoss: agriculturalData?.carbonStockLoss ? `${agriculturalData.carbonStockLoss} tCO₂/ha` : 'No data',
+          deforestationRisk: agriculturalData?.deforestationAlert || 'No data',
+          eudrCompliance: agriculturalData?.eudrStatus || 'PENDING'
         },
         forestData: {
-          forestCover: agriculturalData?.forestCover || '78.5%',
-          treeLoss: agriculturalData?.treeCoverageLoss || '0.63%',
-          carbonLoss: agriculturalData?.carbonStockLoss || '1.0 tCO₂/ha',
-          riskLevel: agriculturalData?.deforestationAlert || 'Low Risk'
+          forestCover: agriculturalData?.forestCover ? `${agriculturalData.forestCover}%` : 'No data',
+          treeLoss: agriculturalData?.treeCoverageLoss ? `${agriculturalData.treeCoverageLoss}%` : 'No data', 
+          carbonLoss: agriculturalData?.carbonStockLoss ? `${agriculturalData.carbonStockLoss} tCO₂/ha` : 'No data',
+          riskLevel: agriculturalData?.deforestationAlert || 'No data'
         }
       };
 
@@ -4451,7 +4451,7 @@ export default function RealMapBoundaryMapper({
                   <div><span className="font-medium">Water Retention:</span> <span className="text-cyan-600 font-semibold">{agriculturalData.waterRetention || 'Good retention (52% field capacity)'}</span></div>
                 </div>
                 <div className="grid grid-cols-2 gap-3">
-                  <div><span className="font-medium">Risk Factors:</span> <span className="text-green-600 font-semibold">{agriculturalData.riskFactors?.join(', ') || '🌳 LOW deforestation: 0.6% tree loss, 🌲 EXCELLENT forest cover: 78.5%'}</span></div>
+                  <div><span className="font-medium">Risk Factors:</span> <span className="text-green-600 font-semibold">{agriculturalData.riskFactors?.join(', ') || 'Analyzing real satellite data...'}</span></div>
                   <div><span className="font-medium">Drying Season:</span> <span className="text-orange-600 font-semibold">{agriculturalData?.seasonality?.dryingSeason || 'Dec-Feb (90 days) - NASA satellite data'}</span></div>
                 </div>
                 <div className="grid grid-cols-2 gap-3">
@@ -4470,7 +4470,7 @@ export default function RealMapBoundaryMapper({
               </h4>
               <div className="space-y-3 text-sm">
                 <div className="grid grid-cols-2 gap-3">
-                  <div><span className="font-medium">Forest Cover:</span> <span className="text-green-600 font-semibold">{agriculturalData.forestCover || '78.5%'}</span></div>
+                  <div><span className="font-medium">Forest Cover:</span> <span className="text-green-600 font-semibold">{agriculturalData.forestCover ? `${agriculturalData.forestCover}%` : 'Real satellite data loading...'}</span></div>
                   <div><span className="font-medium">Biodiversity Impact:</span> <span className={agriculturalData.biodiversityImpact?.includes('Minimal') ? 'text-green-600 font-semibold' : agriculturalData.biodiversityImpact?.includes('Moderate') ? 'text-yellow-600 font-semibold' : 'text-red-600 font-semibold'}>{agriculturalData.biodiversityImpact || 'Minimal Impact'}</span></div>
                 </div>
                 

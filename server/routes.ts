@@ -25,6 +25,7 @@ import bcrypt from "bcryptjs";
 import jwt from "jsonwebtoken";
 import crypto from "crypto";
 import { generateComprehensivePlatformDocumentation } from "./comprehensive-platform-documentation";
+import { protectedAreaService } from "./protected-area-service";
 // Removed test farmer import - using only real transaction data
 import { count, eq, desc, sql, and, or, ne, isNull, isNotNull, inArray } from "drizzle-orm";
 
@@ -22385,6 +22386,33 @@ VERIFY: ${qrCodeData.verificationUrl}`;
     } catch (error) {
       console.error('❌ Forest data API error:', error);
       res.status(500).json({ error: 'Failed to fetch forest data', success: false });
+    }
+  });
+
+  // Protected Area Verification API - Multi-source verification
+  app.post('/api/protected-area-verification', async (req, res) => {
+    try {
+      const { lat, lng, boundaries } = req.body;
+      console.log(`🛡️ Protected area verification request: ${lat}, ${lng}`);
+      
+      if (!lat || !lng) {
+        return res.status(400).json({ error: 'Latitude and longitude are required' });
+      }
+      
+      const verification = await protectedAreaService.verifyProtectedAreaStatus(lat, lng, boundaries);
+      
+      console.log(`✅ Protected area verification complete: ${verification.distance}`);
+      res.json({
+        success: true,
+        verification
+      });
+      
+    } catch (error) {
+      console.error('❌ Protected area verification error:', error);
+      res.status(500).json({ 
+        error: 'Failed to verify protected area status', 
+        success: false 
+      });
     }
   });
 

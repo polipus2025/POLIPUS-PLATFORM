@@ -129,7 +129,10 @@ export default function RealMapBoundaryMapper({
           return {
             forestCover: data.forestCover,
             treeLoss: data.treeLoss,
-            success: true
+            success: true,
+            source: data.source || 'Real Satellite Data',
+            plotArea: data.plotArea,
+            confidence: data.confidence
           };
         }
       }
@@ -379,7 +382,7 @@ export default function RealMapBoundaryMapper({
       else riskLevel = 'high';
       
       // Calculate real environmental metrics using APIs
-      const forestCover = await calculateForestCover(centerLat, centerLng, area);
+      const forestCover = await calculateForestCover(centerLat, centerLng, area, boundaryPoints);
       const carbonStockLoss = calculateCarbonStockLoss(forestCoverLoss, 1.9); // Use default organic matter
       const treeCoverageLoss = calculateTreeCoverageLoss(centerLat, centerLng);
       const ecosystemStatus = determineEcosystemStatus(centerLat, centerLng, area);
@@ -467,16 +470,13 @@ export default function RealMapBoundaryMapper({
   };
 
   // Real Environmental Metric Calculations with API Integration
-  const calculateForestCover = async (lat: number, lng: number, area: number): Promise<number> => {
-    // Try Global Forest Watch API first with plot boundaries if available
-    const plotBoundaries = boundaryPoints.length >= 3 ? boundaryPoints : null;
-    const gfwData = await getGlobalForestWatchData(lat, lng, plotBoundaries);
+  const calculateForestCover = async (lat: number, lng: number, area: number, plotBoundaries?: BoundaryPoint[]): Promise<number> => {
+    // Try Global Forest Watch API first with plot boundaries if available  
+    const boundaries = plotBoundaries && plotBoundaries.length >= 3 ? plotBoundaries : null;
+    const gfwData = await getGlobalForestWatchData(lat, lng, boundaries);
     
     if (gfwData.success && gfwData.forestCover !== null) {
-      console.log(`🌲 Using real ${gfwData.source} forest cover data: ${gfwData.forestCover}%`);
-      if (gfwData.plotArea) {
-        console.log(`📐 Satellite-confirmed plot area: ${gfwData.plotArea} hectares`);
-      }
+      console.log(`🌲 Using real forest cover data: ${gfwData.forestCover}%`);
       return gfwData.forestCover;
     }
 
@@ -787,7 +787,7 @@ export default function RealMapBoundaryMapper({
       
       // Get real forest data using the API integration
       console.log('🌲 Getting real forest data for EUDR analysis...');
-      const forestCover = await calculateForestCover(centerLat, centerLng, area);
+      const forestCover = await calculateForestCover(centerLat, centerLng, area, boundaryPoints);
       
       // Calculate real environmental metrics using APIs
       const carbonStockLoss = calculateCarbonStockLoss(area, forestCover);

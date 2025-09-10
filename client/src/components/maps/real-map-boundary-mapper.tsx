@@ -784,7 +784,7 @@ export default function RealMapBoundaryMapper({
       const assessmentConfidence = calculateAssessmentConfidence(centerLat, centerLng);
       
       // Determine risk level based on real forest data
-      let riskLevel = 'standard';
+      let riskLevel: "high" | "standard" | "low" = 'standard';
       let complianceScore = 85;
       
       if (forestCover < 30) {

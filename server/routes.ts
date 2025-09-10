@@ -399,7 +399,7 @@ async function createMasterTransactionRegistry(farmerOfferData: {
     totalValue: farmerOfferData.totalValue.toString(),
     
     // 🔔 NOTIFICATIONS
-    stakeholdersNotified: [farmerOfferData.farmerId],
+    stakeholdersNotified: JSON.stringify([farmerOfferData.farmerId]),
     nextNotificationDue: new Date(Date.now() + 24 * 60 * 60 * 1000), // 24 hours
     
     // 🎯 FLOW CONTROL
@@ -578,7 +578,7 @@ async function sendStageNotifications(
   
   await db.update(masterTransactionRegistry)
     .set({ 
-      stakeholdersNotified: notifiedStakeholders,
+      stakeholdersNotified: JSON.stringify(notifiedStakeholders),
       lastNotificationSent: new Date()
     })
     .where(eq(masterTransactionRegistry.farmerOfferId, farmerOfferId));

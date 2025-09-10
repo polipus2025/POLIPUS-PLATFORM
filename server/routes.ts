@@ -21894,21 +21894,20 @@ VERIFY: ${qrCodeData.verificationUrl}`;
       // 1. Try Copernicus Sentinel-2 for EUDR forest compliance (EU-approved data source)
       try {
         console.log('🇪🇺 Using Copernicus Sentinel-2 for EUDR forest compliance');
-        console.log(`🌲 Analyzing forest data for Liberian coordinates: ${lat}, ${lng}`);
+        console.log(`🌲 Analyzing forest data for global coordinates: ${lat}, ${lng}`);
         
-        // Use Google Earth Engine Copernicus data (free access for Africa)
+        // Use Google Earth Engine Copernicus data (global access)
         const geeApiUrl = `https://earthengine.googleapis.com/v1/projects/earthengine-public/maps:render`;
         
-        // For now, implement simplified Copernicus-based forest assessment for Africa
-        const isLiberia = (lat >= 4 && lat <= 9 && lng >= -12 && lng <= -7);
-        
-        if (isLiberia) {
-          console.log('🇱🇷 Liberian coordinates detected - using West Africa forest database');
+        // Remove location-specific restrictions - work globally
+        try {
+          console.log('🌍 Processing global forest analysis - using worldwide forest database');
           
           // REAL APIs: Use correct accessible endpoints without authentication
           
           // 1. Try NASA FIRMS API for forest fire/deforestation monitoring (working API)
-          const nasaFirmsUrl = `https://firms.modaps.eosdis.nasa.gov/api/country/csv/MODIS_NRT/LBR/10`;
+          // Use area-based API for any global coordinates
+          const nasaFirmsUrl = `https://firms.modaps.eosdis.nasa.gov/api/area/csv/c6.1/MODIS_C6_1/${lng},${lat},${lng + 0.01},${lat + 0.01}/1/2023-01-01`;
           
           // 2. Try OpenStreetMap Overpass API for land cover data  
           const overpassUrl = `https://overpass-api.de/api/interpreter?data=[out:json][timeout:25];(way["landuse"="forest"](around:1000,${lat},${lng}););out geom;`;
@@ -22120,10 +22119,9 @@ VERIFY: ${qrCodeData.verificationUrl}`;
             },
             source: 'World Bank Forest API + NASA FIRMS + OpenStreetMap (Real Satellite Data)'
           });
+        } catch (error) {
+          console.log('🌲 Forest API processing error:', error.message);
         }
-      } catch (error) {
-        console.log('🌲 Forest API processing error:', error.message);
-      }
       
       // 2. Fallback: Real elevation-based forest estimation
       try {

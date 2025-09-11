@@ -62,6 +62,9 @@ const AquaTracePortal = lazy(() => import("@/pages/portals/aqua-trace-portal"));
 const BlueCarbon360Portal = lazy(() => import("@/pages/portals/blue-carbon360-portal"));
 const CarbonTracePortal = lazy(() => import("@/pages/portals/carbon-trace-portal"));
 
+// POLIPUS MODULE DASHBOARDS
+const BlueCarbon360Dashboard = lazy(() => import("@/pages/portals/blue-carbon360-dashboard"));
+
 // AUTH PAGES - Direct imports for fast access
 import RegulatoryLogin from "@/pages/auth/regulatory-login";
 import InspectorLogin from "@/pages/auth/inspector-login";
@@ -127,6 +130,9 @@ function App() {
             <Route path="/aqua-trace" component={createLazyRoute(AquaTracePortal)} />
             <Route path="/blue-carbon360" component={createLazyRoute(BlueCarbon360Portal)} />
             <Route path="/carbon-trace" component={createLazyRoute(CarbonTracePortal)} />
+            
+            {/* POLIPUS MODULE DASHBOARDS */}
+            <Route path="/blue-carbon360-dashboard" component={createLazyRoute(BlueCarbon360Dashboard)} />
             
             {/* CERTIFICATE TESTING DASHBOARD - HIGH PRIORITY */}
             <Route path="/certificate-testing-dashboard" component={CertificateTestingDashboard} />

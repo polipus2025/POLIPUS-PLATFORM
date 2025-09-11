@@ -65,6 +65,22 @@ const CarbonTracePortal = lazy(() => import("@/pages/portals/carbon-trace-portal
 // POLIPUS MODULE DASHBOARDS
 const BlueCarbon360Dashboard = lazy(() => import("@/pages/portals/blue-carbon360-dashboard"));
 
+// BLUE CARBON 360 PAGES
+const EcosystemMonitoringPage = lazy(() => import("@/pages/blue-carbon360/ecosystem-monitoring-page"));
+const ConservationProjectsPage = lazy(() => import("@/pages/blue-carbon360/conservation-projects-page"));
+const CarbonMarketplacePage = lazy(() => import("@/pages/blue-carbon360/carbon-marketplace-page"));
+const EconomicImpactPage = lazy(() => import("@/pages/blue-carbon360/economic-impact-page"));
+const ConservationMetricsPage = lazy(() => import("@/pages/blue-carbon360/conservation-metrics-page"));
+const CarbonTradingPage = lazy(() => import("@/pages/blue-carbon360/carbon-trading-page"));
+const MangroveManagementPage = lazy(() => import("@/pages/blue-carbon360/mangrove-management-page"));
+const MarineProtectionPage = lazy(() => import("@/pages/blue-carbon360/marine-protection-page"));
+const ConservationEconomicsPage = lazy(() => import("@/pages/blue-carbon360/conservation-economics-page"));
+const ImpactReportsPage = lazy(() => import("@/pages/blue-carbon360/impact-reports-page"));
+const ConservationNetworkPage = lazy(() => import("@/pages/blue-carbon360/conservation-network-page"));
+const EPAInspectorPage = lazy(() => import("@/pages/blue-carbon360/epa-inspector-page"));
+const GlobalStandardsPage = lazy(() => import("@/pages/blue-carbon360/global-standards-page"));
+const ConservationMessagingPage = lazy(() => import("@/pages/blue-carbon360/conservation-messaging-page"));
+
 // AUTH PAGES - Direct imports for fast access
 import RegulatoryLogin from "@/pages/auth/regulatory-login";
 import InspectorLogin from "@/pages/auth/inspector-login";
@@ -133,6 +149,22 @@ function App() {
             
             {/* POLIPUS MODULE DASHBOARDS */}
             <Route path="/blue-carbon360-dashboard" component={createLazyRoute(BlueCarbon360Dashboard)} />
+            
+            {/* BLUE CARBON 360 NAVIGATION PAGES */}
+            <Route path="/blue-carbon360/ecosystem-monitoring" component={createLazyRoute(EcosystemMonitoringPage)} />
+            <Route path="/blue-carbon360/projects" component={createLazyRoute(ConservationProjectsPage)} />
+            <Route path="/blue-carbon360/marketplace" component={createLazyRoute(CarbonMarketplacePage)} />
+            <Route path="/blue-carbon360/economic-impact" component={createLazyRoute(EconomicImpactPage)} />
+            <Route path="/blue-carbon360/metrics" component={createLazyRoute(ConservationMetricsPage)} />
+            <Route path="/blue-carbon360/trading" component={createLazyRoute(CarbonTradingPage)} />
+            <Route path="/blue-carbon360/mangroves" component={createLazyRoute(MangroveManagementPage)} />
+            <Route path="/blue-carbon360/protection" component={createLazyRoute(MarineProtectionPage)} />
+            <Route path="/blue-carbon360/economics" component={createLazyRoute(ConservationEconomicsPage)} />
+            <Route path="/blue-carbon360/reports" component={createLazyRoute(ImpactReportsPage)} />
+            <Route path="/blue-carbon360/network" component={createLazyRoute(ConservationNetworkPage)} />
+            <Route path="/blue-carbon360/epa-inspector" component={createLazyRoute(EPAInspectorPage)} />
+            <Route path="/blue-carbon360/standards" component={createLazyRoute(GlobalStandardsPage)} />
+            <Route path="/blue-carbon360/messaging" component={createLazyRoute(ConservationMessagingPage)} />
             
             {/* CERTIFICATE TESTING DASHBOARD - HIGH PRIORITY */}
             <Route path="/certificate-testing-dashboard" component={CertificateTestingDashboard} />

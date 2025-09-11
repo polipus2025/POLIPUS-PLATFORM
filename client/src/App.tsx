@@ -81,6 +81,9 @@ const EPAInspectorPage = lazy(() => import("@/pages/blue-carbon360/epa-inspector
 const GlobalStandardsPage = lazy(() => import("@/pages/blue-carbon360/global-standards-page"));
 const ConservationMessagingPage = lazy(() => import("@/pages/blue-carbon360/conservation-messaging-page"));
 
+// SATELLITE MONITORING
+const SatelliteMonitoring = lazy(() => import("@/pages/satellite-monitoring"));
+
 // AUTH PAGES - Direct imports for fast access
 import RegulatoryLogin from "@/pages/auth/regulatory-login";
 import InspectorLogin from "@/pages/auth/inspector-login";
@@ -165,6 +168,9 @@ function App() {
             <Route path="/blue-carbon360/epa-inspector" component={createLazyRoute(EPAInspectorPage)} />
             <Route path="/blue-carbon360/standards" component={createLazyRoute(GlobalStandardsPage)} />
             <Route path="/blue-carbon360/messaging" component={createLazyRoute(ConservationMessagingPage)} />
+            
+            {/* SATELLITE MONITORING - SHARED ACROSS MODULES */}
+            <Route path="/satellite-monitoring" component={createLazyRoute(SatelliteMonitoring)} />
             
             {/* CERTIFICATE TESTING DASHBOARD - HIGH PRIORITY */}
             <Route path="/certificate-testing-dashboard" component={CertificateTestingDashboard} />

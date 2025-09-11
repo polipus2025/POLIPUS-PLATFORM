@@ -119,14 +119,14 @@ function App() {
             {/* Agricultural Traceability Portal */}
             <Route path="/portals" component={Landing} />
             
-            {/* POLIPUS MODULE PORTALS - BLOCKED - Redirect to homepage */}
-            <Route path="/live-trace" component={() => { window.location.href = '/'; return null; }} />
-            <Route path="/landmap360-portal" component={() => { window.location.href = '/'; return null; }} />
-            <Route path="/mine-watch" component={() => { window.location.href = '/'; return null; }} />
-            <Route path="/forest-guard" component={() => { window.location.href = '/'; return null; }} />
-            <Route path="/aqua-trace" component={() => { window.location.href = '/'; return null; }} />
-            <Route path="/blue-carbon360" component={() => { window.location.href = '/'; return null; }} />
-            <Route path="/carbon-trace" component={() => { window.location.href = '/'; return null; }} />
+            {/* POLIPUS MODULE PORTALS - FULLY OPERATIONAL */}
+            <Route path="/live-trace" component={createLazyRoute(LiveTracePortal)} />
+            <Route path="/landmap360-portal" component={createLazyRoute(LandMap360Portal)} />
+            <Route path="/mine-watch" component={createLazyRoute(MineWatchPortal)} />
+            <Route path="/forest-guard" component={createLazyRoute(ForestGuardPortal)} />
+            <Route path="/aqua-trace" component={createLazyRoute(AquaTracePortal)} />
+            <Route path="/blue-carbon360" component={createLazyRoute(BlueCarbon360Portal)} />
+            <Route path="/carbon-trace" component={createLazyRoute(CarbonTracePortal)} />
             
             {/* CERTIFICATE TESTING DASHBOARD - HIGH PRIORITY */}
             <Route path="/certificate-testing-dashboard" component={CertificateTestingDashboard} />
